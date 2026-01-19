@@ -517,3 +517,13 @@
 - [x] Bouton "Supprimer mes données" avec emoji + opacity feedback
 - [x] Ajouter des descriptions explicatives pour chaque paramètre
 - [x] Haptics feedback sur tous les boutons interactifs
+
+
+## NETTOYAGE SETTINGS (Clean Design)
+
+- [x] Enlever tous les emoji de la page Settings
+- [x] Supprimer la section "À propos" (Confidentialité, Version, Support)
+- [x] Optimiser le layout pour éviter le scroll (compact, pas de vides)
+- [x] Réduire les descriptions pour être plus concis
+- [x] Rendre le design plus minimaliste et clean
+- [x] Vérifier que tout tient sur un écran iPhone SE/13 sans scroll (View au lieu de ScrollView)

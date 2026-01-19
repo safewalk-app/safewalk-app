@@ -1,4 +1,4 @@
-import { ScrollView, View, Text, Pressable, Switch, Alert } from 'react-native';
+import { View, Text, Pressable, Switch, Alert } from 'react-native';
 import { BubbleBackground } from '@/components/ui/bubble-background';
 import { GlassCard } from '@/components/ui/glass-card';
 import { PopTextField } from '@/components/ui/pop-text-field';
@@ -26,7 +26,7 @@ export default function SettingsScreen() {
     const timer = setTimeout(() => {
       if (firstName !== settings.firstName) {
         updateSettings({ firstName });
-        setToastMessage('✅ Prénom sauvegardé');
+        setToastMessage('Prénom sauvegardé');
         setShowToast(true);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       }
@@ -45,7 +45,7 @@ export default function SettingsScreen() {
           emergencyContactName: contactName,
           emergencyContactPhone: contactPhone,
         });
-        setToastMessage('✅ Contact sauvegardé');
+        setToastMessage('Contact sauvegardé');
         setShowToast(true);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       }
@@ -57,7 +57,7 @@ export default function SettingsScreen() {
   useEffect(() => {
     if (tolerance !== settings.tolerance) {
       updateSettings({ tolerance });
-      setToastMessage(`✅ Tolérance: ${tolerance} min`);
+      setToastMessage(`Tolérance: ${tolerance} min`);
       setShowToast(true);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
@@ -69,8 +69,8 @@ export default function SettingsScreen() {
       updateSettings({ locationEnabled });
       setToastMessage(
         locationEnabled
-          ? '✅ Localisation activée'
-          : '✅ Localisation désactivée'
+          ? 'Localisation activée'
+          : 'Localisation désactivée'
       );
       setShowToast(true);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -79,8 +79,8 @@ export default function SettingsScreen() {
 
   const handleDeleteData = () => {
     Alert.alert(
-      '⚠️ Supprimer toutes les données',
-      'Cette action est irréversible. Tous vos paramètres et historique seront supprimés.',
+      'Supprimer toutes les données',
+      'Cette action est irréversible.',
       [
         { text: 'Annuler', style: 'cancel' },
         {
@@ -88,7 +88,7 @@ export default function SettingsScreen() {
           style: 'destructive',
           onPress: async () => {
             await deleteAllData();
-            setToastMessage('🗑️ Données supprimées');
+            setToastMessage('Données supprimées');
             setShowToast(true);
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
           },
@@ -101,10 +101,8 @@ export default function SettingsScreen() {
     <View className="flex-1 bg-background">
       <BubbleBackground />
 
-      <ScrollView
-        contentContainerStyle={{ flexGrow: 1 }}
-        className="relative z-10"
-        showsVerticalScrollIndicator={false}
+      <View
+        className="relative z-10 flex-1"
         style={{
           paddingHorizontal: 16,
           paddingTop: insets.top + 12,
@@ -112,108 +110,85 @@ export default function SettingsScreen() {
         }}
       >
         {/* Header */}
-        <View className="gap-1 mb-6">
+        <View className="gap-1 mb-4">
           <Text className="text-4xl font-bold text-foreground">
             Paramètres
-          </Text>
-          <Text className="text-base text-muted">
-            Personnalise ta sécurité.
           </Text>
         </View>
 
         {/* SECTION 1: PROFIL */}
-        <View className="mb-6">
-          <Text className="text-xs font-bold text-muted uppercase tracking-wider mb-3">
-            👤 Profil
+        <View className="mb-4">
+          <Text className="text-xs font-bold text-muted uppercase tracking-wider mb-2">
+            Profil
           </Text>
 
           {/* Card "Ton prénom" */}
-          <View className="mb-3">
-            <GlassCard className="gap-3">
-              <View className="flex-row items-center gap-2">
-                <MaterialIcons name="person" size={18} color="#6C63FF" />
-                <Text className="text-sm font-semibold text-muted flex-1">
-                  Ton prénom
-                </Text>
-              </View>
-              <PopTextField
-                placeholder="Ex: Ben"
-                value={firstName}
-                onChangeText={setFirstName}
-              />
-              <Text className="text-xs text-muted">
-                Utilisé pour personnaliser les messages d'alerte.
+          <GlassCard className="gap-2">
+            <View className="flex-row items-center gap-2">
+              <MaterialIcons name="person" size={16} color="#6C63FF" />
+              <Text className="text-sm font-semibold text-muted">
+                Prénom
               </Text>
-            </GlassCard>
-          </View>
+            </View>
+            <PopTextField
+              placeholder="Ben"
+              value={firstName}
+              onChangeText={setFirstName}
+            />
+          </GlassCard>
         </View>
 
         {/* SECTION 2: SÉCURITÉ */}
-        <View className="mb-6">
-          <Text className="text-xs font-bold text-muted uppercase tracking-wider mb-3">
-            🛡️ Sécurité
+        <View className="mb-4">
+          <Text className="text-xs font-bold text-muted uppercase tracking-wider mb-2">
+            Sécurité
           </Text>
 
           {/* Card "Contact d'urgence" */}
           <View className="mb-3">
-            <GlassCard className="gap-3">
+            <GlassCard className="gap-2">
               <View className="flex-row items-center gap-2">
-                <MaterialIcons name="emergency" size={18} color="#FF4D4D" />
-                <Text className="text-sm font-semibold text-foreground flex-1">
+                <MaterialIcons name="emergency" size={16} color="#FF4D4D" />
+                <Text className="text-sm font-semibold text-foreground">
                   Contact d'urgence
                 </Text>
               </View>
               
-              <View>
-                <Text className="text-xs text-muted mb-1.5">Nom</Text>
-                <PopTextField
-                  placeholder="Ex: Maman"
-                  value={contactName}
-                  onChangeText={setContactName}
-                />
-              </View>
+              <PopTextField
+                placeholder="Nom"
+                value={contactName}
+                onChangeText={setContactName}
+              />
 
-              <View>
-                <Text className="text-xs text-muted mb-1.5">Numéro</Text>
-                <View className="flex-row items-center gap-2">
-                  <View className="flex-1">
-                    <PopTextField
-                      placeholder="+33 6 12 34 56 78"
-                      value={contactPhone}
-                      onChangeText={setContactPhone}
-                    />
-                  </View>
-                  <Pressable 
-                    className="p-2"
-                    onPress={() => {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    }}
-                  >
-                    <MaterialIcons name="phone" size={22} color="#6C63FF" />
-                  </Pressable>
+              <View className="flex-row items-center gap-2">
+                <View className="flex-1">
+                  <PopTextField
+                    placeholder="+33 6 12 34 56 78"
+                    value={contactPhone}
+                    onChangeText={setContactPhone}
+                  />
                 </View>
-              </View>
-
-              <View className="bg-orange-50 rounded-lg p-2.5 border border-orange-200">
-                <Text className="text-xs text-orange-700 font-medium">
-                  ⚠️ Ce contact recevra une alerte si tu ne confirmes pas ton retour.
-                </Text>
+                <Pressable 
+                  className="p-2"
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  }}
+                >
+                  <MaterialIcons name="phone" size={20} color="#6C63FF" />
+                </Pressable>
               </View>
             </GlassCard>
           </View>
 
           {/* Card "Tolérance" */}
           <View className="mb-3">
-            <GlassCard className="gap-3">
+            <GlassCard className="gap-2">
               <View className="flex-row items-center gap-2">
-                <MaterialIcons name="schedule" size={18} color="#2DE2A6" />
-                <Text className="text-sm font-semibold text-foreground flex-1">
-                  Marge de tolérance
+                <MaterialIcons name="schedule" size={16} color="#2DE2A6" />
+                <Text className="text-sm font-semibold text-foreground">
+                  Tolérance
                 </Text>
               </View>
-              <Text className="text-xs text-muted">
-                Délai avant déclenchement de l'alerte après l'heure limite.
-              </Text>
               <SegmentedControlPill
                 options={[
                   { label: '10 min', value: 10 },
@@ -228,17 +203,12 @@ export default function SettingsScreen() {
 
           {/* Card "Localisation" */}
           <View className="mb-3">
-            <GlassCard className="gap-3">
+            <GlassCard className="gap-2">
               <View className="flex-row items-center justify-between">
-                <View className="flex-1 gap-1">
-                  <View className="flex-row items-center gap-2">
-                    <MaterialIcons name="location-on" size={18} color="#3A86FF" />
-                    <Text className="text-sm font-semibold text-foreground">
-                      Partage de position
-                    </Text>
-                  </View>
-                  <Text className="text-xs text-muted">
-                    Envoyer ta position GPS en cas d'alerte (si disponible)
+                <View className="flex-row items-center gap-2 flex-1">
+                  <MaterialIcons name="location-on" size={16} color="#3A86FF" />
+                  <Text className="text-sm font-semibold text-foreground">
+                    Partage de position
                   </Text>
                 </View>
                 <Switch
@@ -254,100 +224,24 @@ export default function SettingsScreen() {
           </View>
         </View>
 
-        {/* SECTION 3: À PROPOS */}
-        <View className="mb-4">
-          <Text className="text-xs font-bold text-muted uppercase tracking-wider mb-3">
-            ℹ️ À propos
-          </Text>
-
-          {/* Card "Confidentialité" */}
-          <Pressable 
-            className="mb-2"
-            onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            }}
-          >
-            {({ pressed }) => (
-              <GlassCard 
-                className="gap-3"
-                style={{
-                  opacity: pressed ? 0.7 : 1,
-                }}
-              >
-                <View className="flex-row items-center justify-between">
-                  <View className="flex-row items-center gap-2 flex-1">
-                    <MaterialIcons name="privacy-tip" size={18} color="#6C63FF" />
-                    <Text className="text-sm font-semibold text-foreground">
-                      Confidentialité
-                    </Text>
-                  </View>
-                  <MaterialIcons name="chevron-right" size={20} color="#B0B0B0" />
-                </View>
-              </GlassCard>
-            )}
-          </Pressable>
-
-          {/* Card "Version" */}
-          <View className="mb-2">
-            <GlassCard className="gap-3">
-              <View className="flex-row items-center justify-between">
-                <View className="flex-row items-center gap-2">
-                  <MaterialIcons name="info" size={18} color="#F59E0B" />
-                  <Text className="text-sm text-muted">Version</Text>
-                </View>
-                <Text className="text-sm font-bold text-foreground">
-                  v1.0.0
-                </Text>
-              </View>
-            </GlassCard>
-          </View>
-
-          {/* Card "Support" */}
-          <Pressable 
-            className="mb-4"
-            onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            }}
-          >
-            {({ pressed }) => (
-              <GlassCard 
-                className="gap-3"
-                style={{
-                  opacity: pressed ? 0.7 : 1,
-                }}
-              >
-                <View className="flex-row items-center justify-between">
-                  <View className="flex-row items-center gap-2 flex-1">
-                    <MaterialIcons name="help" size={18} color="#2DE2A6" />
-                    <Text className="text-sm text-muted">Support</Text>
-                  </View>
-                  <Text className="text-sm font-semibold text-primary">
-                    Contacter
-                  </Text>
-                </View>
-              </GlassCard>
-            )}
-          </Pressable>
-
-          {/* Bouton "Supprimer mes données" */}
-          <Pressable 
-            onPress={handleDeleteData}
-            className="py-4"
-          >
-            {({ pressed }) => (
-              <View
-                style={{
-                  opacity: pressed ? 0.6 : 1,
-                }}
-              >
-                <Text className="text-center text-base font-bold text-error">
-                  🗑️ Supprimer mes données
-                </Text>
-              </View>
-            )}
-          </Pressable>
-        </View>
-      </ScrollView>
+        {/* Bouton "Supprimer mes données" */}
+        <Pressable 
+          onPress={handleDeleteData}
+          className="py-3"
+        >
+          {({ pressed }) => (
+            <View
+              style={{
+                opacity: pressed ? 0.6 : 1,
+              }}
+            >
+              <Text className="text-center text-base font-bold text-error">
+                Supprimer mes données
+              </Text>
+            </View>
+          )}
+        </Pressable>
+      </View>
 
       {/* Toast */}
       {showToast && (
