@@ -8,7 +8,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useState, useEffect } from 'react';
 import { ToastPop } from '@/components/ui/toast-pop';
-import * as Haptics from 'expo-haptics';
 
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
@@ -28,7 +27,6 @@ export default function SettingsScreen() {
         updateSettings({ firstName });
         setToastMessage('Prénom sauvegardé');
         setShowToast(true);
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       }
     }, 500);
     return () => clearTimeout(timer);
@@ -47,7 +45,6 @@ export default function SettingsScreen() {
         });
         setToastMessage('Contact sauvegardé');
         setShowToast(true);
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       }
     }, 500);
     return () => clearTimeout(timer);
@@ -59,7 +56,6 @@ export default function SettingsScreen() {
       updateSettings({ tolerance });
       setToastMessage(`Tolérance: ${tolerance} min`);
       setShowToast(true);
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
   }, [tolerance]);
 
@@ -73,7 +69,6 @@ export default function SettingsScreen() {
           : 'Localisation désactivée'
       );
       setShowToast(true);
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
   }, [locationEnabled]);
 
@@ -90,7 +85,6 @@ export default function SettingsScreen() {
             await deleteAllData();
             setToastMessage('Données supprimées');
             setShowToast(true);
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
           },
         },
       ]
@@ -168,12 +162,7 @@ export default function SettingsScreen() {
                     onChangeText={setContactPhone}
                   />
                 </View>
-                <Pressable 
-                  className="p-2"
-                  onPress={() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  }}
-                >
+                <Pressable className="p-2">
                   <MaterialIcons name="phone" size={20} color="#6C63FF" />
                 </Pressable>
               </View>
@@ -225,21 +214,10 @@ export default function SettingsScreen() {
         </View>
 
         {/* Bouton "Supprimer mes données" */}
-        <Pressable 
-          onPress={handleDeleteData}
-          className="py-3"
-        >
-          {({ pressed }) => (
-            <View
-              style={{
-                opacity: pressed ? 0.6 : 1,
-              }}
-            >
-              <Text className="text-center text-base font-bold text-error">
-                Supprimer mes données
-              </Text>
-            </View>
-          )}
+        <Pressable onPress={handleDeleteData}>
+          <Text className="text-center text-base font-bold text-error">
+            Supprimer mes données
+          </Text>
         </Pressable>
       </View>
 

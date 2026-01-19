@@ -527,3 +527,11 @@
 - [x] Réduire les descriptions pour être plus concis
 - [x] Rendre le design plus minimaliste et clean
 - [x] Vérifier que tout tient sur un écran iPhone SE/13 sans scroll (View au lieu de ScrollView)
+
+
+## HARMONISATION INTERACTIONS SETTINGS
+
+- [x] Enlever les haptics excessives (Light, Medium, Success, Warning)
+- [x] Utiliser seulement les haptics des autres pages (aucun haptics sur Settings)
+- [x] Vérifier que les interactions Settings ressemblent à Home/New Session/Active Session
+- [x] Tester que la page ne vibre plus au clic (vibrations supprimées)
