@@ -1,16 +1,16 @@
-import { ScrollView, View, Text, Pressable, Alert } from 'react-native';
-import { ScreenContainer } from '@/components/screen-container';
+import { ScrollView, View, Text, Pressable, Switch, Alert } from 'react-native';
 import { BubbleBackground } from '@/components/ui/bubble-background';
 import { GlassCard } from '@/components/ui/glass-card';
 import { PopTextField } from '@/components/ui/pop-text-field';
 import { SegmentedControlPill } from '@/components/ui/segmented-control-pill';
-import { CushionPillButton } from '@/components/ui/cushion-pill-button';
 import { useApp } from '@/lib/context/app-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { MaterialIcons } from '@expo/vector-icons';
 import { useState, useEffect } from 'react';
 import { ToastPop } from '@/components/ui/toast-pop';
-import { MaterialIcons } from '@expo/vector-icons';
 
 export default function SettingsScreen() {
+  const insets = useSafeAreaInsets();
   const { settings, updateSettings, deleteAllData } = useApp();
   const [firstName, setFirstName] = useState(settings.firstName);
   const [contactName, setContactName] = useState(settings.emergencyContactName);
@@ -92,20 +92,22 @@ export default function SettingsScreen() {
   };
 
   return (
-    <ScreenContainer
-      className="relative pb-32"
-      containerClassName="bg-background"
-    >
+    <View className="flex-1 bg-background">
       <BubbleBackground />
 
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
-        className="relative z-10 gap-4"
+        className="relative z-10"
         showsVerticalScrollIndicator={false}
+        style={{
+          paddingHorizontal: 16,
+          paddingTop: insets.top + 12,
+          paddingBottom: insets.bottom + 16,
+        }}
       >
         {/* Header */}
-        <View className="gap-1 mb-2">
-          <Text className="text-3xl font-bold text-foreground">
+        <View className="gap-1 mb-3">
+          <Text className="text-4xl font-bold text-foreground">
             Paramètres
           </Text>
           <Text className="text-base text-muted">
@@ -113,98 +115,136 @@ export default function SettingsScreen() {
           </Text>
         </View>
 
-        {/* Prénom */}
-        <PopTextField
-          label="Ton prénom"
-          placeholder="Ex: Ben"
-          value={firstName}
-          onChangeText={setFirstName}
-        />
-
-        {/* Contact d'urgence */}
-        <View className="gap-2">
-          <Text className="text-sm font-semibold text-foreground">
-            Contact d'urgence
-          </Text>
-          <GlassCard className="gap-3">
+        {/* Card "Ton prénom" */}
+        <View className="mb-3">
+          <GlassCard className="gap-2">
+            <Text className="text-sm font-semibold text-muted">
+              Ton prénom
+            </Text>
             <PopTextField
-              placeholder="Nom du contact"
+              placeholder="Ben"
+              value={firstName}
+              onChangeText={setFirstName}
+            />
+          </GlassCard>
+        </View>
+
+        {/* Card "Contact d'urgence" */}
+        <View className="mb-3">
+          <GlassCard className="gap-2">
+            <Text className="text-sm font-semibold text-muted">
+              Contact d'urgence
+            </Text>
+            <PopTextField
+              placeholder="Nom"
               value={contactName}
               onChangeText={setContactName}
             />
-            <View className="flex-row gap-2 items-center">
+            <View className="flex-row items-center gap-2">
               <View className="flex-1">
                 <PopTextField
                   placeholder="+33 6 12 34 56 78"
                   value={contactPhone}
                   onChangeText={setContactPhone}
-                  keyboardType="phone-pad"
                 />
               </View>
-              {contactPhone && (
-                <Pressable className="p-2">
-                  <MaterialIcons
-                    name="phone"
-                    size={24}
-                    color="#6C63FF"
-                  />
-                </Pressable>
-              )}
+              <Pressable className="p-2">
+                <MaterialIcons name="phone" size={20} color="#6C63FF" />
+              </Pressable>
+            </View>
+            <Text className="text-xs text-warning">
+              ⚠️ Ce contact est prévu uniquement si tu ne confirmes pas.
+            </Text>
+          </GlassCard>
+        </View>
+
+        {/* Card "Tolérance" */}
+        <View className="mb-3">
+          <GlassCard className="gap-2">
+            <Text className="text-sm font-semibold text-muted">
+              Tolérance
+            </Text>
+            <SegmentedControlPill
+              options={[
+                { label: '10 min', value: 10 },
+                { label: '15 min', value: 15 },
+                { label: '30 min', value: 30 },
+              ]}
+              value={tolerance}
+              onValueChange={(value) => setTolerance(value as number)}
+            />
+          </GlassCard>
+        </View>
+
+        {/* Card "Localisation" */}
+        <View className="mb-3">
+          <GlassCard className="gap-2">
+            <View className="flex-row items-center justify-between">
+              <View className="flex-1">
+                <Text className="text-sm font-semibold text-foreground">
+                  Localisation
+                </Text>
+                <Text className="text-xs text-muted">
+                  Ajouter la position en cas d'alerte
+                </Text>
+              </View>
+              <Switch
+                value={locationEnabled}
+                onValueChange={(value) => setLocationEnabled(value)}
+                trackColor={{ false: '#E5E7EB', true: '#2DE2A6' }}
+                thumbColor="#FFFFFF"
+              />
             </View>
           </GlassCard>
-          <Text className="text-xs text-warning">
-            ⚠ Ce contact est prévu uniquement si tu ne confirmes pas.
-          </Text>
         </View>
 
-        {/* Tolérance */}
-        <SegmentedControlPill
-          label="Tolérance"
-          options={[
-            { label: '10 min', value: 10 },
-            { label: '15 min', value: 15 },
-            { label: '30 min', value: 30 },
-          ]}
-          value={tolerance}
-          onValueChange={(val) => setTolerance(val as number)}
-        />
+        {/* Section "Infos" */}
+        <View className="mt-4 pt-3 border-t border-border">
+          <Text className="text-xs font-semibold text-muted uppercase mb-2">
+            Infos
+          </Text>
 
-        {/* Localisation */}
-        <View className="gap-2">
-          <View className="flex-row items-center justify-between">
-            <Text className="text-sm font-semibold text-foreground">
-              Ajouter la position en cas d'alerte
-            </Text>
-            <Pressable
-              onPress={() => setLocationEnabled(!locationEnabled)}
-              className={`w-12 h-7 rounded-full items-center justify-${
-                locationEnabled ? 'end' : 'start'
-              } px-1`}
-              style={{
-                backgroundColor: locationEnabled ? '#2DE2A6' : '#E5E7EB',
-              }}
-            >
-              <View
-                className="w-5 h-5 rounded-full bg-white"
-                style={{
-                  shadowColor: '#000',
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.1,
-                  shadowRadius: 4,
-                  elevation: 2,
-                }}
-              />
-            </Pressable>
+          {/* Card "Confidentialité" */}
+          <View className="mb-2">
+            <GlassCard className="gap-2">
+              <View className="flex-row items-center justify-between">
+                <Text className="text-sm font-semibold text-foreground">
+                  Confidentialité
+                </Text>
+                <MaterialIcons name="chevron-right" size={20} color="#687076" />
+              </View>
+            </GlassCard>
           </View>
-          <Text className="text-xs text-muted">
-            Jamais en continu, juste une dernière position si l'alerte part.
-          </Text>
-        </View>
 
-        {/* Danger Zone */}
-        <View className="mt-6 pt-6 border-t border-border">
-          <Pressable onPress={handleDeleteData}>
-            <Text className="text-sm font-semibold text-danger">
+          {/* Card "Version" */}
+          <View className="mb-2">
+            <GlassCard className="gap-2">
+              <View className="flex-row items-center justify-between">
+                <Text className="text-sm text-muted">Version</Text>
+                <Text className="text-sm font-semibold text-foreground">
+                  v1.0.0
+                </Text>
+              </View>
+            </GlassCard>
+          </View>
+
+          {/* Card "Support" */}
+          <View className="mb-3">
+            <GlassCard className="gap-2">
+              <View className="flex-row items-center justify-between">
+                <Text className="text-sm text-muted">Support</Text>
+                <Pressable>
+                  <Text className="text-sm font-semibold text-primary">
+                    Contacter
+                  </Text>
+                </Pressable>
+              </View>
+            </GlassCard>
+          </View>
+
+          {/* Bouton "Supprimer mes données" */}
+          <Pressable onPress={handleDeleteData} className="py-3">
+            <Text className="text-center text-sm font-semibold text-error">
               Supprimer mes données
             </Text>
           </Pressable>
@@ -220,6 +260,6 @@ export default function SettingsScreen() {
           onDismiss={() => setShowToast(false)}
         />
       )}
-    </ScreenContainer>
+    </View>
   );
 }

@@ -235,3 +235,41 @@
 - [x] Screenshot 2: Paramètres avec menu capsule
 - [x] Screenshot 3: Je sors SANS menu + bouton sticky
 - [x] Screenshot 4: Sortie en cours SANS menu + boutons sticky
+
+
+## CORRECTION ESPACES + STRUCTURE (FINAL)
+
+### Règles Globales
+- [x] Supprimer tous les Spacer()
+- [x] Supprimer tous les Expanded()
+- [x] Supprimer MainAxisAlignment.spaceBetween/center
+- [x] Supprimer SizedBox(height > 20) sans justification
+- [x] Utiliser SingleChildScrollView + padding compact
+
+### Je Sors (New Session)
+- [x] Restructurer avec SingleChildScrollView
+- [x] Padding: 16 horizontal, 12 top, bottomPadding = CTA_HEIGHT + safeArea + 12
+- [x] CTA "Démarrer" sticky via bottomSheet (Positioned)
+- [x] Zéro vide artificiel
+- [x] SafeArea top correct (titre pas coupé)
+
+### Paramètres (Settings)
+- [x] Restructurer avec SingleChildScrollView
+- [x] Ajouter section "Infos" en bas:
+  - Card "Confidentialité"
+  - Card "Version" (v1.0.0)
+  - Card "Support" (contact@email)
+- [x] Bouton "Supprimer mes données" pas isolé au milieu
+- [x] Bottom padding = safeArea + 16
+
+### Home
+- [x] Ajouter contenu utile sous "Sécurité active":
+  - Si session active: mini card "Sortie en cours" + temps restant
+  - Sinon: mini card "Conseil sécurité du jour"
+- [x] Remplir l'espace avec contenu léger et utile
+- [x] Pas de désert blanc
+
+### QA & Screenshots
+- [x] Screenshot Home sans désert
+- [x] Screenshot Paramètres avec section Infos
+- [x] Screenshot Je sors avec CTA sticky

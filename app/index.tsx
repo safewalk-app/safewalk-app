@@ -1,15 +1,17 @@
 import { ScrollView, View, Text, Pressable } from 'react-native';
-import { ScreenContainer } from '@/components/screen-container';
 import { BubbleBackground } from '@/components/ui/bubble-background';
+import { GlassCard } from '@/components/ui/glass-card';
 import { HeroCardPremium } from '@/components/ui/hero-card-premium';
 import { StatusCard } from '@/components/ui/status-card';
 import { useApp } from '@/lib/context/app-context';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function IndexScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { settings, currentSession } = useApp();
   const [remainingTime, setRemainingTime] = useState<string>('');
 
@@ -41,7 +43,6 @@ export default function IndexScreen() {
 
   const handleStartSession = () => {
     if (!settings.emergencyContactName || !settings.emergencyContactPhone) {
-      // Show error and redirect to settings
       router.push('/settings');
       return;
     }
@@ -51,16 +52,18 @@ export default function IndexScreen() {
   const hasContact = settings.emergencyContactName && settings.emergencyContactPhone;
 
   return (
-    <ScreenContainer
-      className="px-4 pt-3"
-      containerClassName="bg-background"
-    >
+    <View className="flex-1 bg-background">
       <BubbleBackground />
 
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
         className="relative z-10"
         showsVerticalScrollIndicator={false}
+        style={{
+          paddingHorizontal: 16,
+          paddingTop: insets.top + 12,
+          paddingBottom: insets.bottom + 16,
+        }}
       >
         {/* Header */}
         <View className="gap-1 mb-3">
@@ -124,9 +127,20 @@ export default function IndexScreen() {
           </Pressable>
         )}
 
-        {/* Bottom spacer */}
-        <View className="h-2" />
+        {/* Section "Infos utiles" - visible seulement si pas de session */}
+        {!currentSession && (
+          <View className="mt-3">
+            <GlassCard className="gap-2">
+              <Text className="text-sm font-semibold text-foreground">
+                Conseil du jour
+              </Text>
+              <Text className="text-xs text-muted leading-relaxed">
+                Partage toujours ton heure de retour avec un proche de confiance.
+              </Text>
+            </GlassCard>
+          </View>
+        )}
       </ScrollView>
-    </ScreenContainer>
+    </View>
   );
 }

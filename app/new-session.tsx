@@ -34,14 +34,23 @@ export default function NewSessionScreen() {
     setDueTime(newDate);
   };
 
+  // CTA height for bottom padding calculation
+  const ctaHeight = 60;
+  const bottomPadding = ctaHeight + insets.bottom + 12;
+
   return (
     <View className="flex-1 bg-background">
       <BubbleBackground />
 
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
-        className="relative z-10 px-4 pt-3"
+        className="relative z-10"
         showsVerticalScrollIndicator={false}
+        style={{
+          paddingHorizontal: 16,
+          paddingTop: insets.top + 12,
+          paddingBottom: bottomPadding,
+        }}
       >
         {/* Header */}
         <View className="gap-1 mb-3">
@@ -148,7 +157,7 @@ export default function NewSessionScreen() {
       {/* Sticky CTA Bottom */}
       <View
         className="px-4 bg-background border-t border-border"
-        style={{ paddingBottom: insets.bottom + 16, paddingTop: 12 }}
+        style={{ paddingBottom: insets.bottom + 12, paddingTop: 12 }}
       >
         <CushionPillButton
           label="Démarrer"
