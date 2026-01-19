@@ -1,65 +1,53 @@
-import { ScrollView, View, Text, Modal, Pressable } from 'react-native';
-import { useRouter } from 'expo-router';
+import { ScrollView, View, Text, Pressable, Alert } from 'react-native';
 import { ScreenContainer } from '@/components/screen-container';
 import { BubbleBackground } from '@/components/ui/bubble-background';
 import { GlassCard } from '@/components/ui/glass-card';
 import { PopTextField } from '@/components/ui/pop-text-field';
 import { CushionPillButton } from '@/components/ui/cushion-pill-button';
 import { useApp } from '@/lib/context/app-context';
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { ToastPop } from '@/components/ui/toast-pop';
 import { MaterialIcons } from '@expo/vector-icons';
 
 export default function NewSessionScreen() {
   const router = useRouter();
   const { settings, startSession } = useApp();
-  const [dueTime, setDueTime] = useState('02:30');
-  const [location, setLocation] = useState('');
-  const [showTimeModal, setShowTimeModal] = useState(false);
-  const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState('');
+  const [dueTime, setDueTime] = useState(new Date(Date.now() + 2.5 * 60 * 60 * 1000));
+  const [note, setNote] = useState('');
 
-  const handleStartSession = async () => {
-    // Parse time
-    const [hours, minutes] = dueTime.split(':').map(Number);
-    const now = new Date();
-    const dueDateTime = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate(),
-      hours,
-      minutes
-    );
+  const handleStartSession = () => {
+    startSession(dueTime.getTime(), note);
+    router.push('/active-session');
+  };
 
-    // If time is in the past, set for tomorrow
-    if (dueDateTime < now) {
-      dueDateTime.setDate(dueDateTime.getDate() + 1);
+  const formatTime = (date: Date) => {
+    return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  };
+
+  const handleTimeChange = (hours: number, minutes: number) => {
+    const newDate = new Date();
+    newDate.setHours(hours, minutes, 0);
+    if (newDate < new Date()) {
+      newDate.setDate(newDate.getDate() + 1);
     }
-
-    await startSession(dueDateTime.getTime(), location || undefined);
-    setToastMessage('Sortie démarrée !');
-    setShowToast(true);
-
-    setTimeout(() => {
-      router.push('/active-session');
-    }, 500);
+    setDueTime(newDate);
   };
 
   return (
     <ScreenContainer
-      className="relative pb-32"
+      className="px-4 pt-3"
       containerClassName="bg-background"
     >
       <BubbleBackground />
 
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
-        className="relative z-10 gap-3"
+        className="relative z-10"
         showsVerticalScrollIndicator={false}
       >
         {/* Header */}
-        <View className="gap-1 mb-1">
-          <Text className="text-3xl font-bold text-foreground">
+        <View className="gap-1 mb-3">
+          <Text className="text-4xl font-bold text-foreground">
             Je sors
           </Text>
           <Text className="text-base text-muted">
@@ -67,67 +55,72 @@ export default function NewSessionScreen() {
           </Text>
         </View>
 
-        {/* Heure limite */}
-        <Pressable onPress={() => setShowTimeModal(true)}>
-          <GlassCard className="flex-row items-center justify-between p-4">
-            <View>
-              <Text className="text-xs text-muted font-semibold mb-1">
-                Heure limite
-              </Text>
-              <Text className="text-4xl font-bold text-primary">
-                {dueTime}
-              </Text>
-            </View>
-            <MaterialIcons
-              name="schedule"
-              size={28}
-              color="#6C63FF"
-            />
-          </GlassCard>
-        </Pressable>
-
-        {/* Où vas-tu ? */}
-        <PopTextField
-          label="Où vas-tu ? (optionnel)"
-          placeholder="Ex: Soirée chez Karim..."
-          value={location}
-          onChangeText={setLocation}
-          multiline
-          numberOfLines={2}
-        />
-
-        {/* Contact d'urgence */}
-        <GlassCard className="flex-row items-center justify-between p-4">
-          <View className="flex-1">
-            <Text className="text-xs text-muted font-semibold mb-1">
-              Contact d'urgence
-            </Text>
-            <Text className="text-base font-semibold text-foreground">
-              {settings.emergencyContactName}
-            </Text>
-            <Text className="text-sm text-muted">
-              {settings.emergencyContactPhone}
-            </Text>
-          </View>
-          <Pressable className="p-2">
-            <MaterialIcons
-              name="phone"
-              size={24}
-              color="#6C63FF"
-            />
-          </Pressable>
-        </GlassCard>
-
-        {/* Localisation */}
-        <GlassCard className="gap-3 p-4">
+        {/* Card "Heure limite" */}
+        <GlassCard className="gap-3 mb-3">
+          <Text className="text-sm font-semibold text-muted">
+            Heure limite
+          </Text>
           <View className="flex-row items-center justify-between">
-            <Text className="text-sm font-semibold text-foreground">
-              Localisation
+            <Text className="text-5xl font-bold text-foreground">
+              {formatTime(dueTime)}
             </Text>
             <Pressable
-              className={`w-12 h-7 rounded-full items-center justify-${
-                settings.locationEnabled ? 'end' : 'start'
-              } px-1`}
+              onPress={() => {
+                // Simple time picker simulation
+                const newHours = (dueTime.getHours() + 1) % 24;
+                handleTimeChange(newHours, dueTime.getMinutes());
+              }}
+            >
+              <MaterialIcons name="edit" size={24} color="#6C63FF" />
+            </Pressable>
+          </View>
+        </GlassCard>
+
+        {/* Card "Où vas-tu" */}
+        <GlassCard className="gap-2 mb-3">
+          <Text className="text-sm font-semibold text-muted">
+            Où vas-tu ? (optionnel)
+          </Text>
+          <PopTextField
+            placeholder="Ex: Soirée chez Karim..."
+            value={note}
+            onChangeText={setNote}
+          />
+        </GlassCard>
+
+        {/* Card "Contact d'urgence" */}
+        <GlassCard className="gap-2 mb-3">
+          <Text className="text-sm font-semibold text-muted">
+            Contact d'urgence
+          </Text>
+          <View className="flex-row items-center justify-between">
+            <View className="flex-1">
+              <Text className="text-base font-semibold text-foreground">
+                {settings.emergencyContactName}
+              </Text>
+              <Text className="text-sm text-muted">
+                {settings.emergencyContactPhone}
+              </Text>
+            </View>
+            <Pressable>
+              <MaterialIcons name="phone" size={24} color="#6C63FF" />
+            </Pressable>
+          </View>
+        </GlassCard>
+
+        {/* Card "Localisation" */}
+        <GlassCard className="gap-2 mb-3">
+          <View className="flex-row items-center justify-between">
+            <View className="flex-1">
+              <Text className="text-sm font-semibold text-foreground">
+                Ajouter la position en cas d'alerte
+              </Text>
+              <Text className="text-xs text-muted">
+                Jamais en continu, juste une dernière position si l'alerte part.
+              </Text>
+            </View>
+            <View
+              className="w-12 h-7 rounded-full items-center justify-end px-1"
               style={{
                 backgroundColor: settings.locationEnabled ? '#2DE2A6' : '#E5E7EB',
               }}
@@ -142,15 +135,15 @@ export default function NewSessionScreen() {
                   elevation: 2,
                 }}
               />
-            </Pressable>
+            </View>
           </View>
-          <Text className="text-xs text-muted leading-tight">
-            Jamais en continu. Une dernière position si l'alerte part.
-          </Text>
         </GlassCard>
 
-        {/* CTA */}
-        <View className="mt-4 mb-2">
+        {/* Bottom spacer */}
+        <View className="flex-1" />
+
+        {/* CTA "Démarrer" */}
+        <View className="mb-2">
           <CushionPillButton
             label="Démarrer"
             onPress={handleStartSession}
@@ -158,48 +151,10 @@ export default function NewSessionScreen() {
             size="lg"
           />
         </View>
+
+        {/* Extra bottom spacer */}
+        <View className="h-2" />
       </ScrollView>
-
-      {/* Time Picker Modal */}
-      <Modal
-        visible={showTimeModal}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setShowTimeModal(false)}
-      >
-        <Pressable
-          className="flex-1 bg-black/50 items-center justify-center"
-          onPress={() => setShowTimeModal(false)}
-        >
-          <GlassCard className="w-80 gap-4">
-            <Text className="text-lg font-bold text-foreground">
-              Sélectionner l'heure
-            </Text>
-            <PopTextField
-              placeholder="HH:MM"
-              value={dueTime}
-              onChangeText={setDueTime}
-              keyboardType="numeric"
-            />
-            <CushionPillButton
-              label="Confirmer"
-              onPress={() => setShowTimeModal(false)}
-              variant="primary"
-              size="md"
-            />
-          </GlassCard>
-        </Pressable>
-      </Modal>
-
-      {/* Toast */}
-      {showToast && (
-        <ToastPop
-          message={toastMessage}
-          type="success"
-          duration={1500}
-          onDismiss={() => setShowToast(false)}
-        />
-      )}
     </ScreenContainer>
   );
 }

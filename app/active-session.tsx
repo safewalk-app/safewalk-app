@@ -1,21 +1,18 @@
-import { ScrollView, View, Text, Alert, Pressable } from 'react-native';
-import { useRouter } from 'expo-router';
+import { ScrollView, View, Text, Pressable, Alert } from 'react-native';
 import { ScreenContainer } from '@/components/screen-container';
 import { BubbleBackground } from '@/components/ui/bubble-background';
 import { GlassCard } from '@/components/ui/glass-card';
 import { BigSuccessButton } from '@/components/ui/big-success-button';
 import { CushionPillButton } from '@/components/ui/cushion-pill-button';
 import { useApp } from '@/lib/context/app-context';
-import { useState, useEffect } from 'react';
-import { ToastPop } from '@/components/ui/toast-pop';
+import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
 
 export default function ActiveSessionScreen() {
   const router = useRouter();
-  const { currentSession, endSession, addTimeToSession, cancelSession } = useApp();
-  const [timeLeft, setTimeLeft] = useState('--:--');
-  const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState('');
-  const [isLate, setIsLate] = useState(false);
+  const { currentSession, endSession, cancelSession, addTimeToSession } = useApp();
+  const [remainingTime, setRemainingTime] = useState<string>('00:00:00');
+  const [isOverdue, setIsOverdue] = useState(false);
 
   useEffect(() => {
     if (!currentSession) {
@@ -23,50 +20,46 @@ export default function ActiveSessionScreen() {
       return;
     }
 
-    const updateTimeLeft = () => {
+    const interval = setInterval(() => {
       const now = Date.now();
-      const deadline = currentSession.dueTime + currentSession.tolerance * 60 * 1000;
+      const dueTime = currentSession.dueTime;
+      const tolerance = currentSession.tolerance * 60 * 1000;
+      const deadline = dueTime + tolerance;
       const remaining = deadline - now;
 
-      if (remaining <= 0) {
-        // En retard
-        setIsLate(true);
-        const lateTime = Math.abs(remaining);
-        const hours = Math.floor(lateTime / (1000 * 60 * 60));
-        const minutes = Math.floor((lateTime % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((lateTime % (1000 * 60)) / 1000);
-        setTimeLeft(`${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`);
-      } else {
-        // Temps restant
-        setIsLate(false);
+      if (remaining > 0) {
+        setIsOverdue(false);
         const hours = Math.floor(remaining / (1000 * 60 * 60));
         const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
-        setTimeLeft(`${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`);
+        setRemainingTime(
+          `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+        );
+      } else {
+        setIsOverdue(true);
+        const overdueTime = Math.abs(remaining);
+        const hours = Math.floor(overdueTime / (1000 * 60 * 60));
+        const minutes = Math.floor((overdueTime % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((overdueTime % (1000 * 60)) / 1000);
+        setRemainingTime(
+          `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+        );
       }
-    };
+    }, 1000);
 
-    updateTimeLeft();
-    const interval = setInterval(updateTimeLeft, 1000);
     return () => clearInterval(interval);
-  }, [currentSession]);
+  }, [currentSession, router]);
 
-  const handleReturnHome = async () => {
+  const handleCompleteSession = async () => {
     await endSession();
-    setToastMessage('Bienvenue à la maison !');
-    setShowToast(true);
-    setTimeout(() => {
-      router.push('/');
-    }, 500);
+    router.push('/');
   };
 
-  const handleAddTime = async () => {
+  const handleExtendSession = async () => {
     await addTimeToSession(15);
-    setToastMessage('15 minutes ajoutées');
-    setShowToast(true);
   };
 
-  const handleCancel = () => {
+  const handleCancelSession = () => {
     Alert.alert(
       'Annuler la sortie',
       'Êtes-vous sûr de vouloir annuler cette sortie ?',
@@ -75,13 +68,9 @@ export default function ActiveSessionScreen() {
         {
           text: 'Oui',
           style: 'destructive',
-          onPress: async () => {
-            await cancelSession();
-            setToastMessage('Sortie annulée');
-            setShowToast(true);
-            setTimeout(() => {
-              router.push('/');
-            }, 500);
+          onPress: () => {
+            cancelSession();
+            router.push('/');
           },
         },
       ]
@@ -92,88 +81,91 @@ export default function ActiveSessionScreen() {
     return null;
   }
 
+  const dueTimeStr = new Date(currentSession.dueTime).toLocaleTimeString('fr-FR', {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+
   return (
     <ScreenContainer
-      className="relative pb-32"
+      className="px-4 pt-3"
       containerClassName="bg-background"
     >
       <BubbleBackground />
 
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
-        className="relative z-10 gap-2"
+        className="relative z-10"
         showsVerticalScrollIndicator={false}
       >
         {/* Header */}
-        <View className="gap-1 mb-2">
-          <Text className="text-3xl font-bold text-foreground">
+        <View className="gap-1 mb-3">
+          <Text className="text-4xl font-bold text-foreground">
             Sortie en cours
-          </Text>
-          <Text className="text-base text-muted">
-            Tu forase après 😊
           </Text>
         </View>
 
-        {/* Time Display - Compact */}
+        {/* Timer Card */}
         <GlassCard
-          className="items-center justify-center py-4 gap-2"
+          className="gap-2 mb-4"
           style={{
-            backgroundColor: isLate ? 'rgba(245, 158, 11, 0.1)' : 'rgba(255, 255, 255, 0.1)',
+            backgroundColor: isOverdue ? 'rgba(255, 77, 77, 0.08)' : 'rgba(255, 255, 255, 0.94)',
           }}
         >
-          <Text className="text-sm text-muted font-semibold">
-            {isLate ? 'En retard' : 'Temps restant'}
+          <Text className="text-sm font-semibold text-muted">
+            Temps restant
           </Text>
           <Text
-            className="font-bold"
+            className="text-7xl font-bold text-center"
             style={{
-              fontSize: 52,
-              color: isLate ? '#F59E0B' : '#6C63FF',
+              color: isOverdue ? '#FF4D4D' : '#6C63FF',
             }}
           >
-            {timeLeft}
+            {isOverdue ? 'En retard' : remainingTime}
           </Text>
-          <View className="gap-1 items-center mt-1">
-            <Text className="text-xs text-muted">
-              Heure limite : {currentSession.dueTime ? new Date(currentSession.dueTime).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '--:--'}
-            </Text>
-            <Text className="text-xs text-muted">
-              Tolérance : {currentSession.tolerance} min
-            </Text>
+          <View className="gap-1 mt-2">
+            <View className="flex-row justify-between">
+              <Text className="text-sm text-muted">Heure limite :</Text>
+              <Text className="text-sm font-semibold text-foreground">
+                {dueTimeStr}
+              </Text>
+            </View>
+            <View className="flex-row justify-between">
+              <Text className="text-sm text-muted">Tolérance :</Text>
+              <Text className="text-sm font-semibold text-foreground">
+                {currentSession.tolerance} min
+              </Text>
+            </View>
           </View>
         </GlassCard>
 
-        {/* CTA Buttons - Collés sous la card */}
-        <View className="gap-3 mt-3">
+        {/* Buttons */}
+        <View className="gap-2 mb-2">
+          {/* Je suis rentré */}
           <BigSuccessButton
-            label="Je suis rentré"
-            onPress={handleReturnHome}
+            label="✅ Je suis rentré"
+            onPress={handleCompleteSession}
           />
 
+          {/* + 15 min */}
           <CushionPillButton
             label="+ 15 min"
-            onPress={handleAddTime}
+            onPress={handleExtendSession}
             variant="secondary"
             size="md"
           />
 
-          <Pressable onPress={handleCancel}>
-            <Text className="text-center text-sm font-semibold text-error">
+          {/* Annuler la sortie */}
+          <Pressable onPress={handleCancelSession} className="py-3">
+            <Text className="text-center text-sm font-semibold text-danger">
               Annuler la sortie
             </Text>
           </Pressable>
         </View>
-      </ScrollView>
 
-      {/* Toast */}
-      {showToast && (
-        <ToastPop
-          message={toastMessage}
-          type={toastMessage.includes('Bienvenue') ? 'success' : 'info'}
-          duration={1500}
-          onDismiss={() => setShowToast(false)}
-        />
-      )}
+        {/* Bottom spacer */}
+        <View className="h-2" />
+      </ScrollView>
     </ScreenContainer>
   );
 }

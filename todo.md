@@ -149,3 +149,60 @@
 - [x] Screenshots: home, settings, new-session, active-session avec menu visible
 - [x] Vérifier que le menu ne cache pas le contenu
 - [x] Tester les transitions entre écrans
+
+
+## PIXEL RULES EXACTES (Anti "trop d'espace")
+
+### Global Layout
+- [x] Screen padding horizontal: 16
+- [x] Screen padding top: 12
+- [x] Section gap standard: 12
+- [x] Small gap: 8
+- [x] Large gap max: 16 (INTERDIT au-delà)
+- [x] Bottom spacer minimal: 8-12
+
+### Bottom Nav Capsule
+- [x] Height: 68
+- [x] Side margin: 18
+- [x] Bottom margin: 12
+- [x] Content bottom padding: 68 + 12 + safeAreaBottom + 8
+
+### Glass Card
+- [x] Radius: 28
+- [x] Padding H: 16
+- [x] Padding V: 14 (max)
+- [x] Shadow: y=10 blur=35 opacity 0.10
+- [x] Title font: 16-18 semibold
+- [x] Subtitle font: 13-14 regular
+
+### Home Screen
+- [x] "SafeWalk" font: 34-36 bold
+- [x] Subtitle font: 15
+- [x] HeroCard height: 230-250
+- [x] HeroCard padding: 18
+- [x] "Je sors" font: 34-36
+- [x] Bouton "Commencer" height: 52, radius: 26
+- [x] Gap hero -> status: 12
+- [x] StatusCard height: 74-82
+- [x] Mini card "Sortie en cours" height: 74-82
+
+### Je Sors Screen
+- [x] Title: 32-34 bold
+- [x] Subtitle: 15 regular
+- [x] Card "Heure limite" height: 92-104
+- [x] Value "02:30" font: 40-44 bold
+- [x] Card "Où vas-tu" height: 74-82
+- [x] Card "Contact" height: 84-92
+- [x] Card "Localisation" height: 84-96
+- [x] CTA "Démarrer" height: 60, radius: 30
+- [x] Gap au-dessus bouton: 12-16
+
+### Sortie en Cours Screen
+- [x] Title: 32-34
+- [x] Card timer height: 200-230 (max)
+- [x] Label "Temps restant" font: 14
+- [x] Countdown font: 64-72 bold
+- [x] Gap card -> boutons: 16
+- [x] Bouton "Je suis rentré" height: 62, radius: 31, opacity: 1.0
+- [x] Bouton "+ 15 min" height: 48-52, radius: 24-26
+- [x] "Annuler" marginTop: 10-12

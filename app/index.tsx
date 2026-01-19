@@ -1,78 +1,58 @@
 import { ScrollView, View, Text, Pressable } from 'react-native';
-import { useRouter } from 'expo-router';
 import { ScreenContainer } from '@/components/screen-container';
 import { BubbleBackground } from '@/components/ui/bubble-background';
 import { HeroCardPremium } from '@/components/ui/hero-card-premium';
 import { StatusCard } from '@/components/ui/status-card';
-import { GlassCard } from '@/components/ui/glass-card';
 import { useApp } from '@/lib/context/app-context';
-import { useState, useEffect } from 'react';
-import { ToastPop } from '@/components/ui/toast-pop';
+import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
 import { MaterialIcons } from '@expo/vector-icons';
 
 export default function IndexScreen() {
   const router = useRouter();
   const { settings, currentSession } = useApp();
-  const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState('');
-  const [timeRemaining, setTimeRemaining] = useState('--:--:--');
+  const [remainingTime, setRemainingTime] = useState<string>('');
 
-  const hasContact = settings.emergencyContactName && settings.emergencyContactPhone;
-  const statusTitle = hasContact ? 'Sécurité active' : 'Sécurité inactive';
-  const statusSubtitle = hasContact ? 'Contact configuré' : 'Configurer un contact';
-
-  const handleStartSession = () => {
-    if (!hasContact) {
-      setToastMessage('Configure un contact d\'urgence');
-      setShowToast(true);
-      setTimeout(() => {
-        router.push('/settings');
-      }, 1500);
-      return;
-    }
-
-    router.push('/new-session');
-  };
-
-  const handleStatusPress = () => {
-    if (!hasContact) {
-      router.push('/settings');
-    }
-  };
-
-  const handleActiveSessionPress = () => {
-    if (currentSession) {
-      router.push('/active-session');
-    }
-  };
-
-  // Update time remaining every second
+  // Update remaining time every second
   useEffect(() => {
     if (!currentSession) return;
 
-    const updateTimeRemaining = () => {
+    const interval = setInterval(() => {
       const now = Date.now();
-      const deadline = currentSession.dueTime + currentSession.tolerance * 60 * 1000;
+      const dueTime = currentSession.dueTime;
+      const tolerance = currentSession.tolerance * 60 * 1000;
+      const deadline = dueTime + tolerance;
       const remaining = deadline - now;
 
-      if (remaining <= 0) {
-        setTimeRemaining('En retard');
-      } else {
+      if (remaining > 0) {
         const hours = Math.floor(remaining / (1000 * 60 * 60));
         const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
-        setTimeRemaining(`${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`);
+        setRemainingTime(
+          `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+        );
+      } else {
+        setRemainingTime('En retard');
       }
-    };
+    }, 1000);
 
-    updateTimeRemaining();
-    const interval = setInterval(updateTimeRemaining, 1000);
     return () => clearInterval(interval);
   }, [currentSession]);
 
+  const handleStartSession = () => {
+    if (!settings.emergencyContactName || !settings.emergencyContactPhone) {
+      // Show error and redirect to settings
+      router.push('/settings');
+      return;
+    }
+    router.push('/new-session');
+  };
+
+  const hasContact = settings.emergencyContactName && settings.emergencyContactPhone;
+
   return (
     <ScreenContainer
-      className="relative pb-32"
+      className="px-4 pt-3"
       containerClassName="bg-background"
     >
       <BubbleBackground />
@@ -84,7 +64,7 @@ export default function IndexScreen() {
       >
         {/* Header */}
         <View className="gap-1 mb-3">
-          <Text className="text-3xl font-bold text-foreground">
+          <Text className="text-5xl font-bold text-foreground">
             SafeWalk
           </Text>
           <Text className="text-base text-muted">
@@ -99,7 +79,6 @@ export default function IndexScreen() {
             description="Définis une heure de retour. Un proche est prévenu si tu ne confirmes pas."
             buttonLabel="Commencer"
             onButtonPress={handleStartSession}
-            emoji="🚀"
           />
         </View>
 
@@ -107,53 +86,47 @@ export default function IndexScreen() {
         <View className="mb-3">
           <StatusCard
             status={hasContact ? 'active' : 'inactive'}
-            title={statusTitle}
-            subtitle={statusSubtitle}
-            onPress={handleStatusPress}
+            title={hasContact ? 'Sécurité active' : 'Sécurité inactive'}
+            subtitle={hasContact ? 'Contact configuré' : 'Configurer un contact'}
+            onPress={() => router.push('/settings')}
           />
         </View>
 
-        {/* Active Session Card (if exists) */}
+        {/* Mini Card - Sortie en cours */}
         {currentSession && (
-          <Pressable onPress={handleActiveSessionPress}>
-            {({ pressed }) => (
-              <GlassCard
-                className="flex-row items-center justify-between p-4"
-                style={{
-                  opacity: pressed ? 0.8 : 1.0,
-                }}
-              >
-                <View className="flex-row items-center gap-3 flex-1">
-                  <Text className="text-2xl">📍</Text>
-                  <View className="flex-1">
-                    <Text className="text-sm font-semibold text-foreground">
-                      Sortie en cours
-                    </Text>
-                    <Text className="text-xs text-muted">
-                      Temps restant: {timeRemaining}
-                    </Text>
-                  </View>
-                </View>
-                <MaterialIcons
-                  name="chevron-right"
-                  size={24}
-                  color="#6C63FF"
-                />
-              </GlassCard>
-            )}
+          <Pressable
+            onPress={() => router.push('/active-session')}
+            className="mb-3"
+            style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.94)',
+              borderRadius: 28,
+              paddingHorizontal: 16,
+              paddingVertical: 14,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 10 },
+              shadowOpacity: 0.1,
+              shadowRadius: 35,
+              elevation: 4,
+            }}
+          >
+            <View className="flex-row items-center gap-3">
+              <MaterialIcons name="location-on" size={20} color="#6C63FF" />
+              <View className="flex-1">
+                <Text className="text-base font-semibold text-foreground">
+                  Sortie en cours
+                </Text>
+                <Text className="text-sm text-muted">
+                  Temps restant: {remainingTime}
+                </Text>
+              </View>
+              <MaterialIcons name="chevron-right" size={24} color="#6C63FF" />
+            </View>
           </Pressable>
         )}
-      </ScrollView>
 
-      {/* Toast */}
-      {showToast && (
-        <ToastPop
-          message={toastMessage}
-          type="warning"
-          duration={1500}
-          onDismiss={() => setShowToast(false)}
-        />
-      )}
+        {/* Bottom spacer */}
+        <View className="h-2" />
+      </ScrollView>
     </ScreenContainer>
   );
 }
