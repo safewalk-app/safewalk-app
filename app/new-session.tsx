@@ -1,37 +1,29 @@
-import { ScrollView, View, Text, Pressable } from 'react-native';
+import { ScrollView, View, Text } from 'react-native';
 import { BubbleBackground } from '@/components/ui/bubble-background';
 import { GlassCard } from '@/components/ui/glass-card';
 import { PopTextField } from '@/components/ui/pop-text-field';
 import { CushionPillButton } from '@/components/ui/cushion-pill-button';
+import { TimeLimitPicker } from '@/components/ui/time-limit-picker';
 import { useApp } from '@/lib/context/app-context';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { MaterialIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function NewSessionScreen() {
   const router = useRouter();
   const { settings, startSession } = useApp();
   const insets = useSafeAreaInsets();
-  const [dueTime, setDueTime] = useState(new Date(Date.now() + 2.5 * 60 * 60 * 1000));
+  const [limitTime, setLimitTime] = useState(Date.now() + 2.5 * 60 * 60 * 1000);
   const [note, setNote] = useState('');
 
   const handleStartSession = () => {
-    startSession(dueTime.getTime(), note);
-    router.push('/active-session');
-  };
-
-  const formatTime = (date: Date) => {
-    return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-  };
-
-  const handleTimeChange = (hours: number, minutes: number) => {
-    const newDate = new Date();
-    newDate.setHours(hours, minutes, 0);
-    if (newDate < new Date()) {
-      newDate.setDate(newDate.getDate() + 1);
+    if (!settings.emergencyContactName || !settings.emergencyContactPhone) {
+      alert('Veuillez configurer un contact d\'urgence dans les paramètres.');
+      router.push('/settings');
+      return;
     }
-    setDueTime(newDate);
+    startSession(limitTime, note);
+    router.push('/active-session');
   };
 
   // CTA height for bottom padding calculation
@@ -53,105 +45,63 @@ export default function NewSessionScreen() {
         }}
       >
         {/* Header */}
-        <View className="gap-1 mb-3">
-          <Text className="text-4xl font-bold text-foreground">
-            Je sors
-          </Text>
+        <View className="gap-1 mb-6">
+          <Text className="text-4xl font-bold text-foreground">Je sors</Text>
           <Text className="text-base text-muted">
             Tu penses rentrer vers quelle heure ?
           </Text>
         </View>
 
-        {/* Card "Heure limite" */}
-        <View className="mb-3">
-          <GlassCard className="gap-3">
-            <Text className="text-sm font-semibold text-muted">
-              Heure limite
-            </Text>
-            <View className="flex-row items-center justify-between">
-              <Text className="text-5xl font-bold text-foreground">
-                {formatTime(dueTime)}
+        {/* Time Limit Picker */}
+        <View className="gap-3 mb-4">
+          <TimeLimitPicker
+            selectedTime={limitTime}
+            onTimeSelected={setLimitTime}
+          />
+        </View>
+
+        {/* Card Où vas-tu */}
+        <GlassCard className="gap-2 mb-3">
+          <Text className="text-sm font-medium text-muted">
+            Où vas-tu ? (optionnel)
+          </Text>
+          <PopTextField
+            placeholder="Ex: Soirée chez Karim..."
+            value={note}
+            onChangeText={setNote}
+          />
+        </GlassCard>
+
+        {/* Card Contact d'urgence */}
+        <GlassCard className="gap-2 mb-3">
+          <Text className="text-sm font-medium text-muted">
+            Contact d'urgence
+          </Text>
+          <View className="flex-row items-center justify-between">
+            <View className="flex-1">
+              <Text className="text-base font-semibold text-foreground">
+                {settings.emergencyContactName || 'Non configuré'}
               </Text>
-              <Pressable
-                onPress={() => {
-                  const newHours = (dueTime.getHours() + 1) % 24;
-                  handleTimeChange(newHours, dueTime.getMinutes());
-                }}
-              >
-                <MaterialIcons name="edit" size={24} color="#6C63FF" />
-              </Pressable>
+              <Text className="text-sm text-muted mt-1">
+                {settings.emergencyContactPhone || ''}
+              </Text>
             </View>
-          </GlassCard>
-        </View>
+          </View>
+        </GlassCard>
 
-        {/* Card "Où vas-tu" */}
-        <View className="mb-3">
-          <GlassCard className="gap-2">
-            <Text className="text-sm font-semibold text-muted">
-              Où vas-tu ? (optionnel)
-            </Text>
-            <PopTextField
-              placeholder="Ex: Soirée chez Karim..."
-              value={note}
-              onChangeText={setNote}
-            />
-          </GlassCard>
-        </View>
-
-        {/* Card "Contact d'urgence" */}
-        <View className="mb-3">
-          <GlassCard className="gap-2">
-            <Text className="text-sm font-semibold text-muted">
-              Contact d'urgence
-            </Text>
-            <View className="flex-row items-center justify-between">
-              <View className="flex-1">
-                <Text className="text-base font-semibold text-foreground">
-                  {settings.emergencyContactName}
-                </Text>
-                <Text className="text-sm text-muted">
-                  {settings.emergencyContactPhone}
-                </Text>
-              </View>
-              <Pressable>
-                <MaterialIcons name="phone" size={24} color="#6C63FF" />
-              </Pressable>
+        {/* Card Localisation */}
+        <GlassCard className="gap-2">
+          <View className="flex-row items-center justify-between">
+            <View className="flex-1">
+              <Text className="text-sm font-medium text-muted">
+                Localisation
+              </Text>
+              <Text className="text-xs text-muted mt-1">
+                Ajouter ta position en cas d'alerte
+              </Text>
             </View>
-          </GlassCard>
-        </View>
-
-        {/* Card "Localisation" */}
-        <View className="mb-3">
-          <GlassCard className="gap-2">
-            <View className="flex-row items-center justify-between">
-              <View className="flex-1">
-                <Text className="text-sm font-semibold text-foreground">
-                  Ajouter la position en cas d'alerte
-                </Text>
-                <Text className="text-xs text-muted">
-                  Jamais en continu, juste une dernière position si l'alerte part.
-                </Text>
-              </View>
-              <View
-                className="w-12 h-7 rounded-full items-center justify-end px-1"
-                style={{
-                  backgroundColor: settings.locationEnabled ? '#2DE2A6' : '#E5E7EB',
-                }}
-              >
-                <View
-                  className="w-5 h-5 rounded-full bg-white"
-                  style={{
-                    shadowColor: '#000',
-                    shadowOffset: { width: 0, height: 2 },
-                    shadowOpacity: 0.1,
-                    shadowRadius: 4,
-                    elevation: 2,
-                  }}
-                />
-              </View>
-            </View>
-          </GlassCard>
-        </View>
+          </View>
+        </GlassCard>
       </ScrollView>
 
       {/* Sticky CTA Bottom */}
@@ -162,7 +112,7 @@ export default function NewSessionScreen() {
         <CushionPillButton
           label="Démarrer"
           onPress={handleStartSession}
-          variant="primary"
+          variant="success"
           size="lg"
         />
       </View>

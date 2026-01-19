@@ -453,3 +453,34 @@
 - [ ] Enregistrer chaque session (startTime, limitTime, tolerance, status, endTime, extensionsCount, position)
 - [ ] Afficher liste des sorties avec statut (✅ rentré / 🚨 alerte / ⛔ annulé)
 - [ ] Tap sur sortie → affiche détails complets
+
+
+## SÉLECTEUR "HEURE LIMITE" (UI + Logique)
+
+### UI
+- [x] Card "Heure limite": afficher HH:MM en grand + icône horloge/crayon
+- [x] Tap sur card OU icône => ouvrir bottomSheet modal
+- [x] BottomSheet titre: "Choisir l'heure limite"
+- [x] CupertinoDatePicker mode time (minuteInterval = 5)
+- [x] Pills "Aujourd'hui" / "Demain" (optionnel mais recommandé)
+- [x] Bouton "Valider" primaire
+
+### Logique Date
+- [x] Stocker limitTime en timestamp complet (date + heure)
+- [x] Calcul: limit = DateTime(today.year, today.month, today.day, HH, MM)
+- [x] Si limit < now => limit = limit + 1 day
+- [x] Pills Aujourd'hui/Demain:
+  - [x] "Aujourd'hui" force dateToday
+  - [x] "Demain" force dateToday+1
+  - [x] Si "Aujourd'hui" choisi et limit < now => auto-switch "Demain" OU afficher warning
+- [x] Après validation: update limitTime + recalculer deadline
+- [x] Affichage instantané
+
+### Contraintes (optionnel)
+- [x] Min = now + 10 min (optionnel)
+- [x] Sinon autoriser tout
+
+### Composants
+- [x] Créer composant TimeLimitPicker (bottomSheet + CupertinoDatePicker)
+- [x] Intégrer dans New Session screen
+- [x] Tester logique jour suivant
