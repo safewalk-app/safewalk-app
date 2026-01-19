@@ -28,7 +28,7 @@ export function CushionPillButton({
     primary: 'bg-primary',
     success: 'bg-mint',
     danger: 'bg-danger',
-    secondary: 'bg-secondary',
+    secondary: 'bg-blue-600',
   };
 
   const sizeStyles = {
@@ -69,7 +69,7 @@ export function CushionPillButton({
           )}
           style={{
             transform: [{ scale: pressed ? 0.96 : 1 }],
-            shadowColor: variant === 'danger' ? '#FF4D4D' : '#6C63FF',
+            shadowColor: variant === 'danger' ? '#FF4D4D' : (variant === 'secondary' ? '#1E40AF' : '#6C63FF'),
             shadowOffset: { width: 0, height: 6 },
             shadowOpacity: pressed ? 0.2 : 0.15,
             shadowRadius: 10,

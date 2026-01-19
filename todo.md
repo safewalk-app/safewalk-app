@@ -493,3 +493,11 @@
 - [x] Bouton "+ 15 min": augmenter taille texte, améliorer contraste (size lg, text-xl font-bold)
 - [x] Vérifier couleur texte sur fond de bouton (white sur primary/success/danger)
 - [x] Tester sur iPhone 13/14 pour vérifier lisibilité
+
+
+## FIX CONTRASTE TEXTE/FOND
+
+- [x] Bouton secondary: changé de bg-secondary (#3A86FF) à bg-blue-600 (plus foncé) pour meilleur contraste avec texte blanc
+- [x] Bouton "Commencer" dans HeroCard: texte blanc sur fond bleu secondary maintenant lisible
+- [x] Bouton "+ 15 min": texte blanc sur fond bleu foncé maintenant lisible
+- [x] Vérifier tous les boutons ont bon contraste (white text sur colored background)
