@@ -344,3 +344,50 @@
 - [x] Pas de désert blanc
 - [x] Grande card tient dans l'écran sans scroll (iPhone 13/14)
 - [x] Capsule bottom nav collée au bas (floating) sans pousser contenu
+
+
+## VÉRIFICATION LIENS ET BOUTONS FONCTIONNELS
+
+### Écran Home (Accueil)
+- [x] Bouton "Commencer" -> ouvre New Session
+- [x] Card "Sécurité inactive" -> ouvre Settings
+- [x] Menu capsule "Accueil" -> reste sur Home
+- [x] Menu capsule "Paramètres" -> ouvre Settings
+- [x] Mini card "Sortie en cours" (si session active) -> ouvre Active Session
+
+### Écran Settings (Paramètres)
+- [x] Champs texte (prénom, contact) -> autosave
+- [x] Toggle localisation -> autosave
+- [x] Segmented control tolérance -> autosave
+- [x] Bouton "Supprimer mes données" -> confirmation + suppression
+- [x] Menu capsule "Accueil" -> ouvre Home
+- [x] Menu capsule "Paramètres" -> reste sur Settings
+
+### Écran New Session (Je sors)
+- [x] Champ "Heure limite" -> time picker modal
+- [x] Champ "Où vas-tu" -> texte libre
+- [x] Bouton "Démarrer" -> crée session + ouvre Active Session
+- [x] Bouton retour (back) -> retour à Home
+
+### Écran Active Session (Sortie en cours)
+- [x] Bouton "Je suis rentré" -> confirme retour + retour à Home
+- [x] Bouton "+ 15 min" -> ajoute 15 min au timer
+- [x] Texte "Annuler la sortie" -> confirmation modal + annule session + retour à Home
+- [x] Bouton retour (back) -> retour à Home (avec confirmation si session active)
+
+### Écran Alert Sent (Alerte envoyée)
+- [x] Bouton "Je vais bien" -> ferme alerte + retour à Home
+- [x] Bouton "Appeler contact" -> appel (simulé ou réel)
+- [x] Bouton "Appeler 112" -> appel d'urgence (simulé ou réel)
+
+### Écran History (Historique)
+- [x] Liste des sorties -> tap ouvre détails
+- [x] Détails sortie -> affiche info complète
+- [x] Bouton retour -> retour à History
+
+### QA Global
+- [x] Aucune erreur console
+- [x] Aucun crash lors de la navigation
+- [x] Tous les boutons répondent au tap
+- [x] Transitions fluides entre écrans
+- [x] Pas de dead ends (tous les écrans ont un retour
