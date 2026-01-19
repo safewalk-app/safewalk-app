@@ -1,14 +1,24 @@
 /** @type {const} */
 const themeColors = {
-  primary: { light: '#0a7ea4', dark: '#0a7ea4' },
-  background: { light: '#ffffff', dark: '#151718' },
-  surface: { light: '#f5f5f5', dark: '#1e2022' },
-  foreground: { light: '#11181C', dark: '#ECEDEE' },
-  muted: { light: '#687076', dark: '#9BA1A6' },
-  border: { light: '#E5E7EB', dark: '#334155' },
-  success: { light: '#22C55E', dark: '#4ADE80' },
-  warning: { light: '#F59E0B', dark: '#FBBF24' },
-  error: { light: '#EF4444', dark: '#F87171' },
+  // Pop Bubble Design System
+  primary: { light: '#6C63FF', dark: '#6C63FF' },        // Primary Purple
+  secondary: { light: '#3A86FF', dark: '#3A86FF' },      // Primary Blue
+  mint: { light: '#2DE2A6', dark: '#2DE2A6' },           // Mint (Success)
+  danger: { light: '#FF4D4D', dark: '#FF4D4D' },         // Danger Red
+  
+  // Text
+  foreground: { light: '#0B1220', dark: '#0B1220' },     // Text Dark
+  muted: { light: '#6B7280', dark: '#6B7280' },          // Secondary Text
+  
+  // Background & Surface
+  background: { light: '#F6F7FF', dark: '#F6F7FF' },     // Background with bubbles
+  surface: { light: '#FFFFFF', dark: '#FFFFFF' },        // Card surface (translucent)
+  
+  // UI Elements
+  border: { light: '#E5E7EB', dark: '#E5E7EB' },
+  success: { light: '#2DE2A6', dark: '#2DE2A6' },
+  warning: { light: '#F59E0B', dark: '#F59E0B' },
+  error: { light: '#FF4D4D', dark: '#FF4D4D' },
 };
 
 module.exports = { themeColors };
