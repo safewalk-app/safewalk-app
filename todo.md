@@ -54,6 +54,11 @@
 - [x] Bouton danger "Annuler ta sortie" + confirm modal
 - [x] Logique : Confirmer retour, ajouter temps, annuler
 - [x] Pixel-perfect matching
+- [x] CORRECTION: Implémenter compte à rebours "Temps restant" (HH:MM:SS)
+- [x] CORRECTION: Afficher "Heure limite" et "Tolérance" sous le timer
+- [x] CORRECTION: Gérer l'état "En retard" quand remaining <= 0
+- [x] CORRECTION: Réduire les espaces vides (gap 14-18px)
+- [x] CORRECTION: Boutons visibles à opacité 1.0 + shadow
 
 ## Phase 7: Écran Alerte envoyée (Alert Sent)
 - [x] Title "🚨 Alerte envoyée"
@@ -82,4 +87,4 @@
 - [x] Tester responsive (iPhone SE / iPhone 13)
 - [x] Haptics + press animations OK
 - [x] Tous les écrans sans erreurs
-- [ ] Créer checkpoint final
+- [ ] Créer checkpoint final avec timer corrigé

@@ -16,6 +16,8 @@ export default function ActiveSessionScreen() {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
 
+  const [isLate, setIsLate] = useState(false);
+
   useEffect(() => {
     if (!currentSession) {
       router.push('/home');
@@ -24,16 +26,25 @@ export default function ActiveSessionScreen() {
 
     const updateTimeLeft = () => {
       const now = Date.now();
-      const diff = currentSession.dueTime - now;
+      const deadline = currentSession.dueTime + currentSession.tolerance * 60 * 1000;
+      const remaining = deadline - now;
 
-      if (diff <= 0) {
-        setTimeLeft('00:00');
-        return;
+      if (remaining <= 0) {
+        // En retard
+        setIsLate(true);
+        const lateTime = Math.abs(remaining);
+        const hours = Math.floor(lateTime / (1000 * 60 * 60));
+        const minutes = Math.floor((lateTime % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((lateTime % (1000 * 60)) / 1000);
+        setTimeLeft(`${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`);
+      } else {
+        // Temps restant
+        setIsLate(false);
+        const hours = Math.floor(remaining / (1000 * 60 * 60));
+        const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+        setTimeLeft(`${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`);
       }
-
-      const hours = Math.floor(diff / (1000 * 60 * 60));
-      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-      setTimeLeft(`${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`);
     };
 
     updateTimeLeft();
@@ -105,26 +116,36 @@ export default function ActiveSessionScreen() {
         </View>
 
         {/* Time Display */}
-        <GlassCard className="items-center justify-center py-8 gap-3">
-          <View className="flex-row items-center gap-2">
-            <Text className="text-2xl">🌙</Text>
-            <Text className="text-sm text-muted font-semibold">
-              Heure limite
-            </Text>
-          </View>
-          <Text className="text-6xl font-bold text-primary">
+        <GlassCard
+          className="items-center justify-center py-6 gap-3"
+          style={{
+            backgroundColor: isLate ? 'rgba(245, 158, 11, 0.1)' : 'rgba(255, 255, 255, 0.1)',
+          }}
+        >
+          <Text className="text-sm text-muted font-semibold">
+            {isLate ? 'En retard' : 'Temps restant'}
+          </Text>
+          <Text
+            className="font-bold"
+            style={{
+              fontSize: 56,
+              color: isLate ? '#F59E0B' : '#6C63FF',
+            }}
+          >
             {timeLeft}
           </Text>
-          <View className="flex-row gap-4 text-xs text-muted">
-            <Text>Heure limite : {currentSession.dueTime ? new Date(currentSession.dueTime).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '--:--'}</Text>
+          <View className="gap-1 items-center mt-2">
+            <Text className="text-xs text-muted">
+              Heure limite : {currentSession.dueTime ? new Date(currentSession.dueTime).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '--:--'}
+            </Text>
+            <Text className="text-xs text-muted">
+              Tolérance : {currentSession.tolerance} min
+            </Text>
           </View>
-          <Text className="text-xs text-muted">
-            Tolérance: {currentSession.tolerance} min
-          </Text>
         </GlassCard>
 
         {/* Main CTA */}
-        <View className="mt-6">
+        <View className="mt-4">
           <BigSuccessButton
             label="Je suis rentré"
             onPress={handleReturnHome}
@@ -140,8 +161,8 @@ export default function ActiveSessionScreen() {
         />
 
         {/* Cancel */}
-        <Pressable onPress={handleCancel} className="mt-4">
-          <Text className="text-center text-sm font-semibold text-danger">
+        <Pressable onPress={handleCancel} className="mt-3">
+          <Text className="text-center text-sm font-semibold text-error">
             Annuler la sortie
           </Text>
         </Pressable>
