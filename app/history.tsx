@@ -10,9 +10,9 @@ export default function HistoryScreen() {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'completed':
-        return { icon: '✅', label: 'Confirmé' };
-      case 'alerted':
+      case 'returned':
+        return { icon: '✅', label: 'Rentré' };
+      case 'overdue':
         return { icon: '🚨', label: 'Alerte' };
       case 'cancelled':
         return { icon: '⛔', label: 'Annulé' };
@@ -101,7 +101,7 @@ export default function HistoryScreen() {
                     <View className="flex-row justify-between">
                       <Text className="text-sm text-muted">Heure limite :</Text>
                       <Text className="text-sm font-semibold text-foreground">
-                        {new Date(session.dueTime).toLocaleTimeString('fr-FR', {
+                        {new Date(session.limitTime).toLocaleTimeString('fr-FR', {
                           hour: '2-digit',
                           minute: '2-digit',
                         })}

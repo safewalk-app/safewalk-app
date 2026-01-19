@@ -12,13 +12,16 @@ export interface UserSettings {
 export interface Session {
   id: string;
   startTime: number;
-  dueTime: number;
-  tolerance: number;
+  limitTime: number; // heure limite choisie par l'utilisateur
+  tolerance: number; // minutes
+  deadline: number; // limitTime + tolerance (en ms)
   location?: string;
   note?: string;
-  status: 'active' | 'completed' | 'alerted' | 'cancelled';
+  status: 'active' | 'returned' | 'overdue' | 'cancelled';
   endTime?: number;
   lastLocation?: { latitude: number; longitude: number };
+  extensionsCount: number; // nombre de fois que +15 min a été utilisé
+  alertTriggeredAt?: number; // timestamp quand l'alerte a été déclenchée
 }
 
 export interface AppContextType {
@@ -26,11 +29,12 @@ export interface AppContextType {
   currentSession: Session | null;
   history: Session[];
   updateSettings: (settings: Partial<UserSettings>) => Promise<void>;
-  startSession: (dueTime: number, note?: string) => Promise<void>;
+  startSession: (limitTime: number, note?: string) => Promise<void>;
   endSession: () => Promise<void>;
   addTimeToSession: (minutes: number) => Promise<void>;
   cancelSession: () => Promise<void>;
-  alertSession: (location?: { latitude: number; longitude: number }) => Promise<void>;
+  triggerAlert: (location?: { latitude: number; longitude: number }) => Promise<void>;
+  checkAndTriggerAlert: () => Promise<void>;
   deleteAllData: () => Promise<void>;
 }
 
@@ -132,14 +136,26 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
-  const startSession = async (dueTime: number, note?: string) => {
+  const startSession = async (limitTime: number, note?: string) => {
+    const now = Date.now();
+    let adjustedLimitTime = limitTime;
+    
+    // Si limitTime < now, ajouter 1 jour
+    if (adjustedLimitTime < now) {
+      adjustedLimitTime += 24 * 60 * 60 * 1000;
+    }
+    
+    const deadline = adjustedLimitTime + state.settings.tolerance * 60 * 1000;
+    
     const session: Session = {
       id: `session_${Date.now()}`,
-      startTime: Date.now(),
-      dueTime,
+      startTime: now,
+      limitTime: adjustedLimitTime,
       tolerance: state.settings.tolerance,
+      deadline,
       note,
       status: 'active',
+      extensionsCount: 0,
     };
 
     dispatch({ type: 'SET_SESSION', payload: session });
@@ -149,13 +165,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const endSession = async () => {
     if (!state.currentSession) return;
 
-    const completedSession: Session = {
+    const returnedSession: Session = {
       ...state.currentSession,
-      status: 'completed',
+      status: 'returned',
       endTime: Date.now(),
     };
 
-    const newHistory = [...state.history, completedSession];
+    const newHistory = [...state.history, returnedSession];
     dispatch({ type: 'SET_SESSION', payload: null });
     dispatch({ type: 'SET_HISTORY', payload: newHistory });
 
@@ -169,9 +185,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const addTimeToSession = async (minutes: number) => {
     if (!state.currentSession) return;
 
+    // Limiter max 60 min total de tolérance
+    const newTolerance = Math.min(state.currentSession.tolerance + minutes, 60);
+    const newDeadline = state.currentSession.limitTime + newTolerance * 60 * 1000;
+
     const updatedSession: Session = {
       ...state.currentSession,
-      dueTime: state.currentSession.dueTime + minutes * 60 * 1000,
+      tolerance: newTolerance,
+      deadline: newDeadline,
+      extensionsCount: state.currentSession.extensionsCount + 1,
     };
 
     dispatch({ type: 'SET_SESSION', payload: updatedSession });
@@ -201,25 +223,51 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
-  const alertSession = async (location?: { latitude: number; longitude: number }) => {
+  const triggerAlert = async (location?: { latitude: number; longitude: number }) => {
     if (!state.currentSession) return;
 
     const alertedSession: Session = {
       ...state.currentSession,
-      status: 'alerted',
-      endTime: Date.now(),
+      status: 'overdue',
+      alertTriggeredAt: Date.now(),
       lastLocation: location,
     };
 
-    const newHistory = [...state.history, alertedSession];
-    dispatch({ type: 'SET_SESSION', payload: null });
-    dispatch({ type: 'SET_HISTORY', payload: newHistory });
-
-    await AsyncStorage.removeItem('safewalk_session');
+    dispatch({ type: 'SET_SESSION', payload: alertedSession });
     await AsyncStorage.setItem(
-      'safewalk_history',
-      JSON.stringify(newHistory)
+      'safewalk_session',
+      JSON.stringify(alertedSession)
     );
+    
+    // Simuler l'envoi SMS au contact d'urgence
+    const limitTimeStr = new Date(state.currentSession.limitTime).toLocaleTimeString('fr-FR', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+    const positionText = location
+      ? `Position: ${location.latitude.toFixed(4)}, ${location.longitude.toFixed(4)}`
+      : 'Position: non disponible';
+    const smsMessage = `ALERTE: je n'ai pas confirmé mon retour. Heure limite: ${limitTimeStr}, tolérance: ${state.currentSession.tolerance} min. ${positionText}`;
+    console.log('SMS envoyé à', state.settings.emergencyContactPhone, ':', smsMessage);
+  };
+
+  const checkAndTriggerAlert = async () => {
+    if (!state.currentSession) return;
+    if (state.currentSession.status !== 'active') return;
+
+    const now = Date.now();
+    if (now >= state.currentSession.deadline) {
+      // Capturer position GPS si activée
+      let position: { latitude: number; longitude: number } | undefined;
+      if (state.settings.locationEnabled) {
+        // Simuler une position GPS (en production, utiliser expo-location)
+        position = {
+          latitude: 48.8566 + Math.random() * 0.01,
+          longitude: 2.3522 + Math.random() * 0.01,
+        };
+      }
+      await triggerAlert(position);
+    }
   };
 
   const deleteAllData = async () => {
@@ -243,15 +291,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     endSession,
     addTimeToSession,
     cancelSession,
-    alertSession,
+    triggerAlert,
+    checkAndTriggerAlert,
     deleteAllData,
   };
 
-  return (
-    <AppContext.Provider value={value}>
-      {children}
-    </AppContext.Provider>
-  );
+  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }
 
 export function useApp() {

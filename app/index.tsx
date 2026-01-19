@@ -21,9 +21,7 @@ export default function IndexScreen() {
 
     const interval = setInterval(() => {
       const now = Date.now();
-      const dueTime = currentSession.dueTime;
-      const tolerance = currentSession.tolerance * 60 * 1000;
-      const deadline = dueTime + tolerance;
+      const deadline = currentSession.deadline;
       const remaining = deadline - now;
 
       if (remaining > 0) {

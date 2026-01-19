@@ -391,3 +391,65 @@
 - [x] Tous les boutons répondent au tap
 - [x] Transitions fluides entre écrans
 - [x] Pas de dead ends (tous les écrans ont un retour
+
+
+## LOGIQUE D'ALERTE COMPLÈTE (Définitions + Règles)
+
+### Définitions
+- [x] Heure limite = heure choisie par l'utilisateur
+- [x] Tolérance = minutes de marge (10/15/30)
+- [x] Deadline (alerte) = heure_limite + tolérance
+- [ ] Implémenter dans Session model
+
+### Démarrage d'une sortie
+- [ ] Enregistrer startTime = now
+- [ ] Enregistrer limitTime = heure choisie (timestamp)
+- [ ] Enregistrer toleranceMin
+- [ ] Calculer deadline = limitTime + toleranceMin
+- [ ] Mettre status = active
+- [ ] Gestion jour suivant : si limitTime < now alors limitTime += 1 jour
+
+### Temps restant affiché
+- [x] Temps restant = deadline - now
+- [x] Si > 0 → affichage normal (compte à rebours)
+- [x] Si <= 0 → affichage "En retard" + déclenchement alerte
+
+### Déclenchement de l'alerte
+- [ ] À l'instant now >= deadline :
+  - [ ] Vérifier status != returned et status != cancelled
+  - [ ] Mettre status = overdue
+  - [ ] Envoyer SMS au contact d'urgence
+  - [ ] Message SMS : "ALERTE: je n'ai pas confirmé mon retour. Heure limite: XX:XX, tolérance: YY min. Position: {position_si_activée}"
+  - [ ] Capturer position GPS si toggle ON
+  - [ ] Rediriger vers écran "Alerte envoyée"
+
+### Boutons actions
+- [x] Je suis rentré : dispo à tout moment
+  - [ ] Mettre status = returned
+  - [ ] Stop timers
+  - [ ] Aucun SMS
+- [ ] + 15 min :
+  - [ ] Ajouter 15 min à toleranceMin (ou directement à deadline)
+  - [ ] Limiter max 60 min total
+  - [ ] Incrémenter extensionsCount++
+- [x] Annuler la sortie :
+  - [ ] Mettre status = cancelled
+  - [ ] Stop timers
+  - [ ] Aucun SMS
+
+### GPS (simple)
+- [ ] Si GPS ON : capturer une seule position au moment de l'alerte (pas de tracking continu)
+- [ ] Si GPS OFF : SMS sans position
+- [ ] Stocker position dans Session model
+
+### Écran "Alerte envoyée"
+- [ ] Afficher titre "🚨 Alerte envoyée"
+- [ ] Afficher recap : contact, heure alerte, position si dispo
+- [ ] Bouton "Je vais bien" → status = returned + retour Home
+- [ ] Bouton "Appeler contact" → appel simulé
+- [ ] Bouton "Appeler 112" → appel d'urgence simulé
+
+### Historique
+- [ ] Enregistrer chaque session (startTime, limitTime, tolerance, status, endTime, extensionsCount, position)
+- [ ] Afficher liste des sorties avec statut (✅ rentré / 🚨 alerte / ⛔ annulé)
+- [ ] Tap sur sortie → affiche détails complets

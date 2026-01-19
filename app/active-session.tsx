@@ -23,9 +23,7 @@ export default function ActiveSessionScreen() {
 
     const interval = setInterval(() => {
       const now = Date.now();
-      const dueTime = currentSession.dueTime;
-      const tolerance = currentSession.tolerance * 60 * 1000;
-      const deadline = dueTime + tolerance;
+      const deadline = currentSession.deadline;
       const remaining = deadline - now;
 
       if (remaining > 0) {
@@ -82,7 +80,7 @@ export default function ActiveSessionScreen() {
     return null;
   }
 
-  const dueTimeStr = new Date(currentSession.dueTime).toLocaleTimeString('fr-FR', {
+  const dueTimeStr = new Date(currentSession.limitTime).toLocaleTimeString('fr-FR', {
     hour: '2-digit',
     minute: '2-digit',
   });
