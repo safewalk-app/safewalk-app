@@ -680,3 +680,27 @@
 - [x] Créer les tests Twilio (5/5 PASS)
 - [x] Valider que les SMS peuvent être envoyés (secrets validés)
 - [x] Checkpoint final prêt
+
+
+## PHASE FINALE - 3 ÉTAPES
+
+### Étape 1: API Endpoint SMS
+- [x] Créer l'endpoint POST /api/sms/alert côté serveur (server/routes/sms.ts)
+- [x] Implémenter la validation des paramètres (phoneNumbers, limitTimeStr, tolerance)
+- [x] Appeler sendAlertSMSToMultiple() du service Twilio
+- [x] Gérer les erreurs et retourner les résultats
+- [x] Endpoint prêt pour test avec curl/Postman
+
+### Étape 2: Animations Timer
+- [x] Ajouter animation pulse subtile au timer (scale 1.0 → 1.02 → 1.0)
+- [x] Implémenter avec react-native-reanimated (components/ui/timer-animation.tsx)
+- [x] Durée de l'animation : 1.5s, répétée infiniment
+- [x] Composant TimerAnimation créé et prêt à l'emploi
+- [x] Peut être intégré dans active-session.tsx
+
+### Étape 3: Test End-to-End
+- [x] Créer une session avec limitTime = now + 2 min (tests/e2e-flow.test.ts)
+- [x] Valider le calcul du temps restant
+- [x] Valider que l'alerte se déclenche au bon moment
+- [x] Valider le format des SMS (160 caractères max)
+- [x] Tester le check-in pour annuler l'alerte (7/7 tests PASS)
