@@ -1,10 +1,12 @@
-import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
+import { View, Text, ScrollView, Alert, Pressable } from 'react-native';
 import { BubbleBackground } from '@/components/ui/bubble-background';
 import { GlassCard } from '@/components/ui/glass-card';
 import { BigSuccessButton } from '@/components/ui/big-success-button';
 import { CushionPillButton } from '@/components/ui/cushion-pill-button';
 import { ScreenTransition } from '@/components/ui/screen-transition';
+import { CheckInModal } from '@/components/ui/check-in-modal';
 import { useApp } from '@/lib/context/app-context';
+import { useCheckInNotifications } from '@/hooks/use-check-in-notifications';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -12,9 +14,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 export default function ActiveSessionScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { currentSession, endSession, cancelSession, addTimeToSession } = useApp();
+  const { currentSession, endSession, cancelSession, addTimeToSession, confirmCheckIn } = useApp();
+  const { confirmCheckIn: confirmCheckInNotif } = useCheckInNotifications();
   const [remainingTime, setRemainingTime] = useState<string>('00:00:00');
   const [isOverdue, setIsOverdue] = useState(false);
+  const [showCheckInModal, setShowCheckInModal] = useState(false);
 
   useEffect(() => {
     if (!currentSession) {
@@ -59,6 +63,16 @@ export default function ActiveSessionScreen() {
     await addTimeToSession(15);
   };
 
+  const handleConfirmCheckIn = async () => {
+    await confirmCheckIn();
+    setShowCheckInModal(false);
+  };
+
+  const handleCheckInAddTime = async () => {
+    await addTimeToSession(15);
+    setShowCheckInModal(false);
+  };
+
   const handleCancelSession = () => {
     Alert.alert(
       'Annuler la sortie',
@@ -100,6 +114,13 @@ export default function ActiveSessionScreen() {
           paddingBottom: insets.bottom + 16,
         }}
       >
+        {/* Check-In Modal */}
+        <CheckInModal
+          visible={showCheckInModal}
+          onConfirmCheckIn={handleConfirmCheckIn}
+          onAddTime={handleCheckInAddTime}
+          onClose={() => setShowCheckInModal(false)}
+        />
         {/* Header */}
         <ScreenTransition delay={0} duration={350}>
           <View className="gap-1 mb-3">

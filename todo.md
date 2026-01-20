@@ -586,3 +586,35 @@
 - [x] Ajouter animations ScreenTransition avec stagger (0, 100, 200ms)
 - [x] Stocker l'état onboarding dans AsyncStorage (onboarding_completed)
 - [x] Ajouter route onboarding à app/_layout.tsx
+
+
+## V1.1 - CHECK-IN AUTOMATIQUE + 2 CONTACTS
+
+### A) CHECK-IN AUTOMATIQUE
+
+- [x] Mettre à jour AppContext pour stocker checkInOk flag et checkInNotifTime
+- [x] Mettre à jour Session type pour ajouter checkInOk et checkInNotifTime
+- [x] Implémenter logique de calcul midTime = now + (limitTime - now)/2 (dans hook)
+- [x] Configurer notification locale à midTime avec "Tout va bien ?" (use-check-in-notifications.ts)
+- [x] Créer BottomSheet/Modal pour check-in avec 2 actions (check-in-modal.tsx)
+- [x] Action 1: "Je vais bien ✅" => close, log checkInOk=true (confirmCheckIn method)
+- [x] Action 2: "+15 min" => extend limitTime by 15min (addTimeToSession method)
+- [x] Implémenter 2e notification 10 min après 1ère si aucune action (use-check-in-notifications.ts)
+- [x] Intégrer le modal dans active-session.tsx et tester le flow
+
+### B) SUPPORT DE 2 CONTACTS D'URGENCE
+
+- [x] Mettre à jour Settings type pour ajouter emergencyContact2Name et emergencyContact2Phone
+- [x] Mettre à jour Settings screen pour ajouter champs 2e contact
+- [x] Implémenter validation des 2 contacts (au moins 1 obligatoire) - tests pass
+- [x] Logique pour notifier les 2 contacts (dans triggerAlert)
+- [x] Alert Sent screen affichera les 2 contacts notifiés (via context)
+- [x] SMS/push aux 2 contacts (logique dans triggerAlert)
+- [x] Tests de validation des 2 contacts - PASS
+
+### C) TESTS VITEST
+
+- [x] Créer test pour check-in automatique (midTime calculation) - PASS
+- [x] Créer test pour notifications locales (timing) - PASS
+- [x] Créer test pour 2 contacts (validation, notification) - PASS
+- [x] Exécuter tous les tests et vérifier qu'ils passent - 12/12 PASS

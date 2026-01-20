@@ -1,4 +1,4 @@
-import { View, Text, Pressable, Switch, Alert } from 'react-native';
+import { View, Text, Pressable, Switch, Alert, ScrollView } from 'react-native';
 import { BubbleBackground } from '@/components/ui/bubble-background';
 import { GlassCard } from '@/components/ui/glass-card';
 import { PopTextField } from '@/components/ui/pop-text-field';
@@ -16,6 +16,8 @@ export default function SettingsScreen() {
   const [firstName, setFirstName] = useState(settings.firstName);
   const [contactName, setContactName] = useState(settings.emergencyContactName);
   const [contactPhone, setContactPhone] = useState(settings.emergencyContactPhone);
+  const [contact2Name, setContact2Name] = useState(settings.emergencyContact2Name || '');
+  const [contact2Phone, setContact2Phone] = useState(settings.emergencyContact2Phone || '');
   const [tolerance, setTolerance] = useState(settings.tolerance);
   const [locationEnabled, setLocationEnabled] = useState(settings.locationEnabled);
   const [showToast, setShowToast] = useState(false);
@@ -33,7 +35,7 @@ export default function SettingsScreen() {
     return () => clearTimeout(timer);
   }, [firstName]);
 
-  // Autosave contact
+  // Autosave contact 1
   useEffect(() => {
     const timer = setTimeout(() => {
       if (
@@ -44,12 +46,30 @@ export default function SettingsScreen() {
           emergencyContactName: contactName,
           emergencyContactPhone: contactPhone,
         });
-        setToastMessage('Contact sauvegardé');
+        setToastMessage('Contact 1 sauvegardé');
         setShowToast(true);
       }
     }, 500);
     return () => clearTimeout(timer);
   }, [contactName, contactPhone]);
+
+  // Autosave contact 2
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (
+        contact2Name !== (settings.emergencyContact2Name || '') ||
+        contact2Phone !== (settings.emergencyContact2Phone || '')
+      ) {
+        updateSettings({
+          emergencyContact2Name: contact2Name,
+          emergencyContact2Phone: contact2Phone,
+        });
+        setToastMessage('Contact 2 sauvegardé');
+        setShowToast(true);
+      }
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [contact2Name, contact2Phone]);
 
   // Autosave tolerance
   useEffect(() => {
@@ -144,13 +164,13 @@ export default function SettingsScreen() {
               Sécurité
             </Text>
 
-            {/* Card "Contact d'urgence" */}
+            {/* Card "Contact d'urgence 1" */}
             <View className="mb-3">
               <GlassCard className="gap-2">
                 <View className="flex-row items-center gap-2">
                   <MaterialIcons name="emergency" size={16} color="#FF4D4D" />
                   <Text className="text-sm font-semibold text-foreground">
-                    Contact d'urgence
+                    Contact 1
                   </Text>
                 </View>
                 
@@ -166,6 +186,37 @@ export default function SettingsScreen() {
                       placeholder="+33 6 12 34 56 78"
                       value={contactPhone}
                       onChangeText={setContactPhone}
+                    />
+                  </View>
+                  <Pressable className="p-2">
+                    <MaterialIcons name="phone" size={20} color="#6C63FF" />
+                  </Pressable>
+                </View>
+              </GlassCard>
+            </View>
+
+            {/* Card "Contact d'urgence 2" */}
+            <View className="mb-3">
+              <GlassCard className="gap-2">
+                <View className="flex-row items-center gap-2">
+                  <MaterialIcons name="person-add" size={16} color="#3A86FF" />
+                  <Text className="text-sm font-semibold text-foreground">
+                    Contact 2 (optionnel)
+                  </Text>
+                </View>
+                
+                <PopTextField
+                  placeholder="Nom"
+                  value={contact2Name}
+                  onChangeText={setContact2Name}
+                />
+
+                <View className="flex-row items-center gap-2">
+                  <View className="flex-1">
+                    <PopTextField
+                      placeholder="+33 6 12 34 56 78"
+                      value={contact2Phone}
+                      onChangeText={setContact2Phone}
                     />
                   </View>
                   <Pressable className="p-2">

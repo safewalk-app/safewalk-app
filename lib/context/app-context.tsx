@@ -5,6 +5,8 @@ export interface UserSettings {
   firstName: string;
   emergencyContactName: string;
   emergencyContactPhone: string;
+  emergencyContact2Name?: string; // 2e contact optionnel
+  emergencyContact2Phone?: string; // 2e contact optionnel
   tolerance: number; // minutes
   locationEnabled: boolean;
 }
@@ -22,6 +24,9 @@ export interface Session {
   lastLocation?: { latitude: number; longitude: number };
   extensionsCount: number; // nombre de fois que +15 min a été utilisé
   alertTriggeredAt?: number; // timestamp quand l'alerte a été déclenchée
+  checkInOk?: boolean; // true si l'utilisateur a confirmé au check-in
+  checkInNotifTime?: number; // timestamp du check-in notification (midTime)
+  checkInSecondNotifTime?: number; // timestamp de la 2e notification check-in
 }
 
 export interface AppContextType {
@@ -35,6 +40,7 @@ export interface AppContextType {
   cancelSession: () => Promise<void>;
   triggerAlert: (location?: { latitude: number; longitude: number }) => Promise<void>;
   checkAndTriggerAlert: () => Promise<void>;
+  confirmCheckIn: () => Promise<void>; // Utilisateur confirme "Je vais bien"
   deleteAllData: () => Promise<void>;
 }
 
@@ -270,6 +276,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const confirmCheckIn = async () => {
+    if (!state.currentSession) return;
+    
+    // Marquer le check-in comme confirmé
+    const updatedSession: Session = {
+      ...state.currentSession,
+      checkInOk: true,
+    };
+    
+    dispatch({ type: 'SET_SESSION', payload: updatedSession });
+    await AsyncStorage.setItem(
+      'safewalk_session',
+      JSON.stringify(updatedSession)
+    );
+  };
+
   const deleteAllData = async () => {
     dispatch({ type: 'SET_SETTINGS', payload: defaultSettings });
     dispatch({ type: 'SET_SESSION', payload: null });
@@ -293,6 +315,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     cancelSession,
     triggerAlert,
     checkAndTriggerAlert,
+    confirmCheckIn,
     deleteAllData,
   };
 
