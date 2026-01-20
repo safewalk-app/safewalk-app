@@ -3,6 +3,7 @@ import { BubbleBackground } from '@/components/ui/bubble-background';
 import { GlassCard } from '@/components/ui/glass-card';
 import { BigSuccessButton } from '@/components/ui/big-success-button';
 import { CushionPillButton } from '@/components/ui/cushion-pill-button';
+import { TimerAnimation } from '@/components/ui/timer-animation';
 import { ScreenTransition } from '@/components/ui/screen-transition';
 import { CheckInModal } from '@/components/ui/check-in-modal';
 import { useApp } from '@/lib/context/app-context';
