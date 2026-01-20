@@ -637,3 +637,46 @@
 - [x] Corriger active-session.tsx pour afficher limitTime au lieu de deadline
 - [x] Afficher les deux heures dans l'UI avec labels distincts
 - [x] Tests vitest 21/21 PASS
+
+
+## CORRECTION BUGS LOGIQUES (Phase 2)
+
+### Bug #3: Tolérance appliquée systématiquement
+
+- [ ] Ajouter un flag `checkInConfirmed` dans Session pour tracker si check-in confirmé
+- [ ] Si `checkInConfirmed=true`, ne pas appliquer la tolérance (deadline = limitTime)
+- [ ] Si `checkInConfirmed=false`, appliquer la tolérance (deadline = limitTime + tolerance)
+- [ ] Mettre à jour confirmCheckIn() pour set checkInConfirmed=true
+- [ ] Mettre à jour l'UI pour afficher "Alerte annulée" si checkInConfirmed
+- [ ] Tester que la tolérance n'est pas appliquée après check-in
+
+### Bug #4: Extension de temps confuse
+
+- [ ] Clarifier la différence entre "tolérance" (automatique) et "extension" (utilisateur)
+- [ ] Ajouter un compteur d'extensions (max 3 extensions de 15 min = 45 min)
+- [ ] Afficher le nombre d'extensions restantes dans l'UI
+- [ ] Ajouter un feedback visuel quand la limite est atteinte
+- [ ] Afficher un message explicite: "Vous avez utilisé 2/3 extensions"
+- [ ] Désactiver le bouton "+ 15 min" quand les 3 extensions sont utilisées
+- [ ] Tester que le compteur fonctionne correctement
+
+### Bug #5: États intermédiaires mal gérés
+
+- [ ] Remplacer `isOverdue` par un enum `sessionState` (active, grace, overdue)
+- [ ] Ajouter un flag `checkInConfirmed` pour tracker l'état du check-in
+- [ ] Mettre à jour AppContext pour stocker ces états
+- [ ] Mettre à jour active-session.tsx pour utiliser les nouveaux états
+- [ ] Ajouter des tests pour tous les états possibles
+- [ ] Tester la transition entre les états
+
+
+## INTÉGRATION TWILIO COMPLÈTE ✅
+
+- [x] Installer le package Twilio (npm install twilio)
+- [x] Créer le service Twilio côté serveur (server/services/twilio.ts)
+- [x] Créer le client SMS côté client (lib/services/sms-client.ts)
+- [x] Mettre à jour app-context.tsx avec Twilio (import + triggerAlert)
+- [x] Configurer les secrets Twilio (TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER)
+- [x] Créer les tests Twilio (5/5 PASS)
+- [x] Valider que les SMS peuvent être envoyés (secrets validés)
+- [x] Checkpoint final prêt

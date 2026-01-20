@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { sendAlertSMSToMultiple } from '../services/sms-client';
 
 export interface UserSettings {
   firstName: string;
