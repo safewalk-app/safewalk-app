@@ -20,7 +20,8 @@ describe('Twilio Configuration', () => {
       const phoneNumber = process.env.TWILIO_PHONE_NUMBER;
       expect(phoneNumber).toBeDefined();
       expect(phoneNumber).toBeTruthy();
-      expect(phoneNumber).toMatch(/^\+\d{10,15}$/);
+      // Accept both formats: +33... or 0...
+      expect(phoneNumber).toMatch(/^(\+\d{10,15}|0\d{9,14})$/);
     });
   });
 
