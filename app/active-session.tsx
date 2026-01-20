@@ -17,7 +17,7 @@ export default function ActiveSessionScreen() {
   const { currentSession, endSession, cancelSession, addTimeToSession, confirmCheckIn } = useApp();
   const { confirmCheckIn: confirmCheckInNotif } = useCheckInNotifications();
   const [remainingTime, setRemainingTime] = useState<string>('00:00:00');
-  const [isOverdue, setIsOverdue] = useState(false);
+  const [sessionState, setSessionState] = useState<'active' | 'grace' | 'overdue'>('active');
   const [showCheckInModal, setShowCheckInModal] = useState(false);
 
   useEffect(() => {
@@ -28,20 +28,36 @@ export default function ActiveSessionScreen() {
 
     const interval = setInterval(() => {
       const now = Date.now();
+      const limitTime = currentSession.limitTime;
       const deadline = currentSession.deadline;
-      const remaining = deadline - now;
-
-      if (remaining > 0) {
-        setIsOverdue(false);
-        const hours = Math.floor(remaining / (1000 * 60 * 60));
-        const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+      
+      // Calculer le temps restant jusqu'à limitTime (heure de retour prévue)
+      const remainingUntilLimit = limitTime - now;
+      
+      // Déterminer l'état de la session
+      if (remainingUntilLimit > 0) {
+        // Avant l'heure limite : afficher le temps jusqu'à limitTime
+        setSessionState('active');
+        const hours = Math.floor(remainingUntilLimit / (1000 * 60 * 60));
+        const minutes = Math.floor((remainingUntilLimit % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((remainingUntilLimit % (1000 * 60)) / 1000);
+        setRemainingTime(
+          `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+        );
+      } else if (now < deadline) {
+        // Entre limitTime et deadline : période de grâce
+        setSessionState('grace');
+        const remainingUntilDeadline = deadline - now;
+        const hours = Math.floor(remainingUntilDeadline / (1000 * 60 * 60));
+        const minutes = Math.floor((remainingUntilDeadline % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((remainingUntilDeadline % (1000 * 60)) / 1000);
         setRemainingTime(
           `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
         );
       } else {
-        setIsOverdue(true);
-        const overdueTime = Math.abs(remaining);
+        // Après deadline : en retard
+        setSessionState('overdue');
+        const overdueTime = now - deadline;
         const hours = Math.floor(overdueTime / (1000 * 60 * 60));
         const minutes = Math.floor((overdueTime % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((overdueTime % (1000 * 60)) / 1000);
@@ -95,10 +111,20 @@ export default function ActiveSessionScreen() {
     return null;
   }
 
-  const dueTimeStr = new Date(currentSession.limitTime).toLocaleTimeString('fr-FR', {
+  // Formater les heures
+  const limitTimeStr = new Date(currentSession.limitTime).toLocaleTimeString('fr-FR', {
     hour: '2-digit',
     minute: '2-digit',
   });
+
+  const deadlineStr = new Date(currentSession.deadline).toLocaleTimeString('fr-FR', {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+
+  // Déterminer les couleurs en fonction de l'état
+  const timerColor = sessionState === 'active' ? '#6C63FF' : sessionState === 'grace' ? '#F59E0B' : '#FF4D4D';
+  const timerLabel = sessionState === 'active' ? 'Temps avant retour' : sessionState === 'grace' ? 'Période de grâce' : 'En retard depuis';
 
   return (
     <View className="flex-1 bg-background">
@@ -121,6 +147,7 @@ export default function ActiveSessionScreen() {
           onAddTime={handleCheckInAddTime}
           onClose={() => setShowCheckInModal(false)}
         />
+        
         {/* Header */}
         <ScreenTransition delay={0} duration={350}>
           <View className="gap-1 mb-3">
@@ -135,28 +162,36 @@ export default function ActiveSessionScreen() {
           <GlassCard
             className="gap-2 mb-4"
             style={{
-              backgroundColor: isOverdue ? 'rgba(255, 77, 77, 0.08)' : 'rgba(255, 255, 255, 0.94)',
+              backgroundColor: sessionState === 'active' ? 'rgba(108, 99, 255, 0.08)' : sessionState === 'grace' ? 'rgba(245, 158, 11, 0.08)' : 'rgba(255, 77, 77, 0.08)',
               paddingHorizontal: 16,
               paddingVertical: 14,
             }}
           >
             <Text className="text-sm font-semibold text-muted">
-              Temps restant
+              {timerLabel}
             </Text>
             <Text
               className="text-6xl font-bold text-center"
               style={{
-                color: isOverdue ? '#FF4D4D' : '#6C63FF',
+                color: timerColor,
                 lineHeight: 72,
               }}
             >
-              {isOverdue ? 'En retard' : remainingTime}
+              {remainingTime}
             </Text>
-            <View className="gap-1 mt-2">
+            
+            {/* Informations détaillées */}
+            <View className="gap-2 mt-3 pt-3 border-t" style={{ borderTopColor: timerColor + '20' }}>
               <View className="flex-row justify-between">
-                <Text className="text-sm text-muted">Heure limite :</Text>
+                <Text className="text-sm text-muted">Heure limite (retour prévu) :</Text>
                 <Text className="text-sm font-semibold text-foreground">
-                  {dueTimeStr}
+                  {limitTimeStr}
+                </Text>
+              </View>
+              <View className="flex-row justify-between">
+                <Text className="text-sm text-muted">Heure d'alerte (+ tolérance) :</Text>
+                <Text className="text-sm font-semibold text-foreground">
+                  {deadlineStr}
                 </Text>
               </View>
               <View className="flex-row justify-between">
@@ -166,6 +201,23 @@ export default function ActiveSessionScreen() {
                 </Text>
               </View>
             </View>
+
+            {/* Légende des états */}
+            {sessionState === 'grace' && (
+              <View className="mt-3 pt-3 border-t" style={{ borderTopColor: timerColor + '20' }}>
+                <Text className="text-xs text-warning font-semibold">
+                  ⚠️ Vous êtes en retard par rapport à votre heure limite. L'alerte sera déclenchée à {deadlineStr}.
+                </Text>
+              </View>
+            )}
+
+            {sessionState === 'overdue' && (
+              <View className="mt-3 pt-3 border-t" style={{ borderTopColor: timerColor + '20' }}>
+                <Text className="text-xs text-error font-semibold">
+                  🚨 Alerte déclenchée ! Vos contacts d'urgence ont été notifiés.
+                </Text>
+              </View>
+            )}
           </GlassCard>
         </ScreenTransition>
 

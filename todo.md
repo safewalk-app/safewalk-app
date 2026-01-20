@@ -618,3 +618,22 @@
 - [x] Créer test pour notifications locales (timing) - PASS
 - [x] Créer test pour 2 contacts (validation, notification) - PASS
 - [x] Exécuter tous les tests et vérifier qu'ils passent - 12/12 PASS
+
+
+## CORRECTION BUGS CRITIQUES (Phase 1)
+
+### Bug #1: Selecteur d'heure ambigue
+
+- [x] Refactoriser TimeLimitPicker pour afficher clairement le jour selectionne
+- [x] Ajouter un indicateur visuel quand le jour change automatiquement (avertissement orange)
+- [x] Afficher jour et heure avec confirmation (preview)
+- [x] Ajouter message d'avertissement si heure passee
+- [x] Tests vitest 21/21 PASS
+
+### Bug #2: Timer affichant le mauvais temps
+
+- [x] Separer limitTime (heure de retour) et deadline (heure d'alerte)
+- [x] Mettre a jour AppContext pour clarifier les deux concepts
+- [x] Corriger active-session.tsx pour afficher limitTime au lieu de deadline
+- [x] Afficher les deux heures dans l'UI avec labels distincts
+- [x] Tests vitest 21/21 PASS

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -32,13 +32,13 @@ export function TimeLimitPicker({
     }
   };
 
-  const handleValidate = () => {
+  // Calculer la date finale avec clarté
+  const finalDatePreview = useMemo(() => {
     const now = new Date();
-    let finalDate = new Date(tempDate);
+    let previewDate = new Date(tempDate);
 
-    // Construire la date avec l'heure sélectionnée
     if (selectedDay === 'today') {
-      finalDate = new Date(
+      previewDate = new Date(
         now.getFullYear(),
         now.getMonth(),
         now.getDate(),
@@ -46,13 +46,13 @@ export function TimeLimitPicker({
         tempDate.getMinutes()
       );
 
-      // Si l'heure est passée, passer à demain
-      if (finalDate < now) {
-        finalDate.setDate(finalDate.getDate() + 1);
+      // Vérifier si l'heure est passée
+      if (previewDate < now) {
+        previewDate.setDate(previewDate.getDate() + 1);
       }
     } else {
       // Demain
-      finalDate = new Date(
+      previewDate = new Date(
         now.getFullYear(),
         now.getMonth(),
         now.getDate() + 1,
@@ -61,13 +61,37 @@ export function TimeLimitPicker({
       );
     }
 
-    onTimeSelected(finalDate.getTime());
+    return previewDate;
+  }, [selectedDay, tempDate]);
+
+  // Déterminer si le jour a changé automatiquement
+  const dayChanged = useMemo(() => {
+    const now = new Date();
+    const selectedDateOnly = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+      tempDate.getHours(),
+      tempDate.getMinutes()
+    );
+    return selectedDay === 'today' && selectedDateOnly < now;
+  }, [selectedDay, tempDate]);
+
+  const handleValidate = () => {
+    onTimeSelected(finalDatePreview.getTime());
     setShowPicker(false);
   };
 
   const timeStr = new Date(selectedTime).toLocaleTimeString('fr-FR', {
     hour: '2-digit',
     minute: '2-digit',
+  });
+
+  // Formater la date affichée
+  const displayDateStr = finalDatePreview.toLocaleDateString('fr-FR', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
   });
 
   return (
@@ -97,6 +121,12 @@ export function TimeLimitPicker({
               className="text-4xl font-bold"
             >
               {timeStr}
+            </Text>
+            <Text
+              style={{ color: colors.muted }}
+              className="text-xs font-medium mt-2"
+            >
+              {displayDateStr}
             </Text>
           </View>
           <MaterialIcons name="edit" size={24} color={colors.primary} />
@@ -203,6 +233,60 @@ export function TimeLimitPicker({
                 minuteInterval={5}
                 textColor={colors.foreground}
               />
+            </View>
+
+            {/* Avertissement si le jour a changé */}
+            {dayChanged && (
+              <View
+                style={{
+                  backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                  borderLeftColor: '#FFC107',
+                  borderLeftWidth: 4,
+                  paddingHorizontal: 12,
+                  paddingVertical: 10,
+                  borderRadius: 8,
+                  marginBottom: 16,
+                }}
+              >
+                <Text
+                  style={{ color: '#F59E0B' }}
+                  className="text-sm font-semibold"
+                >
+                  ⚠️ Cette heure est passée, le jour a changé à demain
+                </Text>
+              </View>
+            )}
+
+            {/* Prévisualisation de la date/heure finale */}
+            <View
+              style={{
+                backgroundColor: colors.surface,
+                paddingHorizontal: 12,
+                paddingVertical: 10,
+                borderRadius: 8,
+                marginBottom: 16,
+              }}
+            >
+              <Text
+                style={{ color: colors.muted }}
+                className="text-xs font-medium mb-1"
+              >
+                Vous rentrerez à :
+              </Text>
+              <Text
+                style={{ color: colors.foreground }}
+                className="text-lg font-bold"
+              >
+                {finalDatePreview.toLocaleTimeString('fr-FR', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}{' '}
+                {finalDatePreview.toLocaleDateString('fr-FR', {
+                  weekday: 'short',
+                  day: 'numeric',
+                  month: 'short',
+                })}
+              </Text>
             </View>
 
             {/* Bouton Valider */}
