@@ -865,3 +865,16 @@
 - [x] Tests E2E : 7/7 PASS
 - [x] Tests vitest : 78/78 PASS
 - [x] SMS maintenant envoyés à +33763458273
+
+
+## BUG FIX - Navigation renvoie à l'accueil (RÉSOLU)
+
+### Problème
+- [x] Quand on navigue vers une page (settings, history), on est renvoyé à l'accueil
+- [x] Cause : active-session.tsx redirige si currentSession est null
+
+### Correction appliquée
+- [x] Modifier la logique de redirection dans active-session.tsx
+- [x] Utiliser router.back() au lieu de router.push('/') si possible
+- [x] Éviter les redirections involontaires lors de la navigation
+- [x] Tests : 78/78 PASS

@@ -34,7 +34,15 @@ export default function ActiveSessionScreen() {
   const alertNotificationRef = useRef<string | null>(null);
 
   useEffect(() => {
+    // Ne rediriger que si on est sur la page active-session ET qu'il n'y a pas de session
+    // Éviter les redirections involontaires lors de la navigation
+    if (!currentSession && router.canGoBack()) {
+      // Si on peut revenir en arrière, revenir au lieu de rediriger
+      router.back();
+      return;
+    }
     if (!currentSession) {
+      // Sinon rediriger à l'accueil
       router.push('/');
       return;
     }
