@@ -853,3 +853,15 @@
 - [x] Ajouter logs détaillés pour déboguer
 - [x] Tests E2E : 7/7 PASS
 - [x] Tests vitest : 78/78 PASS
+
+
+## BUG FIX - SMS non reçus (RÉSOLU)
+
+### Corrections appliquées
+- [x] Initialiser les contacts d'urgence par défaut dans app-context.tsx
+- [x] Créer les préférences utilisateur automatiquement dans l'endpoint SOS
+- [x] Créer une session par défaut si elle n'existe pas
+- [x] Tester l'endpoint SOS avec curl - SMS envoyés avec succès
+- [x] Tests E2E : 7/7 PASS
+- [x] Tests vitest : 78/78 PASS
+- [x] SMS maintenant envoyés à +33763458273

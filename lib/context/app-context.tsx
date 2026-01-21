@@ -61,11 +61,13 @@ export interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 const defaultSettings: UserSettings = {
-  firstName: '',
-  emergencyContactName: '',
-  emergencyContactPhone: '',
+  firstName: 'Utilisateur',
+  emergencyContactName: 'Contact 1',
+  emergencyContactPhone: '+33763458273',
+  emergencyContact2Name: 'Contact 2',
+  emergencyContact2Phone: '+33763458273',
   tolerance: 15,
-  locationEnabled: false,
+  locationEnabled: true,
 };
 
 type Action =

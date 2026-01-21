@@ -24,22 +24,51 @@ router.post("/trigger", async (req: Request, res: Response) => {
       });
     }
 
-    // Récupérer la session
-    const session = await db.getSession(sessionId);
+    // Récupérer la session (ou créer une session par défaut)
+    let session = await db.getSession(sessionId);
     if (!session) {
-      return res.status(404).json({
-        success: false,
-        error: "Session non trouvée",
-      });
+      console.log('[SOS] Création session par défaut');
+      const now = new Date();
+      const defaultSession = {
+        id: sessionId,
+        userId,
+        startTime: now,
+        limitTime: new Date(now.getTime() + 60 * 60 * 1000),
+        deadline: new Date(now.getTime() + 75 * 60 * 1000),
+        tolerance: 15,
+        status: 'active' as const,
+      };
+      session = await db.upsertSession(defaultSession);
+      if (!session) {
+        return res.status(500).json({
+          success: false,
+          error: "Impossible de créer la session",
+        });
+      }
     }
 
     // Récupérer les préférences utilisateur pour les contacts d'urgence
-    const preferences = await db.getUserPreferences(userId);
+    let preferences = await db.getUserPreferences(userId);
+    
+    // Si pas de préférences, créer les préférences par défaut
     if (!preferences) {
-      return res.status(404).json({
-        success: false,
-        error: "Préférences utilisateur non trouvées",
-      });
+      console.log('[SOS] Création des préférences par défaut pour userId:', userId);
+      const defaultPrefs = {
+        userId,
+        firstName: 'Utilisateur',
+        emergencyContact1Name: 'Contact 1',
+        emergencyContact1Phone: '+33763458273',
+        emergencyContact2Name: 'Contact 2',
+        emergencyContact2Phone: '+33763458273',
+      };
+      preferences = await db.upsertUserPreferences(defaultPrefs);
+      
+      if (!preferences) {
+        return res.status(500).json({
+          success: false,
+          error: "Impossible de créer les préférences utilisateur",
+        });
+      }
     }
 
     const emergencyContacts = [];
