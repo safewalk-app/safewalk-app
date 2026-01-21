@@ -107,10 +107,10 @@ export default function ActiveSessionScreen() {
             data: { type: 'alert_triggered' },
           });
           
-          // Envoyer les SMS d'alerte
-          if (!alertSMSRef.current && location) {
+          // Envoyer les SMS d'alerte (même sans localisation)
+          if (!alertSMSRef.current) {
             alertSMSRef.current = 'sent';
-            triggerAlert(location);
+            triggerAlert(location || undefined);
           }
         }
       }

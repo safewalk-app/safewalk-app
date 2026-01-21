@@ -108,6 +108,7 @@ export async function sendAlertSMSToMultiple(
   tolerance: number,
   location?: { latitude: number; longitude: number }
 ): Promise<void> {
+  console.log('🔍 sendAlertSMSToMultiple called with:', { phoneNumbers, limitTimeStr, tolerance });
   const validPhoneNumbers = phoneNumbers.filter((phone) => phone && phone.trim().length > 0);
 
   if (validPhoneNumbers.length === 0) {
@@ -115,18 +116,25 @@ export async function sendAlertSMSToMultiple(
     return;
   }
 
-  console.log(`📤 Envoi d'alertes SMS à ${validPhoneNumbers.length} contact(s)...`);
+  console.log(`📤 Envoi d'alertes SMS à ${validPhoneNumbers.length} contact(s): ${validPhoneNumbers.join(', ')}`);
 
   const results = await Promise.allSettled(
-    validPhoneNumbers.map((phone) =>
-      sendAlertSMS(phone, limitTimeStr, tolerance, location)
-    )
+    validPhoneNumbers.map((phone) => {
+      console.log(`  → Sending to ${phone}...`);
+      return sendAlertSMS(phone, limitTimeStr, tolerance, location);
+    })
   );
 
   const successful = results.filter((r) => r.status === 'fulfilled').length;
   const failed = results.filter((r) => r.status === 'rejected').length;
 
-  console.log(`📊 Résultats: ${successful} réussi(s), ${failed} échoué(s)`);
+  console.log(`📊 Results: ${successful} succeeded, ${failed} failed`);
+  
+  results.forEach((r, idx) => {
+    if (r.status === 'rejected') {
+      console.error(`  ❌ ${validPhoneNumbers[idx]}: ${r.reason}`);
+    }
+  });
 }
 
 export default {
