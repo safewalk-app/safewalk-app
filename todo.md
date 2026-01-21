@@ -811,3 +811,33 @@
 - [x] Tester sur Expo Go
 - [x] Tests E2E : 7/7 PASS
 - [x] Tests vitest : 78/78 PASS
+
+
+## PHASE 4 - SOS D'URGENCE
+
+### Endpoint API SOS
+- [x] Créer endpoint POST /api/sos/trigger
+- [x] Envoyer SMS immédiatement aux 2 contacts d'urgence
+- [x] Inclure position GPS actuelle dans le SMS
+- [x] Enregistrer l'alerte SOS en base de données
+- [x] Retourner les statuts d'envoi SMS
+
+### Hook useSOS
+- [x] Créer hook useSOS pour déclencher l'alerte
+- [x] Gérer les permissions de notification
+- [x] Envoyer notification locale immédiate
+- [x] Afficher modal de confirmation SOS
+
+### Composant SOS Button
+- [x] Créer composant SOSButton avec style rouge
+- [x] Ajouter haptic feedback (vibration)
+- [x] Afficher sur active-session.tsx
+- [x] Ajouter confirmation avant d'envoyer
+- [x] Modal de confirmation avec détails
+
+### Tests SOS
+- [x] Tester l'envoi SMS SOS
+- [x] Tester la notification SOS
+- [x] Tester la persistance en base de données
+- [x] Tests E2E : 7/7 PASS
+- [x] Tests vitest : 78/78 PASS

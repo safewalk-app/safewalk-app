@@ -10,6 +10,8 @@ import { useApp } from '@/lib/context/app-context';
 import { useCheckInNotifications } from '@/hooks/use-check-in-notifications';
 import { useRealTimeLocation } from '@/hooks/use-real-time-location';
 import { useNotifications } from '@/hooks/use-notifications';
+import { useSOS } from '@/hooks/use-sos';
+import { SOSButton } from '@/components/ui/sos-button';
 import { useRouter } from 'expo-router';
 import { useEffect, useState, useRef } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -21,6 +23,10 @@ export default function ActiveSessionScreen() {
   const { confirmCheckIn: confirmCheckInNotif } = useCheckInNotifications();
   const { location } = useRealTimeLocation({ enabled: settings.locationEnabled });
   const { sendNotification, scheduleNotification, cancelNotification } = useNotifications();
+  const { triggerSOS, isLoading: sosLoading } = useSOS({
+    sessionId: currentSession?.id || '',
+    userId: 1,
+  });
   const [remainingTime, setRemainingTime] = useState<string>('00:00:00');
   const [sessionState, setSessionState] = useState<'active' | 'grace' | 'overdue'>('active');
   const [showCheckInModal, setShowCheckInModal] = useState(false);
@@ -289,8 +295,19 @@ export default function ActiveSessionScreen() {
           </View>
         </ScreenTransition>
 
-        {/* Annuler la sortie */}
+        {/* SOS Button */}
         <ScreenTransition delay={400} duration={350}>
+          <View className="my-4">
+            <SOSButton
+              onPress={triggerSOS}
+              isLoading={sosLoading}
+              className="w-full"
+            />
+          </View>
+        </ScreenTransition>
+
+        {/* Annuler la sortie */}
+        <ScreenTransition delay={500} duration={350}>
           <Pressable onPress={handleCancelSession} className="py-4">
             <Text className="text-center text-base font-bold text-error">
               Annuler la sortie
