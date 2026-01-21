@@ -256,12 +256,7 @@ export default function ActiveSessionScreen() {
                   {deadlineStr}
                 </Text>
               </View>
-              <View className="flex-row justify-between">
-                <Text className="text-sm text-muted">Tolérance :</Text>
-                <Text className="text-sm font-semibold text-foreground">
-                  {currentSession.tolerance} min
-                </Text>
-              </View>
+
             </View>
 
             {/* Légende des états */}

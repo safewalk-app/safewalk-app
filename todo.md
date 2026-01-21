@@ -878,3 +878,16 @@
 - [x] Utiliser router.back() au lieu de router.push('/') si possible
 - [x] Éviter les redirections involontaires lors de la navigation
 - [x] Tests : 78/78 PASS
+
+
+## FEATURE REMOVAL - Suppression de la tolérance
+
+### Modifications appliquées
+- [x] Supprimer le contrôle de tolérance de settings.tsx
+- [x] Supprimer l'affichage de la tolérance de active-session.tsx
+- [x] Supprimer tolerance de UserSettings dans app-context.tsx
+- [x] Supprimer tolerance de Session dans app-context.tsx
+- [x] Corriger la logique de deadline (deadline = limitTime, sans tolérance)
+- [x] Supprimer tolerance des schémas de base de données (sessions, userPreferences)
+- [x] Corriger les endpoints tRPC (sessions.create, preferences.update)
+- [x] Tests : 78/78 PASS

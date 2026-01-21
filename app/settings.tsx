@@ -18,7 +18,7 @@ export default function SettingsScreen() {
   const [contactPhone, setContactPhone] = useState(settings.emergencyContactPhone);
   const [contact2Name, setContact2Name] = useState(settings.emergencyContact2Name || '');
   const [contact2Phone, setContact2Phone] = useState(settings.emergencyContact2Phone || '');
-  const [tolerance, setTolerance] = useState(settings.tolerance);
+
   const [locationEnabled, setLocationEnabled] = useState(settings.locationEnabled);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
@@ -71,14 +71,7 @@ export default function SettingsScreen() {
     return () => clearTimeout(timer);
   }, [contact2Name, contact2Phone]);
 
-  // Autosave tolerance
-  useEffect(() => {
-    if (tolerance !== settings.tolerance) {
-      updateSettings({ tolerance });
-      setToastMessage(`Tolérance: ${tolerance} min`);
-      setShowToast(true);
-    }
-  }, [tolerance]);
+
 
   // Autosave location
   useEffect(() => {
@@ -226,26 +219,7 @@ export default function SettingsScreen() {
               </GlassCard>
             </View>
 
-            {/* Card "Tolérance" */}
-            <View className="mb-3">
-              <GlassCard className="gap-2">
-                <View className="flex-row items-center gap-2">
-                  <MaterialIcons name="schedule" size={16} color="#2DE2A6" />
-                  <Text className="text-sm font-semibold text-foreground">
-                    Tolérance
-                  </Text>
-                </View>
-                <SegmentedControlPill
-                  options={[
-                    { label: '10 min', value: 10 },
-                    { label: '15 min', value: 15 },
-                    { label: '30 min', value: 30 },
-                  ]}
-                  value={tolerance}
-                  onValueChange={(value) => setTolerance(value as number)}
-                />
-              </GlassCard>
-            </View>
+
 
             {/* Card "Localisation" */}
             <View className="mb-3">

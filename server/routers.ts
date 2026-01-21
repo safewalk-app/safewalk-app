@@ -25,9 +25,8 @@ export const appRouter = router({
       create: protectedProcedure
         .input(z.object({
           id: z.string(),
-          limitTime: z.string(),
-          deadline: z.string(),
-          tolerance: z.number(),
+          limitTime: z.number(),
+          deadline: z.number(),
           note: z.string().optional(),
         }))
         .mutation(async ({ ctx, input }) => {
@@ -36,7 +35,6 @@ export const appRouter = router({
             userId: ctx.user.id,
             limitTime: new Date(input.limitTime),
             deadline: new Date(input.deadline),
-            tolerance: input.tolerance,
             note: input.note,
           });
           return session;
@@ -171,7 +169,6 @@ export const appRouter = router({
             emergencyContact1Phone: input.emergencyContact1Phone,
             emergencyContact2Name: input.emergencyContact2Name,
             emergencyContact2Phone: input.emergencyContact2Phone,
-            tolerance: input.tolerance,
             locationEnabled: input.locationEnabled ? 1 : 0,
             notificationsEnabled: input.notificationsEnabled ? 1 : 0,
           });

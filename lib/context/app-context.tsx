@@ -8,7 +8,6 @@ export interface UserSettings {
   emergencyContactPhone: string;
   emergencyContact2Name?: string;
   emergencyContact2Phone?: string;
-  tolerance: number; // minutes
   locationEnabled: boolean;
 }
 
@@ -19,8 +18,7 @@ export interface Session {
   id: string;
   startTime: number;
   limitTime: number; // heure limite choisie par l'utilisateur
-  tolerance: number; // minutes de tolérance (automatique)
-  deadline: number; // limitTime + tolerance (en ms)
+  deadline: number; // limitTime (sans tolérance)
   location?: string;
   note?: string;
   status: SessionState; // CORRECTION: utiliser SessionState au lieu de string
@@ -66,7 +64,6 @@ const defaultSettings: UserSettings = {
   emergencyContactPhone: '+33763458273',
   emergencyContact2Name: 'Contact 2',
   emergencyContact2Phone: '+33763458273',
-  tolerance: 15,
   locationEnabled: true,
 };
 
@@ -154,14 +151,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
 
     // CORRECTION BUG #3: Initialiser checkInConfirmed à false
-    // La tolérance sera appliquée jusqu'au check-in
-    const deadline = adjustedLimitTime + state.settings.tolerance * 60 * 1000;
+    // Pas de tolérance - deadline = limitTime
+    const deadline = adjustedLimitTime;
 
     const session: Session = {
       id: `session_${Date.now()}`,
       startTime: now,
       limitTime: adjustedLimitTime,
-      tolerance: state.settings.tolerance,
       deadline,
       note,
       status: 'active',
@@ -256,7 +252,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         await sendAlertSMSToMultiple(
           phoneNumbers,
           limitTimeStr,
-          state.currentSession.tolerance,
+          0, // Pas de tolérance
           location
         );
       } catch (error) {

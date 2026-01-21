@@ -36,7 +36,6 @@ export const sessions = mysqlTable('sessions', {
   startTime: timestamp('startTime').defaultNow().notNull(),
   limitTime: timestamp('limitTime').notNull(),
   deadline: timestamp('deadline').notNull(),
-  tolerance: int('tolerance').notNull(), // en minutes
   status: mysqlEnum('status', ['active', 'grace', 'overdue', 'returned', 'cancelled']).default('active').notNull(),
   note: text('note'),
   endTime: timestamp('endTime'),
@@ -98,7 +97,6 @@ export const userPreferences = mysqlTable('userPreferences', {
   emergencyContact1Phone: varchar('emergencyContact1Phone', { length: 20 }),
   emergencyContact2Name: varchar('emergencyContact2Name', { length: 100 }),
   emergencyContact2Phone: varchar('emergencyContact2Phone', { length: 20 }),
-  tolerance: int('tolerance').default(15).notNull(), // en minutes
   locationEnabled: int('locationEnabled').default(0).notNull(),
   notificationsEnabled: int('notificationsEnabled').default(1).notNull(),
   createdAt: timestamp('createdAt').defaultNow().notNull(),
