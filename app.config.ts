@@ -51,7 +51,10 @@ const config: ExpoConfig = {
     supportsTablet: true,
     bundleIdentifier: env.iosBundleId,
     "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSLocationWhenInUseUsageDescription": "SafeWalk a besoin de votre position pour vous proteger",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "SafeWalk utilise votre position pour les alertes",
+        "NSLocationAlwaysUsageDescription": "SafeWalk utilise votre position en arriere-plan"
       }
   },
   android: {
@@ -64,7 +67,12 @@ const config: ExpoConfig = {
     edgeToEdgeEnabled: true,
     predictiveBackGestureEnabled: false,
     package: env.androidPackage,
-    permissions: ["POST_NOTIFICATIONS"],
+    permissions: [
+      "POST_NOTIFICATIONS",
+      "ACCESS_FINE_LOCATION",
+      "ACCESS_COARSE_LOCATION",
+      "ACCESS_BACKGROUND_LOCATION"
+    ],
     intentFilters: [
       {
         action: "VIEW",
@@ -86,6 +94,12 @@ const config: ExpoConfig = {
   },
   plugins: [
     "expo-router",
+    [
+      "expo-location",
+      {
+        locationAlwaysAndWhenInUsePermission: "Allow SafeWalk to use your location for safety alerts."
+      }
+    ],
     [
       "expo-audio",
       {

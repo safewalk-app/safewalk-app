@@ -14,7 +14,10 @@ router.post("/trigger", async (req: Request, res: Response) => {
   try {
     const { sessionId, userId, latitude, longitude, accuracy } = req.body;
 
+    console.log('[SOS] Requête reçue:', { sessionId, userId, latitude, longitude, accuracy });
+
     if (!sessionId || !userId) {
+      console.error('[SOS] Erreur: sessionId ou userId manquant');
       return res.status(400).json({
         success: false,
         error: "sessionId et userId sont requis",

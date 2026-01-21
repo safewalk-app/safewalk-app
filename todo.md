@@ -841,3 +841,15 @@
 - [x] Tester la persistance en base de données
 - [x] Tests E2E : 7/7 PASS
 - [x] Tests vitest : 78/78 PASS
+
+
+## BUG FIX - Géolocalisation et SOS
+
+### Corrections appliquées
+- [x] Ajouter permissions iOS dans app.config.ts
+- [x] Ajouter permissions Android dans app.config.ts
+- [x] Ajouter plugin expo-location dans app.config.ts
+- [x] Corriger useSOS pour utiliser getSnapshot()
+- [x] Ajouter logs détaillés pour déboguer
+- [x] Tests E2E : 7/7 PASS
+- [x] Tests vitest : 78/78 PASS

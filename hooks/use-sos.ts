@@ -29,7 +29,7 @@ export interface UseSOSOptions {
 export function useSOS(options: UseSOSOptions) {
   const { sessionId, userId, onSuccess, onError } = options;
   const { sendNotification } = useNotifications();
-  const { location } = useRealTimeLocation({ enabled: true });
+  const { getSnapshot } = useRealTimeLocation({ enabled: true });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -38,25 +38,45 @@ export function useSOS(options: UseSOSOptions) {
       setIsLoading(true);
       setError(null);
 
+      console.log('🚨 Déclenchement SOS pour session:', sessionId);
+
       // Envoyer notification locale immédiate
-      sendNotification({
-        title: '🚨 ALERTE SOS DÉCLENCHÉE',
-        body: 'Alerte d\'urgence envoyée à vos contacts. Restez en sécurité.',
-        data: { type: 'sos_triggered' },
-      });
+      try {
+        sendNotification({
+          title: '🚨 ALERTE SOS DÉCLENCHÉE',
+          body: 'Alerte d\'urgence envoyée à vos contacts. Restez en sécurité.',
+          data: { type: 'sos_triggered' },
+        });
+      } catch (notifErr) {
+        console.warn('Erreur notification:', notifErr);
+      }
+
+      // Capturer la position actuelle (snapshot)
+      console.log('📍 Capture de la position GPS...');
+      const currentLocation = await getSnapshot();
+      console.log('📍 Position capturée pour SOS:', currentLocation);
+
+      if (!currentLocation) {
+        console.warn('⚠️ Position non disponible, envoi SOS sans coordonnées');
+      }
 
       // Préparer les données
       const sosData = {
         sessionId,
         userId,
-        latitude: location?.latitude?.toString(),
-        longitude: location?.longitude?.toString(),
-        accuracy: location?.accuracy?.toString(),
+        latitude: currentLocation?.latitude,
+        longitude: currentLocation?.longitude,
+        accuracy: currentLocation?.accuracy,
       };
 
+      console.log('📤 Envoi SOS avec données:', sosData);
+
       // Appeler l'endpoint SOS
+      const apiUrl = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000';
+      console.log('🔗 URL API:', apiUrl);
+
       const response = await axios.post(
-        `${process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000'}/api/sos/trigger`,
+        `${apiUrl}/api/sos/trigger`,
         sosData,
         {
           timeout: 30000,
@@ -65,6 +85,8 @@ export function useSOS(options: UseSOSOptions) {
           },
         }
       );
+
+      console.log('✅ Réponse SOS:', response.data);
 
       if (response.data.success) {
         console.log('✅ Alerte SOS déclenchée avec succès:', response.data);
@@ -80,7 +102,7 @@ export function useSOS(options: UseSOSOptions) {
     } finally {
       setIsLoading(false);
     }
-  }, [sessionId, userId, location, sendNotification, onSuccess, onError]);
+  }, [sessionId, userId, getSnapshot, sendNotification, onSuccess, onError]);
 
   return {
     triggerSOS,
