@@ -72,8 +72,8 @@ export default function ActiveSessionScreen() {
         if (now >= fiveMinBefore && now < fiveMinBefore + 1000 && !timerNotificationRef.current) {
           timerNotificationRef.current = 'scheduled';
           sendNotification({
-            title: '⚠️ Alerte imminente',
-            body: 'Ton heure limite approche. Confirme ton retour dans 5 minutes.',
+            title: '⚠️ Petit check',
+            body: 'Tout va bien ? 😊 Confirme ton retour dans 5 minutes.',
             data: { type: 'timer_warning' },
           });
         }
@@ -102,8 +102,8 @@ export default function ActiveSessionScreen() {
         if (!alertNotificationRef.current) {
           alertNotificationRef.current = 'triggered';
           sendNotification({
-            title: '🚨 ALERTE',
-            body: 'Ton heure limite est dépassée. Un SMS a été envoyé à tes contacts d\'urgence.',
+            title: '🚨 Oups… on a prévenu ton contact',
+            body: '😬 Confirme si tout va bien.',
             data: { type: 'alert_triggered' },
           });
           

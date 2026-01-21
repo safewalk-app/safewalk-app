@@ -55,10 +55,10 @@ export default function AlertSentScreen() {
         <ScreenTransition delay={0} duration={350}>
           <View className="gap-1 mb-4">
             <Text className="text-4xl font-bold text-foreground">
-              Alerte envoyée
+              Oups… 😬
             </Text>
             <Text className="text-base text-muted">
-              Ton contact a été notifié.
+              On a prévenu ton contact. Confirme si tout va bien.
             </Text>
           </View>
         </ScreenTransition>

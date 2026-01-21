@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { sendAlertSMSToMultiple } from '../services/sms-client';
+import { sendFriendlyAlertSMS } from '../services/friendly-sms-client';
 
 export interface UserSettings {
   firstName: string;
@@ -249,12 +249,27 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     if (phoneNumbers.length > 0) {
       try {
-        await sendAlertSMSToMultiple(
-          phoneNumbers,
+        const contacts = [];
+        if (state.settings.emergencyContactPhone) {
+          contacts.push({
+            name: state.settings.emergencyContactName || 'Contact 1',
+            phone: state.settings.emergencyContactPhone,
+          });
+        }
+        if (state.settings.emergencyContact2Phone) {
+          contacts.push({
+            name: state.settings.emergencyContact2Name || 'Contact 2',
+            phone: state.settings.emergencyContact2Phone,
+          });
+        }
+
+        await sendFriendlyAlertSMS({
+          contacts,
+          userName: state.settings.firstName,
           limitTimeStr,
-          0, // Pas de tolérance
-          location
-        );
+          note: state.currentSession.note,
+          location,
+        });
       } catch (error) {
         console.error('Erreur lors de l\'envoi des SMS:', error);
       }
