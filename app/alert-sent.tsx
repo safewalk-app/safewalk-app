@@ -9,7 +9,7 @@ type SMSStatus = 'sent' | 'delivered' | 'failed' | 'pending';
 import { ScreenTransition } from '@/components/ui/screen-transition';
 import { useApp } from '@/lib/context/app-context';
 import { MaterialIcons } from '@expo/vector-icons';
-import { MapViewComponent } from '@/components/ui/map-view';
+import { MapViewComponent } from '@/components/ui/map-view-expo';
 import * as Clipboard from 'expo-clipboard';
 
 export default function AlertSentScreen() {
@@ -68,9 +68,8 @@ export default function AlertSentScreen() {
           <ScreenTransition delay={100} duration={350}>
             <View className="mb-4 rounded-3xl overflow-hidden">
               <MapViewComponent
-                latitude={currentSession.lastLocation.latitude}
-                longitude={currentSession.lastLocation.longitude}
-                onCopyLink={handleCopyMapLink}
+                latitude={String(currentSession.lastLocation.latitude)}
+                longitude={String(currentSession.lastLocation.longitude)}
               />
             </View>
           </ScreenTransition>

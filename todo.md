@@ -798,3 +798,16 @@
 - [x] Tester le flux complet: timer → notification → SMS → persistance
 - [x] Tests E2E : 7/7 PASS
 - [x] Tests vitest : 78/78 PASS
+
+
+## BUG FIX - RNMapsAirModule Error
+
+### Problème
+- [x] Identifier l'erreur : react-native-maps nécessite compilation native
+- [x] Comprendre que Expo Go ne supporte pas les modules natifs compilés
+- [x] Remplacer react-native-maps par une solution Expo-compatible
+- [x] Créer un composant MapView simplifié avec expo-location
+- [x] Afficher position avec lien Google Maps au lieu de carte interactive
+- [x] Tester sur Expo Go
+- [x] Tests E2E : 7/7 PASS
+- [x] Tests vitest : 78/78 PASS
