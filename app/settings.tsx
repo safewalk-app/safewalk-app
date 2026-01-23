@@ -10,6 +10,8 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useState, useEffect } from 'react';
 import { ToastPop } from '@/components/ui/toast-pop';
 import { validatePhoneNumber, formatPhoneInput, cleanPhoneNumber } from '@/lib/utils';
+import { sendSms, checkSmsApiHealth } from '@/lib/services/sms-client';
+import { ActivityIndicator } from 'react-native';
 
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
@@ -54,6 +56,7 @@ export default function SettingsScreen() {
   const [phone2Error, setPhone2Error] = useState<string | null>(null);
   const [isPhone1Valid, setIsPhone1Valid] = useState<boolean | null>(null);
   const [isPhone2Valid, setIsPhone2Valid] = useState<boolean | null>(null);
+  const [isSendingTestSms, setIsSendingTestSms] = useState(false);
 
   // Autosave firstName
   useEffect(() => {
@@ -132,9 +135,70 @@ export default function SettingsScreen() {
     }
   }, [locationEnabled]);
 
+  const handleTestSms = async () => {
+    if (!contactPhone) {
+      setToastMessage('❌ Aucun numéro de contact');
+      setShowToast(true);
+      return;
+    }
+
+    const cleanedPhone = cleanPhoneNumber(contactPhone);
+    if (!validatePhoneNumber(cleanedPhone)) {
+      setToastMessage('❌ Numéro invalide');
+      setShowToast(true);
+      return;
+    }
+
+    setIsSendingTestSms(true);
+
+    try {
+      // Vérifier la santé de l'API d'abord
+      console.log('🔍 Vérification API SMS...');
+      const health = await checkSmsApiHealth();
+      
+      if (!health.ok) {
+        console.error('❌ API SMS non accessible:', health.error);
+        setToastMessage(`❌ API non accessible: ${health.error}`);
+        setShowToast(true);
+        setIsSendingTestSms(false);
+        return;
+      }
+
+      if (!health.twilioConfigured) {
+        console.error('❌ Twilio non configuré');
+        setToastMessage('❌ Twilio non configuré');
+        setShowToast(true);
+        setIsSendingTestSms(false);
+        return;
+      }
+
+      console.log('✅ API SMS OK, envoi du SMS de test...');
+
+      // Envoyer le SMS de test
+      const result = await sendSms({
+        to: cleanedPhone,
+        message: `Test SafeWalk: Ceci est un SMS de test envoyé depuis l'app. Tout fonctionne ! 🚀`,
+      });
+
+      if (result.success) {
+        console.log('✅ SMS de test envoyé avec succès:', result.sid);
+        setToastMessage(`✅ SMS envoyé à ${contactName || contactPhone}`);
+      } else {
+        console.error('❌ Échec envoi SMS:', result.error);
+        setToastMessage(`❌ Échec: ${result.error}`);
+      }
+    } catch (error: any) {
+      console.error('❌ Erreur test SMS:', error);
+      setToastMessage(`❌ Erreur: ${error.message}`);
+    } finally {
+      setIsSendingTestSms(false);
+      setShowToast(true);
+    }
+  };
+
   const handleDeleteData = () => {
     Alert.alert(
-      'Supprimer toutes les données',
+      'Supprimer toutes les données ?',
       'Cette action est irréversible.',
       [
         { text: 'Annuler', style: 'cancel' },
@@ -317,6 +381,26 @@ export default function SettingsScreen() {
               </GlassCard>
             </View>
           </View>
+        </ScreenTransition>
+
+        {/* Bouton "Test SMS" */}
+        <ScreenTransition delay={250} duration={350}>
+          <Pressable 
+            onPress={handleTestSms}
+            disabled={isSendingTestSms || !contactPhone}
+            className="mb-4"
+          >
+            <GlassCard className="flex-row items-center justify-center gap-2 py-4">
+              {isSendingTestSms ? (
+                <ActivityIndicator size="small" color="#3A86FF" />
+              ) : (
+                <MaterialIcons name="send" size={20} color="#3A86FF" />
+              )}
+              <Text className="text-base font-semibold text-foreground">
+                {isSendingTestSms ? 'Envoi en cours...' : 'Test SMS'}
+              </Text>
+            </GlassCard>
+          </Pressable>
         </ScreenTransition>
 
         {/* Bouton "Supprimer mes données" */}

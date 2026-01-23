@@ -1221,3 +1221,23 @@
 - [x] Protection Platform.OS !== 'web' pour éviter les erreurs sur web
 - [x] Try/catch pour ignorer les erreurs sur simulateur ou appareils sans support
 - [ ] Tester sur appareil réel (les haptiques ne fonctionnent pas sur simulateur)
+
+
+## BUG CRITIQUE : SMS OK EN BACKEND, KO DEPUIS EXPO
+
+### Problème
+- [ ] SMS fonctionne en backend (tests curl OK)
+- [ ] SMS ne fonctionne PAS depuis l'app Expo (téléphone)
+- [ ] L'app doit pouvoir envoyer des SMS via Twilio comme le backend
+
+### Checklist de correction
+- [x] 1) Vérifier que l'app n'appelle pas localhost/127.0.0.1
+- [x] 2) Exposer le backend via URL HTTPS publique (https://3000-i8rqllu1a9mlzen76xc6u-b9cd8fd2.us2.manus.computer)
+- [x] 3) Créer endpoint testable /sms/send avec logs détaillés (server/routes/sms.ts)
+- [x] 4) Configurer EXPO_PUBLIC_API_URL dans .env
+- [x] 5) Implémenter fonction sendSms() dans l'app (lib/services/sms-client.ts)
+- [x] 6) Ajouter bouton "Test SMS" dans Paramètres (app/settings.tsx)
+- [x] 7) Afficher succès/erreur avec toast
+- [x] 8) Debug automatique avec messages d'erreur clairs
+- [ ] 9) Tester end-to-end depuis Expo Go
+- [x] 10) Documenter la procédure de test (PROCEDURE_TEST_SMS_EXPO.md)
