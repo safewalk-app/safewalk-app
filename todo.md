@@ -1377,3 +1377,17 @@
 - [x] Ajouté onError callback pour afficher notification d'erreur
 - [x] Logs console ajoutés pour debug
 - [ ] Tester sur Expo Go
+
+
+## AMÉLIORATION UX : MODALE CONFIRMATION SOS
+
+### Objectif
+- [ ] Ajouter modale de confirmation avant d'envoyer le SOS
+- [ ] Éviter les déclenchements accidentels
+- [ ] Boutons "Annuler" et "Confirmer SOS"
+
+### Implémentation
+- [x] Découvert que SOSButton a déjà une modale de confirmation intégrée
+- [x] Corrigé l'appel async dans active-session.tsx
+- [x] Supprimé le doublon SOSConfirmModal
+- [ ] Tester sur Expo Go que la modale s'affiche bien

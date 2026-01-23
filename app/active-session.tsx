@@ -384,7 +384,9 @@ export default function ActiveSessionScreen() {
         <ScreenTransition delay={400} duration={350}>
           <View className="my-4">
             <SOSButton
-              onPress={triggerSOS}
+              onPress={async () => {
+                await triggerSOS();
+              }}
               isLoading={sosLoading}
               className="w-full"
             />
