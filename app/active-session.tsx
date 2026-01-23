@@ -27,6 +27,24 @@ export default function ActiveSessionScreen() {
     sessionId: currentSession?.id || '',
     userId: 1,
     location: location || undefined,
+    onSuccess: (result) => {
+      console.log('✅ SOS envoyé avec succès:', result);
+      // Afficher une notification de succès
+      sendNotification({
+        title: '✅ SOS envoyé',
+        body: `Alerte envoyée à ${result.smsResults?.filter(r => r.status === 'sent').length} contact(s)`,
+        data: { type: 'sos_success' },
+      });
+    },
+    onError: (error) => {
+      console.error('❌ Erreur SOS:', error);
+      // Afficher une notification d'erreur
+      sendNotification({
+        title: '❌ Erreur SOS',
+        body: error.message || 'Échec de l\'envoi de l\'alerte',
+        data: { type: 'sos_error' },
+      });
+    },
   });
   const [remainingTime, setRemainingTime] = useState<string>('00:00:00');
   const [sessionState, setSessionState] = useState<'active' | 'grace' | 'overdue'>('active');

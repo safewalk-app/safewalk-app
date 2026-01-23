@@ -1356,3 +1356,24 @@
 - [x] SOS ("URGENCE ... a déclenché le bouton SOS !")
 - [x] Relance (follow-up) ("Relance ... n'a toujours pas confirmé...")
 - [x] Confirmation "Je vais bien" ("... est bien rentré ! Merci d'être là...")
+
+
+## BUG CRITIQUE : SOS NE FONCTIONNE PAS
+
+### Problème
+- [ ] Bouton SOS ne déclenche pas l'envoi de SMS
+- [ ] Test SMS fonctionne
+- [ ] Alerte fonctionne (à vérifier)
+- [ ] SOS ne fonctionne pas
+
+### Diagnostic fait
+- [x] Vérifier où est appelé le bouton SOS dans active-session.tsx (ligne 369)
+- [x] Vérifier le hook useSOS (manquait onSuccess/onError callbacks)
+- [x] Vérifier les logs console
+- [x] Vérifier si le SMS est bien envoyé (logs backend)
+
+### Correction appliquée
+- [x] Ajouté onSuccess callback pour afficher notification de succès
+- [x] Ajouté onError callback pour afficher notification d'erreur
+- [x] Logs console ajoutés pour debug
+- [ ] Tester sur Expo Go
