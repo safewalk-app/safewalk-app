@@ -69,7 +69,9 @@ function buildMessage(options: SendEmergencySMSOptions): string {
       }
       if (location) {
         const mapsUrl = `https://www.google.com/maps?q=${location.latitude},${location.longitude}`;
-        alertMsg += `\n\nDernière position :\n${mapsUrl}`;
+        alertMsg += `\n\n📍 Position GPS :\n${mapsUrl}`;
+      } else {
+        alertMsg += `\n\n📍 Position GPS : Non disponible`;
       }
       alertMsg += `\n\nPeux-tu vérifier que tout va bien ? Merci ! 🙏`;
       return alertMsg;
@@ -81,7 +83,9 @@ function buildMessage(options: SendEmergencySMSOptions): string {
       }
       if (location) {
         const mapsUrl = `https://www.google.com/maps?q=${location.latitude},${location.longitude}`;
-        sosMsg += `\n\nPosition actuelle :\n${mapsUrl}`;
+        sosMsg += `\n\n📍 Position GPS :\n${mapsUrl}`;
+      } else {
+        sosMsg += `\n\n📍 Position GPS : Non disponible`;
       }
       sosMsg += `\n\nContacte-le MAINTENANT ou appelle les secours si besoin. 🚨`;
       return sosMsg;
@@ -90,7 +94,9 @@ function buildMessage(options: SendEmergencySMSOptions): string {
       let followupMsg = `⏰ SafeWalk - Relance\n\n${userName} n'a toujours pas confirmé son retour (10 min après l'heure limite).`;
       if (location) {
         const mapsUrl = `https://www.google.com/maps?q=${location.latitude},${location.longitude}`;
-        followupMsg += `\n\nDernière position :\n${mapsUrl}`;
+        followupMsg += `\n\n📍 Position GPS :\n${mapsUrl}`;
+      } else {
+        followupMsg += `\n\n📍 Position GPS : Non disponible`;
       }
       followupMsg += `\n\nMerci de le contacter rapidement. 🙏`;
       return followupMsg;

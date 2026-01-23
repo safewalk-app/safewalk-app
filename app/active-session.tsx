@@ -9,6 +9,7 @@ import { CheckInModal } from '@/components/ui/check-in-modal';
 import { useApp } from '@/lib/context/app-context';
 import { useCheckInNotifications } from '@/hooks/use-check-in-notifications';
 import { useRealTimeLocation } from '@/hooks/use-real-time-location';
+import { useLocationPermission } from '@/hooks/use-location-permission';
 import { useNotifications } from '@/hooks/use-notifications';
 import { useSOS } from '@/hooks/use-sos';
 import { SOSButton } from '@/components/ui/sos-button';
@@ -22,6 +23,7 @@ export default function ActiveSessionScreen() {
   const { currentSession, endSession, cancelSession, addTimeToSession, confirmCheckIn, settings, triggerAlert } = useApp();
   const { confirmCheckIn: confirmCheckInNotif } = useCheckInNotifications();
   const { location } = useRealTimeLocation({ enabled: settings.locationEnabled });
+  const locationPermission = useLocationPermission();
   const { sendNotification, scheduleNotification, cancelNotification } = useNotifications();
   const { triggerSOS, isLoading: sosLoading } = useSOS({
     sessionId: currentSession?.id || '',
@@ -325,9 +327,43 @@ export default function ActiveSessionScreen() {
         {/* Header */}
         <ScreenTransition delay={0} duration={350}>
           <View className="gap-1 mb-3">
-            <Text className="text-4xl font-bold text-foreground">
-              Sortie en cours
-            </Text>
+            <View className="flex-row items-center justify-between">
+              <Text className="text-4xl font-bold text-foreground">
+                Sortie en cours
+              </Text>
+              {/* Indicateur GPS */}
+              <Pressable
+                onPress={() => {
+                  Alert.alert(
+                    locationPermission.enabled ? '📍 Position GPS active' : '📍 Position GPS désactivée',
+                    locationPermission.enabled
+                      ? 'Votre position GPS est partagée dans les SMS d\'alerte.'
+                      : 'Activez la localisation dans Paramètres pour partager votre position en cas d\'alerte.',
+                    [
+                      { text: 'OK', style: 'default' },
+                      locationPermission.enabled
+                        ? undefined
+                        : {
+                            text: 'Paramètres',
+                            onPress: () => router.push('/settings'),
+                          },
+                    ].filter(Boolean) as any
+                  );
+                }}
+                style={({ pressed }) => ([
+                  {
+                    opacity: pressed ? 0.6 : 1,
+                    padding: 8,
+                    borderRadius: 12,
+                    backgroundColor: locationPermission.enabled ? 'rgba(45, 226, 166, 0.15)' : 'rgba(255, 77, 77, 0.15)',
+                  },
+                ])}
+              >
+                <Text style={{ fontSize: 24 }}>
+                  {locationPermission.enabled ? '🟢' : '🔴'} 📍
+                </Text>
+              </Pressable>
+            </View>
           </View>
         </ScreenTransition>
 

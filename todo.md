@@ -1439,3 +1439,17 @@
 - [x] Remplacer requestForegroundPermissionsAsync par getForegroundPermissionsAsync
 - [x] Ajouter Alert pour "Ouvrir Réglages" si permission refusée
 - [ ] Tester sur Expo Go
+
+
+## AMÉLIORATION UX : INDICATEUR GPS + MESSAGES SMS
+
+### Indicateur GPS
+- [x] Afficher icône 🟢 📍 verte dans l'en-tête de active-session si localisation active
+- [x] Afficher icône 🔴 📍 rouge si localisation désactivée
+- [x] Alert explicatif au tap avec bouton "Paramètres" si désactivé
+
+### Messages SMS avec/sans position
+- [x] Si GPS activé + position disponible => "📍 Position GPS : [lien Google Maps]"
+- [x] Si GPS désactivé ou position non disponible => "📍 Position GPS : Non disponible"
+- [x] Contact comprend la situation (alert, sos, followup)
+- [ ] Tester sur Expo Go
