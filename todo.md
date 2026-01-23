@@ -1185,3 +1185,24 @@
 - [x] Tester avec numéro valide → ✓ vert
 - [x] Tester avec numéro invalide → ✗ rouge
 - [x] Créer checkpoint
+
+
+## BUG CRITIQUE : SPAM NOTIFICATIONS PUSH
+
+### Problème rapporté par l'utilisateur
+- [ ] Plusieurs notifications en double sont envoyées pour le même événement
+- [ ] Dès qu'il y a un événement, l'utilisateur en reçoit plein
+
+### Analyse à faire
+- [x] Identifier tous les points d'envoi de notifications dans le code
+- [x] Vérifier si les refs (timerNotificationRef, alertNotificationRef) fonctionnent correctement
+- [x] Analyser la logique du timer dans active-session.tsx (setInterval)
+- [x] Vérifier s'il y a plusieurs instances du timer qui tournent en parallèle
+
+### Corrections appliquées
+- [x] Retirer `location` des dépendances du useEffect (causait recréation du timer)
+- [x] Utiliser `locationRef` pour accéder à la dernière valeur GPS sans redéclencher le timer
+- [x] Ajouter fenêtre de 5 secondes pour notification "Petit check" (ligne 79)
+- [x] Ajouter logs détaillés pour toutes les notifications (débogage)
+- [x] S'assurer que le timer est bien nettoyé (clearInterval déjà présent)
+- [ ] Tester que chaque notification n'est envoyée qu'une seule fois

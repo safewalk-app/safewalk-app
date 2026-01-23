@@ -52,6 +52,7 @@ export function useSOS(options: UseSOSOptions) {
 
       // Envoyer notification locale immédiate
       try {
+        console.log('🔔 [Notification] Envoi notification SOS');
         sendNotification({
           title: '🚨 ALERTE SOS DÉCLENCHÉE',
           body: 'Alerte d\'urgence envoyée à vos contacts. Restez en sécurité.',

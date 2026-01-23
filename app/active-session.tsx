@@ -35,6 +35,12 @@ export default function ActiveSessionScreen() {
   const alertNotificationRef = useRef<string | null>(null);
   const alertSMSRef = useRef<string | null>(null); // Track si SMS d'alerte envoyé
   const followUpSMSRef = useRef<string | null>(null); // Track si SMS de relance envoyé
+  const locationRef = useRef(location); // Ref pour accéder à la dernière valeur de location
+  
+  // Mettre à jour la ref quand location change (sans redéclencher le timer)
+  useEffect(() => {
+    locationRef.current = location;
+  }, [location]);
 
   useEffect(() => {
     // Ne rediriger que si on est sur la page active-session ET qu'il n'y a pas de session
@@ -70,8 +76,9 @@ export default function ActiveSessionScreen() {
         );
         // Envoyer notification 5 minutes avant l'heure limite (une seule fois)
         const fiveMinBefore = limitTime - (5 * 60 * 1000);
-        if (now >= fiveMinBefore && !timerNotificationRef.current) {
+        if (now >= fiveMinBefore && now < fiveMinBefore + 5000 && !timerNotificationRef.current) {
           timerNotificationRef.current = 'scheduled';
+          console.log('🔔 [Notification] Envoi notification "Petit check" (5 min avant deadline)');
           sendNotification({
             title: '⚠️ Petit check',
             body: 'Tout va bien ? 😊 Confirme ton retour dans 5 minutes.',
@@ -102,6 +109,7 @@ export default function ActiveSessionScreen() {
         // Envoyer notification d'alerte ET SMS dès que la deadline est dépassée
         if (!alertNotificationRef.current) {
           alertNotificationRef.current = 'triggered';
+          console.log('🔔 [Notification] Envoi notification d\'alerte (deadline dépassée)');
           sendNotification({
             title: '🚨 Oups… on a prévenu ton contact',
             body: '😬 Confirme si tout va bien.',
@@ -111,7 +119,7 @@ export default function ActiveSessionScreen() {
           // Envoyer les SMS d'alerte (même sans localisation)
           if (!alertSMSRef.current) {
             alertSMSRef.current = 'sent';
-            triggerAlert(location || undefined);
+            triggerAlert(locationRef.current || undefined);
           }
         }
         
@@ -146,7 +154,7 @@ export default function ActiveSessionScreen() {
               sendFollowUpAlertSMS({
                 contacts,
                 userName: settings.firstName,
-                location: location || undefined,
+                location: locationRef.current || undefined,
               }).catch((error) => {
                 console.error('Erreur relance SMS:', error);
               });
@@ -161,7 +169,8 @@ export default function ActiveSessionScreen() {
       if (timerNotificationRef.current) timerNotificationRef.current = null;
       if (alertNotificationRef.current) alertNotificationRef.current = null;
     };
-  }, [currentSession, router, sendNotification, triggerAlert, location]);
+  }, [currentSession, router, sendNotification, triggerAlert]);
+  // Note: location retiré des dépendances pour éviter de recréer le timer à chaque mise à jour GPS
 
   const handleCompleteSession = async () => {
     // Capturer la position GPS si activée
@@ -175,6 +184,7 @@ export default function ActiveSessionScreen() {
   const handleExtendSession = async () => {
     await addTimeToSession(15);
     // Afficher un toast de confirmation
+    console.log('🔔 [Notification] Envoi notification d\'extension (+15 min)');
     sendNotification({
       title: '✅ +15 minutes ajoutées',
       body: 'Nouvelle heure limite : ' + new Date(currentSession!.deadline + 15 * 60 * 1000).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
