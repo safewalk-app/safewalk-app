@@ -1,4 +1,4 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, decimal } from "drizzle-orm/mysql-core";
+import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, decimal, index } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -45,7 +45,13 @@ export const sessions = mysqlTable('sessions', {
   alertTriggeredAt: timestamp('alertTriggeredAt'),
   createdAt: timestamp('createdAt').defaultNow().notNull(),
   updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
-});
+}, (table) => ({
+  // Index pour améliorer les performances
+  userIdIdx: index('sessions_user_id_idx').on(table.userId),
+  statusIdx: index('sessions_status_idx').on(table.status),
+  deadlineIdx: index('sessions_deadline_idx').on(table.deadline),
+  createdAtIdx: index('sessions_created_at_idx').on(table.createdAt),
+}));
 
 export type Session = typeof sessions.$inferSelect;
 export type InsertSession = typeof sessions.$inferInsert;
@@ -61,7 +67,11 @@ export const positions = mysqlTable('positions', {
   accuracy: varchar('accuracy', { length: 20 }),
   timestamp: timestamp('timestamp').defaultNow().notNull(),
   createdAt: timestamp('createdAt').defaultNow().notNull(),
-});
+}, (table) => ({
+  // Index pour améliorer les performances
+  sessionIdIdx: index('positions_session_id_idx').on(table.sessionId),
+  timestampIdx: index('positions_timestamp_idx').on(table.timestamp),
+}));
 
 export type Position = typeof positions.$inferSelect;
 export type InsertPosition = typeof positions.$inferInsert;
@@ -81,7 +91,12 @@ export const smsLogs = mysqlTable('smsLogs', {
   failureReason: text('failureReason'),
   createdAt: timestamp('createdAt').defaultNow().notNull(),
   updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
-});
+}, (table) => ({
+  // Index pour améliorer les performances
+  sessionIdIdx: index('sms_logs_session_id_idx').on(table.sessionId),
+  statusIdx: index('sms_logs_status_idx').on(table.status),
+  createdAtIdx: index('sms_logs_created_at_idx').on(table.createdAt),
+}));
 
 export type SmsLog = typeof smsLogs.$inferSelect;
 export type InsertSmsLog = typeof smsLogs.$inferInsert;

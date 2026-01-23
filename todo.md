@@ -1078,4 +1078,32 @@
 ### Phase 5: Validation finale
 - [x] Tous les tests passent
 - [x] Aucune erreur TypeScript
+- [x] Créer checkpoint final
+
+
+## OPTIMISATION BASE DE DONNÉES
+
+### Phase 1: Analyse du schéma
+- [x] Lire le schéma Drizzle actuel
+- [x] Identifier les tables et colonnes
+- [x] Analyser les requêtes fréquentes
+
+### Phase 2: Identification des index
+- [x] Identifier les colonnes de recherche (WHERE, JOIN)
+- [x] Identifier les colonnes de tri (ORDER BY)
+- [x] Identifier les clés étrangères
+
+### Phase 3: Ajout des index
+- [x] Ajouter index sur userId dans les tables
+- [x] Ajouter index sur sessionId dans les tables
+- [x] Ajouter index sur createdAt pour le tri temporel
+
+### Phase 4: Migration
+- [x] Générer les migrations Drizzle
+- [x] Appliquer les migrations
+- [x] Vérifier que les index sont créés
+
+### Phase 5: Validation
+- [x] Tester les performances
+- [x] Vérifier qu'il n'y a pas d'erreurs
 - [ ] Créer checkpoint final

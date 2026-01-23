@@ -6,6 +6,7 @@ import {
   boolean,
   varchar,
   jsonb,
+  index,
 } from 'drizzle-orm/pg-core';
 import { createId } from '@paralleldrive/cuid2';
 
@@ -45,7 +46,15 @@ export const sessions = pgTable('sessions', {
   // Métadonnées
   createdAt: timestamp('created_at').notNull().$defaultFn(() => new Date()),
   updatedAt: timestamp('updated_at').notNull().$defaultFn(() => new Date()),
-});
+}, (table) => ({
+  // Index pour améliorer les performances
+  userIdIdx: index('sessions_user_id_idx').on(table.userId),
+  statusIdx: index('sessions_status_idx').on(table.status),
+  deadlineIdx: index('sessions_deadline_idx').on(table.deadline),
+  createdAtIdx: index('sessions_created_at_idx').on(table.createdAt),
+  // Index composite pour les requêtes fréquentes (userId + status)
+  userIdStatusIdx: index('sessions_user_id_status_idx').on(table.userId, table.status),
+}));
 
 /**
  * SMS Status table - Suivi des SMS envoyés
@@ -76,7 +85,12 @@ export const smsStatus = pgTable('sms_status', {
   // Métadonnées
   createdAt: timestamp('created_at').notNull().$defaultFn(() => new Date()),
   updatedAt: timestamp('updated_at').notNull().$defaultFn(() => new Date()),
-});
+}, (table) => ({
+  // Index pour améliorer les performances
+  sessionIdIdx: index('sms_status_session_id_idx').on(table.sessionId),
+  statusIdx: index('sms_status_status_idx').on(table.status),
+  createdAtIdx: index('sms_status_created_at_idx').on(table.createdAt),
+}));
 
 /**
  * Check-in Notifications table - Suivi des notifications de check-in
@@ -99,7 +113,12 @@ export const checkInNotifications = pgTable('check_in_notifications', {
   // Métadonnées
   createdAt: timestamp('created_at').notNull().$defaultFn(() => new Date()),
   updatedAt: timestamp('updated_at').notNull().$defaultFn(() => new Date()),
-});
+}, (table) => ({
+  // Index pour améliorer les performances
+  sessionIdIdx: index('check_in_notifications_session_id_idx').on(table.sessionId),
+  statusIdx: index('check_in_notifications_status_idx').on(table.status),
+  scheduledAtIdx: index('check_in_notifications_scheduled_at_idx').on(table.scheduledAt),
+}));
 
 /**
  * Alerts table - Historique des alertes
@@ -127,7 +146,12 @@ export const alerts = pgTable('alerts', {
   // Métadonnées
   createdAt: timestamp('created_at').notNull().$defaultFn(() => new Date()),
   updatedAt: timestamp('updated_at').notNull().$defaultFn(() => new Date()),
-});
+}, (table) => ({
+  // Index pour améliorer les performances
+  sessionIdIdx: index('alerts_session_id_idx').on(table.sessionId),
+  statusIdx: index('alerts_status_idx').on(table.status),
+  triggeredAtIdx: index('alerts_triggered_at_idx').on(table.triggeredAt),
+}));
 
 export type Session = typeof sessions.$inferSelect;
 export type NewSession = typeof sessions.$inferInsert;

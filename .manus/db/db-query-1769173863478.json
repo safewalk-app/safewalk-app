@@ -1,0 +1,9 @@
+{
+  "query": "CREATE INDEX IF NOT EXISTS `positions_session_id_idx` ON `positions` (`sessionId`);\nCREATE INDEX IF NOT EXISTS `positions_timestamp_idx` ON `positions` (`timestamp`);\nCREATE INDEX IF NOT EXISTS `sessions_user_id_idx` ON `sessions` (`userId`);\nCREATE INDEX IF NOT EXISTS `sessions_status_idx` ON `sessions` (`status`);\nCREATE INDEX IF NOT EXISTS `sessions_deadline_idx` ON `sessions` (`deadline`);\nCREATE INDEX IF NOT EXISTS `sessions_created_at_idx` ON `sessions` (`createdAt`);\nCREATE INDEX IF NOT EXISTS `sms_logs_session_id_idx` ON `smsLogs` (`sessionId`);\nCREATE INDEX IF NOT EXISTS `sms_logs_status_idx` ON `smsLogs` (`status`);\nCREATE INDEX IF NOT EXISTS `sms_logs_created_at_idx` ON `smsLogs` (`createdAt`);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3DCUkhkYXFrXqZf.root --database aGChHrk9X6BL9cwJBTdAqC --execute CREATE INDEX IF NOT EXISTS `positions_session_id_idx` ON `positions` (`sessionId`);\nCREATE INDEX IF NOT EXISTS `positions_timestamp_idx` ON `positions` (`timestamp`);\nCREATE INDEX IF NOT EXISTS `sessions_user_id_idx` ON `sessions` (`userId`);\nCREATE INDEX IF NOT EXISTS `sessions_status_idx` ON `sessions` (`status`);\nCREATE INDEX IF NOT EXISTS `sessions_deadline_idx` ON `sessions` (`deadline`);\nCREATE INDEX IF NOT EXISTS `sessions_created_at_idx` ON `sessions` (`createdAt`);\nCREATE INDEX IF NOT EXISTS `sms_logs_session_id_idx` ON `smsLogs` (`sessionId`);\nCREATE INDEX IF NOT EXISTS `sms_logs_status_idx` ON `smsLogs` (`status`);\nCREATE INDEX IF NOT EXISTS `sms_logs_created_at_idx` ON `smsLogs` (`createdAt`);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 1977
+}
