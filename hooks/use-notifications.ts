@@ -1,5 +1,7 @@
 import { useEffect, useRef } from 'react';
 import * as Notifications from 'expo-notifications';
+import * as Haptics from 'expo-haptics';
+import { Platform } from 'react-native';
 
 // Configurer le gestionnaire de notifications
 Notifications.setNotificationHandler({
@@ -91,6 +93,16 @@ export function useNotifications() {
       });
 
       console.log('📤 Notification envoyée:', options.title);
+      
+      // Retour haptique subtil (uniquement sur mobile)
+      if (Platform.OS !== 'web') {
+        try {
+          await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        } catch (hapticError) {
+          // Ignorer les erreurs haptiques (simulateur, appareil sans support)
+        }
+      }
+      
       return notificationId;
     } catch (error) {
       console.error('Erreur lors de l\'envoi de la notification:', error);

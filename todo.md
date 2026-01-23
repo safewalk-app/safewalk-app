@@ -1206,3 +1206,18 @@
 - [x] Ajouter logs détaillés pour toutes les notifications (débogage)
 - [x] S'assurer que le timer est bien nettoyé (clearInterval déjà présent)
 - [ ] Tester que chaque notification n'est envoyée qu'une seule fois
+
+
+## AMÉLIORATION UX : RETOUR HAPTIQUE NOTIFICATIONS
+
+### Demande utilisateur
+- [ ] Ajouter un retour haptique subtil quand une notification est envoyée avec succès
+- [ ] Le retour doit être discret (Light impact) pour ne pas être intrusif
+- [ ] Appliquer à toutes les notifications (Petit check, Alerte, Extension, SOS)
+
+### Implémentation
+- [x] Ajouter expo-haptics dans le hook useNotifications
+- [x] Déclencher Haptics.impactAsync(ImpactFeedbackStyle.Light) après sendNotification
+- [x] Protection Platform.OS !== 'web' pour éviter les erreurs sur web
+- [x] Try/catch pour ignorer les erreurs sur simulateur ou appareils sans support
+- [ ] Tester sur appareil réel (les haptiques ne fonctionnent pas sur simulateur)
