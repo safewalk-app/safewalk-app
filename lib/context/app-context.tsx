@@ -224,6 +224,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   const triggerAlert = async (location?: { latitude: number; longitude: number }) => {
+    // Garde-fou anti-spam : bloquer si SMS envoyé il y a moins de 60s
+    const { canSendSMS } = await import('@/lib/utils');
+    if (!canSendSMS('alert', 60)) {
+      console.warn('🚫 [triggerAlert] SMS bloqué par anti-spam');
+      return;
+    }
+    
     console.log('🚨 [triggerAlert] Début de triggerAlert');
     console.log('📋 [triggerAlert] Settings:', state.settings);
     console.log('📋 [triggerAlert] Session:', state.currentSession);

@@ -40,6 +40,14 @@ export function useSOS(options: UseSOSOptions) {
       setIsLoading(true);
       setError(null);
 
+      // Garde-fou anti-spam : bloquer si SOS envoyé il y a moins de 60s
+      const { canSendSMS } = await import('@/lib/utils');
+      if (!canSendSMS('sos', 60)) {
+        console.warn('🚫 [SOS] SMS bloqué par anti-spam');
+        setIsLoading(false);
+        return;
+      }
+
       console.log('🚨 Déclenchement SOS pour session:', sessionId);
 
       // Envoyer notification locale immédiate

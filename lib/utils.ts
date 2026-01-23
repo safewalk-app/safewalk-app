@@ -124,3 +124,69 @@ export function formatPhoneInput(input: string): string {
 export function cleanPhoneNumber(formatted: string): string {
   return formatted.replace(/\s/g, '');
 }
+
+/**
+ * Système anti-spam SMS basé sur des timestamps
+ * Empêche l'envoi de SMS en double en trackant le dernier envoi par clé
+ */
+const smsTimestamps: Record<string, number> = {};
+
+/**
+ * Vérifie si un SMS peut être envoyé (anti-spam)
+ * 
+ * @param key - Clé unique identifiant le type de SMS (ex: 'alert', 'followup', 'sos')
+ * @param minIntervalSeconds - Intervalle minimum en secondes entre deux envois (défaut: 60s)
+ * @returns true si le SMS peut être envoyé, false sinon
+ * 
+ * Usage:
+ * ```tsx
+ * if (!canSendSMS('alert', 60)) {
+ *   console.warn('SMS bloqué par anti-spam');
+ *   return;
+ * }
+ * // Envoyer le SMS...
+ * ```
+ */
+export function canSendSMS(key: string, minIntervalSeconds: number = 60): boolean {
+  const now = Date.now();
+  const lastSent = smsTimestamps[key];
+  
+  if (!lastSent) {
+    // Premier envoi pour cette clé
+    smsTimestamps[key] = now;
+    return true;
+  }
+  
+  const elapsedSeconds = (now - lastSent) / 1000;
+  
+  if (elapsedSeconds >= minIntervalSeconds) {
+    // Intervalle respecté, autoriser l'envoi
+    smsTimestamps[key] = now;
+    return true;
+  }
+  
+  // Bloquer l'envoi (spam détecté)
+  console.warn(
+    `🚫 [Anti-spam] SMS bloqué pour "${key}". ` +
+    `Dernier envoi il y a ${elapsedSeconds.toFixed(0)}s (min: ${minIntervalSeconds}s)`
+  );
+  return false;
+}
+
+/**
+ * Réinitialise le timestamp pour une clé donnée
+ * Utile pour les tests ou pour forcer un nouvel envoi
+ * 
+ * @param key - Clé à réinitialiser
+ */
+export function resetSMSTimestamp(key: string): void {
+  delete smsTimestamps[key];
+}
+
+/**
+ * Réinitialise tous les timestamps SMS
+ * Utile pour les tests
+ */
+export function resetAllSMSTimestamps(): void {
+  Object.keys(smsTimestamps).forEach(key => delete smsTimestamps[key]);
+}

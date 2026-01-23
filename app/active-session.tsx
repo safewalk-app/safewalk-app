@@ -117,11 +117,18 @@ export default function ActiveSessionScreen() {
         
         // Envoyer SMS de relance 10 min après la deadline si pas de confirmation
         const tenMinAfterDeadline = deadline + (10 * 60 * 1000);
-        if (now >= tenMinAfterDeadline && now < tenMinAfterDeadline + 1000 && !followUpSMSRef.current && !currentSession.checkInConfirmed) {
+        if (now >= tenMinAfterDeadline && !followUpSMSRef.current && !currentSession.checkInConfirmed) {
           followUpSMSRef.current = 'sent';
           console.log('📤 Envoi SMS de relance...');
-          // Importer et appeler sendFollowUpAlertSMS
-          import('@/lib/services/follow-up-sms-client').then(({ sendFollowUpAlertSMS }) => {
+          // Importer et appeler sendFollowUpAlertSMS avec garde-fou anti-spam
+          Promise.all([
+            import('@/lib/services/follow-up-sms-client'),
+            import('@/lib/utils')
+          ]).then(([{ sendFollowUpAlertSMS }, { canSendSMS }]) => {
+            if (!canSendSMS('followup', 60)) {
+              console.warn('🚫 SMS de relance bloqué par anti-spam');
+              return;
+            }
             const contacts = [];
             if (settings.emergencyContactPhone) {
               contacts.push({
