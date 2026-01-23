@@ -53,34 +53,23 @@ router.post("/trigger", async (req: Request, res: Response) => {
     // Si pas de préférences, créer les préférences par défaut
     if (!preferences) {
       console.log('[SOS] Création des préférences par défaut pour userId:', userId);
-      const defaultPrefs = {
-        userId,
-        firstName: 'Utilisateur',
-        emergencyContact1Name: 'Contact 1',
-        emergencyContact1Phone: '+33763458273',
-        emergencyContact2Name: 'Contact 2',
-        emergencyContact2Phone: '+33763458273',
-      };
-      preferences = await db.upsertUserPreferences(defaultPrefs);
-      
-      if (!preferences) {
-        return res.status(500).json({
-          success: false,
-          error: "Impossible de créer les préférences utilisateur",
-        });
-      }
+      // Pas de préférences par défaut - l'utilisateur DOIT configurer ses contacts
+      return res.status(400).json({
+        success: false,
+        error: "Aucun contact d'urgence configuré. Veuillez configurer vos contacts dans les paramètres.",
+      });
     }
 
     const emergencyContacts: Array<{ name: string; phone: string }> = [];
     if (preferences.emergencyContact1Phone) {
       emergencyContacts.push({
-        name: preferences.emergencyContact1Name || "Contact 1",
+        name: preferences.emergencyContact1Name || '',
         phone: preferences.emergencyContact1Phone,
       });
     }
     if (preferences.emergencyContact2Phone) {
       emergencyContacts.push({
-        name: preferences.emergencyContact2Name || "Contact 2",
+        name: preferences.emergencyContact2Name || "",
         phone: preferences.emergencyContact2Phone,
       });
     }

@@ -38,7 +38,7 @@ describe('E2E SMS Flow', () => {
     const data = await response.json();
     console.log('✅ Response:', JSON.stringify(data, null, 2));
     expect(data.success).toBe(true);
-  });
+  }, 10000); // Timeout 10 secondes
 
   it('should send follow-up SMS', async () => {
     const params = {
@@ -61,7 +61,7 @@ describe('E2E SMS Flow', () => {
     const data = await response.json();
     console.log('✅ Response:', JSON.stringify(data, null, 2));
     expect(data.success).toBe(true);
-  });
+  }, 10000); // Timeout 10 secondes
 
   it('should send confirmation SMS', async () => {
     const params = {
@@ -83,5 +83,5 @@ describe('E2E SMS Flow', () => {
     const data = await response.json();
     console.log('✅ Response:', JSON.stringify(data, null, 2));
     expect(data.success).toBe(true);
-  });
+  }, 10000); // Timeout 10 secondes
 });

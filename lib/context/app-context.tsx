@@ -60,11 +60,11 @@ export interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 const defaultSettings: UserSettings = {
-  firstName: 'Utilisateur',
-  emergencyContactName: 'Contact 1',
-  emergencyContactPhone: '+33763458273',
-  emergencyContact2Name: 'Contact 2',
-  emergencyContact2Phone: '+33763458273',
+  firstName: '',
+  emergencyContactName: '',
+  emergencyContactPhone: '',
+  emergencyContact2Name: '',
+  emergencyContact2Phone: '',
   locationEnabled: true,
 };
 
@@ -224,6 +224,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   const triggerAlert = async (location?: { latitude: number; longitude: number }) => {
+    console.log('🚨 [triggerAlert] Début de triggerAlert');
+    console.log('📋 [triggerAlert] Settings:', state.settings);
+    console.log('📋 [triggerAlert] Session:', state.currentSession);
+    console.log('📋 [triggerAlert] Location:', location);
     if (!state.currentSession) return;
     const alertedSession: Session = {
       ...state.currentSession,
@@ -253,17 +257,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       try {
         if (state.settings.emergencyContactPhone) {
           contacts.push({
-            name: state.settings.emergencyContactName || 'Contact 1',
+            name: state.settings.emergencyContactName,
             phone: state.settings.emergencyContactPhone,
           });
         }
         if (state.settings.emergencyContact2Phone) {
           contacts.push({
-            name: state.settings.emergencyContact2Name || 'Contact 2',
+            name: state.settings.emergencyContact2Name || '',
             phone: state.settings.emergencyContact2Phone,
           });
         }
 
+        console.log('📤 [triggerAlert] Appel sendFriendlyAlertSMS avec:', { contacts, userName: state.settings.firstName, limitTimeStr, note: state.currentSession.note, location });
         await sendFriendlyAlertSMS({
           contacts,
           userName: state.settings.firstName,
@@ -330,13 +335,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const contacts = [];
         if (state.settings.emergencyContactPhone) {
           contacts.push({
-            name: state.settings.emergencyContactName || 'Contact 1',
+            name: state.settings.emergencyContactName,
             phone: state.settings.emergencyContactPhone,
           });
         }
         if (state.settings.emergencyContact2Phone) {
           contacts.push({
-            name: state.settings.emergencyContact2Name || 'Contact 2',
+            name: state.settings.emergencyContact2Name || '',
             phone: state.settings.emergencyContact2Phone,
           });
         }

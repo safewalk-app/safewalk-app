@@ -125,13 +125,13 @@ export default function ActiveSessionScreen() {
             const contacts = [];
             if (settings.emergencyContactPhone) {
               contacts.push({
-                name: settings.emergencyContactName || 'Contact 1',
+                name: settings.emergencyContactName,
                 phone: settings.emergencyContactPhone,
               });
             }
             if (settings.emergencyContact2Phone) {
               contacts.push({
-                name: settings.emergencyContact2Name || 'Contact 2',
+                name: settings.emergencyContact2Name || '',
                 phone: settings.emergencyContact2Phone,
               });
             }
