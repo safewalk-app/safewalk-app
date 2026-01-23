@@ -195,6 +195,36 @@ export default function ActiveSessionScreen() {
     if (settings.locationEnabled && location) {
       console.log('Position capturée:', location);
     }
+
+    // Si une alerte a été envoyée, envoyer un SMS de confirmation
+    if (sessionState === 'overdue' && alertSMSRef.current) {
+      console.log('📤 Envoi SMS de confirmation "Je suis rentré"...');
+      try {
+        const { sendEmergencySMS } = await import('@/lib/services/sms-service');
+        const result = await sendEmergencySMS({
+          reason: 'confirmation',
+          contactName: settings.emergencyContactName || 'Contact',
+          contactPhone: settings.emergencyContactPhone || '',
+          firstName: settings.firstName || 'Votre contact',
+          note: currentSession?.note,
+          location: location || undefined,
+        });
+        
+        if (result.ok) {
+          console.log('✅ SMS de confirmation envoyé:', result.sid);
+          sendNotification({
+            title: '✅ Contact rassuré',
+            body: `${settings.emergencyContactName} a été informé que vous êtes bien rentré`,
+            data: { type: 'confirmation_sent' },
+          });
+        } else {
+          console.error('❌ Échec envoi SMS confirmation:', result.error);
+        }
+      } catch (error) {
+        console.error('❌ Erreur lors de l\'envoi du SMS de confirmation:', error);
+      }
+    }
+
     await endSession();
     router.push('/');
   };

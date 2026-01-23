@@ -1391,3 +1391,19 @@
 - [x] Corrigé l'appel async dans active-session.tsx
 - [x] Supprimé le doublon SOSConfirmModal
 - [ ] Tester sur Expo Go que la modale s'affiche bien
+
+
+## AMÉLIORATION : SMS CONFIRMATION "JE SUIS RENTRÉ"
+
+### Objectif
+- [ ] Envoyer SMS de confirmation quand utilisateur clique "Je suis rentré"
+- [ ] Uniquement si une alerte a été envoyée avant
+- [ ] Rassurer le contact d'urgence
+
+### Implémentation
+- [x] Modifier handleCompleteSession dans active-session.tsx
+- [x] Vérifier si alerte envoyée (sessionState === 'overdue' && alertSMSRef.current)
+- [x] Appeler sendEmergencySMS avec reason='confirmation'
+- [x] Afficher notification "✅ Contact rassuré"
+- [x] Logs détaillés pour debug
+- [ ] Tester sur Expo Go
