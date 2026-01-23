@@ -1,4 +1,4 @@
-import { View, Text, Pressable, Switch, Alert, ScrollView } from 'react-native';
+import { View, Text, Pressable, Switch, Alert, ScrollView, ActivityIndicator } from 'react-native';
 import { BubbleBackground } from '@/components/ui/bubble-background';
 import { GlassCard } from '@/components/ui/glass-card';
 import { PopTextField } from '@/components/ui/pop-text-field';
@@ -12,7 +12,7 @@ import { ToastPop } from '@/components/ui/toast-pop';
 import { validatePhoneNumber, formatPhoneInput, cleanPhoneNumber } from '@/lib/utils';
 import { checkHealth } from '@/lib/services/api-client';
 import { sendEmergencySMS } from '@/lib/services/sms-service';
-import { ActivityIndicator } from 'react-native';
+import { useLocationPermission } from '@/hooks/use-location-permission';
 
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
@@ -50,7 +50,8 @@ export default function SettingsScreen() {
     }
   };
 
-  const [locationEnabled, setLocationEnabled] = useState(settings.locationEnabled);
+  const locationPermission = useLocationPermission();
+  const [locationEnabled, setLocationEnabled] = useState(locationPermission.enabled);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [phoneError, setPhoneError] = useState<string | null>(null);
@@ -123,18 +124,43 @@ export default function SettingsScreen() {
 
 
 
-  // Autosave location
+  // Synchroniser locationEnabled avec le hook
   useEffect(() => {
-    if (locationEnabled !== settings.locationEnabled) {
-      updateSettings({ locationEnabled });
+    setLocationEnabled(locationPermission.enabled);
+  }, [locationPermission.enabled]);
+
+  // Handler pour le toggle localisation
+  const handleLocationToggle = async (value: boolean) => {
+    const result = await locationPermission.toggleLocation(value);
+
+    if (result.success) {
+      // Succès
+      updateSettings({ locationEnabled: value });
       setToastMessage(
-        locationEnabled
-          ? 'Localisation activée'
+        value
+          ? '✅ Localisation activée'
           : 'Localisation désactivée'
       );
       setShowToast(true);
+    } else if (result.needsSettings) {
+      // Permission refusée => afficher message + bouton Settings
+      Alert.alert(
+        'Permission refusée',
+        'Pour activer la localisation, vous devez autoriser l\'accès dans les réglages de votre téléphone.',
+        [
+          { text: 'Annuler', style: 'cancel' },
+          {
+            text: 'Ouvrir Réglages',
+            onPress: () => locationPermission.openSettings(),
+          },
+        ]
+      );
+    } else if (result.needsPermission) {
+      // Permission refusée après demande
+      setToastMessage('❌ Permission refusée');
+      setShowToast(true);
     }
-  }, [locationEnabled]);
+  };
 
   const handleTestSms = async () => {
     if (!contactPhone) {
@@ -374,9 +400,7 @@ export default function SettingsScreen() {
                   </View>
                   <Switch
                     value={locationEnabled}
-                    onValueChange={(value) => {
-                      setLocationEnabled(value);
-                    }}
+                    onValueChange={handleLocationToggle}
                     trackColor={{ false: '#E5E7EB', true: '#2DE2A6' }}
                     thumbColor="#FFFFFF"
                   />

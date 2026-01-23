@@ -44,10 +44,10 @@ export function useRealTimeLocation(options: UseRealTimeLocationOptions = {}) {
         setIsLoading(true);
         setError(null);
 
-        // Demander la permission
-        const { status } = await Location.requestForegroundPermissionsAsync();
+        // Vérifier la permission (ne PAS demander)
+        const { status } = await Location.getForegroundPermissionsAsync();
         if (status !== 'granted') {
-          setError('Permission de localisation refusée');
+          setError('Permission de localisation non accordée');
           setIsLoading(false);
           return;
         }
@@ -118,8 +118,10 @@ export function useRealTimeLocation(options: UseRealTimeLocationOptions = {}) {
    */
   const getSnapshot = async (): Promise<LocationData | null> => {
     try {
-      const { status } = await Location.requestForegroundPermissionsAsync();
+      // Vérifier la permission (ne PAS demander)
+      const { status } = await Location.getForegroundPermissionsAsync();
       if (status !== 'granted') {
+        console.log('[Location] Permission non accordée, position non disponible');
         return null;
       }
 

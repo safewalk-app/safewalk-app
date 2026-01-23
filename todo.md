@@ -1407,3 +1407,35 @@
 - [x] Afficher notification "✅ Contact rassuré"
 - [x] Logs détaillés pour debug
 - [ ] Tester sur Expo Go
+
+
+## BUG CRITIQUE : TROP D'AUTORISATIONS LOCALISATION
+
+### Problème
+- [ ] App demande trop souvent les permissions de localisation
+- [ ] Popup système répétée
+- [ ] Mauvaise UX
+
+### Règles à implémenter
+- [ ] JAMAIS demander permission au lancement
+- [ ] Demander UNIQUEMENT via toggle "Localisation" dans Paramètres
+- [ ] Si denied : afficher message + bouton "Ouvrir Réglages"
+- [ ] Stocker : locationPermissionAsked, locationPermissionStatus, gpsEnabled
+
+### Logique toggle
+- [ ] Si user active toggle + granted => gpsEnabled=true
+- [ ] Si user active toggle + undetermined => requestPermission() UNE SEULE FOIS
+- [ ] Si user active toggle + denied => gpsEnabled=false + helperText + openSettings()
+
+### Logique SOS/Alerte
+- [ ] Si gpsEnabled=false => SMS sans position
+- [ ] Si gpsEnabled=true + granted => getCurrentPosition()
+- [ ] Si gpsEnabled=true + denied => SMS sans position + message
+
+### Implémentation
+- [x] Créer hook useLocationPermission avec stockage (hooks/use-location-permission.ts)
+- [x] Modifier toggle Paramètres (app/settings.tsx)
+- [x] Modifier use-real-time-location.ts pour ne plus demander permission automatiquement
+- [x] Remplacer requestForegroundPermissionsAsync par getForegroundPermissionsAsync
+- [x] Ajouter Alert pour "Ouvrir Réglages" si permission refusée
+- [ ] Tester sur Expo Go
