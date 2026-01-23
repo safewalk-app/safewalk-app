@@ -36,8 +36,9 @@ export function BigSuccessButton({
     >
       {({ pressed }) => (
         <View
-          className="flex-row items-center justify-center gap-3 rounded-full bg-mint px-8"
+          className="flex-row items-center justify-center gap-3 rounded-full px-8"
           style={{
+            backgroundColor: '#2DE2A6',
             height: 66,
             transform: [{ scale: pressed ? 0.96 : 1 }],
             shadowColor: '#2DE2A6',

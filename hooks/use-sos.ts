@@ -37,6 +37,15 @@ export function useSOS(options: UseSOSOptions) {
   const [error, setError] = useState<string | null>(null);
 
   const triggerSOS = useCallback(async () => {
+    console.log('=== DÉBUT TRIGGER SOS ===');
+    console.log('Session ID:', sessionId);
+    console.log('Settings:', {
+      contact1: settings.emergencyContactPhone,
+      contact2: settings.emergencyContact2Phone,
+      firstName: settings.firstName,
+    });
+    console.log('Location initiale:', initialLocation);
+    
     try {
       setIsLoading(true);
       setError(null);
@@ -151,7 +160,17 @@ export function useSOS(options: UseSOSOptions) {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erreur inconnue';
       console.error('❌ Erreur SOS:', errorMessage);
+      console.error('Stack trace:', err);
       setError(errorMessage);
+      
+      // Afficher une alerte pour informer l'utilisateur
+      const { Alert } = require('react-native');
+      Alert.alert(
+        '❌ Erreur SOS',
+        `Impossible d'envoyer l'alerte: ${errorMessage}`,
+        [{ text: 'OK' }]
+      );
+      
       onError?.(err instanceof Error ? err : new Error(errorMessage));
     } finally {
       setIsLoading(false);

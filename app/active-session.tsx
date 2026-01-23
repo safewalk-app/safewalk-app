@@ -335,7 +335,7 @@ export default function ActiveSessionScreen() {
               <Pressable
                 onPress={() => {
                   Alert.alert(
-                    locationPermission.enabled ? '📍 Position GPS active' : '📍 Position GPS désactivée',
+                     locationPermission.enabled ? 'Position GPS active' : 'Position GPS désactivée',
                     locationPermission.enabled
                       ? 'Votre position GPS est partagée dans les SMS d\'alerte.'
                       : 'Activez la localisation dans Paramètres pour partager votre position en cas d\'alerte.',
@@ -360,7 +360,7 @@ export default function ActiveSessionScreen() {
                 ])}
               >
                 <Text style={{ fontSize: 24 }}>
-                  {locationPermission.enabled ? '🟢' : '🔴'} 📍
+                  {locationPermission.enabled ? '🟢' : '🔴'}
                 </Text>
               </Pressable>
             </View>

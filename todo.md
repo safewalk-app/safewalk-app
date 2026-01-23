@@ -1453,3 +1453,10 @@
 - [x] Si GPS désactivé ou position non disponible => "📍 Position GPS : Non disponible"
 - [x] Contact comprend la situation (alert, sos, followup)
 - [ ] Tester sur Expo Go
+
+
+## BUGS À CORRIGER (signalés par utilisateur - 23/01/2026)
+
+- [x] Enlever l'émoji 📍 de l'indicateur GPS (garder uniquement cercle vert/rouge)
+- [x] Corriger le bouton "Je suis rentré" transparent (rendre visible avec backgroundColor en style)
+- [x] Déboguer le bouton SOS qui n'envoie pas de SMS (ajout logs + Alert en cas d'erreur)
