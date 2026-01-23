@@ -1,0 +1,75 @@
+/**
+ * API Client - Point d'entrée unique pour tous les appels API
+ * 
+ * Configuration:
+ * - URL de base: EXPO_PUBLIC_API_URL (définie dans .env)
+ * - Logs automatiques en développement
+ * - Gestion d'erreurs unifiée
+ */
+
+// URL de l'API depuis les variables d'environnement
+const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://3000-i8rqllu1a9mlzen76xc6u-b9cd8fd2.us2.manus.computer';
+
+// Log de l'URL utilisée (utile pour debug)
+console.log('🔗 [API Client] URL configurée:', API_URL);
+
+/**
+ * Effectuer un appel API
+ */
+async function apiCall<T = any>(
+  endpoint: string,
+  options: RequestInit = {}
+): Promise<T> {
+  const url = `${API_URL}${endpoint}`;
+  
+  console.log(`📡 [API] ${options.method || 'GET'} ${endpoint}`);
+  
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers,
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error(`❌ [API] Erreur ${response.status}:`, data);
+      throw new Error(data.error || `HTTP ${response.status}`);
+    }
+
+    console.log(`✅ [API] Succès:`, data);
+    return data;
+  } catch (error: any) {
+    console.error(`❌ [API] Exception:`, error.message);
+    throw error;
+  }
+}
+
+/**
+ * Health Check
+ * GET /api/sms/health
+ */
+export async function checkHealth(): Promise<{ ok: boolean; service: string; timestamp: string; twilioConfigured: boolean }> {
+  return apiCall('/api/sms/health');
+}
+
+/**
+ * Envoyer un SMS
+ * POST /api/sms/send
+ */
+export async function sendSMS(to: string, message: string): Promise<{ ok: boolean; sid?: string; error?: string }> {
+  return apiCall('/api/sms/send', {
+    method: 'POST',
+    body: JSON.stringify({ to, message }),
+  });
+}
+
+/**
+ * Obtenir l'URL de l'API (pour affichage/debug)
+ */
+export function getAPIUrl(): string {
+  return API_URL;
+}

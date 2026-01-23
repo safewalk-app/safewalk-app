@@ -35,6 +35,8 @@ router.get('/health', (req: Request, res: Response) => {
  * }
  */
 router.post('/send', async (req: Request, res: Response) => {
+  console.log('📨 [SMS] Requête reçue:', { to: req.body.to, messageLength: req.body.message?.length });
+  
   try {
     const { to, message } = req.body;
 
@@ -42,7 +44,7 @@ router.post('/send', async (req: Request, res: Response) => {
     if (!to || !message) {
       console.error('❌ [SMS] Paramètres manquants:', { to: !!to, message: !!message });
       return res.status(400).json({
-        success: false,
+        ok: false,
         error: 'Missing required fields: to, message',
       });
     }
@@ -51,7 +53,7 @@ router.post('/send', async (req: Request, res: Response) => {
     if (!process.env.TWILIO_ACCOUNT_SID || !process.env.TWILIO_AUTH_TOKEN || !process.env.TWILIO_PHONE_NUMBER) {
       console.error('❌ [SMS] Credentials Twilio manquantes');
       return res.status(500).json({
-        success: false,
+        ok: false,
         error: 'Twilio credentials not configured',
       });
     }
@@ -69,7 +71,7 @@ router.post('/send', async (req: Request, res: Response) => {
     console.log(`✅ [SMS] SMS envoyé avec succès (SID: ${result.sid})`);
 
     return res.status(200).json({
-      success: true,
+      ok: true,
       sid: result.sid,
       status: result.status,
       to: result.to,
@@ -86,7 +88,7 @@ router.post('/send', async (req: Request, res: Response) => {
     };
 
     return res.status(500).json({
-      success: false,
+      ok: false,
       error: 'Failed to send SMS',
       details: errorDetails,
     });

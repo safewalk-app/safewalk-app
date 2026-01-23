@@ -10,7 +10,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useState, useEffect } from 'react';
 import { ToastPop } from '@/components/ui/toast-pop';
 import { validatePhoneNumber, formatPhoneInput, cleanPhoneNumber } from '@/lib/utils';
-import { sendSms, checkSmsApiHealth } from '@/lib/services/sms-client';
+import { sendSMS, checkHealth } from '@/lib/services/api-client';
 import { ActivityIndicator } from 'react-native';
 
 export default function SettingsScreen() {
@@ -154,11 +154,11 @@ export default function SettingsScreen() {
     try {
       // Vérifier la santé de l'API d'abord
       console.log('🔍 Vérification API SMS...');
-      const health = await checkSmsApiHealth();
+      const health = await checkHealth();
       
       if (!health.ok) {
-        console.error('❌ API SMS non accessible:', health.error);
-        setToastMessage(`❌ API non accessible: ${health.error}`);
+        console.error('❌ API SMS non accessible');
+        setToastMessage('❌ API non accessible');
         setShowToast(true);
         setIsSendingTestSms(false);
         return;
@@ -175,12 +175,12 @@ export default function SettingsScreen() {
       console.log('✅ API SMS OK, envoi du SMS de test...');
 
       // Envoyer le SMS de test
-      const result = await sendSms({
-        to: cleanedPhone,
-        message: `Test SafeWalk: Ceci est un SMS de test envoyé depuis l'app. Tout fonctionne ! 🚀`,
-      });
+      const result = await sendSMS(
+        cleanedPhone,
+        `Test SafeWalk: Ceci est un SMS de test envoyé depuis l'app. Tout fonctionne ! 🚀`
+      );
 
-      if (result.success) {
+      if (result.ok) {
         console.log('✅ SMS de test envoyé avec succès:', result.sid);
         setToastMessage(`✅ SMS envoyé à ${contactName || contactPhone}`);
       } else {

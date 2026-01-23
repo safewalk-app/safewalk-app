@@ -1283,3 +1283,30 @@
 - [x] Améliorer les messages d'erreur (plus clairs, plus cohérents)
 - [x] Vérifier que tous les boutons ont le même style
 - [x] S'assurer que le design est cohérent sur toutes les pages
+
+
+## FINAL CHECK : 100% CLEAN FRONT/BACK + SMS OK
+
+### Backend
+- [x] GET /health -> {ok:true}
+- [x] POST /sms/send -> body {to, message}
+- [x] URL HTTPS publique (https://3000-i8rqllu1a9mlzen76xc6u-b9cd8fd2.us2.manus.computer)
+- [x] Logs: request reçue + erreur Twilio
+- [x] Vérifier env Twilio: SID, TOKEN, FROM (twilioConfigured: true)
+
+### Front
+- [x] EXPO_PUBLIC_API_URL = "https://3000-i8rqllu1a9mlzen76xc6u-b9cd8fd2.us2.manus.computer"
+- [x] Créer apiClient unique (lib/services/api-client.ts)
+- [x] Bouton "Test SMS" dans Paramètres (déjà implémenté, mis à jour pour utiliser apiClient)
+- [x] Afficher "✅ envoyé" ou erreur exacte
+
+### Cohérence
+- [x] Front appelle {API_URL}/health et {API_URL}/sms/send
+- [x] Back répond en JSON: succès {ok:true, sid:"..."}, erreur {ok:false, error:"..."}
+
+### Tests
+- [x] Test backend: /health -> ok (curl réussi)
+- [x] Test backend: /sms/send -> SMS envoyé (curl réussi, SID reçu)
+- [ ] Sur téléphone: /health -> ok (test utilisateur)
+- [ ] Dans l'app: Test SMS -> SMS reçu (test utilisateur)
+- [ ] Déclencher alerte -> SMS reçu (test utilisateur)
