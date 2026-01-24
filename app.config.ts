@@ -52,9 +52,8 @@ const config: ExpoConfig = {
     bundleIdentifier: env.iosBundleId,
     "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
-        "NSLocationWhenInUseUsageDescription": "SafeWalk a besoin de votre position pour vous proteger",
-        "NSLocationAlwaysAndWhenInUseUsageDescription": "SafeWalk utilise votre position pour les alertes",
-        "NSLocationAlwaysUsageDescription": "SafeWalk utilise votre position en arriere-plan"
+        "NSLocationWhenInUseUsageDescription": "SafeWalk a besoin de votre position GPS pour partager votre localisation en cas d'alerte d'urgence à vos contacts.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "SafeWalk utilise votre position pour envoyer votre localisation à vos contacts d'urgence si vous ne confirmez pas votre retour."
       }
   },
   android: {
@@ -70,8 +69,7 @@ const config: ExpoConfig = {
     permissions: [
       "POST_NOTIFICATIONS",
       "ACCESS_FINE_LOCATION",
-      "ACCESS_COARSE_LOCATION",
-      "ACCESS_BACKGROUND_LOCATION"
+      "ACCESS_COARSE_LOCATION"
     ],
     intentFilters: [
       {
@@ -97,21 +95,16 @@ const config: ExpoConfig = {
     [
       "expo-location",
       {
-        locationAlwaysAndWhenInUsePermission: "Allow SafeWalk to use your location for safety alerts."
+        locationAlwaysAndWhenInUsePermission: "SafeWalk a besoin de votre position GPS pour partager votre localisation en cas d'alerte d'urgence à vos contacts."
       }
     ],
     [
-      "expo-audio",
+      "expo-notifications",
       {
-        microphonePermission: "Allow $(PRODUCT_NAME) to access your microphone.",
-      },
-    ],
-    [
-      "expo-video",
-      {
-        supportsBackgroundPlayback: true,
-        supportsPictureInPicture: true,
-      },
+        icon: "./assets/images/icon.png",
+        color: "#0a7ea4",
+        sounds: ["./assets/sounds/notification.wav"]
+      }
     ],
     [
       "expo-splash-screen",

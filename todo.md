@@ -1477,3 +1477,36 @@
   - Solution: Mise à jour de la variable d'environnement
   - Tests: 3/3 passés (URL valide, health OK, SMS envoyé)
 - [ ] Tester Test SMS, Alerte et SOS depuis Expo Go
+
+
+## CONFORMITÉ APP STORE / GOOGLE PLAY STORE
+
+### Configuration générale
+- [x] Vérifier app.config.ts (nom, version, bundle ID, permissions)
+  - Supprimé expo-audio et expo-video (non utilisés)
+  - Supprimé ACCESS_BACKGROUND_LOCATION (trop invasif)
+  - Ajouté expo-notifications dans plugins
+  - Descriptions de permissions corrigées (accents)
+- [x] Vérifier que toutes les permissions sont justifiées
+  - Localisation : partage position GPS en cas d'alerte uniquement
+  - Notifications : rappels et alertes
+- [x] Vérifier les icônes (icon.png, splash-icon.png, favicon.png, android icons)
+  - Tous les fichiers présents et valides
+  - Logo bouclier bleu/violet avec coche blanche
+- [x] Vérifier la description et métadonnées
+  - Créé STORE_LISTING.md avec descriptions FR/EN
+  - Keywords, catégorie, age rating définis
+
+### Permissions requises
+- [x] Localisation (expo-location) - Justification : partage position GPS en cas d'alerte
+- [x] Notifications (expo-notifications) - Justification : rappels et alertes
+- [x] Pas de permissions inutiles - Nettoyé expo-audio, expo-video, background location
+
+### Privacy Policy
+- [x] Créer une Privacy Policy claire - PRIVACY_POLICY.md
+- [x] Expliquer l'utilisation des données (localisation, contacts)
+- [x] Expliquer le stockage local (AsyncStorage)
+
+### Synchronisation
+- [x] Redémarrer le serveur pour appliquer les changements
+- [ ] Vérifier que l'app se charge correctement sur Expo Go
