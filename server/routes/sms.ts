@@ -68,13 +68,23 @@ router.post('/send', async (req: Request, res: Response) => {
       to: to,
     });
 
-    console.log(`✅ [SMS] SMS envoyé avec succès (SID: ${result.sid})`);
+    console.log(`✅ [SMS] SMS envoyé avec succès`);
+    console.log(`   SID: ${result.sid}`);
+    console.log(`   Status: ${result.status}`);
+    console.log(`   To: ${result.to}`);
+    console.log(`   From: ${result.from}`);
+    console.log(`   ErrorCode: ${result.errorCode || 'none'}`);
+    console.log(`   ErrorMessage: ${result.errorMessage || 'none'}`);
+    console.log(`   Price: ${result.price || 'pending'}`);
+    console.log(`   PriceUnit: ${result.priceUnit || 'pending'}`);
 
     return res.status(200).json({
       ok: true,
       sid: result.sid,
       status: result.status,
       to: result.to,
+      errorCode: result.errorCode,
+      errorMessage: result.errorMessage,
     });
   } catch (error: any) {
     console.error('❌ [SMS] Erreur Twilio:', error);

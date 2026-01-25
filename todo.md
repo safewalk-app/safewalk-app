@@ -1580,3 +1580,20 @@
   - 0 erreur TypeScript
   - Serveur dev stable
 - [ ] Tester sur Expo Go
+
+
+## PROBLÈME CRITIQUE : AUCUN SMS REÇU (signalé par utilisateur) - RÉSOLU
+
+- [x] Analyser pourquoi AUCUN SMS n'est reçu (alerte, SOS, confirmation)
+- [x] Vérifier configuration Twilio (credentials, compte actif, solde) - OK
+- [x] Tester API backend directement avec curl - OK (SID reçu)
+- [x] Analyser les logs serveur en temps réel pendant envoi
+- [x] Vérifier format des numéros de téléphone (normalisation) - OK
+- [x] Vérifier que l'URL API est correcte dans l'app - OK
+- [x] Tester depuis l'app avec logs détaillés
+- [x] Identifier la cause racine (Twilio, backend, client, réseau)
+  - Cause: Compte Twilio en mode Trial
+  - Solution: Numéro de téléphone vérifié dans Twilio dashboard
+  - Les SMS ne sont envoyés qu'aux numéros vérifiés en mode Trial
+- [x] Corriger le problème identifié - Utilisateur a vérifié son numéro
+- [x] Tester sur Expo Go avec vrai numéro - Tout est bon

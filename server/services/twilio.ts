@@ -40,7 +40,13 @@ export async function sendAlertSMS(
       to: phoneNumber,
     });
 
-    console.log(`✅ SMS envoyé avec succès à ${phoneNumber} (SID: ${result.sid})`);
+    console.log(`✅ SMS ALERTE envoyé avec succès`);
+    console.log(`   À: ${phoneNumber}`);
+    console.log(`   De: ${twilioPhoneNumber}`);
+    console.log(`   SID: ${result.sid}`);
+    console.log(`   Status: ${result.status}`);
+    console.log(`   ErrorCode: ${result.errorCode || 'none'}`);
+    console.log(`   ErrorMessage: ${result.errorMessage || 'none'}`);
   } catch (error) {
     console.error(`❌ Erreur lors de l'envoi du SMS à ${phoneNumber}:`, error);
     throw error;
@@ -66,7 +72,10 @@ export async function sendCheckInReminderSMS(phoneNumber: string): Promise<void>
       to: phoneNumber,
     });
 
-    console.log(`✅ SMS de rappel envoyé à ${phoneNumber} (SID: ${result.sid})`);
+    console.log(`✅ SMS RAPPEL envoyé avec succès`);
+    console.log(`   À: ${phoneNumber}`);
+    console.log(`   SID: ${result.sid}`);
+    console.log(`   Status: ${result.status}`);
   } catch (error) {
     console.error(`❌ Erreur lors de l'envoi du SMS de rappel à ${phoneNumber}:`, error);
     throw error;
@@ -92,7 +101,10 @@ export async function sendCheckInConfirmationSMS(phoneNumber: string): Promise<v
       to: phoneNumber,
     });
 
-    console.log(`✅ SMS de confirmation envoyé à ${phoneNumber} (SID: ${result.sid})`);
+    console.log(`✅ SMS CONFIRMATION envoyé avec succès`);
+    console.log(`   À: ${phoneNumber}`);
+    console.log(`   SID: ${result.sid}`);
+    console.log(`   Status: ${result.status}`);
   } catch (error) {
     console.error(`❌ Erreur lors de l'envoi du SMS de confirmation à ${phoneNumber}:`, error);
     throw error;
