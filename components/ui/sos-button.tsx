@@ -20,14 +20,18 @@ export function SOSButton({ onPress, isLoading = false, disabled = false, classN
   const [showConfirmation, setShowConfirmation] = useState(false);
 
   const handleSOSPress = async () => {
+    console.log('🚨 [SOSButton] Bouton SOS cliqué');
+    
     // Haptic feedback intense
     try {
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      console.log('✅ [SOSButton] Haptic feedback OK');
     } catch (err) {
-      // Fallback silencieux
+      console.log('⚠️ [SOSButton] Haptic feedback échoué:', err);
     }
 
     // Afficher la confirmation
+    console.log('📱 [SOSButton] Affichage modale de confirmation');
     setShowConfirmation(true);
   };
 

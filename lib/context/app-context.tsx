@@ -258,15 +258,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     // Envoyer SMS via sendEmergencySMS
     const { sendEmergencySMS } = await import('@/lib/services/sms-service');
+    const { cleanPhoneNumber } = await import('@/lib/utils');
     
     try {
       // Envoyer au contact 1
       if (state.settings.emergencyContactPhone) {
-        console.log('📤 [triggerAlert] Envoi SMS au contact 1...');
+        const cleanedPhone1 = cleanPhoneNumber(state.settings.emergencyContactPhone);
+        console.log('📤 [triggerAlert] Envoi SMS au contact 1:', cleanedPhone1);
         const result1 = await sendEmergencySMS({
           reason: 'alert',
           contactName: state.settings.emergencyContactName || 'Contact',
-          contactPhone: state.settings.emergencyContactPhone,
+          contactPhone: cleanedPhone1,
           firstName: state.settings.firstName,
           note: state.currentSession.note,
           location,

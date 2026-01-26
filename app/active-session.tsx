@@ -16,6 +16,7 @@ import { SOSButton } from '@/components/ui/sos-button';
 import { useRouter } from 'expo-router';
 import { useEffect, useState, useRef } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import * as Notifications from 'expo-notifications';
 
 export default function ActiveSessionScreen() {
   const router = useRouter();
@@ -24,7 +25,7 @@ export default function ActiveSessionScreen() {
   const { confirmCheckIn: confirmCheckInNotif } = useCheckInNotifications();
   const { location } = useRealTimeLocation({ enabled: settings.locationEnabled });
   const locationPermission = useLocationPermission();
-  const { sendNotification, scheduleNotification, cancelNotification } = useNotifications();
+  const { sendNotification, scheduleNotification, cancelNotification, cancelAllNotifications } = useNotifications();
   const { triggerSOS, isLoading: sosLoading } = useSOS({
     sessionId: currentSession?.id || '',
     location: location || undefined,
@@ -61,6 +62,26 @@ export default function ActiveSessionScreen() {
     locationRef.current = location;
   }, [location]);
 
+  // Écouter les réponses aux notifications (actions)
+  useEffect(() => {
+    const subscription = Notifications.addNotificationResponseReceivedListener(async (response) => {
+      const actionId = response.actionIdentifier;
+      console.log('👆 Action notification:', actionId);
+
+      if (actionId === 'confirm_safe') {
+        // L'utilisateur a cliqué sur "Je suis rentré" dans la notification
+        console.log('✅ Confirmation depuis notification');
+        await handleCompleteSession();
+      } else if (actionId === 'trigger_sos') {
+        // L'utilisateur a cliqué sur "SOS" dans la notification
+        console.log('🚨 SOS depuis notification');
+        await triggerSOS();
+      }
+    });
+
+    return () => subscription.remove();
+  }, [currentSession, triggerSOS, endSession, settings, location]);
+
   useEffect(() => {
     // Ne rediriger que si on est sur la page active-session ET qu'il n'y a pas de session
     // Éviter les redirections involontaires lors de la navigation
@@ -93,16 +114,49 @@ export default function ActiveSessionScreen() {
         setRemainingTime(
           `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
         );
-        // Programmer notification 5 minutes avant l'heure limite (une seule fois)
+        // Programmer toutes les notifications (une seule fois au démarrage)
         if (!timerNotificationRef.current) {
+          timerNotificationRef.current = 'scheduled';
+          
+          // 1. Notification 5 min avant l'heure limite
           const fiveMinBefore = limitTime - (5 * 60 * 1000);
           if (fiveMinBefore > now) {
-            timerNotificationRef.current = 'scheduled';
             scheduleNotification({
               title: '⚠️ Petit check',
               body: 'Tout va bien ? 😊 Confirme ton retour dans 5 minutes.',
-              data: { type: 'timer_warning' },
+              data: { type: 'timer_warning', sessionId: currentSession.id },
             }, new Date(fiveMinBefore));
+          }
+          
+          // 2. Notification à la deadline (heure limite)
+          if (limitTime > now) {
+            scheduleNotification({
+              title: '⏰ Heure de retour dépassée',
+              body: 'Confirme que tout va bien ! Sinon tes contacts seront alertés dans 15 min.',
+              data: { type: 'deadline_reached', sessionId: currentSession.id },
+              categoryIdentifier: 'session_alert',
+            }, new Date(limitTime));
+          }
+          
+          // 3. Notification à la deadline finale (avant alerte)
+          const deadlineWarning = deadline - (2 * 60 * 1000); // 2 min avant alerte
+          if (deadlineWarning > now) {
+            scheduleNotification({
+              title: '🚨 Dernière chance',
+              body: 'Tes contacts seront alertés dans 2 minutes ! Confirme maintenant.',
+              data: { type: 'final_warning', sessionId: currentSession.id },
+              categoryIdentifier: 'session_alert',
+            }, new Date(deadlineWarning));
+          }
+          
+          // 4. Notification quand l'alerte est déclenchée
+          if (deadline > now) {
+            scheduleNotification({
+              title: '🚨 Alerte déclenchée',
+              body: 'Tes contacts d\'urgence ont été alertés. Confirme que tout va bien.',
+              data: { type: 'alert_triggered', sessionId: currentSession.id },
+              categoryIdentifier: 'session_alert',
+            }, new Date(deadline));
           }
         }
       } else if (now < deadline) {
@@ -247,6 +301,8 @@ export default function ActiveSessionScreen() {
   };
 
   const handleConfirmCheckIn = async () => {
+    // Annuler toutes les notifications programmées (session terminée)
+    await cancelAllNotifications();
     await confirmCheckIn();
     setShowCheckInModal(false);
   };
@@ -275,6 +331,8 @@ export default function ActiveSessionScreen() {
           text: 'Oui',
           style: 'destructive',
           onPress: async () => {
+            // Annuler toutes les notifications programmées
+            await cancelAllNotifications();
             // Capturer la position GPS si activée
             if (settings.locationEnabled && location) {
               console.log('Position capturée:', location);

@@ -1610,3 +1610,83 @@
   - Ajouté type: 'timeInterval' + repeats: false pour number
 - [x] Le trigger doit contenir 'type' ou 'channelId' - Corrigé
 - [ ] Tester la notification "5 min avant" sur Expo Go
+
+
+## BUG : Alerte automatique ne fonctionne pas en arrière-plan (RÉSOLÛ)
+
+- [x] Analyser le bouton SOS dans active-session.tsx - Fonctionne
+- [x] Analyser le hook useSOS (triggerSOS) - Fonctionne
+- [x] Vérifier la modale de confirmation SOS - Fonctionne
+- [x] Identifier pourquoi rien ne se passe au clic
+  - Cause: L'alerte automatique ne s'envoie pas quand l'app est en arrière-plan
+  - React Native suspend l'exécution JS en arrière-plan
+  - Le timer s'arrête, donc l'alerte ne se déclenche jamais
+- [x] Corriger le problème - Solution hybride choisie
+- [ ] Tester sur Expo Go
+
+
+## SOLUTION HYBRIDE : Alertes en arrière-plan
+
+### Phase 1 : Programmer toutes les notifications au démarrage
+- [ ] Programmer notification "5 min avant" (déjà fait)
+- [ ] Programmer notification à la deadline
+- [ ] Programmer notifications de relance (+5 min, +10 min, +15 min)
+- [ ] Annuler toutes les notifications programmées quand session se termine
+
+### Phase 2 : Actions dans les notifications
+- [ ] Ajouter action "Je suis rentré" dans les notifications
+- [ ] Ajouter action "SOS" dans les notifications
+- [ ] Configurer les catégories de notifications Expo
+
+### Phase 3 : Gérer les réponses aux actions
+- [ ] Écouter les réponses aux notifications
+- [ ] Action "Je suis rentré" → endSession()
+- [ ] Action "SOS" → triggerSOS()
+- [ ] Mettre à jour l'UI si l'app est ouverte
+
+### Phase 4 : Keep Awake amélioré
+- [ ] Vérifier que useKeepAwake est bien actif pendant la session
+- [ ] Tester que le timer continue en arrière-plan
+
+### Tests
+- [ ] Tester notification programmée avec app fermée
+- [ ] Tester action "Je suis rentré" depuis notification
+- [ ] Tester action "SOS" depuis notification
+- [ ] Tester avec app en arrière-plan
+- [ ] Tester avec écran verrouillé
+
+
+## ACTIONS DANS LES NOTIFICATIONS (V1.47)
+
+### Objectif
+- Permettre à l'utilisateur de répondre aux notifications sans ouvrir l'app
+- Boutons directement dans les notifications iOS/Android
+
+### Implémentation
+- [x] Configurer catégories de notifications avec actions
+  - Catégorie "session_alert" avec 2 actions
+  - Action "confirm_safe" : "✅ Je suis rentré" (ne pas ouvrir l'app)
+  - Action "trigger_sos" : "🚨 SOS" (ouvrir l'app)
+- [x] Ajouter categoryIdentifier à NotificationOptions interface
+- [x] Ajouter categoryIdentifier aux notifications programmées
+  - Notification "Heure de retour dépassée"
+  - Notification "Dernière chance"
+  - Notification "Alerte déclenchée"
+- [x] Ajouter listener de réponse aux notifications
+  - Écouter addNotificationResponseReceivedListener
+  - Appeler handleCompleteSession() si "confirm_safe"
+  - Appeler triggerSOS() si "trigger_sos"
+
+### Tests à effectuer
+- [ ] Démarrer une session avec deadline courte (2-3 minutes)
+- [ ] Fermer/backgrounder l'app
+- [ ] Vérifier que les notifications apparaissent aux bons moments
+- [ ] Vérifier que les boutons d'action sont visibles
+- [ ] Tester le bouton "Je suis rentré" depuis la notification
+- [ ] Tester le bouton "SOS" depuis la notification
+- [ ] Vérifier que les actions fonctionnent correctement
+
+### Fichiers modifiés
+- hooks/use-notifications.ts (catégories + categoryIdentifier)
+- app/active-session.tsx (listener + categoryIdentifier sur notifications)
+- app/about.tsx (import Alert manquant)

@@ -3,6 +3,26 @@ import * as Notifications from 'expo-notifications';
 import * as Haptics from 'expo-haptics';
 import { Platform } from 'react-native';
 
+// Configurer les catégories de notifications avec actions
+if (Platform.OS !== 'web') {
+  Notifications.setNotificationCategoryAsync('session_alert', [
+    {
+      identifier: 'confirm_safe',
+      buttonTitle: '✅ Je suis rentré',
+      options: {
+        opensAppToForeground: false,
+      },
+    },
+    {
+      identifier: 'trigger_sos',
+      buttonTitle: '🚨 SOS',
+      options: {
+        opensAppToForeground: true,
+      },
+    },
+  ]).catch(err => console.error('⚠️ Erreur config catégories:', err));
+}
+
 // Configurer le gestionnaire de notifications
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -19,6 +39,7 @@ export interface NotificationOptions {
   body: string;
   data?: Record<string, any>;
   delay?: number; // en secondes
+  categoryIdentifier?: string; // Catégorie pour actions (iOS/Android)
 }
 
 /**
@@ -88,6 +109,7 @@ export function useNotifications() {
           data: options.data || {},
           sound: 'default',
           badge: 1,
+          categoryIdentifier: options.categoryIdentifier,
         },
         trigger: null, // null = immédiate
       });
@@ -129,6 +151,7 @@ export function useNotifications() {
           data: options.data || {},
           sound: 'default',
           badge: 1,
+          categoryIdentifier: options.categoryIdentifier,
         },
         trigger: trigger as any,
       });
