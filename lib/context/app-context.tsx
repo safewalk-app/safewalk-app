@@ -171,6 +171,36 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     dispatch({ type: 'SET_SESSION', payload: session });
     await AsyncStorage.setItem('safewalk_session', JSON.stringify(session));
+    
+    // Synchroniser avec le serveur backend
+    try {
+      const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/sessions/sync`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: session.id,
+          userId: 1, // TODO: récupérer le vrai userId depuis auth
+          startTime: new Date(session.startTime),
+          limitTime: new Date(session.limitTime),
+          deadline: new Date(session.deadline),
+          status: session.status,
+          note: session.note,
+          extensionsCount: session.extensionsCount,
+          checkInConfirmed: session.checkInConfirmed ? 1 : 0,
+          emergencyContactName: state.settings.emergencyContactName,
+          emergencyContactPhone: state.settings.emergencyContactPhone,
+          firstName: state.settings.firstName,
+        }),
+      });
+      
+      if (response.ok) {
+        console.log('✅ Session synchronisée avec le serveur');
+      } else {
+        console.warn('⚠️ Échec synchronisation session:', await response.text());
+      }
+    } catch (error) {
+      console.error('❌ Erreur synchronisation session:', error);
+    }
   };
 
   const endSession = async () => {

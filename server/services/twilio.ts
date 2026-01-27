@@ -5,8 +5,15 @@ const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
 const twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER;
 
+console.log('🔑 [Twilio] Chargement des credentials...');
+console.log('   TWILIO_ACCOUNT_SID:', accountSid ? `${accountSid.substring(0, 10)}...` : 'NON DÉFINI');
+console.log('   TWILIO_AUTH_TOKEN:', authToken ? `${authToken.substring(0, 8)}...` : 'NON DÉFINI');
+console.log('   TWILIO_PHONE_NUMBER:', twilioPhoneNumber || 'NON DÉFINI');
+
 if (!accountSid || !authToken || !twilioPhoneNumber) {
   console.warn('⚠️ Twilio credentials not configured. SMS will not be sent.');
+} else {
+  console.log('✅ [Twilio] Client initialisé avec succès');
 }
 
 const client = accountSid && authToken ? twilio(accountSid, authToken) : null;

@@ -79,6 +79,13 @@ async function startServer() {
 
   server.listen(port, '0.0.0.0', () => {
     console.log(`[api] server listening on port ${port}`);
+    
+    // Démarrer le moniteur de sessions
+    import('../services/session-monitor').then(({ startSessionMonitor }) => {
+      startSessionMonitor();
+    }).catch(err => {
+      console.error('❌ Failed to start session monitor:', err);
+    });
   });
 }
 

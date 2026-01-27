@@ -3,6 +3,7 @@ import webhookRoutes from "../routes/webhooks";
 import sosRoutes from "../routes/sos";
 import friendlySmsRoutes from "../routes/friendly-sms";
 import smsRoutes from "../routes/sms";
+import sessionsRoutes from "../routes/sessions";
 
 const router = Router();
 
@@ -11,5 +12,6 @@ router.use("/webhooks", webhookRoutes);
 router.use("/sos", sosRoutes);
 router.use("/friendly-sms", friendlySmsRoutes);
 router.use("/sms", smsRoutes);
+router.use("/sessions", sessionsRoutes);
 
 export default router;

@@ -14,6 +14,13 @@ if (Platform.OS !== 'web') {
       },
     },
     {
+      identifier: 'extend_session',
+      buttonTitle: '⏰ +15 min',
+      options: {
+        opensAppToForeground: false,
+      },
+    },
+    {
       identifier: 'trigger_sos',
       buttonTitle: '🚨 SOS',
       options: {

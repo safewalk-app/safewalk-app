@@ -72,6 +72,10 @@ export default function ActiveSessionScreen() {
         // L'utilisateur a cliqué sur "Je suis rentré" dans la notification
         console.log('✅ Confirmation depuis notification');
         await handleCompleteSession();
+      } else if (actionId === 'extend_session') {
+        // L'utilisateur a cliqué sur "+15 min" dans la notification
+        console.log('⏰ Extension depuis notification');
+        await handleExtendSession();
       } else if (actionId === 'trigger_sos') {
         // L'utilisateur a cliqué sur "SOS" dans la notification
         console.log('🚨 SOS depuis notification');
@@ -80,7 +84,7 @@ export default function ActiveSessionScreen() {
     });
 
     return () => subscription.remove();
-  }, [currentSession, triggerSOS, endSession, settings, location]);
+  }, [currentSession, triggerSOS, endSession, settings, location, addTimeToSession]);
 
   useEffect(() => {
     // Ne rediriger que si on est sur la page active-session ET qu'il n'y a pas de session

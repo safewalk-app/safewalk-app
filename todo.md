@@ -1690,3 +1690,68 @@
 - hooks/use-notifications.ts (catégories + categoryIdentifier)
 - app/active-session.tsx (listener + categoryIdentifier sur notifications)
 - app/about.tsx (import Alert manquant)
+
+
+## CORRECTION ERREUR TWILIO AUTHENTICATION (V1.48)
+
+### Problème identifié
+- [ ] Erreur Twilio 20003: "Authenticate" (status 401)
+- [ ] Les identifiants Twilio ne sont pas configurés ou sont incorrects
+- [ ] Tous les SMS échouent (Test SMS, Alerte, SOS, Confirmation)
+
+### Diagnostic
+- [ ] Vérifier les variables d'environnement Twilio
+- [ ] Vérifier la configuration du service Twilio
+- [ ] Tester la connexion Twilio
+
+### Correction
+- [ ] Configurer TWILIO_ACCOUNT_SID
+- [ ] Configurer TWILIO_AUTH_TOKEN
+- [ ] Configurer TWILIO_PHONE_NUMBER
+- [ ] Redémarrer le serveur backend
+
+### Tests
+- [ ] Test SMS depuis Paramètres
+- [ ] Test alerte automatique
+- [ ] Test SOS
+- [ ] Test SMS de confirmation
+
+
+## BOUTON +15 MIN DANS NOTIFICATIONS + SMS EN ARRIÈRE-PLAN (V1.48)
+
+### Objectif
+- Permettre à l'utilisateur de prolonger sa session directement depuis la notification
+- Garantir l'envoi de SMS même quand l'app est fermée ou en arrière-plan
+
+### Phase 1 : Action +15 min dans notifications
+- [x] Ajouter action "extend_session" à la catégorie "session_alert"
+- [x] Configurer le bouton "+15 min" (icône ⏰, ne pas ouvrir l'app)
+- [x] Ajouter categoryIdentifier aux notifications concernées
+
+### Phase 2 : Listener pour prolonger session
+- [x] Détecter l'action "extend_session" dans le listener
+- [x] Implémenter la fonction handleExtendSession()
+- [x] Mettre à jour la deadline dans AsyncStorage
+- [x] Reprogrammer les notifications avec nouvelle deadline
+- [x] Afficher toast de confirmation
+
+### Phase 3 : SMS en arrière-plan (Serveur autonome)
+- [x] Créer modèle Session dans la base de données
+- [x] Créer endpoints API pour synchroniser sessions (create, update, complete)
+- [x] Implémenter cron job serveur pour surveiller sessions actives
+- [x] Envoyer SMS automatiquement depuis le serveur à l'heure limite
+- [x] Modifier app pour synchroniser avec serveur (startSession, endSession, addTime)
+- [ ] Tester envoi SMS avec app fermée
+
+### Tests
+- [ ] Tester bouton +15 min depuis notification
+- [ ] Vérifier que la session est prolongée correctement
+- [ ] Tester envoi SMS avec app en arrière-plan
+- [ ] Tester envoi SMS avec app complètement fermée
+- [ ] Vérifier que les notifications sont reprogrammées
+
+### Fichiers à modifier
+- hooks/use-notifications.ts (ajouter action extend_session)
+- app/active-session.tsx (listener + handleExtendSession)
+- lib/context/app-context.tsx (fonction extendSession)
+- server/services/background-tasks.ts (nouveau fichier pour tâches background)
