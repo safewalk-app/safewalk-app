@@ -21,7 +21,7 @@ import * as Notifications from 'expo-notifications';
 export default function ActiveSessionScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { currentSession, endSession, cancelSession, addTimeToSession, confirmCheckIn, settings, triggerAlert } = useApp();
+  const { currentSession, endSession, cancelSession, addTimeToSession, confirmCheckIn, settings, triggerAlert, syncStatus } = useApp();
   const { confirmCheckIn: confirmCheckInNotif } = useCheckInNotifications();
   const { location } = useRealTimeLocation({ enabled: settings.locationEnabled });
   const locationPermission = useLocationPermission();
@@ -397,8 +397,36 @@ export default function ActiveSessionScreen() {
               <Text className="text-4xl font-bold text-foreground">
                 Sortie en cours
               </Text>
-              {/* Indicateur GPS */}
-              <Pressable
+              <View className="flex-row items-center gap-2">
+                {/* Indicateur de synchronisation */}
+                <Pressable
+                  onPress={() => {
+                    const statusMessages = {
+                      synced: 'Session sauvegardée sur le serveur. Vos contacts seront alertés automatiquement même si l\'app est fermée.',
+                      syncing: 'Synchronisation en cours...',
+                      offline: 'Impossible de contacter le serveur. Les alertes automatiques ne fonctionneront pas.',
+                    };
+                    Alert.alert(
+                      syncStatus === 'synced' ? '☁️ Synchronisé' : syncStatus === 'syncing' ? '🔄 Synchronisation...' : '⚠️ Hors ligne',
+                      statusMessages[syncStatus],
+                      [{ text: 'OK' }]
+                    );
+                  }}
+                  style={({ pressed }) => ([
+                    {
+                      opacity: pressed ? 0.6 : 1,
+                      padding: 8,
+                      borderRadius: 12,
+                      backgroundColor: syncStatus === 'synced' ? 'rgba(45, 226, 166, 0.15)' : syncStatus === 'syncing' ? 'rgba(108, 99, 255, 0.15)' : 'rgba(255, 77, 77, 0.15)',
+                    },
+                  ])}
+                >
+                  <Text style={{ fontSize: 24 }}>
+                    {syncStatus === 'synced' ? '☁️' : syncStatus === 'syncing' ? '🔄' : '⚠️'}
+                  </Text>
+                </Pressable>
+                {/* Indicateur GPS */}
+                <Pressable
                 onPress={() => {
                   Alert.alert(
                      locationPermission.enabled ? 'Position GPS active' : 'Position GPS désactivée',
@@ -429,6 +457,7 @@ export default function ActiveSessionScreen() {
                   {locationPermission.enabled ? '🟢' : '🔴'}
                 </Text>
               </Pressable>
+              </View>
             </View>
           </View>
         </ScreenTransition>

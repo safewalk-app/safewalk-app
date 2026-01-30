@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useReducer, useEffect, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Notifications from 'expo-notifications';
 import { sendFriendlyAlertSMS } from '../services/friendly-sms-client';
 import { sendFollowUpAlertSMS, sendConfirmationSMS } from '../services/follow-up-sms-client';
 import { useNotifications } from '@/hooks/use-notifications';
@@ -41,10 +42,13 @@ export interface Session {
   checkInSecondNotifTime?: number; // timestamp de la 2e notification check-in
 }
 
+export type SyncStatus = 'synced' | 'syncing' | 'offline';
+
 export interface AppContextType {
   settings: UserSettings;
   currentSession: Session | null;
   history: Session[];
+  syncStatus: SyncStatus;
   updateSettings: (settings: Partial<UserSettings>) => Promise<void>;
   startSession: (limitTime: number, note?: string) => Promise<void>;
   endSession: () => Promise<void>;
@@ -73,16 +77,19 @@ type Action =
   | { type: 'SET_SETTINGS'; payload: UserSettings }
   | { type: 'SET_SESSION'; payload: Session | null }
   | { type: 'SET_HISTORY'; payload: Session[] }
-  | { type: 'UPDATE_SESSION'; payload: Partial<Session> };
+  | { type: 'UPDATE_SESSION'; payload: Partial<Session> }
+  | { type: 'SET_SYNC_STATUS'; payload: SyncStatus };
 
 interface State {
   settings: UserSettings;
+  syncStatus: SyncStatus;
   currentSession: Session | null;
   history: Session[];
 }
 
 const initialState: State = {
   settings: defaultSettings,
+  syncStatus: 'synced',
   currentSession: null,
   history: [],
 };
@@ -102,6 +109,8 @@ function appReducer(state: State, action: Action): State {
           ? { ...state.currentSession, ...action.payload }
           : null,
       };
+    case 'SET_SYNC_STATUS':
+      return { ...state, syncStatus: action.payload };
     default:
       return state;
   }
@@ -166,6 +175,74 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               console.log('✅ Session active restaurée depuis le serveur');
               dispatch({ type: 'SET_SESSION', payload: localSession });
               await AsyncStorage.setItem('safewalk_session', JSON.stringify(localSession));
+              
+              // CORRECTION CRITIQUE : Reprogrammer les notifications après restauration
+              // On doit reprogrammer les 4 notifications comme dans active-session.tsx
+              const now = Date.now();
+              const { limitTime, deadline } = localSession;
+              
+              // 1. Notification 5 min avant l'heure limite
+              const fiveMinBefore = limitTime - (5 * 60 * 1000);
+              if (fiveMinBefore > now) {
+                await Notifications.scheduleNotificationAsync({
+                  content: {
+                    title: '⚠️ Petit check',
+                    body: 'Tout va bien ? 😊 Confirme ton retour dans 5 minutes.',
+                    data: { type: 'timer_warning', sessionId: localSession.id },
+                    sound: 'default',
+                    badge: 1,
+                  },
+                  trigger: { type: 'date' as const, date: new Date(fiveMinBefore) } as any,
+                });
+              }
+              
+              // 2. Notification à la deadline (heure limite)
+              if (limitTime > now) {
+                await Notifications.scheduleNotificationAsync({
+                  content: {
+                    title: '⏰ Heure de retour dépassée',
+                    body: 'Confirme que tout va bien ! Sinon tes contacts seront alertés dans 15 min.',
+                    data: { type: 'deadline_reached', sessionId: localSession.id },
+                    sound: 'default',
+                    badge: 1,
+                    categoryIdentifier: 'session_alert',
+                  },
+                  trigger: { type: 'date' as const, date: new Date(limitTime) } as any,
+                });
+              }
+              
+              // 3. Notification à la deadline finale (avant alerte)
+              const deadlineWarning = deadline - (2 * 60 * 1000);
+              if (deadlineWarning > now) {
+                await Notifications.scheduleNotificationAsync({
+                  content: {
+                    title: '🚨 Dernière chance',
+                    body: 'Tes contacts seront alertés dans 2 minutes ! Confirme maintenant.',
+                    data: { type: 'final_warning', sessionId: localSession.id },
+                    sound: 'default',
+                    badge: 1,
+                    categoryIdentifier: 'session_alert',
+                  },
+                  trigger: { type: 'date' as const, date: new Date(deadlineWarning) } as any,
+                });
+              }
+              
+              // 4. Notification quand l'alerte est déclenchée
+              if (deadline > now) {
+                await Notifications.scheduleNotificationAsync({
+                  content: {
+                    title: '🚨 Alerte déclenchée',
+                    body: 'Tes contacts d\'urgence ont été alertés. Confirme que tout va bien.',
+                    data: { type: 'alert_triggered', sessionId: localSession.id },
+                    sound: 'default',
+                    badge: 1,
+                    categoryIdentifier: 'session_alert',
+                  },
+                  trigger: { type: 'date' as const, date: new Date(deadline) } as any,
+                });
+              }
+              
+              console.log('✅ Notifications reprogrammées après restauration');
             }
           }
         }
@@ -213,6 +290,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     await AsyncStorage.setItem('safewalk_session', JSON.stringify(session));
     
     // Synchroniser avec le serveur backend
+    dispatch({ type: 'SET_SYNC_STATUS', payload: 'syncing' });
     try {
       const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/sessions/sync`, {
         method: 'POST',
@@ -235,11 +313,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       
       if (response.ok) {
         console.log('✅ Session synchronisée avec le serveur');
+        dispatch({ type: 'SET_SYNC_STATUS', payload: 'synced' });
       } else {
         console.warn('⚠️ Échec synchronisation session:', await response.text());
+        dispatch({ type: 'SET_SYNC_STATUS', payload: 'offline' });
       }
     } catch (error) {
       console.error('❌ Erreur synchronisation session:', error);
+      dispatch({ type: 'SET_SYNC_STATUS', payload: 'offline' });
     }
   };
 
@@ -257,6 +338,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     await AsyncStorage.setItem('safewalk_history', JSON.stringify(newHistory));
     
     // Synchroniser avec le serveur backend
+    dispatch({ type: 'SET_SYNC_STATUS', payload: 'syncing' });
     try {
       const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/sessions/${returnedSession.id}`, {
         method: 'PUT',
@@ -270,11 +352,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       
       if (response.ok) {
         console.log('✅ Session terminée synchronisée avec le serveur');
+        dispatch({ type: 'SET_SYNC_STATUS', payload: 'synced' });
       } else {
-        console.warn('⚠️ Échec synchronisation fin de session:', await response.text());
+        console.warn('⚠️ Échec synchronisation fin session:', await response.text());
+        dispatch({ type: 'SET_SYNC_STATUS', payload: 'offline' });
       }
     } catch (error) {
-      console.error('❌ Erreur synchronisation fin de session:', error);
+      console.error('❌ Erreur synchronisation fin session:', error);
+      dispatch({ type: 'SET_SYNC_STATUS', payload: 'offline' });
     }
   };
 
@@ -302,6 +387,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     await AsyncStorage.setItem('safewalk_session', JSON.stringify(updatedSession));
     
     // Synchroniser avec le serveur backend
+    dispatch({ type: 'SET_SYNC_STATUS', payload: 'syncing' });
     try {
       const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/sessions/${updatedSession.id}`, {
         method: 'PUT',
@@ -315,11 +401,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       
       if (response.ok) {
         console.log('✅ Extension de session synchronisée avec le serveur');
+        dispatch({ type: 'SET_SYNC_STATUS', payload: 'synced' });
       } else {
         console.warn('⚠️ Échec synchronisation extension:', await response.text());
+        dispatch({ type: 'SET_SYNC_STATUS', payload: 'offline' });
       }
     } catch (error) {
       console.error('❌ Erreur synchronisation extension:', error);
+      dispatch({ type: 'SET_SYNC_STATUS', payload: 'offline' });
     }
   };
 
@@ -337,6 +426,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     await AsyncStorage.setItem('safewalk_history', JSON.stringify(newHistory));
     
     // Synchroniser avec le serveur backend
+    dispatch({ type: 'SET_SYNC_STATUS', payload: 'syncing' });
     try {
       const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/sessions/${cancelledSession.id}`, {
         method: 'PUT',
@@ -350,11 +440,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       
       if (response.ok) {
         console.log('✅ Session annulée synchronisée avec le serveur');
+        dispatch({ type: 'SET_SYNC_STATUS', payload: 'synced' });
       } else {
         console.warn('⚠️ Échec synchronisation annulation:', await response.text());
+        dispatch({ type: 'SET_SYNC_STATUS', payload: 'offline' });
       }
     } catch (error) {
       console.error('❌ Erreur synchronisation annulation:', error);
+      dispatch({ type: 'SET_SYNC_STATUS', payload: 'offline' });
     }
   };
 
@@ -537,6 +630,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     settings: state.settings,
     currentSession: state.currentSession,
     history: state.history,
+    syncStatus: state.syncStatus,
     updateSettings,
     startSession,
     endSession,

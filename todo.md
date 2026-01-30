@@ -1807,3 +1807,29 @@
 - [ ] Tester cancelSession() et vérifier que la session est marquée comme annulée côté serveur
 - [ ] Démarrer session, fermer app, rouvrir → vérifier que la session est restaurée
 - [ ] Vérifier que les notifications sont reprogrammées après restauration
+
+
+## CORRECTIONS CRITIQUES AVANT PRODUCTION
+
+### Problème 1 : Reprogrammer notifications après restauration
+- [x] Importer scheduleNotifications dans app-context.tsx
+- [x] Appeler scheduleNotifications() après restauration de session dans loadData()
+- [x] Tester : fermer app, rouvrir, vérifier que notifications sont reprogrammées
+
+### Problème 2 : Gestion des permissions notifications
+- [x] Créer fonction requestNotificationPermissions()
+- [x] Demander permissions au premier lancement
+- [x] Afficher alerte si permissions refusées
+- [x] Sauvegarder statut permissions dans AsyncStorage
+
+### Problème 3 : Validation numéro de téléphone
+- [x] Créer fonction validatePhoneNumber() avec regex international
+- [x] Valider au moment de la saisie dans settings
+- [x] Afficher erreur si format invalide
+- [x] Empêcher démarrage session si numéro invalide
+
+### Problème 4 : Indicateur de synchronisation
+- [x] Ajouter état syncStatus dans AppContext ('synced' | 'syncing' | 'offline')
+- [x] Mettre à jour syncStatus lors des appels API
+- [x] Afficher icône dans active-session.tsx (☁️ synced, 🔄 syncing, ⚠️ offline)
+- [x] Afficher toast si synchronisation échoue
