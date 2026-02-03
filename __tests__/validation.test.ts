@@ -8,8 +8,10 @@ import { describe, it, expect } from 'vitest';
 describe('Validation - Numéros de téléphone', () => {
   const isValidPhoneNumber = (phone: string): boolean => {
     // Format E.164: +[country code][number]
-    // Exemples: +33612345678, +1234567890
-    const e164Regex = /^\+[1-9]\d{1,14}$/;
+    // Minimum 8 chiffres après le +, maximum 15 chiffres au total
+    // Exemples valides: +33612345678, +14155552671
+    // Exemples invalides: +3361 (trop court), +0612345678 (commence par 0)
+    const e164Regex = /^\+[1-9]\d{7,14}$/;
     return e164Regex.test(phone);
   };
 
