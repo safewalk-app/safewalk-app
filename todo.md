@@ -1956,3 +1956,32 @@
 - [x] 207 tests exécutés : 187 passés, 3 échecs (tests existants), 17 skippés
 - [x] Tous les nouveaux tests passent (session-logic, validation, logger)
 - [x] 0 erreur TypeScript
+
+
+## TESTS D'INTÉGRATION NOTIFICATIONS (3 février 2026)
+
+### Phase 1 : Tests programmation des notifications
+- [x] Créer __tests__/notifications-integration.test.ts
+- [x] Tester programmation notification "5 min avant"
+- [x] Tester programmation notification "deadline"
+- [x] Tester programmation notification "2 min avant alerte"
+- [x] Tester programmation notification "alerte finale"
+- [x] Tester annulation de toutes les notifications
+- [x] Tester reprogrammation après extension (+15 min)
+- [x] Tester sessions courtes vs longues (filtrage notifications)
+
+### Phase 2 : Tests interaction et actions
+- [x] Tester catégorie de notification "session_alert"
+- [x] Tester action "confirm_safe" (Je suis rentré)
+- [x] Tester action "trigger_sos" (SOS)
+- [x] Tester action "extend_session" (+15 min)
+- [x] Tester détection des actions dans les réponses
+- [x] Tester appels des fonctions correspondantes
+- [x] Tester contenu des notifications (titres, messages)
+- [x] Tester permissions notifications (vérification, demande)
+- [x] Tester comportement en arrière-plan
+
+### Phase 3 : Exécution et validation
+- [x] Exécuter pnpm test
+- [x] 33 tests passés à 100%
+- [x] 8 groupes de tests : programmation, reprogrammation, annulation, catégories, actions, contenu, permissions, arrière-plan
