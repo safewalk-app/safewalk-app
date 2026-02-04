@@ -2041,3 +2041,37 @@
 - [x] 243 tests passés (100%)
 - [x] 26 tests skippés (tests E2E/réseau)
 - [x] 0 tests échoués
+
+
+## PRÉPARATION STORES (3 février 2026)
+
+### Phase 1 : EAS Build
+- [x] Créer eas.json avec profils development, preview, production
+- [x] Configurer iOS (bundleIdentifier, buildConfiguration)
+- [x] Configurer Android (package, buildType, autoIncrement)
+- [x] Configurer submit pour App Store et Google Play
+- [x] Créer EAS_BUILD_GUIDE.md avec documentation complète
+- [x] Documenter les commandes EAS (build, submit, credentials)
+
+### Phase 2 : Screenshots
+- [x] Créer dossier screenshots/
+- [x] Créer scripts/generate-screenshots.md avec guide complet
+- [x] Documenter les 5 screenshots requis (Home, New Session, Active Session, Settings, Alert Sent)
+- [x] Documenter les formats stores (iPhone 6.7" 1290x2796, Android 1080x1920)
+- [x] Documenter 3 méthodes de capture (manuelle, simulateur, émulateur)
+- [x] Documenter post-traitement (redimensionnement, texte marketing)
+
+### Phase 3 : Pages légales GitHub Pages
+- [x] Créer dossier docs/
+- [x] Créer docs/index.html (page d'accueil avec features, use cases)
+- [x] Créer docs/privacy.html (politique de confidentialité complète)
+- [x] Créer docs/terms.html (conditions d'utilisation complètes)
+- [x] Créer docs/support.html (FAQ + troubleshooting + contact)
+- [x] Créer docs/styles.css (CSS responsive complet)
+- [x] Créer docs/README.md (guide de déploiement GitHub Pages)
+
+### Phase 4 : Validation
+- [x] Vérifier eas.json (3 profils configurés)
+- [x] Vérifier guide screenshots (5 écrans documentés)
+- [x] Vérifier pages HTML (4 pages + CSS + README)
+- [x] Tout prêt pour soumission aux stores
