@@ -48,6 +48,9 @@ const config: ExpoConfig = {
   userInterfaceStyle: "automatic",
   newArchEnabled: true,
   extra: {
+    eas: {
+      projectId: "5f9bc0ce-0f26-488d-b72d-fe8663f32513",
+    },
     privacyPolicyUrl: "https://safewalk-app.github.io/safewalk-app/privacy.html",
     termsOfServiceUrl: "https://safewalk-app.github.io/safewalk-app/terms.html",
     supportUrl: "https://safewalk-app.github.io/safewalk-app/support.html",
