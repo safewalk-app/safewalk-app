@@ -47,6 +47,11 @@ const config: ExpoConfig = {
   scheme: env.scheme,
   userInterfaceStyle: "automatic",
   newArchEnabled: true,
+  extra: {
+    privacyPolicyUrl: "https://safewalk-app.github.io/safewalk-app/privacy.html",
+    termsOfServiceUrl: "https://safewalk-app.github.io/safewalk-app/terms.html",
+    supportUrl: "https://safewalk-app.github.io/safewalk-app/support.html",
+  },
   ios: {
     supportsTablet: true,
     bundleIdentifier: env.iosBundleId,
