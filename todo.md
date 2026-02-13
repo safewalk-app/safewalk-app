@@ -2103,3 +2103,40 @@
 
 ### Phase 4 : Checkpoint final
 - [ ] Créer checkpoint final avec toutes les corrections
+
+
+## AUDIT FINAL PRODUCTION (13 février 2026)
+
+### Phase 1 : Lisibilité SOS URGENCE
+- [ ] Améliorer lisibilité du bouton "SOS URGENCE"
+- [ ] Augmenter taille du texte
+- [ ] Ajouter ombre ou contraste
+- [ ] Vérifier que le bouton est bien visible sur tous les écrans
+
+### Phase 2 : Audit complet des flux
+- [ ] Vérifier flux "Je sors" (Home → New Session → Active Session)
+- [ ] Vérifier flux "Je suis rentré" (Active Session → Home)
+- [ ] Vérifier flux "Annuler sortie" (Active Session → Home)
+- [ ] Vérifier flux "Extension +15 min" (Active Session reste actif)
+- [ ] Vérifier flux "SOS URGENCE" (Active Session → Alert Sent)
+- [ ] Vérifier flux "Settings" (Home → Settings → Home)
+- [ ] Vérifier flux "Historique" (Home → History → Home)
+- [ ] Vérifier tous les boutons répondent au tap
+- [ ] Vérifier aucune erreur console
+- [ ] Vérifier aucun crash lors de la navigation
+
+### Phase 3 : Nettoyage du code
+- [ ] Supprimer code inutile/dead code
+- [ ] Supprimer console.log/warn/error (utiliser logger)
+- [ ] Supprimer fichiers non utilisés
+- [ ] Supprimer dépendances non utilisées
+- [ ] Vérifier imports inutiles
+
+### Phase 4 : Tests finaux production
+- [ ] Exécuter pnpm test (tous les tests passent)
+- [ ] Exécuter pnpm check (0 erreurs TypeScript)
+- [ ] Vérifier app.json complet et correct
+- [ ] Vérifier eas.json complet et correct
+- [ ] Vérifier aucun secret dans le code
+- [ ] Vérifier toutes les URLs GitHub Pages correctes
+- [ ] Créer checkpoint final production

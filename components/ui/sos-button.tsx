@@ -62,21 +62,25 @@ export function SOSButton({ onPress, isLoading = false, disabled = false, classN
         onPress={handleSOSPress}
         disabled={disabled || isLoading}
         className={cn(
-          'flex-row items-center justify-center gap-2 px-6 py-4 rounded-full active:opacity-80',
-          'bg-red-500 shadow-lg',
+          'flex-row items-center justify-center gap-3 px-8 py-5 rounded-full active:opacity-85',
+          'bg-red-500 shadow-2xl',
           (disabled || isLoading) && 'opacity-50',
           className
         )}
         style={{
-          shadowColor: '#FF4444',
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.3,
-          shadowRadius: 8,
-          elevation: 8,
+          shadowColor: '#FF0000',
+          shadowOffset: { width: 0, height: 6 },
+          shadowOpacity: 0.4,
+          shadowRadius: 12,
+          elevation: 12,
         }}
       >
-        <Text className="text-white text-lg font-bold">🚨</Text>
-        <Text className="text-white font-bold text-base">
+        <Text className="text-white text-3xl font-bold">🚨</Text>
+        <Text className="text-white font-bold text-xl" style={{
+          textShadowColor: 'rgba(0, 0, 0, 0.3)',
+          textShadowOffset: { width: 1, height: 1 },
+          textShadowRadius: 2,
+        }}>
           {isLoading ? 'Envoi...' : 'SOS URGENCE'}
         </Text>
       </Pressable>
