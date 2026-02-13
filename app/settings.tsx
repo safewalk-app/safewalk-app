@@ -164,68 +164,7 @@ export default function SettingsScreen() {
     }
   };
 
-  const handleTestSms = async () => {
-    if (!contactPhone) {
-      setToastMessage('❌ Aucun numéro de contact');
-      setShowToast(true);
-      return;
-    }
 
-    const cleanedPhone = cleanPhoneNumber(contactPhone);
-    if (!validatePhoneNumber(cleanedPhone)) {
-      setToastMessage('❌ Numéro invalide');
-      setShowToast(true);
-      return;
-    }
-
-    setIsSendingTestSms(true);
-
-    try {
-      // Vérifier la santé de l'API d'abord
-      logger.debug('🔍 Vérification API SMS...');
-      const health = await checkHealth();
-      
-      if (!health.ok) {
-        logger.error('❌ API SMS non accessible');
-        setToastMessage('❌ API non accessible');
-        setShowToast(true);
-        setIsSendingTestSms(false);
-        return;
-      }
-
-      if (!health.twilioConfigured) {
-        logger.error('❌ Twilio non configuré');
-        setToastMessage('❌ Twilio non configuré');
-        setShowToast(true);
-        setIsSendingTestSms(false);
-        return;
-      }
-
-      logger.debug('✅ API SMS OK, envoi du SMS de test...');
-
-      // Envoyer le SMS de test via sendEmergencySMS
-      const result = await sendEmergencySMS({
-        reason: 'test',
-        contactName: contactName || 'Contact',
-        contactPhone: cleanedPhone,
-        firstName: firstName,
-      });
-
-      if (result.ok) {
-        logger.debug('✅ SMS de test envoyé avec succès:', result.sid);
-        setToastMessage(`✅ SMS envoyé à ${contactName || contactPhone}`);
-      } else {
-        logger.error('❌ Échec envoi SMS:', result.error);
-        setToastMessage(`❌ Échec: ${result.error}`);
-      }
-    } catch (error: any) {
-      logger.error('❌ Erreur test SMS:', error);
-      setToastMessage(`❌ Erreur: ${error.message}`);
-    } finally {
-      setIsSendingTestSms(false);
-      setShowToast(true);
-    }
-  };
 
   const handleDeleteData = () => {
     Alert.alert(
@@ -422,26 +361,6 @@ export default function SettingsScreen() {
               <MaterialIcons name="info" size={20} color="#0a7ea4" />
               <Text className="text-base font-semibold text-foreground">
                 À propos
-              </Text>
-            </GlassCard>
-          </Pressable>
-        </ScreenTransition>
-
-        {/* Bouton "Test SMS" */}
-        <ScreenTransition delay={300} duration={350}>
-          <Pressable 
-            onPress={handleTestSms}
-            disabled={isSendingTestSms || !contactPhone}
-            className="mb-4"
-          >
-            <GlassCard className="flex-row items-center justify-center gap-2 py-4">
-              {isSendingTestSms ? (
-                <ActivityIndicator size="small" color="#3A86FF" />
-              ) : (
-                <MaterialIcons name="send" size={20} color="#3A86FF" />
-              )}
-              <Text className="text-base font-semibold text-foreground">
-                {isSendingTestSms ? 'Envoi en cours...' : 'Test SMS'}
               </Text>
             </GlassCard>
           </Pressable>

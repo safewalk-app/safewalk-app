@@ -39,8 +39,8 @@ export function CushionPillButton({
 
   const textSizeStyles = {
     sm: 'text-sm font-bold',
-    md: 'text-base font-bold',
-    lg: 'text-xl font-bold',
+    md: 'text-lg font-bold',
+    lg: 'text-2xl font-bold',
   };
 
   const handlePress = () => {
@@ -86,11 +86,16 @@ export function CushionPillButton({
           
           <Text
             className={cn(
-              'text-white',
+              'text-white drop-shadow-lg',
               textSizeStyles[size]
             )}
             numberOfLines={1}
             adjustsFontSizeToFit
+            style={{
+              textShadowColor: 'rgba(0, 0, 0, 0.3)',
+              textShadowOffset: { width: 0, height: 1 },
+              textShadowRadius: 2,
+            }}
           >
             {label}
           </Text>

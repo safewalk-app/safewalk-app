@@ -2075,3 +2075,31 @@
 - [x] Vérifier guide screenshots (5 écrans documentés)
 - [x] Vérifier pages HTML (4 pages + CSS + README)
 - [x] Tout prêt pour soumission aux stores
+
+
+## AUDIT UI/UX ET CORRECTIONS FINALES (6 février 2026)
+
+### Phase 1 : Audit et identification
+- [ ] Identifier et supprimer le bouton "Test SMS"
+- [ ] Vérifier tous les boutons de l'app (Home, Settings, New Session, Active Session, Alert Sent, History)
+- [ ] Vérifier la lisibilité du bouton "Démarrer" (contraste, taille, visibilité)
+- [ ] Vérifier toutes les pages (Home, Settings, History, etc.)
+- [ ] Vérifier les transitions et la navigation
+
+### Phase 2 : Corrections UI
+- [ ] Supprimer bouton "Test SMS" du code
+- [ ] Améliorer le bouton "Démarrer" (augmenter contraste, taille, ombre)
+- [ ] Vérifier les couleurs et le contraste WCAG AA
+- [ ] Vérifier la typographie (lisibilité, tailles)
+- [ ] Vérifier les espacements et les alignements
+
+### Phase 3 : Tests complets
+- [ ] Tester tous les boutons fonctionnent correctement
+- [ ] Vérifier que toutes les pages s'affichent correctement
+- [ ] Tester la navigation complète (Home → Settings → New Session → Active Session → Alert Sent → History)
+- [ ] Tester sur simulateur iPhone
+- [ ] Vérifier pas d'erreurs console
+- [ ] Vérifier pas de dead ends
+
+### Phase 4 : Checkpoint final
+- [ ] Créer checkpoint final avec toutes les corrections
