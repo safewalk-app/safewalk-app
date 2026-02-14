@@ -2140,3 +2140,36 @@
 - [ ] Vérifier aucun secret dans le code
 - [ ] Vérifier toutes les URLs GitHub Pages correctes
 - [ ] Créer checkpoint final production
+
+
+## INTÉGRATION TWILIO & REBUILD (14 février 2026)
+
+### Phase 1 : Credentials Twilio
+- [x] Ajouter TWILIO_ACCOUNT_SID en variable d'environnement
+- [x] Ajouter TWILIO_AUTH_TOKEN en variable d'environnement
+- [x] Ajouter TWILIO_PHONE_NUMBER en variable d'environnement
+- [x] Créer test de validation des credentials
+- [x] Vérifier tous les tests passent (9/9)
+
+### Phase 2 : Rebuild EAS
+- [ ] Exécuter `eas build --profile preview --platform ios` sur Mac
+- [ ] Attendre la fin du build (10-20 min)
+- [ ] Télécharger le .ipa depuis EAS
+- [ ] Installer sur iPhone via Expo Go ou TestFlight
+
+### Phase 3 : Test SMS sur iPhone
+- [ ] Créer une session courte (2-3 minutes)
+- [ ] Attendre que la deadline se dépasse
+- [ ] Vérifier réception du SMS d'alerte
+- [ ] Tester bouton "Je suis rentré"
+- [ ] Tester bouton "SOS URGENCE"
+- [ ] Tester extension "+15 min"
+
+### Phase 4 : Build Android (optionnel)
+- [ ] Exécuter `eas build --profile preview --platform android`
+- [ ] Tester sur émulateur ou appareil Android
+
+### Phase 5 : Checkpoint final avec Twilio
+- [ ] Créer checkpoint avec credentials intégrés
+- [ ] Vérifier tous les tests passent
+- [ ] Vérifier 0 erreurs TypeScript
