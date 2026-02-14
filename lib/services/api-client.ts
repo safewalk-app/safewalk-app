@@ -8,7 +8,7 @@
  */
 
 // URL de l'API depuis les variables d'environnement
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://3000-irwl1yzlwbswmhi7zu2m2-c84b8aca.us1.manus.computer';
+const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://3000-izg08xkxsyk2siv7372nz-49e5cc45.us1.manus.computer';
 
 // Log de l'URL utilisée (utile pour debug)
 console.log('🔗 [API Client] URL configurée:', API_URL);

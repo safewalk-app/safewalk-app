@@ -2151,13 +2151,19 @@
 - [x] Créer test de validation des credentials
 - [x] Vérifier tous les tests passent (9/9)
 
-### Phase 2 : Rebuild EAS
+### Phase 2 : Corriger les URLs du serveur
+- [x] Corriger l'URL dans api-client.ts
+- [x] Corriger l'URL dans app-context.tsx (triggerAlert)
+- [x] Vérifier tous les tests passent (252/252)
+- [x] Vérifier 0 erreurs TypeScript
+
+### Phase 3 : Rebuild EAS
 - [ ] Exécuter `eas build --profile preview --platform ios` sur Mac
 - [ ] Attendre la fin du build (10-20 min)
 - [ ] Télécharger le .ipa depuis EAS
 - [ ] Installer sur iPhone via Expo Go ou TestFlight
 
-### Phase 3 : Test SMS sur iPhone
+### Phase 4 : Test SMS sur iPhone
 - [ ] Créer une session courte (2-3 minutes)
 - [ ] Attendre que la deadline se dépasse
 - [ ] Vérifier réception du SMS d'alerte
@@ -2165,11 +2171,11 @@
 - [ ] Tester bouton "SOS URGENCE"
 - [ ] Tester extension "+15 min"
 
-### Phase 4 : Build Android (optionnel)
+### Phase 5 : Build Android (optionnel)
 - [ ] Exécuter `eas build --profile preview --platform android`
 - [ ] Tester sur émulateur ou appareil Android
 
-### Phase 5 : Checkpoint final avec Twilio
+### Phase 6 : Checkpoint final avec Twilio
 - [ ] Créer checkpoint avec credentials intégrés
 - [ ] Vérifier tous les tests passent
 - [ ] Vérifier 0 erreurs TypeScript

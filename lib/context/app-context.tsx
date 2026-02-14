@@ -297,7 +297,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       });
 
       logger.debug('📤 [triggerAlert] Envoi requête /api/sos/trigger...');
-      const response = await fetch('https://3000-irwl1yzlwbswmhi7zu2m2-c84b8aca.us1.manus.computer/api/sos/trigger', {
+      const response = await fetch('https://3000-izg08xkxsyk2siv7372nz-49e5cc45.us1.manus.computer/api/sos/trigger', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
