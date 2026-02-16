@@ -8,8 +8,7 @@
       "developmentClient": true,
       "distribution": "internal",
       "ios": {
-        "simulator": true,
-        "bundleIdentifier": "space.manus.safewalk.app.t20250119065400"
+        "simulator": true
       },
       "android": {
         "buildType": "apk",
@@ -19,8 +18,7 @@
     "preview": {
       "distribution": "internal",
       "ios": {
-        "simulator": false,
-        "bundleIdentifier": "space.manus.safewalk.app.t20250119065400"
+        "simulator": false
       },
       "android": {
         "buildType": "apk"
@@ -28,7 +26,6 @@
     },
     "production": {
       "ios": {
-        "bundleIdentifier": "space.manus.safewalk.app.t20250119065400",
         "buildConfiguration": "Release"
       },
       "android": {

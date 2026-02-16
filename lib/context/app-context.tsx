@@ -401,6 +401,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     ]);
   };
 
+  // CORRECTION BUG #6: Ajouter un useEffect pour vérifier périodiquement si l'alerte doit être déclenchée
+  useEffect(() => {
+    if (!state.currentSession || state.currentSession.status !== 'active') return;
+
+    const interval = setInterval(() => {
+      checkAndTriggerAlert();
+    }, 1000); // Vérifier toutes les secondes
+
+    return () => clearInterval(interval);
+  }, [state.currentSession, checkAndTriggerAlert]);
+
   // CORRECTION BUG #5: Méthode pour obtenir l'état de la session
   const getSessionState = (session: Session): SessionState => {
     const now = Date.now();

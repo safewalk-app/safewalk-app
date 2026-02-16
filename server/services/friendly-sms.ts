@@ -68,8 +68,12 @@ export async function sendFriendlyAlertSMS(params: AlertSMSParams): Promise<stri
 
     console.log(`✅ SMS envoyé avec succès à ${params.phoneNumber} (SID: ${result.sid})`);
     return result.sid;
-  } catch (error) {
-    console.error(`❌ Erreur lors de l'envoi du SMS à ${params.phoneNumber}:`, error);
+  } catch (error: any) {
+    console.error(`❌ Erreur lors de l'envoi du SMS à ${params.phoneNumber}:`);
+    console.error('   Code:', error?.code);
+    console.error('   Message:', error?.message);
+    console.error('   Status:', error?.status);
+    console.error('   Details:', error?.details || error);
     throw error;
   }
 }
@@ -101,8 +105,12 @@ export async function sendFriendlyAlertSMSToMultiple(
         messageSid,
         status: 'sent',
       });
-    } catch (error) {
-      console.error(`❌ Erreur lors de l'envoi à ${contact.phone}:`, error);
+    } catch (error: any) {
+      console.error(`❌ Erreur lors de l'envoi à ${contact.phone}:`);
+      console.error('   Code:', error?.code);
+      console.error('   Message:', error?.message);
+      console.error('   Status:', error?.status);
+      console.error('   Full error:', JSON.stringify(error, null, 2));
       results.push({
         phone: contact.phone,
         messageSid: '',
