@@ -110,8 +110,7 @@ const config: ExpoConfig = {
       "expo-notifications",
       {
         icon: "./assets/images/icon.png",
-        color: "#0a7ea4",
-        sounds: ["./assets/sounds/notification.wav"]
+        color: "#0a7ea4"
       }
     ],
     [
