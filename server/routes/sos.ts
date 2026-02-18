@@ -1,8 +1,15 @@
-import { logger } from "../utils/logger";
 import { Router, Request, Response } from "express";
 import { rateLimit } from "express-rate-limit";
 import { z } from "zod";
 import { sendFriendlyAlertSMSToMultiple } from "../services/friendly-sms";
+import { supabase, createSession, logSMS } from "../services/supabase-client";
+
+// Simple logger
+const logger = {
+  debug: (msg: string, data?: any) => console.log(`[DEBUG] ${msg}`, data || ''),
+  info: (msg: string, data?: any) => console.log(`[INFO] ${msg}`, data || ''),
+  error: (msg: string, err?: any) => console.error(`[ERROR] ${msg}`, err || ''),
+};
 
 const router = Router();
 
@@ -61,6 +68,24 @@ router.post("/trigger", sosLimiter, async (req: Request, res: Response) => {
 
     logger.debug('[SOS] Requête reçue:', { firstName, emergencyContacts, latitude, longitude });
 
+    // Créer une session dans Supabase
+    const now = new Date();
+    const deadline = new Date(now.getTime() + 30 * 60000); // 30 min par défaut
+    
+    const session = await createSession(
+      'anonymous-' + Date.now(), // Utilisateur anonyme pour maintenant
+      now,
+      deadline,
+      latitude,
+      longitude
+    );
+    
+    if (!session) {
+      logger.error('[SOS] Impossible de créer la session Supabase');
+    } else {
+      logger.debug('[SOS] Session créée:', session.id);
+    }
+
     // Utiliser le système SMS friendly pour SOS
     const location = latitude && longitude ? { latitude, longitude } : undefined;
     const limitTimeStr = limitTime || new Date().toLocaleTimeString('fr-FR', {
@@ -77,6 +102,35 @@ router.post("/trigger", sosLimiter, async (req: Request, res: Response) => {
       '🚨 ALERTE SOS IMMÉDIATE',
       location
     );
+
+    // Logger les résultats SMS dans Supabase
+    if (session) {
+      for (const result of smsResults) {
+        const contact = emergencyContacts.find((c: any) => c.phone === result.phone);
+        if (contact) {
+          // Créer un contact d'urgence temporaire
+          const { data: contactData } = await supabase
+            .from('emergency_contacts')
+            .insert([{
+              user_id: session.user_id,
+              name: contact.name,
+              phone_number: contact.phone,
+            }])
+            .select()
+            .single();
+
+          if (contactData) {
+            await logSMS(
+              session.id,
+              contactData.id,
+              result.messageSid || '',
+              result.status as 'sent' | 'failed' | 'pending',
+              result.status === 'failed' ? 'SMS failed' : undefined
+            );
+          }
+        }
+      }
+    }
 
     res.json({
       success: true,
