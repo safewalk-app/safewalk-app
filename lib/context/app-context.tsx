@@ -298,7 +298,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
       logger.debug('📤 [triggerAlert] Envoi requête Supabase Edge Function...');
       // Utiliser Supabase Edge Function au lieu du serveur Manus
-      const supabaseUrl = 'https://kycuteffcbqizyqlhczc.supabase.co';
+      const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || 'https://your-project.supabase.co';
       const response = await fetch(`${supabaseUrl}/functions/v1/trigger-sos`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

@@ -31,7 +31,10 @@ yarn-error.*
 *.pem
 
 # local env files
+.env
+.env.local
 .env*.local
+.env.production.local
 
 # typescript
 *.tsbuildinfo
@@ -52,6 +55,15 @@ app-example
 # Logs
 logs
 *.log
+
+# Secrets and credentials
+secrets/
+credentials/
+.credentials/
+*.key
+*.pem
+*.p12
+*.jks
 
 # OS
 Thumbs.db

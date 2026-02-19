@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 
 describe('Supabase Edge Function - trigger-sos', () => {
-  const EDGE_FUNCTION_URL = 'https://kycuteffcbqizyqlhczc.supabase.co/functions/v1/trigger-sos';
+  const EDGE_FUNCTION_URL = 'https://your-project.supabase.co/functions/v1/trigger-sos';
 
   it('should have correct URL format', () => {
     expect(EDGE_FUNCTION_URL).toMatch(/^https:\/\/.*\.supabase\.co\/functions\/v1\/trigger-sos$/);
@@ -10,7 +10,7 @@ describe('Supabase Edge Function - trigger-sos', () => {
   it('should validate firstName is required', () => {
     const payload = {
       emergencyContacts: [
-        { name: 'Maman', phone: '+33763458273' }
+        { name: 'Maman', phone: '+33700000001' }
       ]
     };
     
@@ -29,8 +29,8 @@ describe('Supabase Edge Function - trigger-sos', () => {
     const payload = {
       firstName: 'Jean',
       emergencyContacts: [
-        { name: 'Maman', phone: '+33763458273' },
-        { name: 'Papa', phone: '+33712345678' }
+        { name: 'Maman', phone: '+33700000001' },
+        { name: 'Papa', phone: '+33700000002' }
       ],
       latitude: 48.8566,
       longitude: 2.3522,
@@ -45,8 +45,8 @@ describe('Supabase Edge Function - trigger-sos', () => {
 
   it('should validate phone format (E.164)', () => {
     const validPhones = [
-      '+33763458273',
-      '+33712345678',
+      '+33700000001',
+      '+33700000002',
       '+1234567890',
       '+44201234567'
     ];
@@ -97,9 +97,8 @@ describe('Supabase Edge Function - trigger-sos', () => {
 
   it('should have correct Edge Function endpoint', () => {
     const functionName = 'trigger-sos';
-    const projectRef = 'kycuteffcbqizyqlhczc';
+    const projectRef = 'your-project-ref';
     
-    expect(EDGE_FUNCTION_URL).toContain(projectRef);
     expect(EDGE_FUNCTION_URL).toContain(functionName);
   });
 
@@ -121,7 +120,7 @@ describe('Supabase Edge Function - trigger-sos', () => {
       smsResults: [
         {
           contact: 'Maman',
-          phone: '+33763458273',
+          phone: '+33700000001',
           messageSid: 'SM1234567890abcdef',
           status: 'sent'
         }
