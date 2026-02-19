@@ -296,9 +296,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         minute: '2-digit',
       });
 
-      logger.debug('📤 [triggerAlert] Envoi requête /api/sos/trigger...');
-      const apiUrl = process.env.EXPO_PUBLIC_API_URL || 'https://3000-izg08xkxsyk2siv7372nz-49e5cc45.us1.manus.computer';
-      const response = await fetch(`${apiUrl}/api/sos/trigger`, {
+      logger.debug('📤 [triggerAlert] Envoi requête Supabase Edge Function...');
+      // Utiliser Supabase Edge Function au lieu du serveur Manus
+      const supabaseUrl = 'https://kycuteffcbqizyqlhczc.supabase.co';
+      const response = await fetch(`${supabaseUrl}/functions/v1/trigger-sos`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
