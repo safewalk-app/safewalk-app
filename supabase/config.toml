@@ -1,25 +1,19 @@
 # Supabase Configuration
 
-[project]
-project_id = "kycuteffcbqizyqlhczc"
-
 [api]
 enabled = true
-max_body_size = "10 MiB"
 
 [db]
 major_version = 15
 
 [realtime]
 enabled = true
-max_bytes_per_second = 1000000
 
 [auth]
 enable_signup = true
-enable_anonymous_signups = false
 
 [edge_runtime]
-policy = "wasm_only"
+policy = "per_worker"
 
 [functions."trigger-sos"]
 verify_jwt = false

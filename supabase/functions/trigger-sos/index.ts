@@ -46,17 +46,26 @@ function validateSOSRequest(body: any): { valid: boolean; error?: string } {
   return { valid: true };
 }
 
-// Send SMS via Twilio
+// Send SMS via Twilio with better error handling
 async function sendSMSViaTwilio(
   to: string,
   message: string,
   twilioAccountSid: string,
   twilioAuthToken: string,
   twilioPhoneNumber: string
-): Promise<{ success: boolean; messageSid?: string; error?: string }> {
+): Promise<{ success: boolean; messageSid?: string; error?: string; status?: number; response?: string }> {
   try {
     const auth = btoa(`${twilioAccountSid}:${twilioAuthToken}`);
     
+    const requestBody = new URLSearchParams({
+      From: twilioPhoneNumber,
+      To: to,
+      Body: message,
+    }).toString();
+
+    console.log(`[Twilio] Sending SMS to ${to} from ${twilioPhoneNumber}`);
+    console.log(`[Twilio] Auth header: Basic ${auth.substring(0, 20)}...`);
+
     const response = await fetch(
       `https://api.twilio.com/2010-04-01/Accounts/${twilioAccountSid}/Messages.json`,
       {
@@ -65,31 +74,45 @@ async function sendSMSViaTwilio(
           "Authorization": `Basic ${auth}`,
           "Content-Type": "application/x-www-form-urlencoded",
         },
-        body: new URLSearchParams({
-          From: twilioPhoneNumber,
-          To: to,
-          Body: message,
-        }).toString(),
+        body: requestBody,
       }
     );
 
+    const responseText = await response.text();
+    console.log(`[Twilio] Response status: ${response.status}`);
+    console.log(`[Twilio] Response body: ${responseText.substring(0, 200)}`);
+
     if (!response.ok) {
-      const error = await response.json();
-      return {
-        success: false,
-        error: error.message || `HTTP ${response.status}`,
-      };
+      try {
+        const error = JSON.parse(responseText);
+        return {
+          success: false,
+          error: error.message || `HTTP ${response.status}`,
+          status: response.status,
+          response: responseText.substring(0, 500),
+        };
+      } catch {
+        return {
+          success: false,
+          error: `HTTP ${response.status}: ${responseText.substring(0, 200)}`,
+          status: response.status,
+          response: responseText.substring(0, 500),
+        };
+      }
     }
 
-    const data = await response.json();
+    const data = JSON.parse(responseText);
+    console.log(`[Twilio] SMS sent successfully: ${data.sid}`);
     return {
       success: true,
       messageSid: data.sid,
     };
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    console.error(`[Twilio] Error: ${errorMessage}`);
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: errorMessage,
     };
   }
 }
@@ -142,6 +165,13 @@ serve(async (req) => {
     const twilioAuthToken = Deno.env.get("TWILIO_AUTH_TOKEN");
     const twilioPhoneNumber = Deno.env.get("TWILIO_PHONE_NUMBER");
 
+    console.log("[SafeWalk] Environment check:");
+    console.log(`  - SUPABASE_URL: ${supabaseUrl ? "✓" : "✗"}`);
+    console.log(`  - SUPABASE_SERVICE_ROLE_KEY: ${supabaseServiceRoleKey ? "✓" : "✗"}`);
+    console.log(`  - TWILIO_ACCOUNT_SID: ${twilioAccountSid ? "✓" : "✗"}`);
+    console.log(`  - TWILIO_AUTH_TOKEN: ${twilioAuthToken ? "✓" : "✗"}`);
+    console.log(`  - TWILIO_PHONE_NUMBER: ${twilioPhoneNumber ? "✓" : "✗"}`);
+
     if (!supabaseUrl || !supabaseServiceRoleKey) {
       return new Response(
         JSON.stringify({ success: false, error: "Supabase not configured" }),
@@ -162,37 +192,50 @@ serve(async (req) => {
       );
     }
 
-    // Initialize Supabase client
-    const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
-    });
+    // Initialize Supabase
+    const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
 
-    // Create session in Supabase
+    // Parse limitTime to timestamp
     const now = new Date();
-    const deadline = new Date(now.getTime() + 30 * 60000); // 30 min default
+    let limitTimeDate = now;
+    if (limitTime) {
+      const [hours, minutes] = limitTime.split(':').map(Number);
+      limitTimeDate = new Date();
+      limitTimeDate.setHours(hours, minutes, 0, 0);
+      // If the time is in the past, assume it's for tomorrow
+      if (limitTimeDate < now) {
+        limitTimeDate.setDate(limitTimeDate.getDate() + 1);
+      }
+    }
 
-    const { data: sessionData, error: sessionError } = await supabase
+    // Calculate deadline (limitTime + 15 minutes tolerance)
+    const deadline = new Date(limitTimeDate.getTime() + 15 * 60 * 1000);
+
+    // Create session with correct schema
+    const sessionId = crypto.randomUUID();
+    const userId = crypto.randomUUID(); // Generate a valid UUID for anonymous users
+    const { error: sessionError } = await supabase
       .from("sessions")
-      .insert([
-        {
-          user_id: `anonymous-${Date.now()}`,
-          start_time: now.toISOString(),
-          deadline: deadline.toISOString(),
-          status: "active",
-          location_latitude: latitude,
-          location_longitude: longitude,
-        },
-      ])
-      .select()
-      .single();
+      .insert({
+        id: sessionId,
+        user_id: userId, // Valid UUID for anonymous users
+        limit_time: limitTimeDate.toISOString(),
+        tolerance: 15 * 60 * 1000, // 15 minutes in milliseconds
+        deadline: deadline.toISOString(),
+        status: "active",
+        last_location: latitude && longitude ? { latitude, longitude } : null,
+        emergency_contact_1_name: emergencyContacts[0]?.name || null,
+        emergency_contact_1_phone: emergencyContacts[0]?.phone || null,
+        emergency_contact_2_name: emergencyContacts[1]?.name || null,
+        emergency_contact_2_phone: emergencyContacts[1]?.phone || null,
+        created_at: now.toISOString(),
+        updated_at: now.toISOString(),
+      });
 
     if (sessionError) {
-      console.error("Error creating session:", sessionError);
+      console.error(`[Supabase] Session creation error: ${sessionError.message}`);
       return new Response(
-        JSON.stringify({ success: false, error: "Failed to create session" }),
+        JSON.stringify({ success: false, error: `Failed to create session: ${sessionError.message}` }),
         {
           status: 500,
           headers: { "Content-Type": "application/json" },
@@ -200,107 +243,57 @@ serve(async (req) => {
       );
     }
 
-    // Send SMS to all contacts
-    const limitTimeStr = limitTime || now.toLocaleTimeString("fr-FR", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    console.log(`[SafeWalk] Session created: ${sessionId}`);
 
-    const smsResults: Array<{
-      contact: string;
-      phone: string;
-      messageSid: string;
-      status: string;
-    }> = [];
-
+    // Send SMS to each contact
+    const smsResults = [];
     for (const contact of emergencyContacts) {
-      // Build message
-      let message = `SafeWalk 🫶\n`;
-      message += `${firstName} n'a pas encore confirmé qu'il est bien rentré (limite ${limitTimeStr} + 15 min).\n`;
-
-      if (latitude && longitude) {
-        message += `📍 https://maps.google.com/?q=${latitude},${longitude}\n`;
-      } else {
-        message += `📍 Position indisponible\n`;
-      }
-
-      message += `Tu peux lui passer un petit appel ?`;
-
-      // Send SMS
       const smsResult = await sendSMSViaTwilio(
         contact.phone,
-        message,
+        `Alerte SOS de ${firstName}. Localisation: ${latitude}, ${longitude}. Heure limite: ${limitTime}`,
         twilioAccountSid,
         twilioAuthToken,
         twilioPhoneNumber
       );
 
-      // Log SMS in Supabase
-      if (smsResult.success) {
-        // Create emergency contact
-        const { data: contactData } = await supabase
-          .from("emergency_contacts")
-          .insert([
-            {
-              user_id: sessionData.user_id,
-              name: contact.name,
-              phone_number: contact.phone,
-            },
-          ])
-          .select()
-          .single();
-
-        if (contactData) {
-          // Log SMS
-          await supabase.from("sms_logs").insert([
-            {
-              session_id: sessionData.id,
-              contact_id: contactData.id,
-              message_sid: smsResult.messageSid,
-              status: "sent",
-            },
-          ]);
-        }
-      } else {
-        // Log failed SMS
-        const { data: contactData } = await supabase
-          .from("emergency_contacts")
-          .insert([
-            {
-              user_id: sessionData.user_id,
-              name: contact.name,
-              phone_number: contact.phone,
-            },
-          ])
-          .select()
-          .single();
-
-        if (contactData) {
-          await supabase.from("sms_logs").insert([
-            {
-              session_id: sessionData.id,
-              contact_id: contactData.id,
-              message_sid: "",
-              status: "failed",
-              error_message: smsResult.error,
-            },
-          ]);
-        }
-      }
-
       smsResults.push({
         contact: contact.name,
         phone: contact.phone,
-        messageSid: smsResult.messageSid || "",
+        messageSid: smsResult.messageSid,
         status: smsResult.success ? "sent" : "failed",
+        error: smsResult.error,
       });
+
+      // Log SMS result using sms_status table
+      const { error: logError } = await supabase
+        .from("sms_status")
+        .insert({
+          session_id: sessionId,
+          message_sid: smsResult.messageSid || `failed-${Date.now()}`,
+          account_sid: twilioAccountSid,
+          phone_number: contact.phone,
+          contact_name: contact.name,
+          message_body: `Alerte SOS de ${firstName}. Localisation: ${latitude}, ${longitude}. Heure limite: ${limitTime}`,
+          status: smsResult.success ? "sent" : "failed",
+          status_updated_at: now.toISOString(),
+          error_code: smsResult.status ? String(smsResult.status) : null,
+          error_message: smsResult.error || null,
+          created_at: now.toISOString(),
+          updated_at: now.toISOString(),
+        });
+
+      if (logError) {
+        console.error(`[Supabase] SMS log error: ${logError.message}`);
+      }
     }
+
+    console.log(`[SafeWalk] SMS sent to ${smsResults.length} contacts`);
 
     return new Response(
       JSON.stringify({
         success: true,
         message: "Alert SOS triggered",
-        sessionId: sessionData.id,
+        sessionId,
         smsResults,
         timestamp: Date.now(),
       }),
@@ -313,12 +306,10 @@ serve(async (req) => {
       }
     );
   } catch (error) {
-    console.error("Error:", error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    console.error(`[SafeWalk] Error: ${errorMessage}`);
     return new Response(
-      JSON.stringify({
-        success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
-      }),
+      JSON.stringify({ success: false, error: errorMessage }),
       {
         status: 500,
         headers: { "Content-Type": "application/json" },
