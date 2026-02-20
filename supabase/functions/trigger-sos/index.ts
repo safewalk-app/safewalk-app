@@ -187,7 +187,8 @@ serve(async (req) => {
     const deadline = calculateDeadline(limitTime || "");
 
     const sessionId = crypto.randomUUID();
-    const userId = crypto.randomUUID();
+    // Use a fixed UUID for anonymous users
+    const userId = "00000000-0000-0000-0000-000000000000";
 
     console.log("[SafeWalk] Creating session:", {
       id: sessionId,
