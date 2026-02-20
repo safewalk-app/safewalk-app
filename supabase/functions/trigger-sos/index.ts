@@ -187,9 +187,11 @@ serve(async (req) => {
     const deadline = calculateDeadline(limitTime || "");
 
     const sessionId = crypto.randomUUID();
+    const userId = crypto.randomUUID();
 
     console.log("[SafeWalk] Creating session:", {
       id: sessionId,
+      user_id: userId,
       start_time: now.toISOString(),
       deadline: deadline.toISOString(),
       latitude,
@@ -198,7 +200,7 @@ serve(async (req) => {
 
     const { error: sessionError } = await supabase.from("sessions").insert({
       id: sessionId,
-      user_id: null,
+      user_id: userId,
       start_time: now.toISOString(),
       deadline: deadline.toISOString(),
       status: "active",
