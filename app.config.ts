@@ -36,6 +36,8 @@ const env = {
   scheme: schemeFromBundleId,
   iosBundleId: bundleId,
   androidPackage: bundleId,
+  // Supabase configuration
+  supabaseUrl: "https://kycuteffcbqizyqlhczc.supabase.co",
 };
 
 const config: ExpoConfig = {
@@ -54,6 +56,7 @@ const config: ExpoConfig = {
     privacyPolicyUrl: "https://safewalk-app.github.io/safewalk-app/privacy.html",
     termsOfServiceUrl: "https://safewalk-app.github.io/safewalk-app/terms.html",
     supportUrl: "https://safewalk-app.github.io/safewalk-app/support.html",
+    supabaseUrl: env.supabaseUrl,
   },
   ios: {
     supportsTablet: true,
@@ -97,6 +100,9 @@ const config: ExpoConfig = {
     bundler: "metro",
     output: "static",
     favicon: "./assets/images/favicon.png",
+    extra: {
+      supabaseUrl: env.supabaseUrl,
+    },
   },
   plugins: [
     "expo-router",
