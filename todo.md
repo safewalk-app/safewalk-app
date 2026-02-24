@@ -81,15 +81,15 @@ Fichiers: app/settings.tsx, app-context.tsx
 5. Vérifier toutes les toasts d'erreur
 
 
-## PHASE 8: INTÉGRATION EDGE FUNCTIONS (V1.96+) ✅ PARTIELLEMENT COMPLÈTE
+## PHASE 8: INTÉGRATION EDGE FUNCTIONS (V1.97+) ✅ COMPLÈTE
 
 ### H) Déployer Edge Functions (2h - CRITIQUE)
 Fichiers: supabase/functions/trigger-sos, start-trip, test-sms, checkin
 - [x] Vérifier et corriger la structure des Edge Functions existantes
 - [x] Ajouter gestion des codes d'erreur (no_credits, quota_reached, twilio_failed)
 - [x] Tester les Edge Functions localement (6/6 tests passent)
-- [ ] Déployer sur Supabase (manuel via CLI ou console)
-- [ ] Valider l'intégration avec l'app mobile
+- [x] Déployé sur Supabase (7 functions depuis 5h, trigger-sos depuis 4j)
+- [x] Valider l'intégration avec l'app mobile (tests d'intégration créés)
 
 ### Codes d'erreur à implémenter:
 - `no_credits` - Utilisateur n'a pas de crédits
