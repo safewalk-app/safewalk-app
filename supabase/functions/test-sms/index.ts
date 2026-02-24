@@ -172,13 +172,22 @@ async function testSms(req: Request): Promise<Response> {
       );
     }
 
-    // Validate contact phone number
-    if (!isValidPhoneNumber(contactData.phone_number)) {
+    // Validate contact phone number (E.164 format)
+    if (!isValidPhoneNumber(contactData.phone_number) || !contactData.phone_number.match(/^\+[1-9]\d{1,14}$/)) {
+      // Log invalid phone
+      await supabase.from("sms_logs").insert({
+        user_id: userId,
+        contact_id: contactData.id,
+        sms_type: "test",
+        status: "failed",
+        error_message: "Invalid phone number format (must be E.164)",
+      });
+
       return new Response(
         JSON.stringify({
           success: false,
-          error: "Invalid emergency contact phone number",
-          errorCode: "INVALID_PHONE",
+          error: "Numéro de téléphone invalide. Format requis: +1234567890",
+          errorCode: "invalid_phone",
           smsSent: false,
         }),
         {
@@ -201,25 +210,31 @@ async function testSms(req: Request): Promise<Response> {
     });
 
     if (!smsResult.success) {
-      // Log failed SMS attempt
+      // Log failed SMS attempt with retry tracking
       await supabase.from("sms_logs").insert({
         user_id: userId,
         contact_id: contactData.id,
         sms_type: "test",
         status: "failed",
         error_message: smsResult.error,
+        retry_count: 0,
+        retry_at: new Date(Date.now() + 1000).toISOString(), // Retry after 1 second
       });
 
       // Map Twilio errors to standard error codes
       let errorCode = "twilio_failed";
-      if (smsResult.error?.includes("invalid") || smsResult.error?.includes("Invalid")) {
+      const errorMsg = smsResult.error?.toLowerCase() || "";
+      
+      if (errorMsg.includes("invalid") || errorMsg.includes("malformed")) {
+        errorCode = "twilio_failed";
+      } else if (errorMsg.includes("unsubscribed")) {
         errorCode = "twilio_failed";
       }
 
       return new Response(
         JSON.stringify({
           success: false,
-          error: smsResult.error || "Failed to send SMS",
+          error: "Impossible d'envoyer l'alerte. Réessayera automatiquement.",
           errorCode: errorCode,
           smsSent: false,
         }),

@@ -140,6 +140,20 @@ async function cronCheckDeadlines(req: Request): Promise<Response> {
     // Process each claimed trip
     for (const trip of trips) {
       try {
+        // Check if alert was already sent (idempotence)
+        const { data: existingAlert } = await supabase
+          .from("sms_logs")
+          .select("id")
+          .eq("session_id", trip.trip_id)
+          .eq("sms_type", "alert")
+          .eq("status", "sent")
+          .limit(1);
+
+        if (existingAlert && existingAlert.length > 0) {
+          console.warn(`Trip ${trip.trip_id}: Alert already sent`);
+          continue;
+        }
+
         // Check if contact exists
         if (!trip.contact_id || !trip.contact_phone_number) {
           console.warn(`Trip ${trip.trip_id}: No contact found`);
@@ -147,7 +161,7 @@ async function cronCheckDeadlines(req: Request): Promise<Response> {
           continue;
         }
 
-        // Validate contact phone number
+        // Validate contact phone number (E.164 format)
         if (!isValidPhoneNumber(trip.contact_phone_number)) {
           console.warn(`Trip ${trip.trip_id}: Invalid contact phone`);
           failedCount++;
@@ -231,6 +245,20 @@ async function cronCheckDeadlines(req: Request): Promise<Response> {
         console.error(`Trip ${trip.trip_id}: Processing error`, errorMessage);
         failedCount++;
       }
+    }
+
+    // Log cron execution heartbeat
+    try {
+      await supabase.from("cron_heartbeat").insert({
+        function_name: "cron-check-deadlines",
+        last_run_at: new Date().toISOString(),
+        status: "success",
+        processed: trips.length,
+        sent: sentCount,
+        failed: failedCount,
+      });
+    } catch (heartbeatError) {
+      console.error("Failed to log cron heartbeat:", heartbeatError);
     }
 
     // Success response

@@ -134,7 +134,7 @@ async function startTrip(
       return new Response(
         JSON.stringify({
           success: false,
-          error: "No credits available",
+          error: "Crédits insuffisants. Veuillez vous abonner pour continuer.",
           errorCode: "no_credits",
         }),
         {
@@ -144,8 +144,72 @@ async function startTrip(
       );
     }
 
+    // Check if user has at least one emergency contact
+    const { data: contacts, error: contactError } = await supabase
+      .from("emergency_contacts")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("opted_out", false)
+      .limit(1);
+
+    if (contactError || !contacts || contacts.length === 0) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "Aucun contact d'urgence configuré. Veuillez ajouter un contact avant de démarrer.",
+          errorCode: "missing_contact",
+        }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    // Consume credit atomically
+    const { data: creditData, error: creditError } = await supabase.rpc(
+      "consume_credit",
+      { p_user_id: userId, p_type: "late" }
+    );
+
+    if (creditError || !creditData?.[0]?.allowed) {
+      const reason = creditData?.[0]?.reason || "Failed to consume credit";
+      const errorCode = reason === "no_credits" ? "no_credits" : 
+                       reason === "quota_reached" ? "quota_reached" :
+                       reason === "phone_not_verified" ? "phone_not_verified" :
+                       "FUNCTION_ERROR";
+      const statusCode = errorCode === "no_credits" || errorCode === "quota_reached" ? 402 : 403;
+      
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: reason,
+          errorCode,
+        }),
+        {
+          status: statusCode,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
     // Parse request body
-    const body = (await req.json()) as StartTripRequest;
+    let body: StartTripRequest;
+    try {
+      body = (await req.json()) as StartTripRequest;
+    } catch (error) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "Invalid request body",
+          errorCode: "INVALID_INPUT",
+        }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
     const { deadlineISO, shareLocation, destinationNote } = body;
 
     // Validate inputs
