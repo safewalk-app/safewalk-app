@@ -7,7 +7,8 @@ import { TimeLimitPicker } from '@/components/ui/time-limit-picker';
 import { ScreenTransition } from '@/components/ui/screen-transition';
 import { useApp } from '@/lib/context/app-context';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useProfileData } from '@/hooks/use-profile-data';
 import { ToastPop } from '@/components/ui/toast-pop';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { supabase } from '@/lib/supabase';
@@ -21,8 +22,10 @@ export default function NewSessionScreen() {
   const [note, setNote] = useState('');
   const [toastMessage, setToastMessage] = useState('');
   const [showOtpModal, setShowOtpModal] = useState(false);
+  const [showPaywallModal, setShowPaywallModal] = useState(false);
   const [phoneVerified, setPhoneVerified] = useState(false);
   const [loading, setLoading] = useState(true);
+  const profileData = useProfileData();
 
   // Check if phone is verified on mount
   useEffect(() => {
@@ -52,7 +55,7 @@ export default function NewSessionScreen() {
   };
 
   const handleStartSession = async () => {
-    // Check emergency contact
+    // Check 1: Emergency contact
     if (!settings.emergencyContactName || !settings.emergencyContactPhone) {
       setToastMessage('Configure un contact d\'urgence d\'abord');
       setTimeout(() => {
@@ -62,13 +65,20 @@ export default function NewSessionScreen() {
       return;
     }
 
-    // Check phone verification
+    // Check 2: Phone verification
     if (!phoneVerified) {
       setShowOtpModal(true);
       return;
     }
 
-    // Start the session
+    // Check 3: Credits
+    const hasCredits = profileData.subscription_active || profileData.free_alerts_remaining > 0;
+    if (!hasCredits) {
+      setShowPaywallModal(true);
+      return;
+    }
+
+    // All checks passed - start the session
     startSession(limitTime, note);
     router.push('/active-session');
   };

@@ -16,12 +16,12 @@ Fichiers: app/home.tsx
 - [x] Afficher subscription_active status
 - [x] Afficher phone_verified status
 
-### C) Gating New-Session (1h - CRITIQUE)
+### C) Gating New-Session (1h - CRITIQUE) ✅ COMPLÈTE
 Fichiers: app/new-session.tsx
-- [ ] Check contact d'urgence → rediriger settings
-- [ ] Check phone_verified → afficher OTP modal
-- [ ] Check crédits → afficher paywall modal
-- [ ] Tester tous les 3 cas
+- [x] Check contact d'urgence → rediriger settings
+- [x] Check phone_verified → afficher OTP modal
+- [x] Check crédits → afficher paywall modal
+- [x] Tester tous les 3 cas
 
 ### D) Active Session Améliorations (1h - IMPORTANT)
 Fichiers: app/active-session.tsx, trip-service.ts
