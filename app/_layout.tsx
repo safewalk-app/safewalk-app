@@ -22,6 +22,7 @@ import { ToastProvider } from "@/lib/context/toast-context";
 import { PermissionsCheck } from "@/components/permissions-check";
 import { ToastContainer } from "@/components/ui/toast";
 import { useToast } from "@/lib/context/toast-context";
+import { usePushNotifications } from "@/hooks/use-push-notifications";
 
 const DEFAULT_WEB_INSETS: EdgeInsets = { top: 0, right: 0, bottom: 0, left: 0 };
 const DEFAULT_WEB_FRAME: Rect = { x: 0, y: 0, width: 0, height: 0 };
@@ -33,6 +34,18 @@ export const unstable_settings = {
 function ToastContainerWrapper() {
   const { toasts, removeToast } = useToast();
   return <ToastContainer toasts={toasts} onDismiss={removeToast} />;
+}
+
+function PushNotificationsSetup() {
+  usePushNotifications({
+    onNotificationReceived: (notification) => {
+      console.log('📬 Notification reçue:', notification);
+    },
+    onNotificationResponse: (response) => {
+      console.log('👆 Notification tap:', response);
+    },
+  });
+  return null;
 }
 
 export default function RootLayout() {
@@ -90,6 +103,7 @@ export default function RootLayout() {
           <AppProvider>
             <PermissionsCheck />
             <ToastContainerWrapper />
+            <PushNotificationsSetup />
             {/* Stack with all routes - flow screens without nav */}
             {/* Expo Router Stack uses default slide animation from right */}
             <Stack

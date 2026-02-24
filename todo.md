@@ -2375,3 +2375,16 @@
 - [x] Ajouter toasts pour erreurs SMS (envoi, réseau)
 - [x] Toasts avec animations et haptics
 - [x] Toasts avec actions (renvoyer, changer numéro)
+
+## NOTIFICATIONS PUSH POUR ALERTES SOS
+
+- [x] Créer le service push-notification-service.ts
+- [x] Créer la Edge Function send-sos-notification
+- [x] Créer le hook use-push-notifications
+- [x] Intégrer dans app/_layout.tsx
+- [x] Ajouter support des canaux Android (SOS, urgent, info)
+- [x] Implémenter gestion des tokens Expo Push
+- [x] Ajouter haptics et sons personnalisés
+- [x] Support de la localisation dans les notifications
+- [ ] Tester sur iPhone réel avec build EAS
+- [ ] Tester sur Android réel avec build EAS

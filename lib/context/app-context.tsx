@@ -7,6 +7,7 @@ import { logger } from '@/lib/logger';
 import { checkNetworkForSMS } from '@/lib/utils/network-checker';
 import { checkSessionOtpRequirement, resetSessionOtpVerification } from '@/lib/services/otp-session-guard';
 import { useRouter } from 'expo-router';
+import { sendSOSPushNotification } from '@/hooks/use-push-notifications';
 
 export interface UserSettings {
   firstName: string;
