@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
 import { sendFriendlyAlertSMS, sendFollowUpAlertSMS, sendConfirmationSMS } from '../services/sms-service';
 import { useNotifications } from '@/hooks/use-notifications';
-import { logger } from '@/lib/utils/logger';
+import { logger } from '@/lib/logger';
 import { checkNetworkForSMS } from '@/lib/utils/network-checker';
 import { checkSessionOtpRequirement, resetSessionOtpVerification } from '@/lib/services/otp-session-guard';
 import { useRouter } from 'expo-router';
