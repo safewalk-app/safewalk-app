@@ -31,6 +31,7 @@ import {
   getErrorType,
 } from "@/lib/types/otp-errors";
 import * as Haptics from "expo-haptics";
+import { showErrorToast, showSuccessToast, showSmsSendErrorToast, showSmsSentToast } from "@/lib/services/toast-service";
 
 /**
  * Phone Verification Screen
@@ -106,6 +107,7 @@ export default function PhoneVerificationScreen() {
         await Haptics.notificationAsync(
           Haptics.NotificationFeedbackType.Success
         );
+        showSmsSentToast();
 
         // Navigate to OTP verification screen
         router.push({
@@ -130,6 +132,7 @@ export default function PhoneVerificationScreen() {
           Haptics.NotificationFeedbackType.Error
         );
 
+        showSmsSendErrorToast();
         logger.warn("[OTP] Send failed:", { errorCode });
       }
     } catch (err) {
@@ -138,6 +141,7 @@ export default function PhoneVerificationScreen() {
         code: OtpErrorCode.NETWORK_ERROR,
         message: "Erreur réseau. Vérifiez votre connexion.",
       });
+      showErrorToast("🌐 Erreur réseau", "Impossible d'envoyer le code. Vérifiez votre connexion.");
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
       setLoading(false);

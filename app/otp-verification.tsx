@@ -23,6 +23,7 @@ import {
 } from "@/lib/types/otp-errors";
 import * as Haptics from "expo-haptics";
 import { markSessionOtpVerified } from "@/lib/services/otp-session-guard";
+import { showErrorToast, showSuccessToast, showWarningToast, showOtpExpiredToast, showOtpTooManyAttemptsToast } from "@/lib/services/toast-service";
 
 /**
  * OTP Verification Screen
@@ -104,6 +105,7 @@ export default function OtpVerificationScreen() {
         await Haptics.notificationAsync(
           Haptics.NotificationFeedbackType.Success
         );
+        showSuccessToast("✅ Vérification réussie", "Votre numéro a été vérifié.");
 
         // Marquer l'utilisateur comme vérifié OTP
         await markSessionOtpVerified(phoneNumber);
@@ -134,6 +136,15 @@ export default function OtpVerificationScreen() {
           Haptics.NotificationFeedbackType.Error
         );
 
+        // Afficher le toast d'erreur approprié
+        if (errorCode === OtpErrorCode.TOO_MANY_ATTEMPTS) {
+          showOtpTooManyAttemptsToast(15);
+        } else if (errorCode === OtpErrorCode.OTP_EXPIRED) {
+          showOtpExpiredToast();
+        } else {
+          showErrorToast("❌ Vérification échouée", message);
+        }
+
         logger.warn("[OTP] Vérification échouée:", {
           errorCode,
           attemptsRemaining: result.attemptsRemaining,
@@ -145,6 +156,7 @@ export default function OtpVerificationScreen() {
         code: OtpErrorCode.NETWORK_ERROR,
         message: "Erreur réseau. Vérifiez votre connexion.",
       });
+      showErrorToast("🌐 Erreur réseau", "Impossible de vérifier le code. Vérifiez votre connexion.");
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
       setLoading(false);

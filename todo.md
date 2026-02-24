@@ -2365,3 +2365,13 @@
 - [x] Migrer les imports dans app-context.tsx
 - [x] Supprimer les 3 anciens services SMS (273 lignes de code mort)
 - [x] Valider que les tests passent (384/406 = 94.6%)
+
+## NOTIFICATIONS TOAST IMPLÉMENTÉES
+
+- [x] Créer le service toast-service.ts (13 fonctions)
+- [x] Créer le composant Toast réutilisable avec animations
+- [x] Intégrer ToastProvider dans app/_layout.tsx
+- [x] Ajouter toasts pour erreurs OTP (vérification, expiration, tentatives)
+- [x] Ajouter toasts pour erreurs SMS (envoi, réseau)
+- [x] Toasts avec animations et haptics
+- [x] Toasts avec actions (renvoyer, changer numéro)
