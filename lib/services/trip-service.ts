@@ -89,6 +89,32 @@ export async function startTrip(input: StartTripInput): Promise<StartTripOutput>
   try {
     logger.info("Starting trip", { deadline: input.deadlineISO });
 
+    // Check if user phone is verified
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      logger.error("Start trip: No authenticated user");
+      return {
+        success: false,
+        error: "Not authenticated",
+        errorCode: "UNAUTHORIZED",
+      };
+    }
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("phone_verified")
+      .eq("id", user.id)
+      .single();
+
+    if (!profile?.phone_verified) {
+      logger.warn("Start trip: Phone not verified", { userId: user.id });
+      return {
+        success: false,
+        error: "Phone number not verified",
+        errorCode: "PHONE_NOT_VERIFIED",
+      };
+    }
+
     const { data, error } = await supabase.functions.invoke("start-trip", {
       body: input,
     });
@@ -221,6 +247,34 @@ export async function sendTestSms(): Promise<TestSmsOutput> {
   try {
     logger.info("Sending test SMS");
 
+    // Check if user phone is verified
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      logger.error("Test SMS: No authenticated user");
+      return {
+        success: false,
+        error: "Not authenticated",
+        errorCode: "UNAUTHORIZED",
+        smsSent: false,
+      };
+    }
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("phone_verified")
+      .eq("id", user.id)
+      .single();
+
+    if (!profile?.phone_verified) {
+      logger.warn("Test SMS: Phone not verified", { userId: user.id });
+      return {
+        success: false,
+        error: "Phone number not verified",
+        errorCode: "PHONE_NOT_VERIFIED",
+        smsSent: false,
+      };
+    }
+
     const { data, error } = await supabase.functions.invoke("test-sms", {
       body: {},
     });
@@ -255,6 +309,34 @@ export async function sendTestSms(): Promise<TestSmsOutput> {
 export async function triggerSos(input: SosInput = {}): Promise<SosOutput> {
   try {
     logger.info("Triggering SOS alert", { tripId: input.tripId });
+
+    // Check if user phone is verified
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      logger.error("SOS: No authenticated user");
+      return {
+        success: false,
+        error: "Not authenticated",
+        errorCode: "UNAUTHORIZED",
+        smsSent: false,
+      };
+    }
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("phone_verified")
+      .eq("id", user.id)
+      .single();
+
+    if (!profile?.phone_verified) {
+      logger.warn("SOS: Phone not verified", { userId: user.id });
+      return {
+        success: false,
+        error: "Phone number not verified",
+        errorCode: "PHONE_NOT_VERIFIED",
+        smsSent: false,
+      };
+    }
 
     const { data, error } = await supabase.functions.invoke("sos", {
       body: input,

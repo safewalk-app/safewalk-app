@@ -2,11 +2,11 @@
 
 **Analyse complète:** Voir `ANALYSIS_MINIMAL_CHANGES.md`
 
-### A) Auth Anonyme + OTP Flow (1h - CRITIQUE)
+### A) Auth Anonyme + OTP Flow (1h - CRITIQUE) ✅ 75% COMPLÈTE
 Fichiers: app-context.tsx, new-session.tsx, trip-service.ts
-- [ ] Ajouter signInAnonymously dans app-context au démarrage
-- [ ] Ajouter check phone_verified dans trip-service (startTrip, triggerSos, sendTestSms)
-- [ ] Intégrer OTP modal dans new-session.tsx avant startSession
+- [x] Ajouter signInAnonymously dans app-context au démarrage
+- [x] Ajouter check phone_verified dans trip-service (startTrip, triggerSos, sendTestSms)
+- [x] Intégrer OTP modal dans new-session.tsx avant startSession
 - [ ] Tester flow complet
 
 ### B) Affichage Home (30min - IMPORTANT)

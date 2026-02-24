@@ -1,0 +1,30 @@
+--- app-context.tsx
++++ app-context.tsx
+@@ -126,6 +126,27 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
+   // Load data on mount
+   useEffect(() => {
+     loadData();
++    initializeAuth();
+   }, []);
+ 
++  const initializeAuth = async () => {
++    try {
++      const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
++      const { data: { session } } = await supabase.auth.getSession();
++      
++      if (!session) {
++        logger.info('[AppContext] No session found, signing in anonymously...');
++        const { data, error } = await supabase.auth.signInAnonymously();
++        if (error) {
++          logger.error('[AppContext] Anonymous sign-in failed:', error);
++        } else {
++          logger.info('[AppContext] Anonymous sign-in successful:', data.user?.id);
++        }
++      } else {
++        logger.info('[AppContext] Session already exists:', session.user.id);
++      }
++    } catch (error) {
++      logger.error('[AppContext] Auth initialization error:', error);
++    }
++  };
+ 

@@ -10,6 +10,8 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ToastPop } from '@/components/ui/toast-pop';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { supabase } from '@/lib/supabase';
+import { Modal } from 'react-native';
 
 export default function NewSessionScreen() {
   const router = useRouter();
@@ -18,8 +20,39 @@ export default function NewSessionScreen() {
   const [limitTime, setLimitTime] = useState(Date.now() + 2.5 * 60 * 60 * 1000);
   const [note, setNote] = useState('');
   const [toastMessage, setToastMessage] = useState('');
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [phoneVerified, setPhoneVerified] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const handleStartSession = () => {
+  // Check if phone is verified on mount
+  useEffect(() => {
+    checkPhoneVerification();
+  }, []);
+
+  const checkPhoneVerification = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('phone_verified')
+        .eq('id', user.id)
+        .single();
+
+      setPhoneVerified(profile?.phone_verified || false);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error checking phone verification:', error);
+      setLoading(false);
+    }
+  };
+
+  const handleStartSession = async () => {
+    // Check emergency contact
     if (!settings.emergencyContactName || !settings.emergencyContactPhone) {
       setToastMessage('Configure un contact d\'urgence d\'abord');
       setTimeout(() => {
@@ -28,8 +61,23 @@ export default function NewSessionScreen() {
       }, 2000);
       return;
     }
+
+    // Check phone verification
+    if (!phoneVerified) {
+      setShowOtpModal(true);
+      return;
+    }
+
+    // Start the session
     startSession(limitTime, note);
     router.push('/active-session');
+  };
+
+  const handleOtpSuccess = () => {
+    setPhoneVerified(true);
+    setShowOtpModal(false);
+    setToastMessage('Numéro vérifié ! Tu peux maintenant démarrer une sortie.');
+    setTimeout(() => setToastMessage(''), 2000);
   };
 
   // CTA height for bottom padding calculation
