@@ -126,11 +126,19 @@ async function testSms(req: Request): Promise<Response> {
 
     const creditResult = creditData?.[0];
     if (!creditResult?.allowed) {
+      // Map reason to standard error codes
+      let errorCode = "no_credits";
+      if (creditResult?.reason === "quota_reached") {
+        errorCode = "quota_reached";
+      } else if (creditResult?.reason === "phone_not_verified") {
+        errorCode = "phone_not_verified";
+      }
+
       return new Response(
         JSON.stringify({
           success: false,
           error: creditResult?.reason || "Not allowed to send test SMS",
-          errorCode: creditResult?.reason || "NOT_ALLOWED",
+          errorCode: errorCode,
           smsSent: false,
         }),
         {
@@ -202,11 +210,17 @@ async function testSms(req: Request): Promise<Response> {
         error_message: smsResult.error,
       });
 
+      // Map Twilio errors to standard error codes
+      let errorCode = "twilio_failed";
+      if (smsResult.error?.includes("invalid") || smsResult.error?.includes("Invalid")) {
+        errorCode = "twilio_failed";
+      }
+
       return new Response(
         JSON.stringify({
           success: false,
           error: smsResult.error || "Failed to send SMS",
-          errorCode: smsResult.errorCode || "SMS_FAILED",
+          errorCode: errorCode,
           smsSent: false,
         }),
         {

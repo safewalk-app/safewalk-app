@@ -93,6 +93,57 @@ async function startTrip(
 
     const userId = data.user.id;
 
+    // Check if phone is verified
+    const { data: profileData, error: profileError } = await supabase
+      .from("profiles")
+      .select("phone_verified, subscription_active, free_alerts_remaining")
+      .eq("id", userId)
+      .single();
+
+    if (profileError || !profileData) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "User profile not found",
+          errorCode: "PROFILE_NOT_FOUND",
+        }),
+        {
+          status: 404,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    // Check phone verification
+    if (!profileData.phone_verified) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "Phone number not verified",
+          errorCode: "phone_not_verified",
+        }),
+        {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    // Check credits/subscription
+    if (!profileData.subscription_active && profileData.free_alerts_remaining <= 0) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "No credits available",
+          errorCode: "no_credits",
+        }),
+        {
+          status: 402,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
     // Parse request body
     const body = (await req.json()) as StartTripRequest;
     const { deadlineISO, shareLocation, destinationNote } = body;
