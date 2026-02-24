@@ -1,8 +1,7 @@
 import React, { createContext, useContext, useReducer, useEffect, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
-import { sendFriendlyAlertSMS } from '../services/friendly-sms-client';
-import { sendFollowUpAlertSMS, sendConfirmationSMS } from '../services/follow-up-sms-client';
+import { sendFriendlyAlertSMS, sendFollowUpAlertSMS, sendConfirmationSMS } from '../services/sms-service';
 import { useNotifications } from '@/hooks/use-notifications';
 import { logger } from '@/lib/utils/logger';
 import { checkNetworkForSMS } from '@/lib/utils/network-checker';

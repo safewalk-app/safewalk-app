@@ -2356,3 +2356,12 @@
 - [x] Remplacer console.warn par logger dans lib/utils.ts (1 remplacement)
 - [x] Remplacer console.error par logger dans hooks/use-check-in-notifications.ts (2 remplacements)
 - [x] Vérifier qu'aucun console.log ne reste en production (0 trouvés)
+
+
+## UNIFICATION DES SERVICES SMS (V1.83)
+
+- [x] Analyser les 3 services SMS (friendly-sms-client, follow-up-sms-client, sms-client)
+- [x] Créer sms-service.ts unifié avec toutes les fonctions
+- [x] Migrer les imports dans app-context.tsx
+- [x] Supprimer les 3 anciens services SMS (273 lignes de code mort)
+- [x] Valider que les tests passent (384/406 = 94.6%)

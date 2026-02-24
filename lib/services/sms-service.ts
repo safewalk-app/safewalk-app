@@ -1,11 +1,13 @@
-import { sendSMS } from './api-client';
+import { API_BASE_URL } from '../config/api';
 import { cleanPhoneNumber, validatePhoneNumber } from '../utils';
+import { logger } from '../logger';
 
 /**
- * Service SMS - Point d'entrée unique pour tous les envois SMS d'urgence
+ * Service SMS Unifié - Point d'entrée unique pour tous les envois SMS
+ * Fusionne: friendly-sms-client, follow-up-sms-client, sms-client
  */
 
-export type SMSReason = 'test' | 'alert' | 'sos' | 'followup' | 'confirmation';
+export type SMSReason = 'test' | 'alert' | 'sos' | 'followup' | 'confirmation' | 'friendly-alert';
 
 export interface SendEmergencySMSOptions {
   reason: SMSReason;
@@ -20,34 +22,53 @@ export interface SendEmergencySMSOptions {
   };
 }
 
-export interface SendEmergencySMSResult {
+export interface SendFriendlyAlertOptions {
+  contacts: Array<{ name: string; phone: string }>;
+  userName: string;
+  limitTimeStr: string;
+  note?: string;
+  location?: { latitude: number; longitude: number };
+}
+
+export interface SendFollowUpOptions {
+  contacts: Array<{ name: string; phone: string }>;
+  userName: string;
+  location?: { latitude: number; longitude: number };
+}
+
+export interface SendConfirmationOptions {
+  contacts: Array<{ name: string; phone: string }>;
+  userName: string;
+}
+
+export interface SendSmsResult {
   ok: boolean;
   sid?: string;
   error?: string;
   timestamp: number;
 }
 
+export interface SmsHealthCheck {
+  ok: boolean;
+  service?: string;
+  twilioConfigured?: boolean;
+  error?: string;
+}
+
 /**
  * Normaliser un numéro français en format E.164
- * Exemples:
- * - 06 12 34 56 78 => +33612345678
- * - 07 12 34 56 78 => +33712345678
- * - +33 6 12 34 56 78 => +33612345678
  */
 function normalizePhoneNumber(phone: string): string {
   const cleaned = cleanPhoneNumber(phone);
   
-  // Si commence déjà par +, on garde tel quel
   if (cleaned.startsWith('+')) {
     return cleaned;
   }
   
-  // Si commence par 06 ou 07 (France), on ajoute +33
   if (cleaned.startsWith('06') || cleaned.startsWith('07')) {
     return '+33' + cleaned.substring(1);
   }
   
-  // Sinon on ajoute + devant
   return '+' + cleaned;
 }
 
@@ -104,28 +125,23 @@ function buildMessage(options: SendEmergencySMSOptions): string {
     case 'confirmation':
       return `✅ SafeWalk\n\n${userName} est bien rentré ! Tout va bien. 😊\n\nMerci d'être là pour lui. 🙏`;
     
+    case 'friendly-alert':
+      return `🔔 SafeWalk - Alerte\n\n${userName} n'a pas confirmé son retour à l'heure prévue. Peux-tu vérifier que tout va bien ? Merci ! 🙏`;
+    
     default:
       return `SafeWalk: Message d'urgence de ${userName}`;
   }
 }
 
 /**
- * Envoyer un SMS d'urgence
- * Fonction unique utilisée par Test SMS, SOS et Alerte Retard
+ * Envoyer un SMS d'urgence unique
  */
-export async function sendEmergencySMS(options: SendEmergencySMSOptions): Promise<SendEmergencySMSResult> {
+export async function sendEmergencySMS(options: SendEmergencySMSOptions): Promise<SendSmsResult> {
   const timestamp = Date.now();
   
   logger.info(`📤 [SMS Service] Envoi SMS d'urgence (${options.reason})...`);
-  logger.info(`📋 [SMS Service] Options:`, {
-    reason: options.reason,
-    contactName: options.contactName,
-    contactPhone: options.contactPhone,
-    hasLocation: !!options.location,
-  });
   
   try {
-    // Validation du numéro
     const cleanedPhone = cleanPhoneNumber(options.contactPhone);
     if (!validatePhoneNumber(cleanedPhone)) {
       logger.error('❌ [SMS Service] Numéro invalide:', options.contactPhone);
@@ -136,38 +152,196 @@ export async function sendEmergencySMS(options: SendEmergencySMSOptions): Promis
       };
     }
     
-    // Normalisation en E.164
     const normalizedPhone = normalizePhoneNumber(cleanedPhone);
-    logger.info(`📞 [SMS Service] Numéro normalisé: ${options.contactPhone} => ${normalizedPhone}`);
-    
-    // Construction du message
     const message = buildMessage(options);
-    logger.info(`📝 [SMS Service] Message (${message.length} chars):`, message.substring(0, 100) + '...');
     
-    // Envoi via API
-    const result = await sendSMS(normalizedPhone, message);
+    logger.info(`📞 [SMS Service] Envoi à ${normalizedPhone}`);
     
-    if (result.ok) {
-      logger.info(`✅ [SMS Service] SMS envoyé avec succès (SID: ${result.sid})`);
-      return {
-        ok: true,
-        sid: result.sid,
-        timestamp,
-      };
-    } else {
-      logger.error(`❌ [SMS Service] Échec envoi SMS:`, result.error);
+    const url = `${API_BASE_URL}/api/sms/send`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        to: normalizedPhone,
+        message: message,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.ok) {
+      logger.error(`❌ [SMS Service] Échec envoi:`, data);
       return {
         ok: false,
-        error: result.error || 'Échec envoi SMS',
+        error: data.error || `HTTP ${response.status}`,
         timestamp,
       };
     }
+
+    logger.info(`✅ [SMS Service] SMS envoyé (SID: ${data.sid})`);
+    return {
+      ok: true,
+      sid: data.sid,
+      timestamp,
+    };
   } catch (error: any) {
     logger.error('❌ [SMS Service] Exception:', error);
     return {
       ok: false,
       error: error.message || 'Erreur réseau',
       timestamp,
+    };
+  }
+}
+
+/**
+ * Envoyer un SMS "friendly alert" à plusieurs contacts avec retry
+ */
+export async function sendFriendlyAlertSMS(params: SendFriendlyAlertOptions): Promise<void> {
+  const maxRetries = 3;
+  let lastError: Error | null = null;
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      logger.info(`📤 [SMS Service] Tentative ${attempt}/${maxRetries} - Friendly alert`);
+      
+      const url = `${API_BASE_URL}/api/friendly-sms/alert`;
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(params),
+      });
+
+      if (!response.ok) {
+        const errorBody = await response.text();
+        logger.error('❌ [SMS Service] Réponse API:', errorBody);
+        throw new Error(`SMS API error: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      logger.info('✅ [SMS Service] Friendly alert envoyés:', data);
+      return;
+    } catch (error) {
+      lastError = error as Error;
+      logger.error(`❌ [SMS Service] Tentative ${attempt} échouée:`, error);
+      
+      if (attempt < maxRetries) {
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
+    }
+  }
+
+  throw new Error(`Échec friendly alert après ${maxRetries} tentatives: ${lastError?.message}`);
+}
+
+/**
+ * Envoyer un SMS de relance après 10 min si pas de confirmation
+ */
+export async function sendFollowUpAlertSMS(params: SendFollowUpOptions): Promise<void> {
+  const maxRetries = 3;
+  let lastError: Error | null = null;
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      logger.info(`📤 [SMS Service] Tentative ${attempt}/${maxRetries} - Follow-up`);
+      
+      const url = `${API_BASE_URL}/api/friendly-sms/follow-up`;
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(params),
+      });
+
+      if (!response.ok) {
+        const errorBody = await response.text();
+        logger.error('❌ [SMS Service] Réponse API:', errorBody);
+        throw new Error(`SMS API error: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      logger.info('✅ [SMS Service] Follow-up envoyés:', data);
+      return;
+    } catch (error) {
+      lastError = error as Error;
+      logger.error(`❌ [SMS Service] Tentative ${attempt} échouée:`, error);
+      
+      if (attempt < maxRetries) {
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
+    }
+  }
+
+  throw new Error(`Échec follow-up après ${maxRetries} tentatives: ${lastError?.message}`);
+}
+
+/**
+ * Envoyer un SMS de confirmation quand l'utilisateur confirme "Je vais bien"
+ */
+export async function sendConfirmationSMS(params: SendConfirmationOptions): Promise<void> {
+  const maxRetries = 3;
+  let lastError: Error | null = null;
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      logger.info(`📤 [SMS Service] Tentative ${attempt}/${maxRetries} - Confirmation`);
+      
+      const url = `${API_BASE_URL}/api/friendly-sms/confirmation`;
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(params),
+      });
+
+      if (!response.ok) {
+        const errorBody = await response.text();
+        logger.error('❌ [SMS Service] Réponse API:', errorBody);
+        throw new Error(`SMS API error: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      logger.info('✅ [SMS Service] Confirmation envoyée:', data);
+      return;
+    } catch (error) {
+      lastError = error as Error;
+      logger.error(`❌ [SMS Service] Tentative ${attempt} échouée:`, error);
+      
+      if (attempt < maxRetries) {
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
+    }
+  }
+
+  throw new Error(`Échec confirmation après ${maxRetries} tentatives: ${lastError?.message}`);
+}
+
+/**
+ * Vérifier la santé de l'API SMS
+ */
+export async function checkSmsApiHealth(): Promise<SmsHealthCheck> {
+  try {
+    const url = `${API_BASE_URL}/api/sms/health`;
+    logger.info(`🔍 [SMS Service] Vérification santé API...`);
+
+    const response = await fetch(url);
+    const data = await response.json();
+
+    if (!response.ok) {
+      return {
+        ok: false,
+        error: `HTTP ${response.status}`,
+      };
+    }
+
+    return {
+      ok: data.ok,
+      service: data.service,
+      twilioConfigured: data.twilioConfigured,
+    };
+  } catch (error: any) {
+    logger.error('❌ [SMS Service] Health check échoué:', error);
+    return {
+      ok: false,
+      error: error.message || 'Network error',
     };
   }
 }
