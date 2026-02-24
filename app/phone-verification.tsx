@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,60 +6,88 @@ import {
   TouchableOpacity,
   TextInput,
   ActivityIndicator,
-  Alert,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
+import { ErrorAlert } from "@/components/error-alert";
 import { otpService } from "@/lib/services/otp-service";
 import { logger } from "@/lib/logger";
 import { useColors } from "@/hooks/use-colors";
+import { cn } from "@/lib/utils";
+import {
+  validatePhoneNumber,
+  formatPhoneForInput,
+  getMissingDigits,
+  isCompletePhoneNumber,
+} from "@/lib/services/phone-validation-service";
+import {
+  checkRateLimit,
+  recordOtpAttempt,
+  getFormattedResetTime,
+} from "@/lib/services/otp-rate-limiter";
+import {
+  OtpErrorCode,
+  getErrorTitle,
+  getErrorType,
+} from "@/lib/types/otp-errors";
 import * as Haptics from "expo-haptics";
 
 /**
  * Phone Verification Screen
  * Allows user to enter their phone number to receive OTP
+ * Includes validation, rate limiting, and comprehensive error handling
  */
 export default function PhoneVerificationScreen() {
   const router = useRouter();
   const colors = useColors();
   const { returnTo } = useLocalSearchParams<{ returnTo?: string }>();
 
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [phoneInput, setPhoneInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<{
+    code: OtpErrorCode;
+    message: string;
+    resetTime?: number;
+  } | null>(null);
 
-  // Format phone number to E.164
-  const formatPhoneNumber = (input: string): string => {
-    // Remove all non-digits
-    const digits = input.replace(/\D/g, "");
-
-    // If starts with 0 (France), replace with 33
-    if (digits.startsWith("0")) {
-      return "+" + "33" + digits.slice(1);
-    }
-
-    // If already has country code
-    if (digits.length >= 10) {
-      return "+" + digits;
-    }
-
-    return "";
-  };
+  // Validation en temps réel
+  const validation = validatePhoneNumber(phoneInput);
+  const isComplete = isCompletePhoneNumber(phoneInput);
+  const missingDigits = getMissingDigits(phoneInput);
 
   // Handle phone input change
   const handlePhoneChange = (text: string) => {
-    // Format as user types
-    const formatted = text.replace(/\D/g, "");
-    setPhoneNumber(formatted);
+    // Formater l'input pour l'affichage
+    const formatted = formatPhoneForInput(text);
+    setPhoneInput(formatted);
     setError(null);
   };
 
   // Handle send OTP
   const handleSendOtp = async () => {
-    const formattedPhone = formatPhoneNumber(phoneNumber);
+    // Validation format
+    if (!validation.isValid || !validation.formatted) {
+      setError({
+        code: validation.errorCode || OtpErrorCode.INVALID_PHONE_FORMAT,
+        message:
+          validation.message || "Format invalide. Utilisez +33... ou 06...",
+      });
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      return;
+    }
 
-    if (!formattedPhone) {
-      setError("Please enter a valid phone number");
+    // Vérifier le rate limit
+    const rateLimitStatus = await checkRateLimit(validation.formatted);
+
+    if (!rateLimitStatus.isAllowed) {
+      setError({
+        code: OtpErrorCode.RATE_LIMIT,
+        message: `Trop de demandes. Réessayez dans ${getFormattedResetTime(rateLimitStatus.resetTime || Date.now())}`,
+        resetTime: rateLimitStatus.resetTime,
+      });
+      await Haptics.notificationAsync(
+        Haptics.NotificationFeedbackType.Warning
+      );
       return;
     }
 
@@ -67,10 +95,14 @@ export default function PhoneVerificationScreen() {
     setError(null);
 
     try {
-      const result = await otpService.sendOtp(formattedPhone);
+      const result = await otpService.sendOtp(validation.formatted);
 
       if (result.success) {
         logger.info("[OTP] OTP sent successfully");
+
+        // Enregistrer la tentative pour le rate limiting
+        await recordOtpAttempt(validation.formatted);
+
         await Haptics.notificationAsync(
           Haptics.NotificationFeedbackType.Success
         );
@@ -79,33 +111,38 @@ export default function PhoneVerificationScreen() {
         router.push({
           pathname: "/otp-verification",
           params: {
-            phoneNumber: formattedPhone,
+            phoneNumber: validation.formatted,
             returnTo: returnTo || "/",
           },
         });
       } else {
-        setError(result.error || "Failed to send OTP");
+        // Handle error response
+        const errorCode = (result.errorCode ||
+          OtpErrorCode.SERVER_ERROR) as OtpErrorCode;
+        const message = result.error || "Impossible d'envoyer le code";
+
+        setError({
+          code: errorCode,
+          message,
+        });
+
         await Haptics.notificationAsync(
           Haptics.NotificationFeedbackType.Error
         );
+
+        logger.warn("[OTP] Send failed:", { errorCode });
       }
     } catch (err) {
       logger.error("[OTP] Send error:", err);
-      setError("Network error. Please try again.");
-      await Haptics.notificationAsync(
-        Haptics.NotificationFeedbackType.Error
-      );
+      setError({
+        code: OtpErrorCode.NETWORK_ERROR,
+        message: "Erreur réseau. Vérifiez votre connexion.",
+      });
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
       setLoading(false);
     }
   };
-
-  // Display formatted phone number
-  const displayPhone = phoneNumber
-    ? `+33 ${phoneNumber.slice(1).replace(/(\d{1})(\d{2})(\d{2})(\d{2})(\d{2})/, "$1 $2 $3 $4 $5")}`
-    : "";
-
-  const isValidPhone = phoneNumber.length === 9; // 9 digits for France (without 0)
 
   return (
     <ScreenContainer className="p-4">
@@ -124,46 +161,90 @@ export default function PhoneVerificationScreen() {
             </Text>
           </View>
 
-          {/* Phone Input */}
+          {/* Content */}
           <View className="gap-4">
-            {/* Input Field */}
+            {/* Error Alert */}
+            {error && (
+              <ErrorAlert
+                title={getErrorTitle(error.code)}
+                message={error.message}
+                type={getErrorType(error.code)}
+                icon="alert-circle"
+                onDismiss={() => setError(null)}
+                dismissible
+              />
+            )}
+
+            {/* Phone Input Section */}
             <View className="gap-2">
               <Text className="text-sm font-semibold text-foreground">
                 Numéro de téléphone
               </Text>
-              <View className="flex-row items-center gap-2 bg-surface rounded-2xl px-4 py-3 border border-border">
+
+              {/* Input Field */}
+              <View
+                className={cn(
+                  "flex-row items-center gap-2 rounded-2xl px-4 py-3 border",
+                  error
+                    ? "bg-error/5 border-error/30"
+                    : "bg-surface border-border"
+                )}
+              >
                 <Text className="text-foreground font-semibold">+33</Text>
                 <TextInput
-                  value={phoneNumber}
+                  value={phoneInput}
                   onChangeText={handlePhoneChange}
                   placeholder="6 12 34 56 78"
                   placeholderTextColor={colors.muted}
                   keyboardType="phone-pad"
-                  maxLength={9}
+                  maxLength={14} // "6 12 34 56 78" = 14 caractères
                   editable={!loading}
                   className="flex-1 text-foreground font-semibold"
                   style={{ padding: 0 }}
                 />
               </View>
-              {displayPhone && (
+
+              {/* Input Helper Text */}
+              <View className="flex-row items-center justify-between">
                 <Text className="text-xs text-muted">
-                  Format: {displayPhone}
+                  {validation.displayFormat || "Entrez 9 chiffres"}
                 </Text>
-              )}
+                {!isComplete && phoneInput && (
+                  <Text className="text-xs text-warning font-semibold">
+                    {missingDigits} chiffre(s) manquant(s)
+                  </Text>
+                )}
+              </View>
             </View>
 
-            {/* Info */}
+            {/* Info Box */}
             <View className="bg-primary/10 rounded-lg p-3 border border-primary/20">
-              <Text className="text-xs text-foreground">
+              <Text className="text-xs text-foreground leading-relaxed">
                 Nous enverrons un code de vérification par SMS. Les tarifs SMS
                 standards s'appliquent.
               </Text>
             </View>
 
-            {/* Error Message */}
-            {error && (
-              <View className="bg-error/10 rounded-lg p-3 border border-error/20">
-                <Text className="text-sm text-error">{error}</Text>
+            {/* Validation Status */}
+            {phoneInput && (
+              <View
+                className={cn(
+                  "rounded-lg p-3 border",
+                  validation.isValid
+                    ? "bg-success/10 border-success/20"
+                    : "bg-error/10 border-error/20"
+                )}
+              >
+                <Text
+                  className={cn(
+                    "text-xs font-semibold",
+                    validation.isValid ? "text-success" : "text-error"
+                  )}
+                >
+                  {validation.isValid
+                    ? "✓ Numéro valide"
+                    : validation.message || "Numéro invalide"}
+                </Text>
               </View>
             )}
           </View>
@@ -173,13 +254,16 @@ export default function PhoneVerificationScreen() {
             {/* Send OTP Button */}
             <TouchableOpacity
               onPress={handleSendOtp}
-              disabled={loading || !isValidPhone}
+              disabled={loading || !isComplete || !validation.isValid}
               className={cn(
                 "py-3 rounded-full items-center justify-center",
-                isValidPhone && !loading ? "bg-primary" : "bg-primary/50"
+                isComplete && validation.isValid && !loading
+                  ? "bg-primary"
+                  : "bg-primary/50"
               )}
               style={{
-                opacity: loading || !isValidPhone ? 0.6 : 1,
+                opacity:
+                  loading || !isComplete || !validation.isValid ? 0.6 : 1,
               }}
             >
               {loading ? (
@@ -206,9 +290,4 @@ export default function PhoneVerificationScreen() {
       </ScrollView>
     </ScreenContainer>
   );
-}
-
-// Helper function
-function cn(...classes: (string | undefined | false)[]): string {
-  return classes.filter(Boolean).join(" ");
 }

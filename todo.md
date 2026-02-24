@@ -2294,3 +2294,15 @@
 - [ ] Tester flux complet sur iPhone
 - [ ] Ajouter rate limiting côté client
 - [ ] Ajouter notifications pour erreurs critiques
+
+
+## AMÉLIORATION PHONE-VERIFICATION (Phase 6 - Complétée)
+
+- [x] Service de validation et formatage de numéro E.164
+- [x] Service de rate limiting côté client (max 5 envois/heure)
+- [x] Écran phone-verification.tsx amélioré avec gestion des erreurs
+- [x] Tests unitaires pour validation de numéro (30/30 passés)
+- [x] Tests unitaires pour rate limiting (19/19 passés)
+- [x] Validation en temps réel avec indicateur de force
+- [x] Formatage automatique du numéro lors de la saisie
+- [x] Messages d'erreur clairs et actions de récupération
