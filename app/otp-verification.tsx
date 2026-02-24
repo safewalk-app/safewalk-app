@@ -22,6 +22,7 @@ import {
   shouldChangePhone,
 } from "@/lib/types/otp-errors";
 import * as Haptics from "expo-haptics";
+import { markSessionOtpVerified } from "@/lib/services/otp-session-guard";
 
 /**
  * OTP Verification Screen
@@ -103,6 +104,10 @@ export default function OtpVerificationScreen() {
         await Haptics.notificationAsync(
           Haptics.NotificationFeedbackType.Success
         );
+
+        // Marquer l'utilisateur comme vérifié OTP
+        await markSessionOtpVerified(phoneNumber);
+        logger.info("[OTP] Utilisateur marqué comme vérifié");
 
         // Navigate back or to next screen
         if (returnTo) {

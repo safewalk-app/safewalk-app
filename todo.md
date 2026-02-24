@@ -2306,3 +2306,15 @@
 - [x] Validation en temps réel avec indicateur de force
 - [x] Formatage automatique du numéro lors de la saisie
 - [x] Messages d'erreur clairs et actions de récupération
+
+
+## INTÉGRATION OTP DANS APP-CONTEXT (Phase 6 - Complétée)
+
+- [x] Service otp-session-guard pour protéger la création de session
+- [x] Vérification OTP obligatoire avant startSession
+- [x] Redirection vers phone-verification si non vérifié
+- [x] Marquage de l'utilisateur comme vérifié après OTP réussi
+- [x] Réinitialisation OTP lors de la suppression des données
+- [x] Flux de retour après vérification OTP (returnTo parameter)
+- [x] Tests d'intégration OTP (13/13 passés)
+- [x] Gestion des erreurs et fallback gracieux

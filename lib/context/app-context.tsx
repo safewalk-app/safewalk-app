@@ -6,6 +6,8 @@ import { sendFollowUpAlertSMS, sendConfirmationSMS } from '../services/follow-up
 import { useNotifications } from '@/hooks/use-notifications';
 import { logger } from '@/lib/utils/logger';
 import { checkNetworkForSMS } from '@/lib/utils/network-checker';
+import { checkSessionOtpRequirement, resetSessionOtpVerification } from '@/lib/services/otp-session-guard';
+import { useRouter } from 'expo-router';
 
 export interface UserSettings {
   firstName: string;
@@ -114,6 +116,7 @@ function appReducer(state: State, action: Action): State {
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(appReducer, initialState);
   const { sendNotification } = useNotifications();
+  const router = useRouter();
 
   // Load data on mount
   useEffect(() => {
@@ -151,6 +154,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   const startSession = async (limitTime: number, note?: string) => {
+    // VERIFICATION OTP: Verifier que l'utilisateur est authentifie OTP
+    const otpCheck = await checkSessionOtpRequirement();
+    
+    if (!otpCheck.canCreateSession) {
+      logger.info('[AppContext] OTP requis avant de creer une session');
+      // Rediriger vers la verification OTP
+      router.push({
+        pathname: '/phone-verification',
+        params: {
+          returnTo: '/new-session',
+          message: 'Verification OTP requise avant de demarrer une session',
+        },
+      });
+      return;
+    }
+
     const now = Date.now();
     let adjustedLimitTime = limitTime;
 
@@ -396,6 +415,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     dispatch({ type: 'SET_SETTINGS', payload: defaultSettings });
     dispatch({ type: 'SET_SESSION', payload: null });
     dispatch({ type: 'SET_HISTORY', payload: [] });
+    // Reinitialiser aussi la verification OTP lors de la suppression des donnees
+    await resetSessionOtpVerification();
     await Promise.all([
       AsyncStorage.removeItem('safewalk_settings'),
       AsyncStorage.removeItem('safewalk_session'),
