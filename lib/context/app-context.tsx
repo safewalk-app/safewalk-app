@@ -8,6 +8,8 @@ import { checkNetworkForSMS } from '@/lib/utils/network-checker';
 import { checkSessionOtpRequirement, resetSessionOtpVerification } from '@/lib/services/otp-session-guard';
 import { useRouter } from 'expo-router';
 import { sendSOSPushNotification } from '@/hooks/use-push-notifications';
+import { getQuotaStatus, canSendSosAlert, logSms } from '@/lib/services/quota-service';
+import { getLocationSnapshot, formatLocationForSms, saveLocationToTrip } from '@/lib/services/privacy-service';
 
 export interface UserSettings {
   firstName: string;
@@ -257,6 +259,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     logger.debug('📋 [triggerAlert] Location:', location);
     
     if (!state.currentSession) return;
+    
+    // VÉRIFIER LES QUOTAS
+    const userId = 'current-user';
+    const canSend = await canSendSosAlert(userId);
+    if (!canSend) {
+      logger.error('Quotas épuisés');
+      sendNotification({
+        title: 'Quotas épuisés',
+        body: 'Vous avez atteint votre limite. Passez à Premium.',
+        data: { type: 'quota_exceeded' },
+      });
+      return;
+    }
     
     // Vérifier la connectivité réseau avant d'envoyer les SMS
     const networkCheck = await checkNetworkForSMS();

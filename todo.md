@@ -2388,3 +2388,47 @@
 - [x] Support de la localisation dans les notifications
 - [ ] Tester sur iPhone réel avec build EAS
 - [ ] Tester sur Android réel avec build EAS
+
+
+## ÉCONOMIE ET PAYWALL
+
+- [ ] Créer migration profiles avec free_alerts_remaining, free_test_sms_remaining, subscription_active
+- [ ] Créer migration contacts (name, phone E.164, priority, opted_out)
+- [ ] Créer migration trips (status, share_location, last_lat/lng, timestamps)
+- [ ] Créer migration sms_logs (sms_type, status, twilio_sid)
+- [ ] Ajouter RLS sur toutes les tables
+- [ ] Ajouter indexes (trips status/deadline, contacts user_id, sms_logs user_id/created_at)
+- [ ] Implémenter vérification quotas avant alerte/SMS
+- [ ] Implémenter paywall UI avec subscription_active
+- [ ] Implémenter Edge Function pour décrémenter quotas
+
+## PRIVACY
+
+- [ ] Implémenter position snapshot (au start ou app open)
+- [ ] Inclure position uniquement en cas d'alerte
+- [ ] Pas de tracking continu en arrière-plan
+- [ ] Ajouter toggle "Partager position" dans settings
+
+## BACKEND SÉCURISÉ
+
+- [ ] Configurer secrets Twilio dans Supabase
+- [ ] Mettre à jour Edge Functions pour utiliser secrets
+- [ ] Ajouter validation E.164 côté serveur
+- [ ] Ajouter logging audit pour SMS envoyés
+- [ ] Implémenter rate limiting côté serveur
+
+## ÉCONOMIE, PRIVACY ET BACKEND (V1.87)
+
+- [x] Migration Supabase : tables profiles, contacts, trips, sms_logs
+- [x] RLS (Row Level Security) sur toutes les tables
+- [x] Auto-création de profil à l'inscription
+- [x] Service quota-service.ts (gestion quotas)
+- [x] Service privacy-service.ts (position snapshot)
+- [x] Edge Function decrement-quota (sécurisée)
+- [x] Composant Paywall UI
+- [x] Intégration quotas dans app-context.tsx
+- [x] Tests quota-service.test.ts (16 tests)
+- [x] Tests privacy-service.test.ts (14 tests)
+- [ ] Déployer migrations Supabase
+- [ ] Configurer Twilio secrets côté Edge Functions
+- [ ] Tester le flux complet avec quotas
