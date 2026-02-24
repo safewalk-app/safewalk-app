@@ -20,14 +20,16 @@ interface SessionGuardResult {
  */
 export async function checkSessionOtpRequirement(): Promise<SessionGuardResult> {
   try {
-    // Vérifier si l'utilisateur est déjà vérifié OTP
-    const isVerified = await otpGuard.isVerified();
+    // Vérifier si l'utilisateur doit être vérifié OTP
+    const requiresOtp = otpGuard.shouldRequireOtp();
 
-    if (isVerified) {
+    if (!requiresOtp) {
       logger.info('[OTP Session Guard] Utilisateur déjà vérifié OTP');
+      const state = otpGuard.getState();
       return {
         canCreateSession: true,
         requiresOtp: false,
+        phoneNumber: state.verifiedPhoneNumber || undefined,
       };
     }
 
@@ -54,7 +56,7 @@ export async function checkSessionOtpRequirement(): Promise<SessionGuardResult> 
  */
 export async function resetSessionOtpVerification(): Promise<void> {
   try {
-    await otpGuard.resetVerification();
+    otpGuard.clear();
     logger.info('[OTP Session Guard] Vérification OTP réinitialisée');
   } catch (error) {
     logger.error('[OTP Session Guard] Erreur lors de la réinitialisation:', error);
@@ -67,7 +69,7 @@ export async function resetSessionOtpVerification(): Promise<void> {
  */
 export async function markSessionOtpVerified(phoneNumber: string): Promise<void> {
   try {
-    await otpGuard.markVerified(phoneNumber);
+    otpGuard.markAsVerified(phoneNumber);
     logger.info('[OTP Session Guard] Utilisateur marqué comme vérifié OTP');
   } catch (error) {
     logger.error('[OTP Session Guard] Erreur lors du marquage de vérification:', error);
@@ -80,7 +82,8 @@ export async function markSessionOtpVerified(phoneNumber: string): Promise<void>
  */
 export async function getVerifiedPhoneNumber(): Promise<string | undefined> {
   try {
-    return await otpGuard.getVerifiedPhoneNumber();
+    const state = otpGuard.getState();
+    return state.verifiedPhoneNumber || undefined;
   } catch (error) {
     logger.error('[OTP Session Guard] Erreur lors de la récupération du numéro:', error);
     return undefined;
@@ -93,10 +96,23 @@ export async function getVerifiedPhoneNumber(): Promise<string | undefined> {
  */
 export async function isOtpVerificationExpired(): Promise<boolean> {
   try {
-    return await otpGuard.isExpired();
+    const state = otpGuard.getState();
+    
+    // Si pas vérifié, considérer comme expiré
+    if (!state.isVerified) {
+      return true;
+    }
+
+    // Vérifier si plus de 24h ont passé
+    if (state.verifiedAt) {
+      const hoursElapsed = (Date.now() - state.verifiedAt) / (1000 * 60 * 60);
+      return hoursElapsed > 24;
+    }
+
+    return true;
   } catch (error) {
     logger.error('[OTP Session Guard] Erreur lors de la vérification d\'expiration:', error);
-    return false;
+    return true;
   }
 }
 
@@ -106,7 +122,18 @@ export async function isOtpVerificationExpired(): Promise<boolean> {
  */
 export async function getOtpVerificationTimeRemaining(): Promise<number> {
   try {
-    return await otpGuard.getTimeRemaining();
+    const state = otpGuard.getState();
+    
+    // Si pas vérifié, retourner 0
+    if (!state.isVerified || !state.verifiedAt) {
+      return 0;
+    }
+
+    // Calculer le temps restant (24h = 86400000ms)
+    const expirationTime = state.verifiedAt + (24 * 60 * 60 * 1000);
+    const timeRemaining = expirationTime - Date.now();
+
+    return timeRemaining > 0 ? timeRemaining : 0;
   } catch (error) {
     logger.error('[OTP Session Guard] Erreur lors de la récupération du temps restant:', error);
     return 0;

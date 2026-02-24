@@ -1,0 +1,17 @@
+== ANALYSE TYPESCRIPT ==
+31 erreurs totales
+
+CATÉGORIE 1: Erreurs Supabase Edge Functions (Deno) - 17 erreurs
+- supabase/functions/send-otp/index.ts: 7 erreurs (Deno, modules)
+- supabase/functions/verify-otp/index.ts: 5 erreurs (Deno, modules)
+- supabase/functions/trigger-sos/index.ts: 5 erreurs (Deno, modules)
+→ NON BLOQUANT: Edge Functions utilisent Deno, pas Node.js
+
+CATÉGORIE 2: Erreurs app critiques - 8 erreurs
+- app/home.tsx(37): getPermissionsAsync n'existe pas
+- app/otp-verification.tsx(120,180): errorCode manquant sur types
+- app/phone-verification.tsx(120): errorCode manquant sur type
+- lib/services/otp-session-guard.ts: 6 erreurs (méthodes incorrectes)
+
+CATÉGORIE 3: Erreurs de types OTP - 6 erreurs
+- otp-session-guard.ts: isVerified, resetVerification, markVerified, getVerifiedPhoneNumber, isExpired, getTimeRemaining

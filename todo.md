@@ -2337,3 +2337,11 @@
 - [ ] Déployer les Edge Functions Supabase
 - [ ] Tester sur iPhone réel
 - [ ] Intégrer OTP obligatoire dans app-context
+
+
+## CORRECTION DES 3 BUGS CRITIQUES (V1.81)
+
+- [x] Corriger otp-session-guard.ts - aligner avec otp-guard.ts (6 erreurs résolues)
+- [x] Ajouter errorCode aux interfaces OTP (3 erreurs résolues)
+- [x] Corriger getPermissionsAsync en getForegroundPermissionsAsync (1 erreur résolue)
+- [x] Valider que tous les tests passent (394/420 PASS)

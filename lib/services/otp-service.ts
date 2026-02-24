@@ -6,6 +6,7 @@ interface SendOtpResponse {
   message: string;
   expiresIn?: number;
   error?: string;
+  errorCode?: string;
 }
 
 interface VerifyOtpResponse {
@@ -14,6 +15,7 @@ interface VerifyOtpResponse {
   verified?: boolean;
   error?: string;
   attemptsRemaining?: number;
+  errorCode?: string;
 }
 
 class OtpService {

@@ -34,7 +34,7 @@ export default function HomeScreen() {
         const notifStatus = notifSettings.granted ? 'ok' : 'pending';
 
         // Vérifier localisation
-        const locationStatus = await Location.getPermissionsAsync();
+        const locationStatus = await Location.getForegroundPermissionsAsync();
         const locStatus = locationStatus.granted ? 'ok' : 'pending';
 
         setChecklistItems([

@@ -1,0 +1,6 @@
+== ANALYSE VISUELLE ==
+- Page d'accueil: Design propre, carte "Je sors" avec gradient violet, bouton "Commencer"
+- "Sécurité inactive" avec alerte orange et chevron
+- "Conseil du jour" avec texte informatif
+- Bulles décoratives en arrière-plan
+- Pas de tab bar visible sur la preview web
