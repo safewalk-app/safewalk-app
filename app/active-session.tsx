@@ -23,6 +23,10 @@ import { useKeepAwake } from 'expo-keep-awake';
 import { useNetworkStatus } from '@/hooks/use-network-status';
 import { getNetworkErrorMessage } from '@/lib/utils/network-checker';
 import { useLocationTracking } from '@/hooks/use-location-tracking';
+import { LongPressGestureHandler } from 'react-native-gesture-handler';
+import * as Haptics from 'expo-haptics';
+import { tripService, cancelTrip } from '@/lib/services/trip-service';
+import { logger } from '@/lib/logger';
 
 export default function ActiveSessionScreen() {
   // Empêcher l'écran de s'éteindre pendant la session
@@ -613,22 +617,55 @@ export default function ActiveSessionScreen() {
           </View>
         </ScreenTransition>
 
-        {/* SOS Button */}
+        {/* SOS Button - Long Press (2s) */}
         <ScreenTransition delay={400} duration={350}>
-          <View className="my-4">
-            <SOSButton
-              onPress={async () => {
-                await triggerSOS();
-              }}
-              isLoading={sosLoading}
-              className="w-full"
-            />
-          </View>
+          <LongPressGestureHandler
+            onHandlerStateChange={async (event) => {
+              if (event.nativeEvent.state === 3) { // ACTIVE state
+                await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+                await tripService.triggerSos({ tripId: currentSession?.id });
+              }
+            }}
+            minDurationMs={2000}
+          >
+            <View className="my-4">
+              <SOSButton
+                onPress={async () => {
+                  // Fallback for tap (optional)
+                }}
+                isLoading={sosLoading}
+                className="w-full"
+              />
+            </View>
+          </LongPressGestureHandler>
         </ScreenTransition>
 
         {/* Annuler la sortie */}
         <ScreenTransition delay={500} duration={350}>
-          <Pressable onPress={handleCancelSession} className="py-4">
+          <Pressable 
+            onPress={async () => {
+              Alert.alert(
+                'Annuler la sortie ?',
+                'Êtes-vous sûr de vouloir annuler cette sortie ?',
+                [
+                  { text: 'Non', style: 'cancel' },
+                  {
+                    text: 'Oui, annuler',
+                    style: 'destructive',
+                    onPress: async () => {
+                      const result = await cancelTrip(currentSession?.id || '');
+                      if (result.success) {
+                        router.push('/home');
+                      } else {
+                        Alert.alert('Erreur', result.error || 'Impossible d\'annuler la sortie');
+                      }
+                    },
+                  },
+                ]
+              );
+            }}
+            className="py-4"
+          >
             <Text className="text-center text-base font-bold text-error">
               Annuler la sortie
             </Text>

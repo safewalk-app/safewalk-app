@@ -27,8 +27,8 @@ Fichiers: app/new-session.tsx
 Fichiers: app/active-session.tsx, trip-service.ts
 - [ ] Remplacer SOS bouton par LongPressable (2s)
 - [ ] Ajouter haptics feedback (Heavy)
-- [ ] Ajouter cancelTrip() dans trip-service
-- [ ] Ajouter bouton Annuler la sortie
+- [x] Ajouter cancelTrip() dans trip-service
+- [x] Ajouter bouton Annuler la sortie
 
 ### E) Settings Améliorations (1.5h - IMPORTANT)
 Fichiers: app/settings.tsx

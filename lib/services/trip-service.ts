@@ -365,3 +365,50 @@ export async function triggerSos(input: SosInput = {}): Promise<SosOutput> {
     };
   }
 }
+
+
+/**
+ * Cancel an active trip
+ */
+export async function cancelTrip(tripId: string): Promise<{ success: boolean; error?: string; errorCode?: string }> {
+  try {
+    logger.info("Cancelling trip", { tripId });
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      logger.error("Cancel trip: No authenticated user");
+      return {
+        success: false,
+        error: "Not authenticated",
+        errorCode: "UNAUTHORIZED",
+      };
+    }
+
+    // Update trip status to 'cancelled'
+    const { error } = await supabase
+      .from("sessions")
+      .update({ status: "cancelled" })
+      .eq("id", tripId)
+      .eq("user_id", user.id);
+
+    if (error) {
+      logger.error("Cancel trip error", { error, tripId });
+      return {
+        success: false,
+        error: error.message,
+        errorCode: "DB_ERROR",
+      };
+    }
+
+    logger.info("Trip cancelled successfully", { tripId });
+    return { success: true };
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    logger.error("Cancel trip exception", { error: errorMessage });
+    return {
+      success: false,
+      error: errorMessage,
+      errorCode: "EXCEPTION",
+    };
+  }
+}
