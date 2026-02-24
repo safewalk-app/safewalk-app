@@ -2510,3 +2510,45 @@
 - [ ] Tester atomicité (FOR UPDATE SKIP LOCKED)
 - [ ] Tester gestion d'erreurs (network, Twilio, DB)
 - [ ] Tester sur iPhone et Android réels
+
+
+## PHASE 5: RPC SQL ATOMIQUE + EDGE FUNCTIONS (V1.88)
+
+### RPC Functions
+- [x] Créer `claim_overdue_trips(p_limit)` - FOR UPDATE SKIP LOCKED
+- [x] Créer `consume_credit(p_user_id, p_type)` - Logique crédits/quotas atomique
+- [x] Créer `get_sms_daily_count()` - Compter SMS du jour
+- [x] Créer indexes pour performance
+
+### Edge Functions Client-Auth
+- [x] `start-trip` - Créer une nouvelle session
+- [x] `checkin` - Confirmer le retour
+- [x] `extend` - Prolonger la deadline
+- [x] `ping-location` - Mettre à jour la position
+- [x] `test-sms` - Envoyer un SMS de test
+- [x] `sos` - Déclencher une alerte SOS immédiate
+
+### Edge Functions Server-Only
+- [x] `cron-check-deadlines` - Vérifier les trips en retard (appelle RPC + Twilio)
+
+### Intégration Backend
+- [x] Créer helper Twilio partagé (`_shared/twilio.ts`)
+- [x] Configurer secrets Supabase (TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER, CRON_SECRET)
+- [x] Créer Cron Job pour `cron-check-deadlines` (toutes les 1 minute)
+
+### Intégration Frontend
+- [x] Créer `lib/supabase.ts` - Client Supabase
+- [x] Créer `lib/services/trip-service.ts` - Client pour Edge Functions
+- [x] Intégrer `trip-service` dans `app-context.tsx`
+  - `startSession()` → appelle `tripService.startTrip()`
+  - `endSession()` → appelle `tripService.checkin()`
+  - `addTimeToSession()` → appelle `tripService.extendTrip()`
+
+### Tests & QA
+- [x] Corriger erreurs TypeScript dans tests
+- [x] Adapter RPC pour schéma réel (sans priority/opted_out)
+- [x] Vérifier imports et dépendances
+
+### Documentation
+- [x] Créer `ARCHITECTURE_RPC_EDGE_FUNCTIONS.md` (300+ lignes)
+- [x] Créer `DEPLOY_EDGE_FUNCTIONS.md` (guide de déploiement)

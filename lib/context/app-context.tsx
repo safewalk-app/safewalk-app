@@ -10,6 +10,7 @@ import { useRouter } from 'expo-router';
 import { sendSOSPushNotification } from '@/hooks/use-push-notifications';
 import { getQuotaStatus, canSendSosAlert, logSms } from '@/lib/services/quota-service';
 import { getLocationSnapshot, formatLocationForSms, saveLocationToTrip } from '@/lib/services/privacy-service';
+import { tripService } from '@/lib/services/trip-service';
 
 export interface UserSettings {
   firstName: string;
@@ -198,6 +199,28 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     dispatch({ type: 'SET_SESSION', payload: session });
     await AsyncStorage.setItem('safewalk_session', JSON.stringify(session));
+    
+    // INTEGRATION: Appeler Edge Function start-trip pour synchroniser avec Supabase
+    try {
+      const deadlineISO = new Date(deadline).toISOString();
+      const result = await tripService.startTrip({
+        deadlineISO,
+        shareLocation: state.settings.locationEnabled,
+        destinationNote: note,
+      });
+      
+      if (result.success && result.tripId) {
+        // Mettre à jour la session avec l'ID du serveur
+        const updatedSession = { ...session, id: result.tripId };
+        dispatch({ type: 'SET_SESSION', payload: updatedSession });
+        await AsyncStorage.setItem('safewalk_session', JSON.stringify(updatedSession));
+        logger.info('[AppContext] Trip créée sur Supabase:', result.tripId);
+      } else {
+        logger.warn('[AppContext] Erreur lors de la création de la trip:', result.error);
+      }
+    } catch (error) {
+      logger.error('[AppContext] Erreur lors de l\'appel à start-trip:', error);
+    }
   };
 
   const endSession = async () => {
@@ -212,6 +235,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     dispatch({ type: 'SET_HISTORY', payload: newHistory });
     await AsyncStorage.removeItem('safewalk_session');
     await AsyncStorage.setItem('safewalk_history', JSON.stringify(newHistory));
+    
+    // INTEGRATION: Appeler Edge Function checkin pour synchroniser avec Supabase
+    try {
+      if (state.currentSession.id) {
+        const result = await tripService.checkin({ tripId: state.currentSession.id });
+        if (result.success) {
+          logger.info('[AppContext] Trip confirmée sur Supabase:', state.currentSession.id);
+        } else {
+          logger.warn('[AppContext] Erreur lors de la confirmation de la trip:', result.error);
+        }
+      }
+    } catch (error) {
+      logger.error('[AppContext] Erreur lors de l\'appel à checkin:', error);
+    }
   };
 
   const addTimeToSession = async (minutes: number) => {
@@ -236,6 +273,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     dispatch({ type: 'SET_SESSION', payload: updatedSession });
     await AsyncStorage.setItem('safewalk_session', JSON.stringify(updatedSession));
+    
+    // INTEGRATION: Appeler Edge Function extend pour synchroniser avec Supabase
+    try {
+      if (state.currentSession.id) {
+        const result = await tripService.extendTrip({
+          tripId: state.currentSession.id,
+          addMinutes: minutes,
+        });
+        if (result.success) {
+          logger.info('[AppContext] Trip prolongée sur Supabase:', result.newDeadline);
+        } else {
+          logger.warn('[AppContext] Erreur lors de la prolongation de la trip:', result.error);
+        }
+      }
+    } catch (error) {
+      logger.error('[AppContext] Erreur lors de l\'appel à extend:', error);
+    }
   };
 
   const cancelSession = async () => {
