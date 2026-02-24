@@ -5,6 +5,8 @@
  * en développement et en production.
  */
 
+import { logger } from '@/lib/logger';
+
 // Fonction pour obtenir l'URL de l'API
 export function getApiUrl(): string {
   // 1. Essayer d'utiliser EXPO_PUBLIC_API_URL (définie dans les secrets Manus)
