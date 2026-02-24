@@ -9,12 +9,12 @@ Fichiers: app-context.tsx, new-session.tsx, trip-service.ts
 - [x] Intégrer OTP modal dans new-session.tsx avant startSession
 - [ ] Tester flow complet
 
-### B) Affichage Home (30min - IMPORTANT)
+### B) Affichage Home (30min - IMPORTANT) ✅ COMPLÈTE
 Fichiers: app/home.tsx
-- [ ] Ajouter query Supabase pour lire profile
-- [ ] Afficher crédits restants dans checklist
-- [ ] Afficher subscription_active status
-- [ ] Afficher phone_verified status
+- [x] Ajouter query Supabase pour lire profile
+- [x] Afficher crédits restants dans checklist
+- [x] Afficher subscription_active status
+- [x] Afficher phone_verified status
 
 ### C) Gating New-Session (1h - CRITIQUE)
 Fichiers: app/new-session.tsx

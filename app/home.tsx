@@ -14,12 +14,14 @@ import * as Notifications from 'expo-notifications';
 import * as Location from 'expo-location';
 import { useColors } from '@/hooks/use-colors';
 import { logger } from '@/lib/logger';
+import { useProfileData } from '@/hooks/use-profile-data';
 
 export default function HomeScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const colors = useColors();
   const { settings, currentSession } = useApp();
+  const profileData = useProfileData();
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>([]);
@@ -46,6 +48,20 @@ export default function HomeScreen() {
             onPress: () => router.push('/settings'),
           },
           {
+            id: 'phone',
+            label: profileData.phone_verified ? 'Téléphone: Vérifié' : 'Téléphone: À vérifier',
+            status: profileData.phone_verified ? 'ok' : 'pending',
+            onPress: !profileData.phone_verified ? () => router.push('/otp-verification') : undefined,
+          },
+          {
+            id: 'credits',
+            label: profileData.subscription_active 
+              ? 'Abonnement: Actif' 
+              : `Crédits: ${profileData.free_alerts_remaining} restants`,
+            status: profileData.subscription_active || profileData.free_alerts_remaining > 0 ? 'ok' : 'warning',
+            onPress: profileData.subscription_active || profileData.free_alerts_remaining > 0 ? undefined : () => router.push('/paywall'),
+          },
+          {
             id: 'notifications',
             label: notifStatus === 'ok' ? 'Notifications: Activées' : 'Notifications: À activer',
             status: notifStatus,
@@ -64,7 +80,7 @@ export default function HomeScreen() {
     };
 
     checkPermissions();
-  }, [settings, hasContact]);
+  }, [settings, hasContact, profileData]);
 
   const requestNotifications = async () => {
     try {
