@@ -2234,3 +2234,63 @@
   - `supabase functions deploy verify-otp`
 - [ ] Configurer secrets Twilio dans Supabase
 - [ ] Tester flux complet sur iPhone
+
+
+## GESTION DES ERREURS OTP (V1.77)
+
+### Architecture des erreurs
+- [x] Créer énumération OtpErrorCode (14 codes d'erreur)
+- [x] Créer types TypeScript pour erreurs OTP
+- [x] Mapper codes d'erreur à titres français
+- [x] Mapper codes d'erreur à types visuels (error/warning/info)
+
+### Composants d'erreur réutilisables
+- [x] Créer ErrorAlert (alerte avec icône, titre, message, action)
+- [x] Créer ErrorMessage (message d'erreur simple)
+- [x] Créer ErrorState (état d'erreur avec action)
+- [x] Intégrer icônes MaterialIcons
+
+### Écrans améliorés
+- [x] Améliorer otp-verification.tsx avec gestion complète des erreurs
+  - Validation format code (6 chiffres)
+  - Affichage ErrorAlert pour chaque cas d'erreur
+  - Actions de récupération (renvoyer, changer numéro)
+  - Suggestion de changement de numéro si SMS non envoyé
+- [x] Améliorer phone-verification.tsx (à faire)
+
+### Edge Functions avec gestion d'erreurs
+- [x] Réécrire send-otp avec codes d'erreur structurés
+  - Validation numéro (E.164)
+  - Rate limiting (max 5 envois/heure)
+  - Gestion erreurs Twilio
+  - Logging audit
+- [x] Réécrire verify-otp avec codes d'erreur structurés
+  - Validation code (6 chiffres)
+  - Gestion expiration (10 min)
+  - Gestion tentatives (max 3)
+  - Messages d'erreur français
+
+### Tests
+- [x] Tests otp-error-handling.test.ts (38/38 passés)
+  - getErrorTitle pour tous les codes
+  - getErrorType (error/warning/info)
+  - isRecoverableError
+  - canResendOtp
+  - shouldChangePhone
+  - Hiérarchie d'erreurs
+  - Chemins de récupération
+
+### Documentation
+- [x] OTP_ERROR_HANDLING.md - Guide complet des erreurs
+  - 10 cas d'erreur identifiés
+  - Stratégie de gestion
+  - Composants d'erreur
+  - Flux de gestion par écran
+  - Codes d'erreur standardisés
+  - Exemples d'implémentation
+
+### À faire
+- [ ] Améliorer phone-verification.tsx avec gestion des erreurs
+- [ ] Tester flux complet sur iPhone
+- [ ] Ajouter rate limiting côté client
+- [ ] Ajouter notifications pour erreurs critiques
