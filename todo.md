@@ -2179,3 +2179,58 @@
 - [ ] Créer checkpoint avec credentials intégrés
 - [ ] Vérifier tous les tests passent
 - [ ] Vérifier 0 erreurs TypeScript
+
+
+## AUTHENTIFICATION OTP PAR SMS (V1.76)
+
+### Backend Supabase Edge Functions
+- [x] Créer migration SQL pour tables `otp_verifications` et `otp_logs`
+- [x] Implémenter Edge Function `send-otp` (Deno/TypeScript)
+  - Validation E.164 du numéro
+  - Génération code 6 chiffres
+  - Envoi SMS via Twilio
+  - Stockage dans Supabase
+- [x] Implémenter Edge Function `verify-otp` (Deno/TypeScript)
+  - Validation du code (6 chiffres)
+  - Gestion des tentatives (max 3)
+  - Vérification expiration (10 minutes)
+  - Logging audit
+
+### Services Client
+- [x] Créer `otp-service.ts` - Client pour les Edge Functions
+- [x] Créer `otp-guard.ts` - Gestion état vérification (24h validité)
+- [x] Créer `use-otp-verification.ts` - Hook React pour persistance
+
+### Composants UI
+- [x] Créer `OtpInput.tsx` - Composant saisie 6 chiffres
+  - Auto-focus entre champs
+  - Support copier-coller
+  - Validation en temps réel
+- [x] Créer `phone-verification.tsx` - Écran saisie numéro
+  - Format E.164 automatique
+  - Validation numéro français
+- [x] Créer `otp-verification.tsx` - Écran saisie code
+  - Timer 10 minutes
+  - Renvoyer code (après 5 min)
+  - Gestion tentatives (max 3)
+
+### Tests
+- [x] Tests `otp-guard.test.ts` (8/8 passés)
+  - Vérification requise au départ
+  - Pas de vérification après validation
+  - Expiration après 24h
+  - Sauvegarde/restauration état
+- [x] Tests `otp-service.test.ts` (validation format)
+
+### Intégration
+- [ ] Ajouter vérification OTP avant `triggerAlert`
+- [ ] Rediriger vers `phone-verification` si non vérifié
+- [ ] Persister état OTP dans AsyncStorage
+- [ ] Intégrer dans le flux d'alerte existant
+
+### Déploiement
+- [ ] Déployer Edge Functions sur Supabase
+  - `supabase functions deploy send-otp`
+  - `supabase functions deploy verify-otp`
+- [ ] Configurer secrets Twilio dans Supabase
+- [ ] Tester flux complet sur iPhone
