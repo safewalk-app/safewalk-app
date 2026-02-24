@@ -26,7 +26,6 @@ import { useLocationTracking } from '@/hooks/use-location-tracking';
 import { LongPressGestureHandler } from 'react-native-gesture-handler';
 import * as Haptics from 'expo-haptics';
 import { tripService, cancelTrip } from '@/lib/services/trip-service';
-import { logger } from '@/lib/logger';
 
 export default function ActiveSessionScreen() {
   // Empêcher l'écran de s'éteindre pendant la session
