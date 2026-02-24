@@ -2552,3 +2552,16 @@
 ### Documentation
 - [x] Créer `ARCHITECTURE_RPC_EDGE_FUNCTIONS.md` (300+ lignes)
 - [x] Créer `DEPLOY_EDGE_FUNCTIONS.md` (guide de déploiement)
+
+
+## PHASE 6: GPS TRACKING AUTOMATIQUE (V1.89)
+
+### Tracking GPS
+- [x] Créer hook `useLocationTracking` pour tracker la position
+- [x] Implémenter envoi automatique toutes les 45 secondes
+- [x] Gérer les permissions GPS (iOS/Android)
+- [x] Gérer les erreurs de localisation
+- [x] Intégrer dans `ActiveSessionScreen`
+- [x] Ajouter UI pour afficher le statut du tracking
+- [x] Afficher la dernière position envoyée
+- [ ] Tester le tracking complet

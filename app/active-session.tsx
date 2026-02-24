@@ -22,6 +22,7 @@ import * as Notifications from 'expo-notifications';
 import { useKeepAwake } from 'expo-keep-awake';
 import { useNetworkStatus } from '@/hooks/use-network-status';
 import { getNetworkErrorMessage } from '@/lib/utils/network-checker';
+import { useLocationTracking } from '@/hooks/use-location-tracking';
 
 export default function ActiveSessionScreen() {
   // Empêcher l'écran de s'éteindre pendant la session
@@ -59,6 +60,17 @@ export default function ActiveSessionScreen() {
       });
     },
   });
+  
+  // Tracker la position GPS automatiquement
+  const locationTracking = useLocationTracking({
+    tripId: currentSession?.id || '',
+    enabled: settings.locationEnabled && !!currentSession,
+    intervalMs: 45000,
+    onError: (error) => {
+      logger.error('Location tracking error:', error);
+    },
+  });
+  
   const [remainingTime, setRemainingTime] = useState<string>('00:00:00');
   const [sessionState, setSessionState] = useState<'active' | 'grace' | 'overdue'>('active');
   const [showCheckInModal, setShowCheckInModal] = useState(false);
@@ -455,7 +467,7 @@ export default function ActiveSessionScreen() {
                 ])}
               >
                 <Text style={{ fontSize: 24 }}>
-                  {locationPermission.enabled ? '🟢' : '🔴'}
+                  {locationTracking.isTracking ? '🟢' : locationTracking.error ? '🔴' : '⚪'}
                 </Text>
               </Pressable>
             </View>
@@ -484,6 +496,38 @@ export default function ActiveSessionScreen() {
                   <Text className="text-xs text-muted leading-relaxed">
                     L'alerte SMS ne pourra pas être envoyée. Vérifiez votre connexion WiFi ou cellulaire.
                   </Text>
+                </View>
+              </View>
+            </GlassCard>
+          </ScreenTransition>
+        )}
+
+        {/* GPS Tracking Status Card */}
+        {settings.locationEnabled && (
+          <ScreenTransition delay={75} duration={350}>
+            <GlassCard
+              className="gap-2 mb-4"
+              style={{
+                backgroundColor: locationTracking.isTracking ? 'rgba(45, 226, 166, 0.08)' : locationTracking.error ? 'rgba(255, 77, 77, 0.08)' : 'rgba(200, 200, 200, 0.08)',
+                paddingHorizontal: 16,
+                paddingVertical: 12,
+              }}
+            >
+              <View className="flex-row items-center justify-between">
+                <View className="flex-row items-center gap-2 flex-1">
+                  <Text style={{ fontSize: 18 }}>
+                    {locationTracking.isTracking ? '🟢' : locationTracking.error ? '🔴' : '⚪'}
+                  </Text>
+                  <View className="flex-1">
+                    <Text className="text-sm font-semibold text-foreground">
+                      {locationTracking.isTracking ? 'Suivi GPS actif' : locationTracking.error ? 'Erreur GPS' : 'Suivi GPS inactif'}
+                    </Text>
+                    {locationTracking.lastSentAt && (
+                      <Text className="text-xs text-muted">
+                        Mise à jour: {new Date(locationTracking.lastSentAt).toLocaleTimeString('fr-FR')}
+                      </Text>
+                    )}
+                  </View>
                 </View>
               </View>
             </GlassCard>
