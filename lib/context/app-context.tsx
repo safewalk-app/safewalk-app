@@ -10,7 +10,7 @@ import { useRouter } from 'expo-router';
 import { sendSOSPushNotification } from '@/hooks/use-push-notifications';
 import { getQuotaStatus, canSendSosAlert, logSms } from '@/lib/services/quota-service';
 import { getLocationSnapshot, formatLocationForSms, saveLocationToTrip } from '@/lib/services/privacy-service';
-import { tripService } from '@/lib/services/trip-service';
+import * as tripService from '@/lib/services/trip-service';
 import { supabase } from '@/lib/supabase';
 
 export interface UserSettings {
@@ -53,7 +53,7 @@ export interface AppContextType {
   currentSession: Session | null;
   history: Session[];
   updateSettings: (settings: Partial<UserSettings>) => Promise<void>;
-  startSession: (limitTime: number, note?: string) => Promise<void>;
+  startSession: (limitTime: number, note?: string) => Promise<{ success: boolean; error?: string; errorCode?: string } | void>;
   endSession: () => Promise<void>;
   addTimeToSession: (minutes: number) => Promise<void>;
   cancelSession: () => Promise<void>;
@@ -375,7 +375,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     });
     
     // Vérifier qu'il y a au moins un contact
-    if (!state.settings.emergencyContactPhone && !state.settings.emergencyContact2Phone) {
+    if (!state.settings.emergencyContactPhone) {
       logger.error('❌ [triggerAlert] AUCUN CONTACT CONFIGURÉ ! Les SMS ne seront pas envoyés.');
       return;
     }
@@ -386,12 +386,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       emergencyContacts.push({
         name: state.settings.emergencyContactName || 'Contact',
         phone: state.settings.emergencyContactPhone,
-      });
-    }
-    if (state.settings.emergencyContact2Phone) {
-      emergencyContacts.push({
-        name: state.settings.emergencyContact2Name || 'Contact 2',
-        phone: state.settings.emergencyContact2Phone,
       });
     }
 
@@ -479,12 +473,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             phone: state.settings.emergencyContactPhone,
           });
         }
-        if (state.settings.emergencyContact2Phone) {
-          contacts.push({
-            name: state.settings.emergencyContact2Name || '',
-            phone: state.settings.emergencyContact2Phone,
-          });
-        }
+
 
         if (contacts.length > 0) {
           await sendConfirmationSMS({

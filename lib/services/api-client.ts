@@ -7,6 +7,8 @@
  * - Gestion d'erreurs unifiée
  */
 
+import { logger } from '@/lib/logger';
+
 // URL de l'API depuis les variables d'environnement
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://3000-izg08xkxsyk2siv7372nz-49e5cc45.us1.manus.computer';
 

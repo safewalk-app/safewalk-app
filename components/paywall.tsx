@@ -29,7 +29,7 @@ export function PaywallSheet() {
   const loadQuota = async () => {
     if (!user?.id) return;
     setLoading(true);
-    const status = await getQuotaStatus(user.id);
+    const status = await getQuotaStatus(String(user.id));
     setQuota(status);
     setLoading(false);
   };
@@ -184,7 +184,7 @@ export function PaywallSheet() {
                   <Text className="text-sm text-muted">10 SMS par jour</Text>
                 </View>
                 <View className="flex-row items-center gap-2">
-                  <MaterialIcons name="close-circle" size={18} color={colors.error} />
+                  <MaterialIcons name="cancel" size={18} color={colors.error} />
                   <Text className="text-sm text-error">Support limité</Text>
                 </View>
               </View>

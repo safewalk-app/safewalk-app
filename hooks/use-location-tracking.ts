@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import * as Location from 'expo-location';
-import { tripService } from '@/lib/services/trip-service';
+import * as tripService from '@/lib/services/trip-service';
 
 export interface LocationTrackingState {
   isTracking: boolean;

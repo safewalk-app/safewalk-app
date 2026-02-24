@@ -1,6 +1,7 @@
-import { useEffect, useState, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import * as Location from 'expo-location';
 import { Platform } from 'react-native';
+import { logger } from '@/lib/logger';
 
 export interface LocationData {
   latitude: number;

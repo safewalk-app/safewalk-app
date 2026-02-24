@@ -3,6 +3,7 @@ import { useNotifications } from './use-notifications';
 import { useRealTimeLocation } from './use-real-time-location';
 import { sendEmergencySMS } from '@/lib/services/sms-service';
 import { useApp } from '@/lib/context/app-context';
+import { logger } from '@/lib/logger';
 
 export interface SOSResult {
   success: boolean;
@@ -40,7 +41,6 @@ export function useSOS(options: UseSOSOptions) {
     logger.info('Session ID:', sessionId);
     logger.info('Settings:', {
       contact1: settings.emergencyContactPhone,
-      contact2: settings.emergencyContact2Phone,
       firstName: settings.firstName,
     });
     logger.info('Location initiale:', initialLocation);
@@ -79,7 +79,7 @@ export function useSOS(options: UseSOSOptions) {
       }
 
       // Vérifier qu'il y a au moins un contact
-      if (!settings.emergencyContactPhone && !settings.emergencyContact2Phone) {
+      if (!settings.emergencyContactPhone) {
         throw new Error('Aucun contact d\'urgence configuré');
       }
 
@@ -116,31 +116,7 @@ export function useSOS(options: UseSOSOptions) {
         }
       }
 
-      // Envoyer SMS au contact 2
-      if (settings.emergencyContact2Phone) {
-        logger.info('📤 [SOS] Envoi SMS au contact 2...');
-        const result2 = await sendEmergencySMS({
-          reason: 'sos',
-          contactName: settings.emergencyContact2Name || 'Contact 2',
-          contactPhone: settings.emergencyContact2Phone,
-          firstName: settings.firstName,
-          note: currentSession?.note,
-          location: currentLocation,
-        });
 
-        smsResults.push({
-          contact: settings.emergencyContact2Name || 'Contact 2',
-          phone: settings.emergencyContact2Phone,
-          status: result2.ok ? 'sent' : 'failed',
-          messageSid: result2.sid,
-        });
-
-        if (result2.ok) {
-          logger.info('✅ [SOS] SMS envoyé au contact 2 (SID:', result2.sid, ')');
-        } else {
-          logger.error('❌ [SOS] Échec envoi SMS au contact 2:', result2.error);
-        }
-      }
 
       // Vérifier si au moins un SMS a été envoyé
       const successCount = smsResults.filter(r => r.status === 'sent').length;

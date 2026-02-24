@@ -10,6 +10,7 @@
 
 import { Platform } from "react-native";
 import type { Metrics } from "react-native-safe-area-context";
+import { logger } from "@/lib/logger";
 
 // Debug logging with timestamps
 const DEBUG = true;

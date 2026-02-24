@@ -15,7 +15,7 @@ import { validatePhoneNumber, formatPhoneInput, cleanPhoneNumber } from '@/lib/u
 import { checkHealth } from '@/lib/services/api-client';
 import { sendEmergencySMS } from '@/lib/services/sms-service';
 import { useLocationPermission } from '@/hooks/use-location-permission';
-import { tripService } from '@/lib/services/trip-service';
+import * as tripService from '@/lib/services/trip-service';
 import { useProfileData } from '@/hooks/use-profile-data';
 
 export default function SettingsScreen() {
@@ -87,30 +87,7 @@ export default function SettingsScreen() {
     return () => clearTimeout(timer);
   }, [contactName, contactPhone]);
 
-  // Autosave contact 2 avec validation
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (
-        contact2Name !== (settings.emergencyContact2Name || '') ||
-        contact2Phone !== (settings.emergencyContact2Phone || '')
-      ) {
-        // Nettoyer et valider le numéro si non vide
-        const cleanedPhone2 = cleanPhoneNumber(contact2Phone);
-        if (cleanedPhone2 && !validatePhoneNumber(cleanedPhone2)) {
-          setPhone2Error('Format invalide. Utilisez +33 suivi de 9 chiffres (ex: +33612345678)');
-          return;
-        }
-        setPhone2Error(null);
-        updateSettings({
-          emergencyContact2Name: contact2Name,
-          emergencyContact2Phone: cleanedPhone2,
-        });
-        setToastMessage('Contact 2 sauvegardé');
-        setShowToast(true);
-      }
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [contact2Name, contact2Phone]);
+
 
 
 

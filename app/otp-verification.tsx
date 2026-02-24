@@ -137,7 +137,7 @@ export default function OtpVerificationScreen() {
         );
 
         // Afficher le toast d'erreur approprié
-        if (errorCode === OtpErrorCode.TOO_MANY_ATTEMPTS) {
+        if (errorCode === OtpErrorCode.MAX_ATTEMPTS_EXCEEDED) {
           showOtpTooManyAttemptsToast(15);
         } else if (errorCode === OtpErrorCode.OTP_EXPIRED) {
           showOtpExpiredToast();

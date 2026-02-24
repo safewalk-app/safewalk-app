@@ -25,7 +25,7 @@ import { getNetworkErrorMessage } from '@/lib/utils/network-checker';
 import { useLocationTracking } from '@/hooks/use-location-tracking';
 import { LongPressGestureHandler } from 'react-native-gesture-handler';
 import * as Haptics from 'expo-haptics';
-import { tripService, cancelTrip } from '@/lib/services/trip-service';
+import * as tripService from '@/lib/services/trip-service';
 
 export default function ActiveSessionScreen() {
   // Empêcher l'écran de s'éteindre pendant la session
@@ -260,12 +260,7 @@ export default function ActiveSessionScreen() {
                 phone: settings.emergencyContactPhone,
               });
             }
-            if (settings.emergencyContact2Phone) {
-              contacts.push({
-                name: settings.emergencyContact2Name || '',
-                phone: settings.emergencyContact2Phone,
-              });
-            }
+
             if (contacts.length > 0) {
               sendFollowUpAlertSMS({
                 contacts,
@@ -664,7 +659,7 @@ export default function ActiveSessionScreen() {
                     text: 'Oui, annuler',
                     style: 'destructive',
                     onPress: async () => {
-                      const result = await cancelTrip(currentSession?.id || '');
+                      const result = await tripService.cancelTrip(currentSession?.id || '');
                       if (result.success) {
                         router.push('/home');
                       } else {

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import * as Location from 'expo-location';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform, Linking } from 'react-native';
+import { logger } from '@/lib/logger';
 
 type PermissionStatus = 'granted' | 'denied' | 'undetermined';
 

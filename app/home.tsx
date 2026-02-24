@@ -58,8 +58,8 @@ export default function HomeScreen() {
             label: profileData.subscription_active 
               ? 'Abonnement: Actif' 
               : `Crédits: ${profileData.free_alerts_remaining} restants`,
-            status: profileData.subscription_active || profileData.free_alerts_remaining > 0 ? 'ok' : 'warning',
-            onPress: profileData.subscription_active || profileData.free_alerts_remaining > 0 ? undefined : () => router.push('/paywall'),
+            status: profileData.subscription_active || profileData.free_alerts_remaining > 0 ? 'ok' : 'pending',
+            onPress: profileData.subscription_active || profileData.free_alerts_remaining > 0 ? undefined : () => router.push('/home'),
           },
           {
             id: 'notifications',
