@@ -11,8 +11,7 @@ import { sendSOSPushNotification } from '@/hooks/use-push-notifications';
 import { getQuotaStatus, canSendSosAlert, logSms } from '@/lib/services/quota-service';
 import { getLocationSnapshot, formatLocationForSms, saveLocationToTrip } from '@/lib/services/privacy-service';
 import { tripService } from '@/lib/services/trip-service';
-import { createClient } from '@supabase/supabase-js';
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from '@/lib/constants';
+import { supabase } from '@/lib/supabase';
 
 export interface UserSettings {
   firstName: string;
@@ -155,7 +154,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const initializeAuth = async () => {
     try {
-      const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      const { supabase } = require("@/lib/supabase");
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
