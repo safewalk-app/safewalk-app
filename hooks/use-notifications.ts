@@ -2,6 +2,7 @@ import { useEffect, useRef, useCallback } from 'react';
 import * as Notifications from 'expo-notifications';
 import * as Haptics from 'expo-haptics';
 import { Platform } from 'react-native';
+import { logger } from '@/lib/logger';
 
 // Configurer les catégories de notifications avec actions
 if (Platform.OS !== 'web') {
