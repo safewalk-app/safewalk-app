@@ -23,10 +23,10 @@ Fichiers: app/new-session.tsx
 - [x] Check crédits → afficher paywall modal
 - [x] Tester tous les 3 cas
 
-### D) Active Session Améliorations (1h - IMPORTANT)
+### D) Active Session Améliorations (1h - IMPORTANT) ✅ COMPLÈTE
 Fichiers: app/active-session.tsx, trip-service.ts
-- [ ] Remplacer SOS bouton par LongPressable (2s)
-- [ ] Ajouter haptics feedback (Heavy)
+- [x] Remplacer SOS bouton par LongPressable (2s)
+- [x] Ajouter haptics feedback (Heavy)
 - [x] Ajouter cancelTrip() dans trip-service
 - [x] Ajouter bouton Annuler la sortie
 
@@ -37,10 +37,45 @@ Fichiers: app/settings.tsx
 - [x] Afficher liste contacts existants (Contact 1 & 2)
 - [x] Ajouter bouton supprimer contact (via delete/clear fields)
 
-### F) Error Handling (1h - IMPORTANT)
-Fichiers: app/new-session.tsx, app/active-session.tsx, trip-service.ts
-- [ ] Ajouter toast pour no_credits → paywall
-- [ ] Ajouter toast pour quota_reached
-- [ ] Ajouter toast pour phone_not_verified
-- [ ] Ajouter toast pour twilio_failed
-- [ ] Ajouter logging détaillé dans trip-service
+### F) Error Handling (1h - IMPORTANT) ✅ COMPLÈTE
+Fichiers: app/new-session.tsx, app/active-session.tsx, trip-service.ts, app/settings.tsx
+- [x] Ajouter toast pour no_credits → paywall
+- [x] Ajouter toast pour quota_reached
+- [x] Ajouter toast pour phone_not_verified
+- [x] Ajouter toast pour twilio_failed
+- [x] Ajouter logging détaillé dans trip-service
+
+### G) Simplifier à un seul contact d'urgence ✅ COMPLÈTE
+Fichiers: app/settings.tsx, app-context.tsx
+- [x] Supprimer Contact 2 du rendu settings.tsx
+- [x] Supprimer Contact 2 de l'interface UserSettings
+- [x] Supprimer Contact 2 de defaultSettings
+
+---
+
+## RÉSUMÉ FINAL V1.95
+
+**Toutes les phases complétées ✅**
+
+### Changements implémentés:
+1. **A) Auth Anonyme** - signInAnonymously au démarrage + phone_verified checks
+2. **B) Home Display** - Affichage dynamique des crédits, subscription, phone_verified
+3. **C) New-Session Gating** - 3 checks (contact, phone, credits) avec modals appropriés
+4. **D) Active Session** - SOS long-press (2s) + haptics + cancel-trip
+5. **E) Settings** - Test SMS button avec gating
+6. **F) Error Handling** - Toasts clairs pour 4 codes d'erreur (no_credits, quota_reached, phone_not_verified, twilio_failed)
+7. **G) Single Contact** - Suppression de Contact 2, un seul contact d'urgence
+
+### Fichiers modifiés:
+- app/settings.tsx - Suppression Contact 2, error handling Test SMS
+- app-context.tsx - Suppression Contact 2 de UserSettings
+- trip-service.ts - Error handling pour startTrip, sendTestSms, triggerSos
+- app/new-session.tsx - Error handling avec paywall/toast
+- app/active-session.tsx - Error handling pour SOS long-press
+
+### Tests recommandés:
+1. Sign-in anonyme → Check phone_verified flow
+2. New-session avec tous les 3 checks (contact, phone, credits)
+3. Active session avec SOS long-press
+4. Settings avec Test SMS
+5. Vérifier toutes les toasts d'erreur

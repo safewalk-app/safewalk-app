@@ -19,6 +19,11 @@ export interface StartTripOutput {
   message?: string;
   error?: string;
   errorCode?: string;
+  // Error handling codes for UI
+  // 'no_credits' -> show paywall
+  // 'quota_reached' -> show "Limite atteinte aujourd'hui"
+  // 'phone_not_verified' -> trigger OTP flow
+  // 'twilio_failed' -> show "Impossible d'envoyer l'alerte"
 }
 
 export interface CheckinInput {
@@ -126,6 +131,37 @@ export async function startTrip(input: StartTripInput): Promise<StartTripOutput>
         error: error.message,
         errorCode: "FUNCTION_ERROR",
       };
+    }
+
+    // Handle error codes from Edge Function
+    if (data && !data.success) {
+      const errorCode = data.errorCode;
+      logger.warn("Start trip failed", { errorCode, error: data.error });
+      
+      // Map error codes for UI handling
+      if (errorCode === "no_credits") {
+        return {
+          success: false,
+          error: "Crédits insuffisants",
+          errorCode: "no_credits",
+        };
+      }
+      if (errorCode === "quota_reached") {
+        return {
+          success: false,
+          error: "Limite atteinte aujourd'hui",
+          errorCode: "quota_reached",
+        };
+      }
+      if (errorCode === "twilio_failed") {
+        return {
+          success: false,
+          error: "Impossible d'envoyer l'alerte, réessaiera",
+          errorCode: "twilio_failed",
+        };
+      }
+      
+      return data as StartTripOutput;
     }
 
     logger.info("Trip started successfully", { tripId: data?.tripId });
@@ -289,6 +325,39 @@ export async function sendTestSms(): Promise<TestSmsOutput> {
       };
     }
 
+    // Handle error codes from Edge Function
+    if (data && !data.success) {
+      const errorCode = data.errorCode;
+      logger.warn("Test SMS failed", { errorCode, error: data.error });
+      
+      if (errorCode === "no_credits") {
+        return {
+          success: false,
+          error: "Crédits insuffisants",
+          errorCode: "no_credits",
+          smsSent: false,
+        };
+      }
+      if (errorCode === "quota_reached") {
+        return {
+          success: false,
+          error: "Limite atteinte aujourd'hui",
+          errorCode: "quota_reached",
+          smsSent: false,
+        };
+      }
+      if (errorCode === "twilio_failed") {
+        return {
+          success: false,
+          error: "Impossible d'envoyer l'alerte, réessaiera",
+          errorCode: "twilio_failed",
+          smsSent: false,
+        };
+      }
+      
+      return data as TestSmsOutput;
+    }
+
     logger.info("Test SMS sent successfully");
     return data as TestSmsOutput;
   } catch (error) {
@@ -350,6 +419,39 @@ export async function triggerSos(input: SosInput = {}): Promise<SosOutput> {
         errorCode: "FUNCTION_ERROR",
         smsSent: false,
       };
+    }
+
+    // Handle error codes from Edge Function
+    if (data && !data.success) {
+      const errorCode = data.errorCode;
+      logger.warn("SOS failed", { errorCode, error: data.error });
+      
+      if (errorCode === "no_credits") {
+        return {
+          success: false,
+          error: "Crédits insuffisants",
+          errorCode: "no_credits",
+          smsSent: false,
+        };
+      }
+      if (errorCode === "quota_reached") {
+        return {
+          success: false,
+          error: "Limite atteinte aujourd'hui",
+          errorCode: "quota_reached",
+          smsSent: false,
+        };
+      }
+      if (errorCode === "twilio_failed") {
+        return {
+          success: false,
+          error: "Impossible d'envoyer l'alerte, réessaiera",
+          errorCode: "twilio_failed",
+          smsSent: false,
+        };
+      }
+      
+      return data as SosOutput;
     }
 
     logger.info("SOS alert sent successfully");

@@ -17,8 +17,6 @@ export interface UserSettings {
   firstName: string;
   emergencyContactName: string;
   emergencyContactPhone: string;
-  emergencyContact2Name?: string;
-  emergencyContact2Phone?: string;
   locationEnabled: boolean;
 }
 
@@ -73,8 +71,6 @@ const defaultSettings: UserSettings = {
   firstName: '',
   emergencyContactName: '',
   emergencyContactPhone: '',
-  emergencyContact2Name: '',
-  emergencyContact2Phone: '',
   locationEnabled: true,
 };
 

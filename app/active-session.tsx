@@ -622,7 +622,19 @@ export default function ActiveSessionScreen() {
             onHandlerStateChange={async (event) => {
               if (event.nativeEvent.state === 3) { // ACTIVE state
                 await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-                await tripService.triggerSos({ tripId: currentSession?.id });
+                const result = await tripService.triggerSos({ tripId: currentSession?.id });
+                
+                // Handle error codes from SOS
+                if (!result.success) {
+                  const errorCode = result.errorCode;
+                  if (errorCode === 'quota_reached') {
+                    Alert.alert('Limite atteinte', 'Tu as atteint la limite d\'alertes SOS pour aujourd\'hui.');
+                  } else if (errorCode === 'twilio_failed') {
+                    Alert.alert('Erreur d\'envoi', 'Impossible d\'envoyer l\'alerte SOS. Réessaiera automatiquement.');
+                  } else {
+                    Alert.alert('Erreur SOS', result.error || 'Erreur lors de l\'envoi de l\'alerte SOS.');
+                  }
+                }
               }
             }}
             minDurationMs={2000}

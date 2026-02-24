@@ -79,8 +79,46 @@ export default function NewSessionScreen() {
     }
 
     // All checks passed - start the session
-    startSession(limitTime, note);
-    router.push('/active-session');
+    try {
+      setLoading(true);
+      const result = await startSession(limitTime, note);
+      
+      // Check if startSession returned an error
+      if (!result || result.success === false) {
+        const errorCode = result?.errorCode;
+        
+        if (errorCode === 'no_credits') {
+          setShowPaywallModal(true);
+          setLoading(false);
+          return;
+        }
+        if (errorCode === 'quota_reached') {
+          setToastMessage('Limite atteinte aujourd\'hui');
+          setLoading(false);
+          setTimeout(() => setToastMessage(''), 3000);
+          return;
+        }
+        if (errorCode === 'twilio_failed') {
+          setToastMessage('Impossible d\'envoyer l\'alerte, réessaiera');
+          setLoading(false);
+          setTimeout(() => setToastMessage(''), 3000);
+          return;
+        }
+        
+        // Generic error
+        setToastMessage(result?.error || 'Erreur lors du démarrage');
+        setLoading(false);
+        setTimeout(() => setToastMessage(''), 3000);
+        return;
+      }
+      
+      setLoading(false);
+      router.push('/active-session');
+    } catch (error) {
+      setLoading(false);
+      setToastMessage('Erreur lors du démarrage');
+      setTimeout(() => setToastMessage(''), 3000);
+    }
   };
 
   const handleOtpSuccess = () => {

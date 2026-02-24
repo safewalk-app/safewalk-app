@@ -25,8 +25,6 @@ export default function SettingsScreen() {
   const [firstName, setFirstName] = useState(settings.firstName);
   const [contactName, setContactName] = useState(settings.emergencyContactName);
   const [contactPhone, setContactPhone] = useState(settings.emergencyContactPhone);
-  const [contact2Name, setContact2Name] = useState(settings.emergencyContact2Name || '');
-  const [contact2Phone, setContact2Phone] = useState(settings.emergencyContact2Phone || '');
 
   // Handlers pour le masque de saisie
   const handlePhoneChange = (text: string) => {
@@ -42,27 +40,14 @@ export default function SettingsScreen() {
     }
   };
 
-  const handlePhone2Change = (text: string) => {
-    const formatted = formatPhoneInput(text);
-    setContact2Phone(formatted);
-    
-    // Validation en temps réel
-    const cleaned = cleanPhoneNumber(formatted);
-    if (cleaned.length === 0) {
-      setIsPhone2Valid(null); // Pas d'icône si vide
-    } else {
-      setIsPhone2Valid(validatePhoneNumber(cleaned));
-    }
-  };
+
 
   const locationPermission = useLocationPermission();
   const [locationEnabled, setLocationEnabled] = useState(locationPermission.enabled);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [phoneError, setPhoneError] = useState<string | null>(null);
-  const [phone2Error, setPhone2Error] = useState<string | null>(null);
   const [isPhone1Valid, setIsPhone1Valid] = useState<boolean | null>(null);
-  const [isPhone2Valid, setIsPhone2Valid] = useState<boolean | null>(null);
   const [isSendingTestSms, setIsSendingTestSms] = useState(false);
 
   // Autosave firstName
@@ -190,7 +175,17 @@ export default function SettingsScreen() {
       setToastMessage('✅ SMS de test envoyé !');
       setShowToast(true);
     } else {
-      Alert.alert('Erreur', result.error || 'Impossible d\'envoyer le SMS de test');
+      // Handle specific error codes
+      const errorCode = result.errorCode;
+      if (errorCode === 'no_credits') {
+        Alert.alert('Crédits insuffisants', 'Vous n\'avez plus de SMS de test disponibles.');
+      } else if (errorCode === 'quota_reached') {
+        Alert.alert('Limite atteinte', 'Vous avez atteint la limite d\'SMS pour aujourd\'hui.');
+      } else if (errorCode === 'twilio_failed') {
+        Alert.alert('Erreur d\'envoi', 'Impossible d\'envoyer le SMS. Réessaiera automatiquement.');
+      } else {
+        Alert.alert('Erreur', result.error || 'Impossible d\'envoyer le SMS de test');
+      }
     }
   };
 
@@ -310,50 +305,7 @@ export default function SettingsScreen() {
               </GlassCard>
             </View>
 
-            {/* Card "Contact d'urgence 2" */}
-            <View className="mb-3">
-              <GlassCard className="gap-2">
-                <View className="flex-row items-center gap-2">
-                  <MaterialIcons name="person-add" size={16} color="#3A86FF" />
-                  <Text className="text-sm font-semibold text-foreground">
-                    Contact 2 (optionnel)
-                  </Text>
-                </View>
-                
-                <PopTextField
-                  placeholder="Nom"
-                  value={contact2Name}
-                  onChangeText={setContact2Name}
-                />
 
-                <View className="flex-row items-center gap-2">
-                  <View className="flex-1">
-                    <PopTextField
-                      placeholder="+33 6 12 34 56 78"
-                      value={contact2Phone}
-                      onChangeText={handlePhone2Change}
-                      keyboardType="phone-pad"
-                    />
-                    {phone2Error && (
-                      <Text className="text-xs text-error mt-1">
-                        {phone2Error}
-                      </Text>
-                    )}
-                  </View>
-                  <View className="p-2">
-                    {isPhone2Valid === true && (
-                      <MaterialIcons name="check-circle" size={20} color="#22C55E" />
-                    )}
-                    {isPhone2Valid === false && (
-                      <MaterialIcons name="cancel" size={20} color="#EF4444" />
-                    )}
-                    {isPhone2Valid === null && (
-                      <MaterialIcons name="phone" size={20} color="#9BA1A6" />
-                    )}
-                  </View>
-                </View>
-              </GlassCard>
-            </View>
 
 
 
