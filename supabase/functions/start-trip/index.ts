@@ -28,9 +28,7 @@ interface StartTripResponse {
   errorCode?: string;
 }
 
-async function startTrip(
-  req: Request
-): Promise<Response> {
+async function startTrip(req: Request): Promise<Response> {
   // Handle CORS
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -93,52 +91,66 @@ async function startTrip(
 
     const userId = data.user.id;
 
-    // Check if phone is verified
-    const { data: profileData, error: profileError } = await supabase
-      .from("profiles")
-      .select("phone_verified, subscription_active, free_alerts_remaining")
-      .eq("id", userId)
-      .single();
-
-    if (profileError || !profileData) {
+    // ──────────────────────────────────────────────────────────────
+    // FIX P0: Parse and validate body BEFORE consuming credits
+    // ──────────────────────────────────────────────────────────────
+    let body: StartTripRequest;
+    try {
+      body = (await req.json()) as StartTripRequest;
+    } catch (_error) {
       return new Response(
         JSON.stringify({
           success: false,
-          error: "User profile not found",
-          errorCode: "PROFILE_NOT_FOUND",
+          error: "Invalid request body",
+          errorCode: "INVALID_INPUT",
         }),
         {
-          status: 404,
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+    const { deadlineISO, shareLocation, destinationNote } = body;
+
+    // Validate deadlineISO
+    if (!deadlineISO) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "Missing deadlineISO",
+          errorCode: "INVALID_INPUT",
+        }),
+        {
+          status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         }
       );
     }
 
-    // Check phone verification
-    if (!profileData.phone_verified) {
+    const deadline = new Date(deadlineISO);
+    if (isNaN(deadline.getTime())) {
       return new Response(
         JSON.stringify({
           success: false,
-          error: "Phone number not verified",
-          errorCode: "phone_not_verified",
+          error: "Invalid deadline format",
+          errorCode: "INVALID_DEADLINE",
         }),
         {
-          status: 403,
+          status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         }
       );
     }
 
-    // Check credits/subscription
-    if (!profileData.subscription_active && profileData.free_alerts_remaining <= 0) {
+    if (deadline <= new Date()) {
       return new Response(
         JSON.stringify({
           success: false,
-          error: "Crédits insuffisants. Veuillez vous abonner pour continuer.",
-          errorCode: "no_credits",
+          error: "Deadline must be in the future",
+          errorCode: "DEADLINE_IN_PAST",
         }),
         {
-          status: 402,
+          status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         }
       );
@@ -166,7 +178,10 @@ async function startTrip(
       );
     }
 
-    // Consume credit atomically
+    // ──────────────────────────────────────────────────────────────
+    // FIX P0: Single atomic credit check via RPC (no double check)
+    // consume_credit handles: phone_verified, credits, quota
+    // ──────────────────────────────────────────────────────────────
     const { data: creditData, error: creditError } = await supabase.rpc(
       "consume_credit",
       { p_user_id: userId, p_type: "late" }
@@ -174,12 +189,24 @@ async function startTrip(
 
     if (creditError || !creditData?.[0]?.allowed) {
       const reason = creditData?.[0]?.reason || "Failed to consume credit";
-      const errorCode = reason === "no_credits" ? "no_credits" : 
-                       reason === "quota_reached" ? "quota_reached" :
-                       reason === "phone_not_verified" ? "phone_not_verified" :
-                       "FUNCTION_ERROR";
-      const statusCode = errorCode === "no_credits" || errorCode === "quota_reached" ? 402 : 403;
-      
+      // Map RPC reason to standard error codes
+      let errorCode = "FUNCTION_ERROR";
+      let statusCode = 500;
+
+      if (reason === "no_credits") {
+        errorCode = "no_credits";
+        statusCode = 402;
+      } else if (reason === "quota_reached") {
+        errorCode = "quota_reached";
+        statusCode = 402;
+      } else if (reason === "phone_not_verified") {
+        errorCode = "phone_not_verified";
+        statusCode = 403;
+      } else if (reason === "profile_not_found") {
+        errorCode = "PROFILE_NOT_FOUND";
+        statusCode = 404;
+      }
+
       return new Response(
         JSON.stringify({
           success: false,
@@ -188,71 +215,6 @@ async function startTrip(
         }),
         {
           status: statusCode,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
-    }
-
-    // Parse request body
-    let body: StartTripRequest;
-    try {
-      body = (await req.json()) as StartTripRequest;
-    } catch (error) {
-      return new Response(
-        JSON.stringify({
-          success: false,
-          error: "Invalid request body",
-          errorCode: "INVALID_INPUT",
-        }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
-    }
-    const { deadlineISO, shareLocation, destinationNote } = body;
-
-    // Validate inputs
-    if (!deadlineISO) {
-      return new Response(
-        JSON.stringify({
-          success: false,
-          error: "Missing deadlineISO",
-          errorCode: "INVALID_INPUT",
-        }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
-    }
-
-    // Parse deadline
-    const deadline = new Date(deadlineISO);
-    if (isNaN(deadline.getTime())) {
-      return new Response(
-        JSON.stringify({
-          success: false,
-          error: "Invalid deadline format",
-          errorCode: "INVALID_DEADLINE",
-        }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
-    }
-
-    // Validate deadline is in the future
-    if (deadline <= new Date()) {
-      return new Response(
-        JSON.stringify({
-          success: false,
-          error: "Deadline must be in the future",
-          errorCode: "DEADLINE_IN_PAST",
-        }),
-        {
-          status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         }
       );

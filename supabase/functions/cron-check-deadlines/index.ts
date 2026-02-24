@@ -184,6 +184,7 @@ async function cronCheckDeadlines(req: Request): Promise<Response> {
           await supabase.from("sms_logs").insert({
             user_id: trip.user_id,
             contact_id: trip.contact_id,
+            session_id: trip.trip_id,
             sms_type: "alert",
             status: "failed",
             error_message: creditData?.[0]?.reason || "No credits",
@@ -194,9 +195,20 @@ async function cronCheckDeadlines(req: Request): Promise<Response> {
         }
 
         // Create alert message
+        // FIX P0: Get user's first_name for the alert message (not phone number)
+        let userName = "Utilisateur";
+        const { data: userData } = await supabase
+          .from("users")
+          .select("first_name")
+          .eq("id", trip.user_id)
+          .single();
+        if (userData?.first_name) {
+          userName = userData.first_name;
+        }
+
         const deadline = new Date(trip.deadline);
         const alertMessage = createOverdueAlertMessage(
-          trip.user_phone_number || "User",
+          userName,
           deadline,
           trip.share_location,
           trip.location_latitude,
@@ -221,6 +233,7 @@ async function cronCheckDeadlines(req: Request): Promise<Response> {
           await supabase.from("sms_logs").insert({
             user_id: trip.user_id,
             contact_id: trip.contact_id,
+            session_id: trip.trip_id,
             sms_type: "alert",
             status: "failed",
             error_message: smsResult.error,
@@ -234,6 +247,7 @@ async function cronCheckDeadlines(req: Request): Promise<Response> {
         await supabase.from("sms_logs").insert({
           user_id: trip.user_id,
           contact_id: trip.contact_id,
+          session_id: trip.trip_id,
           sms_type: "alert",
           status: "sent",
           message_sid: smsResult.messageSid,

@@ -173,7 +173,7 @@ async function testSms(req: Request): Promise<Response> {
     }
 
     // Validate contact phone number (E.164 format)
-    if (!isValidPhoneNumber(contactData.phone_number) || !contactData.phone_number.match(/^\+[1-9]\d{1,14}$/)) {
+    if (!isValidPhoneNumber(contactData.phone_number)) {
       // Log invalid phone
       await supabase.from("sms_logs").insert({
         user_id: userId,

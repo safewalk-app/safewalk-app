@@ -145,8 +145,8 @@ async function extend(req: Request): Promise<Response> {
       );
     }
 
-    // Check if trip is still active
-    if (tripData.status !== "active") {
+    // Check if trip is still active or alerted (can extend both)
+    if (tripData.status !== "active" && tripData.status !== "alerted") {
       return new Response(
         JSON.stringify({
           success: false,
@@ -164,12 +164,19 @@ async function extend(req: Request): Promise<Response> {
     const currentDeadline = new Date(tripData.deadline);
     const newDeadline = new Date(currentDeadline.getTime() + addMinutes * 60000);
 
-    // Update trip deadline
+    // Update trip deadline + reset alert state if extending from alerted
+    const updatePayload: Record<string, unknown> = {
+      deadline: newDeadline.toISOString(),
+    };
+    // If trip was alerted, reset to active and clear alert_sent_at
+    if (tripData.status === "alerted") {
+      updatePayload.status = "active";
+      updatePayload.alert_sent_at = null;
+    }
+
     const { data: updatedTrip, error: updateError } = await supabase
       .from("sessions")
-      .update({
-        deadline: newDeadline.toISOString(),
-      })
+      .update(updatePayload)
       .eq("id", tripId)
       .select()
       .single();

@@ -96,3 +96,23 @@ Fichiers: supabase/functions/trigger-sos, start-trip, test-sms, checkin
 - `quota_reached` - Limite quotidienne atteinte
 - `phone_not_verified` - Téléphone non vérifié
 - `twilio_failed` - Erreur d'envoi SMS Twilio
+
+
+### I) Audit des fonctions RPC et Edge Functions ✅ COMPLÈTE
+- [x] Vérifier consume_credit RPC (search_path, REVOKE/GRANT)
+- [x] Vérifier toutes les Edge Functions (start-trip, test-sms, sos, checkin, cron-check-deadlines, extend, ping-location)
+- [x] Corriger les erreurs similaires à claim_overdue_trips
+
+**Corrections appliquées:**
+- [x] start-trip: Supprimer double check crédits, parser body AVANT consume_credit
+- [x] checkin: Aligner colonne checkin_at (était checked_in_at)
+- [x] extend: Accepter statut alerted + reset alert_sent_at
+- [x] test-sms: Supprimer double validation E.164
+- [x] cron-check-deadlines: Ajouter session_id aux sms_logs + corriger nom utilisateur
+- [x] Créer migration-002 pour session_id dans sms_logs
+- [x] Créer rapport d'audit AUDIT_EDGE_FUNCTIONS.md
+
+**Fonctions obsolètes identifiées:**
+- trigger-sos → remplacée par sos
+- decrement-quota → remplacée par RPC consume_credit
+- send-sos-notification → remplacée par sos

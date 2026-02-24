@@ -149,7 +149,7 @@ async function checkin(req: Request): Promise<Response> {
       .from("sessions")
       .update({
         status: "checked_in",
-        checked_in_at: new Date().toISOString(),
+        checkin_at: new Date().toISOString(),
       })
       .eq("id", tripId)
       .select()

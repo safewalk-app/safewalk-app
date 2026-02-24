@@ -1,5 +1,6 @@
--- SafeWalk MVP READY Migrations
+-- SafeWalk MVP READY Migrations (Simplified Version)
 -- This migration adds missing columns, indexes, and constraints for production readiness
+-- Note: This version avoids ENUM types to prevent Supabase compatibility issues
 
 -- ============================================================================
 -- 1. ALTER sessions TABLE - Add missing columns
@@ -25,25 +26,6 @@ ADD COLUMN IF NOT EXISTS share_location BOOLEAN DEFAULT false;
 ALTER TABLE sessions
 ADD COLUMN IF NOT EXISTS destination_note TEXT DEFAULT NULL;
 
--- Convert status to ENUM for type safety
--- First, create the enum type
-DO $$ BEGIN
-  CREATE TYPE session_status AS ENUM('active', 'checked_in', 'cancelled', 'alerted');
-EXCEPTION
-  WHEN duplicate_object THEN null;
-END $$;
-
--- Then alter the column (if not already enum)
--- First remove the default, then convert, then set new default
-ALTER TABLE sessions
-ALTER COLUMN status DROP DEFAULT;
-
-ALTER TABLE sessions
-ALTER COLUMN status TYPE session_status USING status::text::session_status;
-
-ALTER TABLE sessions
-ALTER COLUMN status SET DEFAULT 'active'::session_status;
-
 -- ============================================================================
 -- 2. ALTER emergency_contacts TABLE - Add missing columns
 -- ============================================================================
@@ -64,15 +46,9 @@ ADD COLUMN IF NOT EXISTS opted_out BOOLEAN DEFAULT false;
 ALTER TABLE sms_logs
 ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES users(id) ON DELETE CASCADE;
 
--- Add sms_type (late, test, sos)
-DO $$ BEGIN
-  CREATE TYPE sms_type AS ENUM('late', 'test', 'sos');
-EXCEPTION
-  WHEN duplicate_object THEN null;
-END $$;
-
+-- Add sms_type (late, test, sos) - using VARCHAR instead of ENUM
 ALTER TABLE sms_logs
-ADD COLUMN IF NOT EXISTS sms_type sms_type DEFAULT 'late';
+ADD COLUMN IF NOT EXISTS sms_type VARCHAR(20) DEFAULT 'late';
 
 -- Add retry_count for tracking retries
 ALTER TABLE sms_logs
@@ -81,23 +57,6 @@ ADD COLUMN IF NOT EXISTS retry_count INT DEFAULT 0;
 -- Add retry_at for exponential backoff
 ALTER TABLE sms_logs
 ADD COLUMN IF NOT EXISTS retry_at TIMESTAMPTZ DEFAULT NULL;
-
--- Convert status to ENUM
-DO $$ BEGIN
-  CREATE TYPE sms_status AS ENUM('queued', 'sent', 'failed');
-EXCEPTION
-  WHEN duplicate_object THEN null;
-END $$;
-
--- First remove the default, then convert, then set new default
-ALTER TABLE sms_logs
-ALTER COLUMN status DROP DEFAULT;
-
-ALTER TABLE sms_logs
-ALTER COLUMN status TYPE sms_status USING status::text::sms_status;
-
-ALTER TABLE sms_logs
-ALTER COLUMN status SET DEFAULT 'queued'::sms_status;
 
 -- ============================================================================
 -- 4. CREATE profiles TABLE - For subscription and quota tracking
@@ -167,7 +126,6 @@ CREATE INDEX IF NOT EXISTS idx_emergency_contacts_priority
 -- ============================================================================
 
 -- Enable RLS on all tables
-ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE emergency_contacts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE sessions ENABLE ROW LEVEL SECURITY;
@@ -175,46 +133,59 @@ ALTER TABLE sms_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE cron_heartbeat ENABLE ROW LEVEL SECURITY;
 
 -- Users can only read their own profile
+DROP POLICY IF EXISTS "users_read_own_profile" ON profiles;
 CREATE POLICY "users_read_own_profile" ON profiles
   FOR SELECT USING (auth.uid() = id);
 
+DROP POLICY IF EXISTS "users_update_own_profile" ON profiles;
 CREATE POLICY "users_update_own_profile" ON profiles
   FOR UPDATE USING (auth.uid() = id);
 
 -- Users can only read/write their own emergency contacts
+DROP POLICY IF EXISTS "users_read_own_contacts" ON emergency_contacts;
 CREATE POLICY "users_read_own_contacts" ON emergency_contacts
   FOR SELECT USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "users_insert_own_contacts" ON emergency_contacts;
 CREATE POLICY "users_insert_own_contacts" ON emergency_contacts
   FOR INSERT WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "users_update_own_contacts" ON emergency_contacts;
 CREATE POLICY "users_update_own_contacts" ON emergency_contacts
   FOR UPDATE USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "users_delete_own_contacts" ON emergency_contacts;
 CREATE POLICY "users_delete_own_contacts" ON emergency_contacts
   FOR DELETE USING (auth.uid() = user_id);
 
 -- Users can only read/write their own sessions
+DROP POLICY IF EXISTS "users_read_own_sessions" ON sessions;
 CREATE POLICY "users_read_own_sessions" ON sessions
   FOR SELECT USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "users_insert_own_sessions" ON sessions;
 CREATE POLICY "users_insert_own_sessions" ON sessions
   FOR INSERT WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "users_update_own_sessions" ON sessions;
 CREATE POLICY "users_update_own_sessions" ON sessions
   FOR UPDATE USING (auth.uid() = user_id);
 
 -- Users can only read their own SMS logs
+DROP POLICY IF EXISTS "users_read_own_sms_logs" ON sms_logs;
 CREATE POLICY "users_read_own_sms_logs" ON sms_logs
   FOR SELECT USING (auth.uid() = user_id);
 
 -- Cron can read/write cron_heartbeat (via service role)
+DROP POLICY IF EXISTS "cron_read_heartbeat" ON cron_heartbeat;
 CREATE POLICY "cron_read_heartbeat" ON cron_heartbeat
   FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "cron_write_heartbeat" ON cron_heartbeat;
 CREATE POLICY "cron_write_heartbeat" ON cron_heartbeat
   FOR INSERT WITH CHECK (true);
 
+DROP POLICY IF EXISTS "cron_update_heartbeat" ON cron_heartbeat;
 CREATE POLICY "cron_update_heartbeat" ON cron_heartbeat
   FOR UPDATE USING (true);
 
@@ -223,7 +194,9 @@ CREATE POLICY "cron_update_heartbeat" ON cron_heartbeat
 -- ============================================================================
 
 -- Function to claim overdue trips (for cron)
-CREATE OR REPLACE FUNCTION claim_overdue_trips(p_limit INT DEFAULT 50)
+DROP FUNCTION IF EXISTS public.claim_overdue_trips(integer);
+
+CREATE FUNCTION public.claim_overdue_trips(p_limit INT DEFAULT 50)
 RETURNS TABLE(
   trip_id UUID,
   user_id UUID,
@@ -233,73 +206,109 @@ RETURNS TABLE(
   user_phone_number VARCHAR,
   share_location BOOLEAN,
   location_latitude FLOAT,
-  location_longitude FLOAT
-) AS $$
+  location_longitude FLOAT,
+  last_seen_at TIMESTAMPTZ
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
 BEGIN
   RETURN QUERY
-  WITH claimed AS (
-    UPDATE sessions
-    SET alert_sent_at = NOW()
-    WHERE
-      status = 'active'::session_status
-      AND deadline < NOW()
-      AND alert_sent_at IS NULL
-    ORDER BY deadline ASC
+  WITH candidates AS (
+    SELECT s.id
+    FROM public.sessions s
+    JOIN public.emergency_contacts ec
+      ON ec.user_id = s.user_id
+     AND ec.priority = 1
+     AND ec.opted_out = false
+    WHERE s.status = 'active'
+      AND s.deadline <= NOW()
+      AND s.alert_sent_at IS NULL
+    ORDER BY s.deadline ASC
     LIMIT p_limit
-    FOR UPDATE SKIP LOCKED
-    RETURNING id, user_id, deadline
+    FOR UPDATE OF s SKIP LOCKED
+  ),
+  claimed AS (
+    UPDATE public.sessions s
+    SET
+      status = 'alerted',
+      alert_sent_at = NOW(),
+      updated_at = NOW()
+    WHERE s.id IN (SELECT id FROM candidates)
+    RETURNING
+      s.id,
+      s.user_id,
+      s.deadline,
+      s.share_location,
+      s.location_latitude,
+      s.location_longitude,
+      s.last_seen_at
   )
   SELECT
-    claimed.id,
-    claimed.user_id,
-    claimed.deadline,
+    c.id,
+    c.user_id,
+    c.deadline,
     ec.id,
     ec.phone_number,
     u.phone_number,
-    s.share_location,
-    s.location_latitude,
-    s.location_longitude
-  FROM claimed
-  JOIN sessions s ON s.id = claimed.id
-  JOIN users u ON u.id = claimed.user_id
-  LEFT JOIN emergency_contacts ec ON ec.user_id = claimed.user_id
-    AND ec.priority = 1
-    AND ec.opted_out = false;
+    c.share_location,
+    c.location_latitude,
+    c.location_longitude,
+    c.last_seen_at
+  FROM claimed c
+  JOIN public.users u ON u.id = c.user_id
+  JOIN public.emergency_contacts ec
+    ON ec.user_id = c.user_id
+   AND ec.priority = 1
+   AND ec.opted_out = false
+  ORDER BY c.deadline ASC;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
+
+REVOKE EXECUTE ON FUNCTION public.claim_overdue_trips(INT) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.claim_overdue_trips(INT) TO service_role;
 
 -- Function to consume credits (for SMS gating)
-CREATE OR REPLACE FUNCTION consume_credit(
+DROP FUNCTION IF EXISTS public.consume_credit(UUID, VARCHAR);
+
+CREATE FUNCTION public.consume_credit(
   p_user_id UUID,
   p_type VARCHAR -- 'late', 'test', 'sos'
 )
-RETURNS TABLE(allowed BOOLEAN, reason VARCHAR) AS $$
+RETURNS TABLE(allowed BOOLEAN, reason VARCHAR)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
 DECLARE
-  v_profile profiles%ROWTYPE;
-  v_daily_limit INT;
-  v_daily_count INT;
+  v_profile public.profiles%ROWTYPE;
 BEGIN
-  -- Get user profile
-  SELECT * INTO v_profile FROM profiles WHERE id = p_user_id;
+  -- Get user profile (lock row to prevent race conditions)
+  SELECT * INTO v_profile
+  FROM public.profiles
+  WHERE id = p_user_id
+  FOR UPDATE;
   
   IF NOT FOUND THEN
-    RETURN QUERY SELECT false, 'User profile not found';
+    RETURN QUERY SELECT false::BOOLEAN, 'profile_not_found'::VARCHAR;
     RETURN;
   END IF;
   
   -- Check if phone is verified
   IF NOT v_profile.phone_verified THEN
-    RETURN QUERY SELECT false, 'phone_not_verified';
+    RETURN QUERY SELECT false::BOOLEAN, 'phone_not_verified'::VARCHAR;
     RETURN;
   END IF;
   
   -- Reset daily counts if needed
   IF v_profile.last_sms_reset_date < CURRENT_DATE THEN
-    UPDATE profiles
+    UPDATE public.profiles
     SET
       sms_daily_count = 0,
       sms_sos_daily_count = 0,
-      last_sms_reset_date = CURRENT_DATE
+      last_sms_reset_date = CURRENT_DATE,
+      updated_at = NOW()
     WHERE id = p_user_id;
     v_profile.sms_daily_count := 0;
     v_profile.sms_sos_daily_count := 0;
@@ -307,72 +316,90 @@ BEGIN
   
   -- Check subscription or free credits
   IF NOT v_profile.subscription_active AND v_profile.free_alerts_remaining <= 0 THEN
-    RETURN QUERY SELECT false, 'no_credits';
+    RETURN QUERY SELECT false::BOOLEAN, 'no_credits'::VARCHAR;
     RETURN;
   END IF;
   
   -- Check type-specific quotas
   IF p_type = 'sos' THEN
     IF v_profile.sms_sos_daily_count >= v_profile.sms_sos_daily_limit THEN
-      RETURN QUERY SELECT false, 'quota_reached';
+      RETURN QUERY SELECT false::BOOLEAN, 'quota_reached'::VARCHAR;
       RETURN;
     END IF;
   ELSE
     IF v_profile.sms_daily_count >= v_profile.sms_daily_limit THEN
-      RETURN QUERY SELECT false, 'quota_reached';
+      RETURN QUERY SELECT false::BOOLEAN, 'quota_reached'::VARCHAR;
       RETURN;
     END IF;
   END IF;
   
-  -- Decrement credits atomically
-  IF NOT v_profile.subscription_active THEN
-    UPDATE profiles
-    SET free_alerts_remaining = free_alerts_remaining - 1
-    WHERE id = p_user_id;
-  END IF;
-  
-  -- Increment daily count
-  IF p_type = 'sos' THEN
-    UPDATE profiles
-    SET sms_sos_daily_count = sms_sos_daily_count + 1
-    WHERE id = p_user_id;
+  -- Decrement credits atomically + increment daily count in one UPDATE
+  IF v_profile.subscription_active THEN
+    -- Subscriber: only increment daily count
+    IF p_type = 'sos' THEN
+      UPDATE public.profiles
+      SET sms_sos_daily_count = sms_sos_daily_count + 1, updated_at = NOW()
+      WHERE id = p_user_id;
+    ELSE
+      UPDATE public.profiles
+      SET sms_daily_count = sms_daily_count + 1, updated_at = NOW()
+      WHERE id = p_user_id;
+    END IF;
   ELSE
-    UPDATE profiles
-    SET sms_daily_count = sms_daily_count + 1
-    WHERE id = p_user_id;
+    -- Free user: decrement credits + increment daily count
+    IF p_type = 'sos' THEN
+      UPDATE public.profiles
+      SET
+        free_alerts_remaining = free_alerts_remaining - 1,
+        sms_sos_daily_count = sms_sos_daily_count + 1,
+        updated_at = NOW()
+      WHERE id = p_user_id;
+    ELSE
+      UPDATE public.profiles
+      SET
+        free_alerts_remaining = free_alerts_remaining - 1,
+        sms_daily_count = sms_daily_count + 1,
+        updated_at = NOW()
+      WHERE id = p_user_id;
+    END IF;
   END IF;
   
-  RETURN QUERY SELECT true, NULL;
+  RETURN QUERY SELECT true::BOOLEAN, NULL::VARCHAR;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
+
+REVOKE EXECUTE ON FUNCTION public.consume_credit(UUID, VARCHAR) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.consume_credit(UUID, VARCHAR) TO service_role;
 
 -- ============================================================================
 -- 9. CONSTRAINTS - Add phone number validation
 -- ============================================================================
 
 -- Add check constraint for E.164 phone format
-ALTER TABLE users
-ADD CONSTRAINT check_phone_format_users
-  CHECK (phone_number IS NULL OR phone_number ~ '^\+[1-9]\d{1,14}$');
+DO $$ BEGIN
+  ALTER TABLE users
+  ADD CONSTRAINT check_phone_format_users
+    CHECK (phone_number IS NULL OR phone_number ~ '^\+[1-9]\d{1,14}$');
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
 
-ALTER TABLE emergency_contacts
-ADD CONSTRAINT check_phone_format_contacts
-  CHECK (phone_number ~ '^\+[1-9]\d{1,14}$');
+DO $$ BEGIN
+  ALTER TABLE emergency_contacts
+  ADD CONSTRAINT check_phone_format_contacts
+    CHECK (phone_number ~ '^\+[1-9]\d{1,14}$');
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
 
 -- Add check constraint for priority
-ALTER TABLE emergency_contacts
-ADD CONSTRAINT check_priority_range
-  CHECK (priority > 0 AND priority <= 10);
-
--- ============================================================================
--- 10. TIMESTAMPS - Convert to TIMESTAMPTZ for consistency
--- ============================================================================
-
--- Note: This is a breaking change, only do if necessary
--- ALTER TABLE sessions ALTER COLUMN start_time TYPE TIMESTAMPTZ;
--- ALTER TABLE sessions ALTER COLUMN deadline TYPE TIMESTAMPTZ;
--- ALTER TABLE sessions ALTER COLUMN created_at TYPE TIMESTAMPTZ;
--- ALTER TABLE sessions ALTER COLUMN updated_at TYPE TIMESTAMPTZ;
+DO $$ BEGIN
+  ALTER TABLE emergency_contacts
+  ADD CONSTRAINT check_priority_range
+    CHECK (priority > 0 AND priority <= 10);
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
 
 -- ============================================================================
 -- DONE
