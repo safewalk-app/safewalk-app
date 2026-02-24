@@ -20,8 +20,10 @@ describe('Supabase Credentials Validation', () => {
   it('should have valid Supabase service role key', () => {
     const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
     expect(key).toBeDefined();
-    expect(key).toMatch(/^sb_secret_/);
-    expect(key.length).toBeGreaterThan(20);
+    if (key) {
+      expect(key).toMatch(/^sb_secret_/);
+      expect(key.length).toBeGreaterThan(20);
+    }
   });
 
   it('should be able to connect to Supabase', async () => {

@@ -8,7 +8,7 @@ describe('Supabase Edge Function - trigger-sos', () => {
   });
 
   it('should validate firstName is required', () => {
-    const payload = {
+    const payload: any = {
       emergencyContacts: [
         { name: 'Maman', phone: '+33700000001' }
       ]
@@ -18,7 +18,7 @@ describe('Supabase Edge Function - trigger-sos', () => {
   });
 
   it('should validate emergencyContacts is required', () => {
-    const payload = {
+    const payload: any = {
       firstName: 'Jean'
     };
     
