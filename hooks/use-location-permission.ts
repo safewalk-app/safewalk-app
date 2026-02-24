@@ -55,7 +55,7 @@ export function useLocationPermission() {
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
       setIsLoading(false);
     } catch (error) {
-      console.error('Erreur lors du chargement de l\'état des permissions:', error);
+      logger.error('Erreur lors du chargement de l\'état des permissions:', error);
       setIsLoading(false);
     }
   };
@@ -65,7 +65,7 @@ export function useLocationPermission() {
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
       setState(newState);
     } catch (error) {
-      console.error('Erreur lors de la sauvegarde de l\'état des permissions:', error);
+      logger.error('Erreur lors de la sauvegarde de l\'état des permissions:', error);
     }
   };
 
@@ -75,7 +75,7 @@ export function useLocationPermission() {
    */
   const requestPermission = useCallback(async (): Promise<boolean> => {
     try {
-      console.log('[Location Permission] Demande de permission...');
+      logger.info('[Location Permission] Demande de permission...');
       const { status } = await Location.requestForegroundPermissionsAsync();
       const newStatus: PermissionStatus =
         status === 'granted' ? 'granted' : 'denied';
@@ -87,10 +87,10 @@ export function useLocationPermission() {
       };
 
       await saveState(newState);
-      console.log('[Location Permission] Statut:', newStatus);
+      logger.info('[Location Permission] Statut:', newStatus);
       return newStatus === 'granted';
     } catch (error) {
-      console.error('[Location Permission] Erreur:', error);
+      logger.error('[Location Permission] Erreur:', error);
       return false;
     }
   }, []);
@@ -103,7 +103,7 @@ export function useLocationPermission() {
     needsPermission: boolean;
     needsSettings: boolean;
   }> => {
-    console.log('[Location Permission] Toggle:', enable);
+    logger.info('[Location Permission] Toggle:', enable);
 
     if (!enable) {
       // Désactiver la localisation
@@ -155,7 +155,7 @@ export function useLocationPermission() {
         await Linking.openSettings();
       }
     } catch (error) {
-      console.error('Erreur lors de l\'ouverture des réglages:', error);
+      logger.error('Erreur lors de l\'ouverture des réglages:', error);
     }
   }, []);
 
@@ -168,7 +168,7 @@ export function useLocationPermission() {
     accuracy?: number;
   } | null> => {
     if (state.status !== 'granted' || !state.enabled) {
-      console.log('[Location Permission] Position non disponible (permission non accordée ou désactivée)');
+      logger.info('[Location Permission] Position non disponible (permission non accordée ou désactivée)');
       return null;
     }
 
@@ -183,7 +183,7 @@ export function useLocationPermission() {
         accuracy: location.coords.accuracy || undefined,
       };
     } catch (error) {
-      console.error('[Location Permission] Erreur lors de la récupération de la position:', error);
+      logger.error('[Location Permission] Erreur lors de la récupération de la position:', error);
       return null;
     }
   }, [state]);

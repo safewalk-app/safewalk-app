@@ -116,8 +116,8 @@ function buildMessage(options: SendEmergencySMSOptions): string {
 export async function sendEmergencySMS(options: SendEmergencySMSOptions): Promise<SendEmergencySMSResult> {
   const timestamp = Date.now();
   
-  console.log(`📤 [SMS Service] Envoi SMS d'urgence (${options.reason})...`);
-  console.log(`📋 [SMS Service] Options:`, {
+  logger.info(`📤 [SMS Service] Envoi SMS d'urgence (${options.reason})...`);
+  logger.info(`📋 [SMS Service] Options:`, {
     reason: options.reason,
     contactName: options.contactName,
     contactPhone: options.contactPhone,
@@ -128,7 +128,7 @@ export async function sendEmergencySMS(options: SendEmergencySMSOptions): Promis
     // Validation du numéro
     const cleanedPhone = cleanPhoneNumber(options.contactPhone);
     if (!validatePhoneNumber(cleanedPhone)) {
-      console.error('❌ [SMS Service] Numéro invalide:', options.contactPhone);
+      logger.error('❌ [SMS Service] Numéro invalide:', options.contactPhone);
       return {
         ok: false,
         error: 'Numéro de téléphone invalide',
@@ -138,24 +138,24 @@ export async function sendEmergencySMS(options: SendEmergencySMSOptions): Promis
     
     // Normalisation en E.164
     const normalizedPhone = normalizePhoneNumber(cleanedPhone);
-    console.log(`📞 [SMS Service] Numéro normalisé: ${options.contactPhone} => ${normalizedPhone}`);
+    logger.info(`📞 [SMS Service] Numéro normalisé: ${options.contactPhone} => ${normalizedPhone}`);
     
     // Construction du message
     const message = buildMessage(options);
-    console.log(`📝 [SMS Service] Message (${message.length} chars):`, message.substring(0, 100) + '...');
+    logger.info(`📝 [SMS Service] Message (${message.length} chars):`, message.substring(0, 100) + '...');
     
     // Envoi via API
     const result = await sendSMS(normalizedPhone, message);
     
     if (result.ok) {
-      console.log(`✅ [SMS Service] SMS envoyé avec succès (SID: ${result.sid})`);
+      logger.info(`✅ [SMS Service] SMS envoyé avec succès (SID: ${result.sid})`);
       return {
         ok: true,
         sid: result.sid,
         timestamp,
       };
     } else {
-      console.error(`❌ [SMS Service] Échec envoi SMS:`, result.error);
+      logger.error(`❌ [SMS Service] Échec envoi SMS:`, result.error);
       return {
         ok: false,
         error: result.error || 'Échec envoi SMS',
@@ -163,7 +163,7 @@ export async function sendEmergencySMS(options: SendEmergencySMSOptions): Promis
       };
     }
   } catch (error: any) {
-    console.error('❌ [SMS Service] Exception:', error);
+    logger.error('❌ [SMS Service] Exception:', error);
     return {
       ok: false,
       error: error.message || 'Erreur réseau',

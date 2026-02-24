@@ -11,13 +11,13 @@ export function getApiUrl(): string {
   const envApiUrl = process.env.EXPO_PUBLIC_API_URL;
   
   if (envApiUrl) {
-    console.log('✅ API URL depuis EXPO_PUBLIC_API_URL:', envApiUrl);
+    logger.info('✅ API URL depuis EXPO_PUBLIC_API_URL:', envApiUrl);
     return envApiUrl;
   }
   
   // 2. Fallback: utiliser l'URL publique Manus exposée
   const manusPublicUrl = 'https://3000-i97kkuvwkekymxd119cln-297f2a9c.us2.manus.computer';
-  console.warn('⚠️ EXPO_PUBLIC_API_URL non définie, utilisation du fallback:', manusPublicUrl);
+  logger.warn('⚠️ EXPO_PUBLIC_API_URL non définie, utilisation du fallback:', manusPublicUrl);
   
   return manusPublicUrl;
 }
@@ -35,14 +35,14 @@ export async function testApiConnection(): Promise<boolean> {
     
     if (response.ok) {
       const data = await response.json();
-      console.log('✅ API Health Check OK:', data);
+      logger.info('✅ API Health Check OK:', data);
       return true;
     } else {
-      console.error('❌ API Health Check Failed:', response.status, response.statusText);
+      logger.error('❌ API Health Check Failed:', response.status, response.statusText);
       return false;
     }
   } catch (error) {
-    console.error('❌ API Connection Error:', error);
+    logger.error('❌ API Connection Error:', error);
     return false;
   }
 }

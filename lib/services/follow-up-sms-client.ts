@@ -20,11 +20,11 @@ export async function sendFollowUpAlertSMS(params: FollowUpAlertParams): Promise
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      console.log(`📤 [Tentative ${attempt}/${maxRetries}] Appel API SMS relance`);
-      console.log('📋 Params:', JSON.stringify(params, null, 2));
+      logger.info(`📤 [Tentative ${attempt}/${maxRetries}] Appel API SMS relance`);
+      logger.info('📋 Params:', JSON.stringify(params, null, 2));
       
       const url = `${API_BASE_URL}/api/friendly-sms/follow-up`;
-      console.log('🔗 URL:', url);
+      logger.info('🔗 URL:', url);
 
       const response = await fetch(url, {
         method: 'POST',
@@ -32,23 +32,23 @@ export async function sendFollowUpAlertSMS(params: FollowUpAlertParams): Promise
         body: JSON.stringify(params),
       });
 
-      console.log('📊 Réponse API:', response.status, response.statusText);
+      logger.info('📊 Réponse API:', response.status, response.statusText);
 
       if (!response.ok) {
         const errorBody = await response.text();
-        console.error('❌ Réponse API:', errorBody);
+        logger.error('❌ Réponse API:', errorBody);
         throw new Error(`SMS API error: ${response.status} ${response.statusText} - ${errorBody}`);
       }
 
       const data = await response.json();
-      console.log('✅ SMS relance envoyés avec succès:', data);
+      logger.info('✅ SMS relance envoyés avec succès:', data);
       return; // Succès, sortir de la boucle
     } catch (error) {
       lastError = error as Error;
-      console.error(`❌ [Tentative ${attempt}/${maxRetries}] Erreur SMS relance:`, error);
+      logger.error(`❌ [Tentative ${attempt}/${maxRetries}] Erreur SMS relance:`, error);
       
       if (attempt < maxRetries) {
-        console.log(`⏳ Nouvelle tentative dans 2 secondes...`);
+        logger.info(`⏳ Nouvelle tentative dans 2 secondes...`);
         await new Promise(resolve => setTimeout(resolve, 2000));
       }
     }
@@ -66,11 +66,11 @@ export async function sendConfirmationSMS(params: ConfirmationParams): Promise<v
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      console.log(`📤 [Tentative ${attempt}/${maxRetries}] Appel API SMS confirmation`);
-      console.log('📋 Params:', JSON.stringify(params, null, 2));
+      logger.info(`📤 [Tentative ${attempt}/${maxRetries}] Appel API SMS confirmation`);
+      logger.info('📋 Params:', JSON.stringify(params, null, 2));
       
       const url = `${API_BASE_URL}/api/friendly-sms/confirmation`;
-      console.log('🔗 URL:', url);
+      logger.info('🔗 URL:', url);
 
       const response = await fetch(url, {
         method: 'POST',
@@ -78,23 +78,23 @@ export async function sendConfirmationSMS(params: ConfirmationParams): Promise<v
         body: JSON.stringify(params),
       });
 
-      console.log('📊 Réponse API:', response.status, response.statusText);
+      logger.info('📊 Réponse API:', response.status, response.statusText);
 
       if (!response.ok) {
         const errorBody = await response.text();
-        console.error('❌ Réponse API:', errorBody);
+        logger.error('❌ Réponse API:', errorBody);
         throw new Error(`SMS API error: ${response.status} ${response.statusText} - ${errorBody}`);
       }
 
       const data = await response.json();
-      console.log('✅ SMS confirmation envoyés avec succès:', data);
+      logger.info('✅ SMS confirmation envoyés avec succès:', data);
       return; // Succès, sortir de la boucle
     } catch (error) {
       lastError = error as Error;
-      console.error(`❌ [Tentative ${attempt}/${maxRetries}] Erreur SMS confirmation:`, error);
+      logger.error(`❌ [Tentative ${attempt}/${maxRetries}] Erreur SMS confirmation:`, error);
       
       if (attempt < maxRetries) {
-        console.log(`⏳ Nouvelle tentative dans 2 secondes...`);
+        logger.info(`⏳ Nouvelle tentative dans 2 secondes...`);
         await new Promise(resolve => setTimeout(resolve, 2000));
       }
     }

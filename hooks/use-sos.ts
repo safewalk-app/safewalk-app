@@ -36,35 +36,35 @@ export function useSOS(options: UseSOSOptions) {
   const [error, setError] = useState<string | null>(null);
 
   const triggerSOS = useCallback(async () => {
-    console.log('=== DÉBUT TRIGGER SOS ===');
-    console.log('Session ID:', sessionId);
-    console.log('Settings:', {
+    logger.info('=== DÉBUT TRIGGER SOS ===');
+    logger.info('Session ID:', sessionId);
+    logger.info('Settings:', {
       contact1: settings.emergencyContactPhone,
       contact2: settings.emergencyContact2Phone,
       firstName: settings.firstName,
     });
-    console.log('Location initiale:', initialLocation);
+    logger.info('Location initiale:', initialLocation);
     
     try {
       setIsLoading(true);
       setError(null);
 
-      console.log('🚨 Déclenchement SOS pour session:', sessionId);
+      logger.info('🚨 Déclenchement SOS pour session:', sessionId);
 
       // Envoyer notification locale immédiate
       try {
-        console.log('🔔 [Notification] Envoi notification SOS');
+        logger.info('🔔 [Notification] Envoi notification SOS');
         sendNotification({
           title: '🚨 ALERTE SOS DÉCLENCHÉE',
           body: 'Alerte d\'urgence envoyée à vos contacts. Restez en sécurité.',
           data: { type: 'sos_triggered' },
         });
       } catch (notifErr) {
-        console.warn('Erreur notification:', notifErr);
+        logger.warn('Erreur notification:', notifErr);
       }
 
       // Utiliser la position passée en paramètre ou capturer une nouvelle
-      console.log('📍 Capture de la position GPS...');
+      logger.info('📍 Capture de la position GPS...');
       let currentLocation: { latitude: number; longitude: number; accuracy?: number } | undefined = initialLocation;
       if (!currentLocation) {
         const snapshot = await getSnapshot();
@@ -72,10 +72,10 @@ export function useSOS(options: UseSOSOptions) {
           currentLocation = snapshot;
         }
       }
-      console.log('📍 Position capturée pour SOS:', currentLocation);
+      logger.info('📍 Position capturée pour SOS:', currentLocation);
 
       if (!currentLocation) {
-        console.warn('⚠️ Position non disponible, envoi SOS sans coordonnées');
+        logger.warn('⚠️ Position non disponible, envoi SOS sans coordonnées');
       }
 
       // Vérifier qu'il y a au moins un contact
@@ -92,7 +92,7 @@ export function useSOS(options: UseSOSOptions) {
 
       // Envoyer SMS au contact 1
       if (settings.emergencyContactPhone) {
-        console.log('📤 [SOS] Envoi SMS au contact 1...');
+        logger.info('📤 [SOS] Envoi SMS au contact 1...');
         const result1 = await sendEmergencySMS({
           reason: 'sos',
           contactName: settings.emergencyContactName || 'Contact',
@@ -110,15 +110,15 @@ export function useSOS(options: UseSOSOptions) {
         });
 
         if (result1.ok) {
-          console.log('✅ [SOS] SMS envoyé au contact 1 (SID:', result1.sid, ')');
+          logger.info('✅ [SOS] SMS envoyé au contact 1 (SID:', result1.sid, ')');
         } else {
-          console.error('❌ [SOS] Échec envoi SMS au contact 1:', result1.error);
+          logger.error('❌ [SOS] Échec envoi SMS au contact 1:', result1.error);
         }
       }
 
       // Envoyer SMS au contact 2
       if (settings.emergencyContact2Phone) {
-        console.log('📤 [SOS] Envoi SMS au contact 2...');
+        logger.info('📤 [SOS] Envoi SMS au contact 2...');
         const result2 = await sendEmergencySMS({
           reason: 'sos',
           contactName: settings.emergencyContact2Name || 'Contact 2',
@@ -136,9 +136,9 @@ export function useSOS(options: UseSOSOptions) {
         });
 
         if (result2.ok) {
-          console.log('✅ [SOS] SMS envoyé au contact 2 (SID:', result2.sid, ')');
+          logger.info('✅ [SOS] SMS envoyé au contact 2 (SID:', result2.sid, ')');
         } else {
-          console.error('❌ [SOS] Échec envoi SMS au contact 2:', result2.error);
+          logger.error('❌ [SOS] Échec envoi SMS au contact 2:', result2.error);
         }
       }
 
@@ -154,12 +154,12 @@ export function useSOS(options: UseSOSOptions) {
         smsResults,
       };
 
-      console.log('✅ Alerte SOS déclenchée avec succès:', result);
+      logger.info('✅ Alerte SOS déclenchée avec succès:', result);
       onSuccess?.(result);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erreur inconnue';
-      console.error('❌ Erreur SOS:', errorMessage);
-      console.error('Stack trace:', err);
+      logger.error('❌ Erreur SOS:', errorMessage);
+      logger.error('Stack trace:', err);
       setError(errorMessage);
       
       // Afficher une alerte pour informer l'utilisateur

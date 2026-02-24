@@ -27,7 +27,7 @@ if (Platform.OS !== 'web') {
         opensAppToForeground: true,
       },
     },
-  ]).catch(err => console.error('⚠️ Erreur config catégories:', err));
+  ]).catch(err => logger.error('⚠️ Erreur config catégories:', err));
 }
 
 // Configurer le gestionnaire de notifications
@@ -65,14 +65,14 @@ export function useNotifications() {
     // Écouter les notifications reçues
     notificationListenerRef.current = (Notifications.addNotificationReceivedListener as any)(
       (notification: any) => {
-        console.log('📬 Notification reçue:', notification);
+        logger.info('📬 Notification reçue:', notification);
       }
     );
 
     // Écouter les réponses aux notifications (tap)
     responseListenerRef.current = (Notifications.addNotificationResponseReceivedListener as any)(
       (response: any) => {
-        console.log('👆 Notification tapée:', response.notification.request.content);
+        logger.info('👆 Notification tapée:', response.notification.request.content);
       }
     );
 
@@ -93,13 +93,13 @@ export function useNotifications() {
     try {
       const { status } = await (Notifications.requestPermissionsAsync as any)();
       if (status !== 'granted') {
-        console.warn('⚠️ Permission de notification refusée');
+        logger.warn('⚠️ Permission de notification refusée');
         return false;
       }
-      console.log('✅ Permission de notification accordée');
+      logger.info('✅ Permission de notification accordée');
       return true;
     } catch (error) {
-      console.error('Erreur lors de la demande de permission:', error);
+      logger.error('Erreur lors de la demande de permission:', error);
       return false;
     }
   };
@@ -121,7 +121,7 @@ export function useNotifications() {
         trigger: null, // null = immédiate
       });
 
-      console.log('📤 Notification envoyée:', options.title);
+      logger.info('📤 Notification envoyée:', options.title);
       
       // Retour haptique subtil (uniquement sur mobile)
       if (Platform.OS !== 'web') {
@@ -134,7 +134,7 @@ export function useNotifications() {
       
       return notificationId;
     } catch (error) {
-      console.error('Erreur lors de l\'envoi de la notification:', error);
+      logger.error('Erreur lors de l\'envoi de la notification:', error);
       return null;
     }
   }, []);
@@ -166,10 +166,10 @@ export function useNotifications() {
       const delayInfo = triggerDate instanceof Date 
         ? `à ${triggerDate.toLocaleTimeString()}`
         : `dans ${triggerDate}s`;
-      console.log(`📅 Notification programmée ${delayInfo}:`, options.title);
+      logger.info(`📅 Notification programmée ${delayInfo}:`, options.title);
       return notificationId;
     } catch (error) {
-      console.error('Erreur lors de la programmation de la notification:', error);
+      logger.error('Erreur lors de la programmation de la notification:', error);
       return null;
     }
   }, []);
@@ -180,9 +180,9 @@ export function useNotifications() {
   const cancelNotification = useCallback(async (notificationId: string): Promise<void> => {
     try {
       await Notifications.cancelScheduledNotificationAsync(notificationId);
-      console.log('❌ Notification annulée:', notificationId);
+      logger.info('❌ Notification annulée:', notificationId);
     } catch (error) {
-      console.error('Erreur lors de l\'annulation de la notification:', error);
+      logger.error('Erreur lors de l\'annulation de la notification:', error);
     }
   }, []);
 
@@ -192,9 +192,9 @@ export function useNotifications() {
   const cancelAllNotifications = useCallback(async (): Promise<void> => {
     try {
       await Notifications.cancelAllScheduledNotificationsAsync();
-      console.log('❌ Toutes les notifications annulées');
+      logger.info('❌ Toutes les notifications annulées');
     } catch (error) {
-      console.error('Erreur lors de l\'annulation des notifications:', error);
+      logger.error('Erreur lors de l\'annulation des notifications:', error);
     }
   }, []);
 

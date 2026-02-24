@@ -13,6 +13,7 @@ import { DurationQuickSelect, type DurationOption } from '@/components/ui/durati
 import * as Notifications from 'expo-notifications';
 import * as Location from 'expo-location';
 import { useColors } from '@/hooks/use-colors';
+import { logger } from '@/lib/logger';
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -58,7 +59,7 @@ export default function HomeScreen() {
           },
         ]);
       } catch (error) {
-        console.error('Error checking permissions:', error);
+        logger.error('Error checking permissions:', error);
       }
     };
 
@@ -73,7 +74,7 @@ export default function HomeScreen() {
         setShowToast(true);
       }
     } catch (error) {
-      console.error('Error requesting notifications:', error);
+      logger.error('Error requesting notifications:', error);
     }
   };
 
@@ -85,7 +86,7 @@ export default function HomeScreen() {
         setShowToast(true);
       }
     } catch (error) {
-      console.error('Error requesting location:', error);
+      logger.error('Error requesting location:', error);
     }
   };
 

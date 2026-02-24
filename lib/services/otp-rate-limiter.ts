@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { OtpErrorCode } from "../types/otp-errors";
+import { logger } from "../logger";
 
 /**
  * Service de rate limiting côté client pour OTP
@@ -71,7 +72,7 @@ export async function checkRateLimit(
       attemptsRemaining,
     };
   } catch (error) {
-    console.error("[OTP] Rate limit check error:", error);
+    logger.error("[OTP] Rate limit check error:", error);
     // En cas d'erreur, autoriser l'envoi
     return {
       isAllowed: true,
@@ -106,7 +107,7 @@ export async function recordOtpAttempt(phoneNumber: string): Promise<void> {
       JSON.stringify(validRecords)
     );
   } catch (error) {
-    console.error("[OTP] Failed to record attempt:", error);
+    logger.error("[OTP] Failed to record attempt:", error);
   }
 }
 
@@ -127,7 +128,7 @@ export async function resetRateLimit(phoneNumber: string): Promise<void> {
       JSON.stringify(filtered)
     );
   } catch (error) {
-    console.error("[OTP] Failed to reset rate limit:", error);
+    logger.error("[OTP] Failed to reset rate limit:", error);
   }
 }
 
@@ -185,7 +186,7 @@ export async function clearAllRateLimits(): Promise<void> {
   try {
     await AsyncStorage.removeItem(RATE_LIMIT_KEY);
   } catch (error) {
-    console.error("[OTP] Failed to clear rate limits:", error);
+    logger.error("[OTP] Failed to clear rate limits:", error);
   }
 }
 

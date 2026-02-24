@@ -121,7 +121,7 @@ export function useRealTimeLocation(options: UseRealTimeLocationOptions = {}) {
       // Vérifier la permission (ne PAS demander)
       const { status } = await Location.getForegroundPermissionsAsync();
       if (status !== 'granted') {
-        console.log('[Location] Permission non accordée, position non disponible');
+        logger.info('[Location] Permission non accordée, position non disponible');
         return null;
       }
 
@@ -136,7 +136,7 @@ export function useRealTimeLocation(options: UseRealTimeLocationOptions = {}) {
         timestamp: currentLocation.timestamp,
       };
     } catch (err) {
-      console.error('Erreur lors de la capture de position:', err);
+      logger.error('Erreur lors de la capture de position:', err);
       return null;
     }
   };

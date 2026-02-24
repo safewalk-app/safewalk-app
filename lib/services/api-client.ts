@@ -11,7 +11,7 @@
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://3000-izg08xkxsyk2siv7372nz-49e5cc45.us1.manus.computer';
 
 // Log de l'URL utilisée (utile pour debug)
-console.log('🔗 [API Client] URL configurée:', API_URL);
+logger.info('🔗 [API Client] URL configurée:', API_URL);
 
 /**
  * Effectuer un appel API
@@ -22,7 +22,7 @@ async function apiCall<T = any>(
 ): Promise<T> {
   const url = `${API_URL}${endpoint}`;
   
-  console.log(`📡 [API] ${options.method || 'GET'} ${endpoint}`);
+  logger.info(`📡 [API] ${options.method || 'GET'} ${endpoint}`);
   
   try {
     const response = await fetch(url, {
@@ -36,14 +36,14 @@ async function apiCall<T = any>(
     const data = await response.json();
 
     if (!response.ok) {
-      console.error(`❌ [API] Erreur ${response.status}:`, data);
+      logger.error(`❌ [API] Erreur ${response.status}:`, data);
       throw new Error(data.error || `HTTP ${response.status}`);
     }
 
-    console.log(`✅ [API] Succès:`, data);
+    logger.info(`✅ [API] Succès:`, data);
     return data;
   } catch (error: any) {
-    console.error(`❌ [API] Exception:`, error.message);
+    logger.error(`❌ [API] Exception:`, error.message);
     throw error;
   }
 }

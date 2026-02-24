@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { logger } from "./logger";
 
 /**
  * Combines class names using clsx and tailwind-merge.
@@ -154,7 +155,7 @@ const smsTimestamps: Record<string, number> = {};
  * Usage:
  * ```tsx
  * if (!canSendSMS('alert', 60)) {
- *   console.warn('SMS bloqué par anti-spam');
+ *   logger.warn('SMS bloqué par anti-spam');
  *   return;
  * }
  * // Envoyer le SMS...
@@ -179,7 +180,7 @@ export function canSendSMS(key: string, minIntervalSeconds: number = 60): boolea
   }
   
   // Bloquer l'envoi (spam détecté)
-  console.warn(
+  logger.warn(
     `🚫 [Anti-spam] SMS bloqué pour "${key}". ` +
     `Dernier envoi il y a ${elapsedSeconds.toFixed(0)}s (min: ${minIntervalSeconds}s)`
   );

@@ -14,11 +14,11 @@ export async function sendFriendlyAlertSMS(params: FriendlyAlertParams): Promise
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      console.log(`📤 [Tentative ${attempt}/${maxRetries}] Appel API SMS friendly`);
-      console.log('📋 Params:', JSON.stringify(params, null, 2));
+      logger.info(`📤 [Tentative ${attempt}/${maxRetries}] Appel API SMS friendly`);
+      logger.info('📋 Params:', JSON.stringify(params, null, 2));
       
       const url = `${API_BASE_URL}/api/friendly-sms/alert`;
-      console.log('🔗 URL:', url);
+      logger.info('🔗 URL:', url);
 
       const response = await fetch(url, {
         method: 'POST',
@@ -26,24 +26,24 @@ export async function sendFriendlyAlertSMS(params: FriendlyAlertParams): Promise
         body: JSON.stringify(params),
       });
 
-      console.log('📊 Réponse API:', response.status, response.statusText);
+      logger.info('📊 Réponse API:', response.status, response.statusText);
 
       if (!response.ok) {
         const errorBody = await response.text();
-        console.error('❌ Réponse API:', errorBody);
+        logger.error('❌ Réponse API:', errorBody);
         throw new Error(`SMS API error: ${response.status} ${response.statusText} - ${errorBody}`);
       }
 
       const data = await response.json();
-      console.log('✅ SMS friendly envoyés avec succès:', data);
+      logger.info('✅ SMS friendly envoyés avec succès:', data);
       return; // Succès, sortir de la boucle
     } catch (error) {
       lastError = error as Error;
-      console.error(`❌ [Tentative ${attempt}/${maxRetries}] Erreur SMS friendly:`, error);
+      logger.error(`❌ [Tentative ${attempt}/${maxRetries}] Erreur SMS friendly:`, error);
       
       if (attempt < maxRetries) {
         // Attendre 2 secondes avant de réessayer
-        console.log(`⏳ Nouvelle tentative dans 2 secondes...`);
+        logger.info(`⏳ Nouvelle tentative dans 2 secondes...`);
         await new Promise(resolve => setTimeout(resolve, 2000));
       }
     }

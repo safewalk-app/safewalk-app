@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import * as Notifications from 'expo-notifications';
 import { useApp } from '@/lib/context/app-context';
+import { logger } from '@/lib/logger';
 
 /**
  * Hook pour gérer les notifications de check-in automatique
@@ -68,11 +69,11 @@ export function useCheckInNotifications() {
                 });
               }
             } catch (error) {
-              console.error('Error sending 2nd check-in notification:', error);
+              logger.error('Error sending 2nd check-in notification:', error);
             }
           }, 10 * 60 * 1000); // 10 minutes
         } catch (error) {
-          console.error('Error sending check-in notification:', error);
+          logger.error('Error sending check-in notification:', error);
         }
       }, delayMs);
     }

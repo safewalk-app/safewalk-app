@@ -21,8 +21,8 @@ export async function sendSms(options: SendSmsOptions): Promise<SendSmsResult> {
     const apiUrl = getApiUrl();
     const endpoint = `${apiUrl}/api/sms/send`;
 
-    console.log(`📤 [SMS Client] Envoi SMS à ${options.to}...`);
-    console.log(`🔗 [SMS Client] Endpoint: ${endpoint}`);
+    logger.info(`📤 [SMS Client] Envoi SMS à ${options.to}...`);
+    logger.info(`🔗 [SMS Client] Endpoint: ${endpoint}`);
 
     const response = await fetch(endpoint, {
       method: 'POST',
@@ -38,7 +38,7 @@ export async function sendSms(options: SendSmsOptions): Promise<SendSmsResult> {
     const data = await response.json();
 
     if (!response.ok) {
-      console.error(`❌ [SMS Client] Erreur HTTP ${response.status}:`, data);
+      logger.error(`❌ [SMS Client] Erreur HTTP ${response.status}:`, data);
       return {
         success: false,
         error: data.error || `HTTP ${response.status}`,
@@ -47,7 +47,7 @@ export async function sendSms(options: SendSmsOptions): Promise<SendSmsResult> {
     }
 
     if (!data.success) {
-      console.error('❌ [SMS Client] Échec envoi SMS:', data);
+      logger.error('❌ [SMS Client] Échec envoi SMS:', data);
       return {
         success: false,
         error: data.error || 'Unknown error',
@@ -55,14 +55,14 @@ export async function sendSms(options: SendSmsOptions): Promise<SendSmsResult> {
       };
     }
 
-    console.log(`✅ [SMS Client] SMS envoyé avec succès (SID: ${data.sid})`);
+    logger.info(`✅ [SMS Client] SMS envoyé avec succès (SID: ${data.sid})`);
     return {
       success: true,
       sid: data.sid,
       status: data.status,
     };
   } catch (error: any) {
-    console.error('❌ [SMS Client] Erreur réseau:', error);
+    logger.error('❌ [SMS Client] Erreur réseau:', error);
     return {
       success: false,
       error: error.message || 'Network error',
@@ -88,7 +88,7 @@ export async function checkSmsApiHealth(): Promise<{
     const apiUrl = getApiUrl();
     const endpoint = `${apiUrl}/api/sms/health`;
 
-    console.log(`🔍 [SMS Client] Vérification santé API: ${endpoint}`);
+    logger.info(`🔍 [SMS Client] Vérification santé API: ${endpoint}`);
 
     const response = await fetch(endpoint);
     const data = await response.json();
@@ -106,7 +106,7 @@ export async function checkSmsApiHealth(): Promise<{
       twilioConfigured: data.twilioConfigured,
     };
   } catch (error: any) {
-    console.error('❌ [SMS Client] Erreur health check:', error);
+    logger.error('❌ [SMS Client] Erreur health check:', error);
     return {
       ok: false,
       error: error.message || 'Network error',

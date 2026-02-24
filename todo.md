@@ -2345,3 +2345,14 @@
 - [x] Ajouter errorCode aux interfaces OTP (3 erreurs résolues)
 - [x] Corriger getPermissionsAsync en getForegroundPermissionsAsync (1 erreur résolue)
 - [x] Valider que tous les tests passent (394/420 PASS)
+
+
+## NETTOYAGE CONSOLE.LOG POUR PRODUCTION (V1.82)
+
+- [x] Remplacer console.log par logger dans lib/_core/auth.ts (15 remplacements)
+- [x] Remplacer console.log par logger dans hooks/use-auth.ts (18 remplacements)
+- [x] Remplacer console.error par logger dans app/home.tsx (3 remplacements)
+- [x] Remplacer console.error par logger dans lib/services/otp-rate-limiter.ts (4 remplacements)
+- [x] Remplacer console.warn par logger dans lib/utils.ts (1 remplacement)
+- [x] Remplacer console.error par logger dans hooks/use-check-in-notifications.ts (2 remplacements)
+- [x] Vérifier qu'aucun console.log ne reste en production (0 trouvés)
