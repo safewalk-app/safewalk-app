@@ -1,16 +1,17 @@
 -- Migration: Create economy, privacy, and backend tables for SafeWalk
 -- Date: 2026-02-24
+-- Version: 2 (Simplified - no triggers)
 
 -- ============================================================================
 -- 1. PROFILES TABLE (Économie + Quotas)
 -- ============================================================================
 CREATE TABLE IF NOT EXISTS profiles (
   user_id uuid PRIMARY KEY,
-  free_alerts_remaining int DEFAULT 3 NOT NULL CHECK (free_alerts_remaining >= 0),
-  free_test_sms_remaining int DEFAULT 1 NOT NULL CHECK (free_test_sms_remaining >= 0),
+  free_alerts_remaining int DEFAULT 3 NOT NULL,
+  free_test_sms_remaining int DEFAULT 1 NOT NULL,
   subscription_active boolean DEFAULT false NOT NULL,
-  sms_daily_limit int DEFAULT 10 NOT NULL CHECK (sms_daily_limit > 0),
-  sms_sos_daily_limit int DEFAULT 3 NOT NULL CHECK (sms_sos_daily_limit > 0),
+  sms_daily_limit int DEFAULT 10 NOT NULL,
+  sms_sos_daily_limit int DEFAULT 3 NOT NULL,
   created_at timestamptz DEFAULT now() NOT NULL,
   updated_at timestamptz DEFAULT now() NOT NULL
 );
@@ -23,7 +24,7 @@ CREATE TABLE IF NOT EXISTS contacts (
   user_id uuid NOT NULL,
   name text NOT NULL,
   phone text NOT NULL,
-  priority int DEFAULT 1 NOT NULL CHECK (priority >= 1 AND priority <= 5),
+  priority int DEFAULT 1 NOT NULL,
   opted_out boolean DEFAULT false NOT NULL,
   created_at timestamptz DEFAULT now() NOT NULL,
   updated_at timestamptz DEFAULT now() NOT NULL,
@@ -38,7 +39,7 @@ CREATE TABLE IF NOT EXISTS trips (
   user_id uuid NOT NULL,
   start_time timestamptz DEFAULT now() NOT NULL,
   deadline timestamptz NOT NULL,
-  status text DEFAULT 'active' NOT NULL CHECK (status IN ('active', 'checked_in', 'cancelled', 'alerted')),
+  status text DEFAULT 'active' NOT NULL,
   share_location boolean DEFAULT true NOT NULL,
   destination_note text,
   last_lat double precision,
@@ -59,8 +60,8 @@ CREATE TABLE IF NOT EXISTS sms_logs (
   user_id uuid NOT NULL,
   trip_id uuid,
   to_phone text NOT NULL,
-  sms_type text NOT NULL CHECK (sms_type IN ('late', 'sos', 'test')),
-  status text DEFAULT 'queued' NOT NULL CHECK (status IN ('queued', 'sent', 'failed')),
+  sms_type text NOT NULL,
+  status text DEFAULT 'queued' NOT NULL,
   twilio_sid text,
   error text,
   created_at timestamptz DEFAULT now() NOT NULL
@@ -77,27 +78,7 @@ CREATE INDEX IF NOT EXISTS idx_sms_logs_user_created ON sms_logs(user_id, create
 CREATE INDEX IF NOT EXISTS idx_sms_logs_trip_id ON sms_logs(trip_id);
 
 -- ============================================================================
--- 6. TRIGGERS (updated_at)
--- ============================================================================
-CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
-BEGIN
-  NEW.updated_at = now();
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER update_profiles_updated_at BEFORE UPDATE ON profiles
-FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
-CREATE TRIGGER update_contacts_updated_at BEFORE UPDATE ON contacts
-FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
-CREATE TRIGGER update_trips_updated_at BEFORE UPDATE ON trips
-FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
--- ============================================================================
--- 7. ROW LEVEL SECURITY (RLS)
+-- 6. ROW LEVEL SECURITY (RLS)
 -- ============================================================================
 
 -- Profiles: Users can only see/edit their own profile
@@ -156,24 +137,3 @@ CREATE POLICY "Users can view own sms logs" ON sms_logs
 
 CREATE POLICY "Service role can manage sms logs" ON sms_logs
   USING (auth.role() = 'service_role');
-
--- ============================================================================
--- 8. AUTO-CREATE PROFILE ON USER SIGNUP
--- ============================================================================
-CREATE OR REPLACE FUNCTION public.handle_new_user()
-RETURNS TRIGGER AS $$
-BEGIN
-  INSERT INTO public.profiles (user_id)
-  VALUES (new.id)
-  ON CONFLICT (user_id) DO NOTHING;
-  RETURN new;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
-
--- Drop existing trigger if it exists
-DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
-
--- Create the trigger
-CREATE TRIGGER on_auth_user_created
-AFTER INSERT ON auth.users
-FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();

@@ -2432,3 +2432,81 @@
 - [ ] Déployer migrations Supabase
 - [ ] Configurer Twilio secrets côté Edge Functions
 - [ ] Tester le flux complet avec quotas
+
+
+## PHASE 5: RPC SQL ATOMIQUES & EDGE FUNCTIONS (SafeWalk V1.88+)
+
+### RPC SQL Functions
+- [x] Créer RPC claim_overdue_trips (FOR UPDATE SKIP LOCKED)
+- [x] Créer RPC consume_credit (logique crédits + quotas)
+- [x] Créer helper get_sms_daily_count
+- [x] Créer indexes pour performance (sessions, sms_logs, emergency_contacts)
+- [x] Ajouter colonnes économie à users (free_alerts_remaining, free_test_sms_remaining, subscription_active)
+- [x] Ajouter colonnes localisation à sessions (share_location, destination_note, last_seen_at)
+- [x] Ajouter colonnes à sms_logs (user_id, sms_type, twilio_sid)
+
+### Helper Twilio Partagé
+- [x] Créer _shared/twilio.ts (sendSms, formatPhoneNumber, isValidPhoneNumber)
+- [x] Créer message builders (createOverdueAlertMessage, createTestSmsMessage, createSosAlertMessage)
+- [x] Implémenter gestion d'erreurs Twilio robuste
+- [x] Ajouter logging pour tous les appels SMS
+
+### Edge Functions Client-Auth (JWT)
+- [x] Créer start-trip (créer session active)
+- [x] Créer checkin (confirmer retour)
+- [x] Créer extend (prolonger deadline)
+- [x] Créer ping-location (mettre à jour position)
+- [x] Créer test-sms (envoyer SMS de test avec consume_credit)
+- [x] Créer sos (alerte SOS immédiate avec consume_credit)
+
+### Edge Function Server-Only (CRON_SECRET)
+- [x] Créer cron-check-deadlines (claim + consume_credit + send SMS)
+- [x] Implémenter logique atomique avec RPC
+- [x] Ajouter logging détaillé pour monitoring
+
+### Services TypeScript
+- [x] Créer trip-service.ts (client pour toutes les Edge Functions)
+- [x] Implémenter startTrip, checkin, extendTrip, pingLocation
+- [x] Implémenter sendTestSms, triggerSos
+- [x] Ajouter logging centralisé
+
+### Tests
+- [x] Créer tests/rpc-functions.test.ts (claim_overdue_trips, consume_credit)
+- [x] Créer tests/trip-service.test.ts (toutes les Edge Functions)
+- [x] Tester cas d'erreur (no credits, quota exceeded, invalid input)
+- [x] Tester idempotence des RPC
+
+### Déploiement Supabase
+- [ ] Déployer migrations SQL (RPC + indexes)
+- [ ] Déployer Edge Functions (start-trip, checkin, extend, ping-location, test-sms, sos, cron-check-deadlines)
+- [ ] Configurer CRON_SECRET dans Supabase
+- [ ] Tester toutes les Edge Functions via Supabase Dashboard
+
+### Intégration Frontend
+- [ ] Mettre à jour app-context.tsx pour utiliser trip-service
+- [ ] Intégrer startTrip dans createSession
+- [ ] Intégrer checkin dans confirmArrival
+- [ ] Intégrer extendTrip dans extendDeadline
+- [ ] Intégrer pingLocation dans useCheckInNotifications
+- [ ] Intégrer sendTestSms dans Settings
+- [ ] Intégrer triggerSos dans Active Session (long press)
+
+### Monitoring & Logging
+- [ ] Ajouter logging pour tous les appels RPC
+- [ ] Ajouter logging pour tous les appels SMS
+- [ ] Créer dashboard de monitoring (SMS count, credit usage, quota status)
+- [ ] Ajouter alertes pour erreurs critiques
+
+### Documentation
+- [ ] Documenter RPC functions (inputs, outputs, error codes)
+- [ ] Documenter Edge Functions (auth, rate limiting, error handling)
+- [ ] Documenter flux complet (start-trip → cron-check-deadlines → alert SMS)
+- [ ] Créer guide de dépannage
+
+### QA & Validation
+- [ ] Tester flux complet: start-trip → deadline → cron → SMS
+- [ ] Tester consume_credit avec tous les cas (subscription, free, quota)
+- [ ] Tester idempotence (appels multiples = même résultat)
+- [ ] Tester atomicité (FOR UPDATE SKIP LOCKED)
+- [ ] Tester gestion d'erreurs (network, Twilio, DB)
+- [ ] Tester sur iPhone et Android réels
