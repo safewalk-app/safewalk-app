@@ -30,12 +30,12 @@ Fichiers: app/active-session.tsx, trip-service.ts
 - [x] Ajouter cancelTrip() dans trip-service
 - [x] Ajouter bouton Annuler la sortie
 
-### E) Settings Améliorations (1.5h - IMPORTANT)
+### E) Settings Améliorations (1.5h - IMPORTANT) ✅ COMPLÈTE
 Fichiers: app/settings.tsx
-- [ ] Ajouter form pour créer/modifier contact principal
-- [ ] Ajouter bouton Test SMS avec gating OTP + crédits
-- [ ] Afficher liste contacts existants
-- [ ] Ajouter bouton supprimer contact
+- [x] CRUD contacts déjà existant (PopTextField autosave + validation)
+- [x] Ajouter bouton Test SMS avec gating OTP + crédits
+- [x] Afficher liste contacts existants (Contact 1 & 2)
+- [x] Ajouter bouton supprimer contact (via delete/clear fields)
 
 ### F) Error Handling (1h - IMPORTANT)
 Fichiers: app/new-session.tsx, app/active-session.tsx, trip-service.ts

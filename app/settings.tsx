@@ -15,10 +15,13 @@ import { validatePhoneNumber, formatPhoneInput, cleanPhoneNumber } from '@/lib/u
 import { checkHealth } from '@/lib/services/api-client';
 import { sendEmergencySMS } from '@/lib/services/sms-service';
 import { useLocationPermission } from '@/hooks/use-location-permission';
+import { tripService } from '@/lib/services/trip-service';
+import { useProfileData } from '@/hooks/use-profile-data';
 
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const { settings, updateSettings, deleteAllData } = useApp();
+  const profileData = useProfileData();
   const [firstName, setFirstName] = useState(settings.firstName);
   const [contactName, setContactName] = useState(settings.emergencyContactName);
   const [contactPhone, setContactPhone] = useState(settings.emergencyContactPhone);
@@ -165,6 +168,31 @@ export default function SettingsScreen() {
   };
 
 
+
+  const handleTestSms = async () => {
+    // Check phone_verified
+    if (!profileData?.phone_verified) {
+      Alert.alert('Téléphone non vérifié', 'Veuillez d\'abord vérifier votre numéro de téléphone.');
+      return;
+    }
+
+    // Check credits
+    if (profileData?.free_test_sms_remaining === 0 && !profileData?.subscription_active) {
+      Alert.alert('Pas de crédits', 'Vous n\'avez plus de SMS de test disponibles.');
+      return;
+    }
+
+    setIsSendingTestSms(true);
+    const result = await tripService.sendTestSms();
+    setIsSendingTestSms(false);
+
+    if (result.success) {
+      setToastMessage('✅ SMS de test envoyé !');
+      setShowToast(true);
+    } else {
+      Alert.alert('Erreur', result.error || 'Impossible d\'envoyer le SMS de test');
+    }
+  };
 
   const handleDeleteData = () => {
     Alert.alert(
@@ -351,8 +379,28 @@ export default function SettingsScreen() {
           </View>
         </ScreenTransition>
 
-        {/* Bouton "À propos" */}
+        {/* Bouton "Test SMS" */}
         <ScreenTransition delay={250} duration={350}>
+          <Pressable 
+            onPress={handleTestSms}
+            disabled={isSendingTestSms}
+            className="mb-4"
+          >
+            <GlassCard className="flex-row items-center justify-center gap-2 py-4">
+              {isSendingTestSms ? (
+                <ActivityIndicator size="small" color="#0a7ea4" />
+              ) : (
+                <MaterialIcons name="message" size={20} color="#0a7ea4" />
+              )}
+              <Text className="text-base font-semibold text-foreground">
+                {isSendingTestSms ? 'Envoi en cours...' : 'Tester SMS'}
+              </Text>
+            </GlassCard>
+          </Pressable>
+        </ScreenTransition>
+
+        {/* Bouton "À propos" */}
+        <ScreenTransition delay={300} duration={350}>
           <Pressable 
             onPress={() => router.push('/about')}
             className="mb-4"
