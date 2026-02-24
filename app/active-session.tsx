@@ -231,7 +231,7 @@ export default function ActiveSessionScreen() {
           logger.debug('📤 Envoi SMS de relance...');
           // Importer et appeler sendFollowUpAlertSMS avec garde-fou anti-spam
           Promise.all([
-            import('@/lib/services/follow-up-sms-client'),
+            import('@/lib/services/sms-service'),
             import('@/lib/utils')
           ]).then(([{ sendFollowUpAlertSMS }, { canSendSMS }]) => {
             if (!canSendSMS('followup', 60)) {
