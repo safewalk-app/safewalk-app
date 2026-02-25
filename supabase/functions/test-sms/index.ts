@@ -5,8 +5,9 @@
 // Output: { success, message, smsSent, error }
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
-import { sendSms, createTestSmsMessage, isValidPhoneNumber } from "../_shared/twilio.ts";
+import { sendSms, isValidPhoneNumber } from "../_shared/twilio.ts";
 import { checkRateLimit, logRequest, createRateLimitHttpResponse } from "../_shared/rate-limiter.ts";
+import { buildTestSms } from "../_shared/sms-templates.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -209,8 +210,18 @@ async function testSms(req: Request): Promise<Response> {
       );
     }
 
-    // Send test SMS
-    const testMessage = createTestSmsMessage();
+    // Get user first name for test SMS
+    const { data: userData } = await supabase
+      .from("profiles")
+      .select("first_name")
+      .eq("id", userId)
+      .single();
+
+    // Build test SMS message using dynamic template
+    const testMessage = buildTestSms({
+      firstName: userData?.first_name || undefined,
+    });
+
     const smsResult = await sendSms({
       to: contactData.phone_number,
       message: testMessage,

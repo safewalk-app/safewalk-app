@@ -5,7 +5,8 @@
 // Output: { success, processed, sent, failed, message }
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
-import { sendSms, createOverdueAlertMessage, isValidPhoneNumber } from "../_shared/twilio.ts";
+import { sendSms, isValidPhoneNumber } from "../_shared/twilio.ts";
+import { buildLateSms } from "../_shared/sms-templates.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -194,26 +195,22 @@ async function cronCheckDeadlines(req: Request): Promise<Response> {
           continue;
         }
 
-        // Create alert message
-        // FIX P0: Get user's first_name for the alert message (not phone number)
-        let userName = "Utilisateur";
+        // Get user profile for alert message
         const { data: userData } = await supabase
-          .from("users")
-          .select("first_name")
+          .from("profiles")
+          .select("first_name, share_user_phone_in_alerts")
           .eq("id", trip.user_id)
           .single();
-        if (userData?.first_name) {
-          userName = userData.first_name;
-        }
 
-        const deadline = new Date(trip.deadline);
-        const alertMessage = createOverdueAlertMessage(
-          userName,
-          deadline,
-          trip.share_location,
-          trip.location_latitude,
-          trip.location_longitude
-        );
+        // Build alert message using dynamic template
+        const alertMessage = buildLateSms({
+          firstName: userData?.first_name || undefined,
+          deadline: trip.deadline,
+          lat: trip.share_location ? trip.location_latitude : undefined,
+          lng: trip.share_location ? trip.location_longitude : undefined,
+          userPhone: trip.user_phone_number,
+          shareUserPhoneInAlerts: userData?.share_user_phone_in_alerts ?? false,
+        });
 
         // Send SMS via Twilio
         const smsResult = await sendSms({

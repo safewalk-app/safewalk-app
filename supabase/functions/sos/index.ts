@@ -5,8 +5,9 @@
 // Output: { success, message, smsSent, error }
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
-import { sendSms, createSosAlertMessage, isValidPhoneNumber } from "../_shared/twilio.ts";
+import { sendSms, isValidPhoneNumber } from "../_shared/twilio.ts";
 import { checkRateLimit, logRequest, createRateLimitHttpResponse } from "../_shared/rate-limiter.ts";
+import { buildSosSms } from "../_shared/sms-templates.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -160,10 +161,10 @@ async function sos(req: Request): Promise<Response> {
       );
     }
 
-    // Get user info
+    // Get user profile info
     const { data: userData, error: userError } = await supabase
-      .from("users")
-      .select("first_name")
+      .from("profiles")
+      .select("first_name, share_user_phone_in_alerts, phone_number")
       .eq("id", userId)
       .single();
 
@@ -236,13 +237,14 @@ async function sos(req: Request): Promise<Response> {
       );
     }
 
-    // Create SOS message
-    const sosMessage = createSosAlertMessage(
-      userData.first_name,
-      tripData?.share_location ?? false,
-      tripData?.location_latitude,
-      tripData?.location_longitude
-    );
+    // Build SOS message using dynamic template
+    const sosMessage = buildSosSms({
+      firstName: userData?.first_name || undefined,
+      lat: tripData?.share_location ? tripData?.location_latitude : undefined,
+      lng: tripData?.share_location ? tripData?.location_longitude : undefined,
+      userPhone: userData?.phone_number,
+      shareUserPhoneInAlerts: userData?.share_user_phone_in_alerts ?? false,
+    });
 
     // Send SOS SMS
     const smsResult = await sendSms({

@@ -267,3 +267,38 @@ Fichiers: app/phone-verification.tsx, app/new-session.tsx, app/settings.tsx
 - [x] Integrer rate limiting dans l'ecran Settings (settings.tsx)
 - [x] Ajouter cooldowns visuels avec timers
 - [x] Ajouter composant RateLimitErrorAlert sur chaque ecran
+
+
+## PHASE 13: TEMPLATES SMS DYNAMIQUES (V2.6+)
+
+### U) Helper de génération de SMS - COMPLETE
+Fichiers: supabase/functions/_shared/sms-templates.ts
+- [x] Creer buildLateSms() avec 8 variantes
+- [x] Creer buildSosSms() avec 8 variantes
+- [x] Creer buildTestSms() avec 2 variantes
+- [x] Valider les entrees (firstName, deadline, lat, lng, userPhone, shareUserPhoneInAlerts)
+- [x] Generer les liens Google Maps dynamiquement
+- [x] Gerer les fallbacks propres (sans undefined/null/double espace)
+
+### V) Integration dans les Edge Functions - COMPLETE
+Fichiers: supabase/functions/cron-check-deadlines/index.ts, supabase/functions/sos/index.ts, supabase/functions/test-sms/index.ts
+- [x] Integrer buildLateSms() dans cron-check-deadlines
+- [x] Integrer buildSosSms() dans sos
+- [x] Integrer buildTestSms() dans test-sms
+- [x] Tester avec donnees reelles
+
+### W) Tests unitaires - COMPLETE
+Fichiers: supabase/functions/_shared/sms-templates.test.ts
+- [x] Tester buildLateSms() avec 8 variantes
+- [x] Tester buildSosSms() avec 8 variantes
+- [x] Tester buildTestSms() avec 2 variantes
+- [x] Tester les cas limites (undefined, null, empty string)
+- [x] Tester la validation des entrees
+
+### X) Validation d'integration - COMPLETE
+Fichiers: SMS_TEMPLATES_INTEGRATION_GUIDE.md
+- [x] Creer le guide de validation
+- [x] Documenter les 22 tests unitaires
+- [x] Documenter les variantes couvertes
+- [x] Documenter les etapes de validation manuelle
+- [x] Documenter le troubleshooting
