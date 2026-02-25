@@ -442,13 +442,13 @@ Fichiers: app/active-session.tsx, app/settings.tsx, supabase/functions/test-sms/
 - [x] Limite quotidienne de tests SMS (1 par jour)
 - [x] Composant BatteryWarning cree
 - [x] Verifications batterie/internet integrees (hook + banniere dans active-session.tsx)
+- [x] Notifications push en arriere-plan (expo-notifications deja configurees)
+- [x] Timers visibles sur boutons (OTP 60s, Demarrer 2s, Test SMS 5s)
 - [ ] Gestion erreurs Twilio avec retry
 - [x] Verification credits avant SOS (deja fait)
 - [x] Verification credits avant session (deja fait)
 
 ### AF) Problemes MOYENNE (5) - A FAIRE
-- [ ] Timer visible sur bouton (countdown)
-- [ ] Notifications push en arriere-plan
 - [ ] Affichage du temps restant avant deadline
 - [ ] Validation du numero de telephone avant sauvegarde
 - [ ] Affichage du statut de localisation en temps reel
