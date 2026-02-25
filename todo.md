@@ -305,3 +305,14 @@ Fichiers: SMS_TEMPLATES_INTEGRATION_GUIDE.md
 - [x] Documenter les variantes couvertes
 - [x] Documenter les etapes de validation manuelle
 - [x] Documenter le troubleshooting
+
+
+### Y) Deploiement en Production - COMPLETE
+Fichiers: supabase/functions/_shared/*, supabase/functions/cron-check-deadlines/index.ts, supabase/functions/sos/index.ts, supabase/functions/test-sms/index.ts
+- [x] Creer les fichiers _shared (twilio.ts, rate-limiter.ts, sms-templates.ts)
+- [x] Deployer cron-check-deadlines avec buildLateSms()
+- [x] Deployer sos avec buildSosSms()
+- [x] Deployer test-sms avec buildTestSms()
+- [x] Verifier que toutes les Edge Functions sont actives
+- [x] Creer le guide de deploiement manuel (SUPABASE_DEPLOY_GUIDE.md)
+- [x] Confirmer le deploiement via Supabase Dashboard
