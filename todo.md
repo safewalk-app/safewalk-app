@@ -259,3 +259,11 @@ Fichiers: components/rate-limit-error-alert.tsx, RATE_LIMITING_UI_EXAMPLE.md
 - [x] Documenter les patterns cles (cooldown, erreurs, hooks)
 - [x] Fournir checklist d'implementation
 - [x] Fournir guide de test
+
+### T) Integration UI dans les ecrans critiques - COMPLETE
+Fichiers: app/phone-verification.tsx, app/new-session.tsx, app/settings.tsx
+- [x] Integrer rate limiting dans l'ecran OTP (phone-verification.tsx)
+- [x] Integrer rate limiting dans l'ecran New Session (new-session.tsx)
+- [x] Integrer rate limiting dans l'ecran Settings (settings.tsx)
+- [x] Ajouter cooldowns visuels avec timers
+- [x] Ajouter composant RateLimitErrorAlert sur chaque ecran

@@ -1,4 +1,4 @@
-import { ScrollView, Text, View } from 'react-native';
+import { ScrollView, Text, View, Modal } from 'react-native';
 import { BubbleBackground } from '@/components/ui/bubble-background';
 import { GlassCard } from '@/components/ui/glass-card';
 import { PopTextField } from '@/components/ui/pop-text-field';
@@ -12,7 +12,8 @@ import { useProfileData } from '@/hooks/use-profile-data';
 import { ToastPop } from '@/components/ui/toast-pop';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { supabase } from '@/lib/supabase';
-import { Modal } from 'react-native';
+import { RateLimitErrorAlert } from '@/components/rate-limit-error-alert';
+import { useCooldown } from '@/lib/hooks/use-cooldown';
 
 export default function NewSessionScreen() {
   const router = useRouter();
@@ -25,7 +26,16 @@ export default function NewSessionScreen() {
   const [showPaywallModal, setShowPaywallModal] = useState(false);
   const [phoneVerified, setPhoneVerified] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [rateLimitError, setRateLimitError] = useState<{
+    visible: boolean;
+    message?: string;
+  }>({ visible: false });
   const profileData = useProfileData();
+
+  // Cooldown de 2 secondes entre les démarrages de sortie
+  const { trigger: triggerStartSession, isOnCooldown, remainingTime } = useCooldown({
+    duration: 2000,
+  });
 
   // Check if phone is verified on mount
   useEffect(() => {
@@ -55,6 +65,7 @@ export default function NewSessionScreen() {
   };
 
   const handleStartSession = async () => {
+    await triggerStartSession(async () => {
     // Check 1: Emergency contact
     if (!settings.emergencyContactName || !settings.emergencyContactPhone) {
       setToastMessage('Configure un contact d\'urgence d\'abord');
@@ -119,6 +130,7 @@ export default function NewSessionScreen() {
       setToastMessage('Erreur lors du démarrage');
       setTimeout(() => setToastMessage(''), 3000);
     }
+    });
   };
 
   const handleOtpSuccess = () => {
@@ -221,11 +233,19 @@ export default function NewSessionScreen() {
         className="px-4 bg-background border-t border-border"
         style={{ paddingBottom: insets.bottom + 12, paddingTop: 12 }}
       >
+        {/* Rate Limit Error Alert */}
+        <RateLimitErrorAlert
+          visible={rateLimitError.visible}
+          message={rateLimitError.message}
+          onDismiss={() => setRateLimitError({ visible: false })}
+        />
+
         <CushionPillButton
-          label="Démarrer"
+          label={isOnCooldown ? `Attendre ${Math.ceil(remainingTime / 1000)}s` : "Démarrer"}
           onPress={handleStartSession}
           variant="success"
           size="lg"
+          disabled={isOnCooldown || loading}
         />
       </View>
 

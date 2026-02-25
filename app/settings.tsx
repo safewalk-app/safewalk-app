@@ -17,6 +17,8 @@ import { sendEmergencySMS } from '@/lib/services/sms-service';
 import { useLocationPermission } from '@/hooks/use-location-permission';
 import * as tripService from '@/lib/services/trip-service';
 import { useProfileData } from '@/hooks/use-profile-data';
+import { RateLimitErrorAlert } from '@/components/rate-limit-error-alert';
+import { useCooldown } from '@/lib/hooks/use-cooldown';
 
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
@@ -49,6 +51,15 @@ export default function SettingsScreen() {
   const [phoneError, setPhoneError] = useState<string | null>(null);
   const [isPhone1Valid, setIsPhone1Valid] = useState<boolean | null>(null);
   const [isSendingTestSms, setIsSendingTestSms] = useState(false);
+  const [rateLimitError, setRateLimitError] = useState<{
+    visible: boolean;
+    message?: string;
+  }>({ visible: false });
+
+  // Cooldown de 5 secondes entre les SMS de test
+  const { trigger: triggerTestSms, isOnCooldown, remainingTime } = useCooldown({
+    duration: 5000,
+  });
 
   // Autosave firstName
   useEffect(() => {
@@ -132,8 +143,9 @@ export default function SettingsScreen() {
 
 
   const handleTestSms = async () => {
-    // Check phone_verified
-    if (!profileData?.phone_verified) {
+    await triggerTestSms(async () => {
+      // Check phone_verified
+      if (!profileData?.phone_verified) {
       Alert.alert('Téléphone non vérifié', 'Veuillez d\'abord vérifier votre numéro de téléphone.');
       return;
     }
@@ -164,6 +176,7 @@ export default function SettingsScreen() {
         Alert.alert('Erreur', result.error || 'Impossible d\'envoyer le SMS de test');
       }
     }
+    });
   };
 
   const handleDeleteData = () => {
@@ -308,21 +321,32 @@ export default function SettingsScreen() {
           </View>
         </ScreenTransition>
 
+        {/* Rate Limit Error Alert */}
+        <RateLimitErrorAlert
+          visible={rateLimitError.visible}
+          message={rateLimitError.message}
+          onDismiss={() => setRateLimitError({ visible: false })}
+        />
+
         {/* Bouton "Test SMS" */}
         <ScreenTransition delay={250} duration={350}>
           <Pressable 
             onPress={handleTestSms}
-            disabled={isSendingTestSms}
+            disabled={isSendingTestSms || isOnCooldown}
             className="mb-4"
           >
-            <GlassCard className="flex-row items-center justify-center gap-2 py-4">
+            <GlassCard className={`flex-row items-center justify-center gap-2 py-4 ${isOnCooldown ? 'opacity-50' : ''}`}>
               {isSendingTestSms ? (
                 <ActivityIndicator size="small" color="#0a7ea4" />
               ) : (
                 <MaterialIcons name="message" size={20} color="#0a7ea4" />
               )}
               <Text className="text-base font-semibold text-foreground">
-                {isSendingTestSms ? 'Envoi en cours...' : 'Tester SMS'}
+                {isSendingTestSms
+                  ? 'Envoi en cours...'
+                  : isOnCooldown
+                    ? `Attendre ${Math.ceil(remainingTime / 1000)}s`
+                    : 'Tester SMS'}
               </Text>
             </GlassCard>
           </Pressable>

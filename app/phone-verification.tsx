@@ -10,6 +10,8 @@ import {
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { ErrorAlert } from "@/components/error-alert";
+import { RateLimitErrorAlert } from "@/components/rate-limit-error-alert";
+import { useCooldown } from "@/lib/hooks/use-cooldown";
 import { otpService } from "@/lib/services/otp-service";
 import { logger } from "@/lib/logger";
 import { useColors } from "@/hooks/use-colors";
@@ -50,6 +52,16 @@ export default function PhoneVerificationScreen() {
     message: string;
     resetTime?: number;
   } | null>(null);
+  const [rateLimitError, setRateLimitError] = useState<{
+    visible: boolean;
+    message?: string;
+    retryAfter?: number;
+  }>({ visible: false });
+
+  // Cooldown de 60 secondes entre les envois d'OTP
+  const { trigger: triggerSendOtp, isOnCooldown, remainingTime } = useCooldown({
+    duration: 60000,
+  });
 
   // Validation en temps réel
   const validation = validatePhoneNumber(phoneInput);
@@ -66,8 +78,9 @@ export default function PhoneVerificationScreen() {
 
   // Handle send OTP
   const handleSendOtp = async () => {
-    // Validation format
-    if (!validation.isValid || !validation.formatted) {
+    await triggerSendOtp(async () => {
+      // Validation format
+      if (!validation.isValid || !validation.formatted) {
       setError({
         code: validation.errorCode || OtpErrorCode.INVALID_PHONE_FORMAT,
         message:
@@ -146,6 +159,7 @@ export default function PhoneVerificationScreen() {
     } finally {
       setLoading(false);
     }
+    });
   };
 
   return (
@@ -167,6 +181,14 @@ export default function PhoneVerificationScreen() {
 
           {/* Content */}
           <View className="gap-4">
+            {/* Rate Limit Error Alert */}
+            <RateLimitErrorAlert
+              visible={rateLimitError.visible}
+              message={rateLimitError.message}
+              retryAfter={rateLimitError.retryAfter}
+              onDismiss={() => setRateLimitError({ visible: false })}
+            />
+
             {/* Error Alert */}
             {error && (
               <ErrorAlert
@@ -258,20 +280,24 @@ export default function PhoneVerificationScreen() {
             {/* Send OTP Button */}
             <TouchableOpacity
               onPress={handleSendOtp}
-              disabled={loading || !isComplete || !validation.isValid}
+              disabled={loading || !isComplete || !validation.isValid || isOnCooldown}
               className={cn(
                 "py-3 rounded-full items-center justify-center",
-                isComplete && validation.isValid && !loading
+                isComplete && validation.isValid && !loading && !isOnCooldown
                   ? "bg-primary"
                   : "bg-primary/50"
               )}
               style={{
                 opacity:
-                  loading || !isComplete || !validation.isValid ? 0.6 : 1,
+                  loading || !isComplete || !validation.isValid || isOnCooldown ? 0.6 : 1,
               }}
             >
               {loading ? (
                 <ActivityIndicator color={colors.background} size="small" />
+              ) : isOnCooldown ? (
+                <Text className="text-base font-semibold text-background">
+                  Attendre {Math.ceil(remainingTime / 1000)}s
+                </Text>
               ) : (
                 <Text className="text-base font-semibold text-background">
                   Envoyer le code
