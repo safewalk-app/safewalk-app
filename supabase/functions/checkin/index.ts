@@ -5,6 +5,7 @@
 // Output: { success, message, tripId, status }
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
+import { checkRateLimit, logRequest, createRateLimitHttpResponse } from "../_shared/rate-limiter.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -87,6 +88,17 @@ async function checkin(req: Request): Promise<Response> {
     }
 
     const userId = data.user.id;
+
+    // RATE LIMITING: Check if user has exceeded rate limit
+    const ipAddress = req.headers.get("x-forwarded-for") || "unknown";
+    const rateLimitResult = await checkRateLimit(supabase, userId, "checkin", ipAddress);
+
+    if (!rateLimitResult.isAllowed) {
+      await logRequest(supabase, userId, "checkin", ipAddress);
+      return createRateLimitHttpResponse(rateLimitResult.resetAt);
+    }
+
+    await logRequest(supabase, userId, "checkin", ipAddress);
 
     // Parse request body
     const body = (await req.json()) as CheckinRequest;

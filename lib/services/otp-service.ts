@@ -59,6 +59,18 @@ class OtpService {
       );
 
       if (!response.ok) {
+        // Handle rate limit error (429)
+        if (response.status === 429) {
+          const errorData = await response.json().catch(() => ({}));
+          logger.warn("[OTP] Rate limit exceeded");
+          return {
+            success: false,
+            message: errorData.message || "Trop de requêtes. Veuillez réessayer plus tard.",
+            error: errorData.message || "Trop de requêtes. Veuillez réessayer plus tard.",
+            errorCode: "rate_limit_exceeded",
+          };
+        }
+
         const error = await response.text();
         logger.error("[OTP] Send failed:", error);
         return {
@@ -124,6 +136,17 @@ class OtpService {
       const data: VerifyOtpResponse = await response.json();
 
       if (!response.ok) {
+        // Handle rate limit error (429)
+        if (response.status === 429) {
+          logger.warn("[OTP] Rate limit exceeded");
+          return {
+            success: false,
+            message: data.message || "Trop de requêtes. Veuillez réessayer plus tard.",
+            error: data.message || "Trop de requêtes. Veuillez réessayer plus tard.",
+            errorCode: "rate_limit_exceeded",
+          };
+        }
+
         logger.warn("[OTP] Verification failed:", data.error);
         return data;
       }

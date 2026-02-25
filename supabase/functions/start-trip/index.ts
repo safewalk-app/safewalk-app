@@ -5,6 +5,7 @@
 // Output: { tripId, status, deadline, message }
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
+import { checkRateLimit, logRequest, createRateLimitHttpResponse } from "../_shared/rate-limiter.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -90,6 +91,22 @@ async function startTrip(req: Request): Promise<Response> {
     }
 
     const userId = data.user.id;
+
+    // ──────────────────────────────────────────────────────────────
+    // RATE LIMITING: Check if user has exceeded rate limit
+    // ──────────────────────────────────────────────────────────────
+    const ipAddress = req.headers.get("x-forwarded-for") || "unknown";
+    const rateLimitResult = await checkRateLimit(supabase, userId, "start-trip", ipAddress);
+
+    if (!rateLimitResult.isAllowed) {
+      // Log the rate limit violation
+      await logRequest(supabase, userId, "start-trip", ipAddress);
+
+      return createRateLimitHttpResponse(rateLimitResult.resetAt);
+    }
+
+    // Log the request
+    await logRequest(supabase, userId, "start-trip", ipAddress);
 
     // ──────────────────────────────────────────────────────────────
     // FIX P0: Parse and validate body BEFORE consuming credits

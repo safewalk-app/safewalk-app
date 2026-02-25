@@ -217,3 +217,45 @@ Fichiers: supabase/functions/create-stripe-checkout/index.ts
 - ✅ Gestion centralisée dans Stripe Dashboard
 - ✅ Caching pour optimiser les performances
 - ✅ Fallback si Stripe API échoue
+
+
+## PHASE 12: RATE LIMITING GLOBAL (V2.4+) - COMPLETE
+
+### P) Migration SQL et Middleware - COMPLETE
+Fichiers: supabase/migrations/migrations-004-rate-limiting.sql, supabase/functions/_shared/rate-limiter.ts
+- [x] Creer tables rate_limit_logs et rate_limit_config
+- [x] Creer RPC functions check_rate_limit et log_request
+- [x] Ajouter indexes pour les requetes rapides
+- [x] Configurer RLS policies
+- [x] Creer middleware rate-limiter reutilisable
+
+### Q) Rate Limiting sur Edge Functions - COMPLETE
+Fichiers: supabase/functions/*/index.ts
+- [x] Ajouter rate limiting a send-otp (5 req/min)
+- [x] Ajouter rate limiting a verify-otp (10 req/min)
+- [x] Ajouter rate limiting a start-trip (10 req/min)
+- [x] Ajouter rate limiting a test-sms (5 req/min)
+- [x] Ajouter rate limiting a sos (20 req/min)
+- [x] Ajouter rate limiting a checkin (20 req/min)
+- [x] Ajouter rate limiting a extend (10 req/min)
+- [x] Ajouter rate limiting a get-stripe-products (100 req/min)
+- [x] Ajouter rate limiting a create-stripe-checkout (50 req/min)
+
+### R) Gestion des Erreurs 429 - COMPLETE
+Fichiers: lib/services/trip-service.ts, lib/services/otp-service.ts
+- [x] Ajouter gestion des erreurs 429 dans startTrip
+- [x] Ajouter gestion des erreurs 429 dans checkin
+- [x] Ajouter gestion des erreurs 429 dans extendTrip
+- [x] Ajouter gestion des erreurs 429 dans pingLocation
+- [x] Ajouter gestion des erreurs 429 dans sendTestSms
+- [x] Ajouter gestion des erreurs 429 dans triggerSos
+- [x] Ajouter gestion des erreurs 429 dans sendOtp
+- [x] Ajouter gestion des erreurs 429 dans verifyOtp
+
+### S) UI avec Cooldowns - COMPLETE
+Fichiers: components/rate-limit-error-alert.tsx, RATE_LIMITING_UI_EXAMPLE.md
+- [x] Creer composant RateLimitErrorAlert
+- [x] Creer guide d'implementation UI avec exemples
+- [x] Documenter les patterns cles (cooldown, erreurs, hooks)
+- [x] Fournir checklist d'implementation
+- [x] Fournir guide de test

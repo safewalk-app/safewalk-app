@@ -1,5 +1,6 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
+import { checkRateLimit, logRequest, createRateLimitHttpResponse } from "../_shared/rate-limiter.ts";
 
 interface CheckoutRequest {
   productId: string;
@@ -50,6 +51,18 @@ serve(async (req: Request) => {
     if (!supabaseUrl || !supabaseServiceKey) {
       throw new Error("Supabase configuration missing");
     }
+
+    // RATE LIMITING: Check if user has exceeded rate limit
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const ipAddress = req.headers.get("x-forwarded-for") || "unknown";
+    const rateLimitResult = await checkRateLimit(supabase, userId, "create-stripe-checkout", ipAddress);
+
+    if (!rateLimitResult.isAllowed) {
+      await logRequest(supabase, userId, "create-stripe-checkout", ipAddress);
+      return createRateLimitHttpResponse(rateLimitResult.resetAt);
+    }
+
+    await logRequest(supabase, userId, "create-stripe-checkout", ipAddress);
 
     // Create Stripe checkout session
     const checkoutResponse = await fetch(

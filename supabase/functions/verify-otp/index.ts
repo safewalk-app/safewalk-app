@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 /// <reference lib="deno.window" />
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
+import { checkRateLimit, logRequest, createRateLimitHttpResponse } from "../_shared/rate-limiter.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -205,6 +206,17 @@ serve(async (req) => {
 
     // Create Supabase client
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // RATE LIMITING: Check if user has exceeded rate limit
+    const ipAddress = req.headers.get("x-forwarded-for") || "unknown";
+    const rateLimitResult = await checkRateLimit(supabase, null, "verify-otp", ipAddress);
+
+    if (!rateLimitResult.isAllowed) {
+      await logRequest(supabase, null, "verify-otp", ipAddress);
+      return createRateLimitHttpResponse(rateLimitResult.resetAt);
+    }
+
+    await logRequest(supabase, null, "verify-otp", ipAddress);
 
     // Get OTP record
     const { data: otpRecord, error: fetchError } = await supabase

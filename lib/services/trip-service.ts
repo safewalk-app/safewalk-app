@@ -125,6 +125,18 @@ export async function startTrip(input: StartTripInput): Promise<StartTripOutput>
     });
 
     if (error) {
+      // Handle rate limit error (429)
+      if (error.status === 429) {
+        const errorData = error.context?.json || {};
+        logger.warn("Start trip: Rate limit exceeded", { retryAfter: errorData.retryAfter });
+        return {
+          success: false,
+          error: errorData.message || "Trop de requêtes. Veuillez réessayer plus tard.",
+          errorCode: "rate_limit_exceeded",
+          message: `Réessayez dans ${errorData.retryAfter || 60} secondes`,
+        };
+      }
+
       logger.error("Start trip error", { error });
       return {
         success: false,
@@ -189,6 +201,17 @@ export async function checkin(input: CheckinInput): Promise<CheckinOutput> {
     });
 
     if (error) {
+      // Handle rate limit error (429)
+      if (error.status === 429) {
+        const errorData = error.context?.json || {};
+        logger.warn("Checkin: Rate limit exceeded");
+        return {
+          success: false,
+          error: errorData.message || "Trop de requêtes. Veuillez réessayer plus tard.",
+          errorCode: "rate_limit_exceeded",
+        };
+      }
+
       logger.error("Checkin error", { error });
       return {
         success: false,
@@ -222,6 +245,17 @@ export async function extendTrip(input: ExtendInput): Promise<ExtendOutput> {
     });
 
     if (error) {
+      // Handle rate limit error (429)
+      if (error.status === 429) {
+        const errorData = error.context?.json || {};
+        logger.warn("Extend trip: Rate limit exceeded");
+        return {
+          success: false,
+          error: errorData.message || "Trop de requêtes. Veuillez réessayer plus tard.",
+          errorCode: "rate_limit_exceeded",
+        };
+      }
+
       logger.error("Extend trip error", { error });
       return {
         success: false,
@@ -255,6 +289,17 @@ export async function pingLocation(input: PingLocationInput): Promise<PingLocati
     });
 
     if (error) {
+      // Handle rate limit error (429)
+      if (error.status === 429) {
+        const errorData = error.context?.json || {};
+        logger.warn("Ping location: Rate limit exceeded");
+        return {
+          success: false,
+          error: errorData.message || "Trop de requêtes. Veuillez réessayer plus tard.",
+          errorCode: "rate_limit_exceeded",
+        };
+      }
+
       logger.error("Ping location error", { error });
       return {
         success: false,
@@ -316,6 +361,18 @@ export async function sendTestSms(): Promise<TestSmsOutput> {
     });
 
     if (error) {
+      // Handle rate limit error (429)
+      if (error.status === 429) {
+        const errorData = error.context?.json || {};
+        logger.warn("Test SMS: Rate limit exceeded");
+        return {
+          success: false,
+          error: errorData.message || "Trop de requêtes. Veuillez réessayer plus tard.",
+          errorCode: "rate_limit_exceeded",
+          smsSent: false,
+        };
+      }
+
       logger.error("Test SMS error", { error });
       return {
         success: false,
@@ -412,6 +469,18 @@ export async function triggerSos(input: SosInput = {}): Promise<SosOutput> {
     });
 
     if (error) {
+      // Handle rate limit error (429)
+      if (error.status === 429) {
+        const errorData = error.context?.json || {};
+        logger.warn("SOS: Rate limit exceeded");
+        return {
+          success: false,
+          error: errorData.message || "Trop de requêtes. Veuillez réessayer plus tard.",
+          errorCode: "rate_limit_exceeded",
+          smsSent: false,
+        };
+      }
+
       logger.error("SOS error", { error });
       return {
         success: false,

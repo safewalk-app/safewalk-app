@@ -6,6 +6,7 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
 import { sendSms, createSosAlertMessage, isValidPhoneNumber } from "../_shared/twilio.ts";
+import { checkRateLimit, logRequest, createRateLimitHttpResponse } from "../_shared/rate-limiter.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -87,6 +88,17 @@ async function sos(req: Request): Promise<Response> {
     }
 
     const userId = data.user.id;
+
+    // RATE LIMITING: Check if user has exceeded rate limit
+    const ipAddress = req.headers.get("x-forwarded-for") || "unknown";
+    const rateLimitResult = await checkRateLimit(supabase, userId, "sos", ipAddress);
+
+    if (!rateLimitResult.isAllowed) {
+      await logRequest(supabase, userId, "sos", ipAddress);
+      return createRateLimitHttpResponse(rateLimitResult.resetAt);
+    }
+
+    await logRequest(supabase, userId, "sos", ipAddress);
 
     // Parse request body
     const body = (await req.json()) as SosRequest;
