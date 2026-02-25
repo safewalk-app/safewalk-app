@@ -116,3 +116,68 @@ Fichiers: supabase/functions/trigger-sos, start-trip, test-sms, checkin
 - trigger-sos → remplacée par sos
 - decrement-quota → remplacée par RPC consume_credit
 - send-sos-notification → remplacée par sos
+
+
+## PHASE 9: MONITORING, ANALYTICS, PAYWALL (POST-MVP)
+
+### J) Monitoring/Alertes en Production
+- [x] Architecture du monitoring (MONITORING_ARCHITECTURE.md)
+- [x] Métriques surveillées (cron health, SMS delivery, error rate)
+- [x] Alertes par sévérité (CRITIQUE, AVERTISSEMENT)
+- [x] Intégrations (Slack, Email, PagerDuty)
+- [ ] À implémenter: Edge Function monitoring-alerts
+
+### K) Analytics
+- [x] Architecture d'Analytics (ANALYTICS_ARCHITECTURE.md)
+- [x] 9 événements à tracker (app_opened, session_created, sos_triggered, etc.)
+- [x] Métriques (DAU, funnel, retention, cohorts)
+- [x] Dashboard mockup
+- [ ] À implémenter: Service analytics.ts + Edge Function track-event
+
+### L) Paywall/Subscription - MVP SIMPLIFIÉ
+- [x] Architecture du Paywall (PAYWALL_SUBSCRIPTION_ARCHITECTURE.md)
+- [x] Analyse de rentabilité (PRICING_PROFITABILITY_ANALYSIS.md)
+- [x] Migration SQL tables subscription (migrations-003)
+- [x] Edge Function handle-stripe-webhook
+- [x] Service stripe-service.ts
+- [x] Composant Paywall.tsx
+- [ ] À implémenter Phase 2: Intégration Stripe complète + gating crédits
+
+---
+
+## MVP READY - CHECKLIST FINALE
+
+✅ **Backend Supabase:**
+- ✅ 7 Edge Functions déployées
+- ✅ Migrations SQL appliquées (colonnes, indexes, RLS, RPC)
+- ✅ Gestion des crédits (RPC consume_credit)
+- ✅ Gestion des erreurs (4 codes d'erreur standardisés)
+
+✅ **App Mobile:**
+- ✅ Authentification anonyme (OTP)
+- ✅ Création de sortie avec gating crédits
+- ✅ SOS long-press (2s)
+- ✅ Checkin + Extend
+- ✅ Contact d'urgence unique
+- ✅ Toasts d'erreur en français
+- ✅ Tests (23 unitaires + 12 cas limites)
+
+✅ **Documentation:**
+- ✅ Audit complet (AUDIT_MVP_READY.md)
+- ✅ Guide de déploiement (DEPLOY_STANDALONE_FUNCTIONS.md)
+- ✅ Guide des secrets (MANUS_SECRETS_GUIDE.md)
+- ✅ Checklist de validation (AUDIT_VALIDATION_CHECKLIST.md)
+- ✅ Guide de test critique (TEST_CRITICAL_FEATURES.md)
+- ✅ Guide de vérification E.164 (verify-e164-format.sql)
+
+⚠️ **À Tester Avant Production:**
+- [ ] Flux end-to-end (Sign-in → OTP → Créer sortie → SOS → Checkin)
+- [ ] Codes d'erreur (4 codes affichés correctement)
+- [ ] Deadman switch (cron déclenche les alertes)
+- [ ] Twilio (SMS reçus correctement)
+
+❌ **Non Implémenté (Post-MVP):**
+- ❌ Notifications push en arrière-plan
+- ❌ Monitoring/Alertes en production
+- ❌ Analytics
+- ❌ Paywall/Subscription complet

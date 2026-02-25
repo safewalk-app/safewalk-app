@@ -1,245 +1,269 @@
-/**
- * Composant Paywall - Affiche les options d'abonnement
- * 
- * Affiche :
- * - Quotas actuels (alertes, SMS)
- * - Options d'abonnement
- * - Bouton "Passer à Premium"
- */
+import React, { useEffect, useState } from "react";
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert } from "react-native";
+import { useRouter } from "expo-router";
+import { MaterialIcons } from "@expo/vector-icons";
+import { stripeService, StripeProduct } from "@/lib/services/stripe-service";
+import { ScreenContainer } from "@/components/screen-container";
+import { useColors } from "@/hooks/use-colors";
+import { cn } from "@/lib/utils";
 
-import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, Pressable } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
-import { useColors } from '@/hooks/use-colors';
-import { getQuotaStatus, QuotaStatus } from '@/lib/services/quota-service';
-import { useAuth } from '@/hooks/use-auth';
+interface PaywallProps {
+  onClose?: () => void;
+  initialTab?: "subscription" | "credits";
+}
 
-export function PaywallSheet() {
+export function Paywall({ onClose, initialTab = "subscription" }: PaywallProps) {
   const colors = useColors();
-  const { user } = useAuth();
-  const [quota, setQuota] = useState<QuotaStatus | null>(null);
+  const [tab, setTab] = useState<"subscription" | "credits">(initialTab);
+  const [products, setProducts] = useState<StripeProduct[]>([]);
   const [loading, setLoading] = useState(true);
+  const [purchasing, setPurchasing] = useState<string | null>(null);
+  const [quotaStatus, setQuotaStatus] = useState<any>(null);
 
   useEffect(() => {
-    if (user?.id) {
-      loadQuota();
-    }
-  }, [user?.id]);
+    loadData();
+  }, []);
 
-  const loadQuota = async () => {
-    if (!user?.id) return;
-    setLoading(true);
-    const status = await getQuotaStatus(String(user.id));
-    setQuota(status);
+  const loadData = async () => {
+    await stripeService.initialize();
+    const prods = await stripeService.getProducts();
+    const quota = await stripeService.getQuotaStatus();
+    setProducts(prods);
+    setQuotaStatus(quota);
     setLoading(false);
   };
 
-  if (loading || !quota) {
+  const handlePurchase = async (product: StripeProduct) => {
+    setPurchasing(product.id);
+    try {
+      const session = await stripeService.createCheckoutSession(product.id);
+      if (session?.url) {
+        Alert.alert("Paiement", `Redirection vers la page de paiement pour ${product.name}`);
+      } else {
+        Alert.alert("Erreur", "Impossible de créer la session de paiement");
+      }
+    } catch (error) {
+      Alert.alert("Erreur", "Une erreur est survenue lors du paiement");
+      console.error("Purchase error:", error);
+    } finally {
+      setPurchasing(null);
+    }
+  };
+
+  const subscriptionProducts = products.filter((p) => p.type === "subscription");
+  const creditProducts = products.filter((p) => p.type === "credits");
+
+  if (loading) {
     return (
-      <View className="flex-1 items-center justify-center p-4">
-        <Text className="text-foreground">Chargement...</Text>
-      </View>
+      <ScreenContainer className="flex-1 justify-center items-center">
+        <ActivityIndicator size="large" color={colors.primary} />
+      </ScreenContainer>
     );
   }
 
   return (
-    <ScrollView className="flex-1 bg-background">
-      <View className="p-6 gap-6">
+    <ScreenContainer className="flex-1 bg-background">
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         {/* Header */}
-        <View className="gap-2">
-          <Text className="text-3xl font-bold text-foreground">Quotas</Text>
-          <Text className="text-base text-muted">
-            {quota.subscriptionActive ? '✅ Premium actif' : '⚠️ Plan gratuit'}
+        <View className="px-6 py-8 items-center">
+          <Text className="text-3xl font-bold text-foreground mb-2">
+            Débloquez SafeWalk Premium
+          </Text>
+          <Text className="text-base text-muted text-center">
+            Alertes SMS illimitées + support prioritaire
           </Text>
         </View>
 
-        {/* Quotas actuels */}
-        <View className="gap-4">
-          <Text className="text-lg font-semibold text-foreground">Vos quotas</Text>
-
-          {/* Alertes */}
-          <View className="bg-surface rounded-2xl p-4 gap-2">
-            <View className="flex-row items-center justify-between">
-              <View className="flex-row items-center gap-2">
-                <MaterialIcons name="notifications-active" size={20} color={colors.primary} />
-                <Text className="text-base font-semibold text-foreground">Alertes SOS</Text>
-              </View>
-              <Text className="text-lg font-bold text-primary">
-                {quota.freeAlertsRemaining}/{3}
-              </Text>
+        {/* Quota Status */}
+        {quotaStatus && (
+          <View className="px-6 mb-6">
+            <View className="bg-surface p-4 rounded-lg border border-border">
+              {quotaStatus.has_subscription ? (
+                <>
+                  <View className="flex-row items-center gap-2 mb-2">
+                    <MaterialIcons name="verified" size={20} color={colors.success} />
+                    <Text className="text-sm text-success font-semibold">Abonnement actif</Text>
+                  </View>
+                  <Text className="text-2xl font-bold text-primary mb-2">
+                    {quotaStatus.subscription_plan?.toUpperCase()}
+                  </Text>
+                  {quotaStatus.subscription_ends_at && (
+                    <Text className="text-xs text-muted">
+                      Expire le {new Date(quotaStatus.subscription_ends_at).toLocaleDateString()}
+                    </Text>
+                  )}
+                </>
+              ) : (
+                <>
+                  <Text className="text-sm text-muted mb-3">Crédits disponibles</Text>
+                  <View className="flex-row justify-between">
+                    <View>
+                      <Text className="text-3xl font-bold text-primary">
+                        {quotaStatus.paid_credits_balance}
+                      </Text>
+                      <Text className="text-xs text-muted">crédits payants</Text>
+                    </View>
+                    <View>
+                      <Text className="text-3xl font-bold text-primary">
+                        {quotaStatus.free_alerts_remaining}
+                      </Text>
+                      <Text className="text-xs text-muted">gratuit ce mois</Text>
+                    </View>
+                  </View>
+                </>
+              )}
             </View>
-            <Text className="text-sm text-muted">
-              {quota.subscriptionActive
-                ? 'Illimité avec Premium'
-                : `${quota.freeAlertsRemaining} alertes gratuites restantes`}
-            </Text>
-            {quota.freeAlertsRemaining === 0 && !quota.subscriptionActive && (
-              <View className="mt-2 p-2 bg-error/10 rounded-lg">
-                <Text className="text-sm text-error">Quotas d'alertes épuisés</Text>
-              </View>
+          </View>
+        )}
+
+        {/* Tabs */}
+        <View className="flex-row px-6 gap-2 mb-6">
+          <TouchableOpacity
+            onPress={() => setTab("subscription")}
+            className={cn(
+              "flex-1 py-3 px-4 rounded-lg border",
+              tab === "subscription"
+                ? "bg-primary border-primary"
+                : "bg-surface border-border"
             )}
-          </View>
-
-          {/* SMS de test */}
-          <View className="bg-surface rounded-2xl p-4 gap-2">
-            <View className="flex-row items-center justify-between">
-              <View className="flex-row items-center gap-2">
-                <MaterialIcons name="sms" size={20} color={colors.primary} />
-                <Text className="text-base font-semibold text-foreground">SMS de test</Text>
-              </View>
-              <Text className="text-lg font-bold text-primary">
-                {quota.freeTestSmsRemaining}/{1}
-              </Text>
-            </View>
-            <Text className="text-sm text-muted">
-              {quota.subscriptionActive
-                ? 'SMS illimités avec Premium'
-                : `${quota.freeTestSmsRemaining} SMS de test gratuit`}
+          >
+            <Text
+              className={cn(
+                "text-center font-semibold",
+                tab === "subscription" ? "text-background" : "text-foreground"
+              )}
+            >
+              Abonnement
             </Text>
-          </View>
+          </TouchableOpacity>
 
-          {/* SMS quotidiens */}
-          <View className="bg-surface rounded-2xl p-4 gap-2">
-            <View className="flex-row items-center justify-between">
-              <View className="flex-row items-center gap-2">
-                <MaterialIcons name="schedule" size={20} color={colors.primary} />
-                <Text className="text-base font-semibold text-foreground">SMS aujourd'hui</Text>
-              </View>
-              <Text className="text-lg font-bold text-primary">
-                {quota.smsDailyRemaining}/{quota.subscriptionActive ? '∞' : 10}
-              </Text>
-            </View>
-            <Text className="text-sm text-muted">
-              {quota.subscriptionActive
-                ? 'SMS illimités par jour'
-                : `${quota.smsDailyRemaining} SMS restants aujourd'hui`}
+          <TouchableOpacity
+            onPress={() => setTab("credits")}
+            className={cn(
+              "flex-1 py-3 px-4 rounded-lg border",
+              tab === "credits"
+                ? "bg-primary border-primary"
+                : "bg-surface border-border"
+            )}
+          >
+            <Text
+              className={cn(
+                "text-center font-semibold",
+                tab === "credits" ? "text-background" : "text-foreground"
+              )}
+            >
+              Crédits
             </Text>
-          </View>
+          </TouchableOpacity>
         </View>
 
-        {/* Plans d'abonnement */}
-        {!quota.subscriptionActive && (
-          <View className="gap-4">
-            <Text className="text-lg font-semibold text-foreground">Passer à Premium</Text>
-
-            {/* Plan Premium */}
-            <View className="bg-primary/10 border-2 border-primary rounded-2xl p-4 gap-3">
-              <View className="flex-row items-center justify-between">
-                <Text className="text-xl font-bold text-primary">Premium</Text>
-                <View className="bg-primary px-3 py-1 rounded-full">
-                  <Text className="text-white text-sm font-semibold">Recommandé</Text>
-                </View>
-              </View>
-
-              <View className="gap-2">
-                <View className="flex-row items-center gap-2">
-                  <MaterialIcons name="check-circle" size={18} color={colors.success} />
-                  <Text className="text-sm text-foreground">Alertes SOS illimitées</Text>
-                </View>
-                <View className="flex-row items-center gap-2">
-                  <MaterialIcons name="check-circle" size={18} color={colors.success} />
-                  <Text className="text-sm text-foreground">SMS illimités</Text>
-                </View>
-                <View className="flex-row items-center gap-2">
-                  <MaterialIcons name="check-circle" size={18} color={colors.success} />
-                  <Text className="text-sm text-foreground">Priorité support</Text>
-                </View>
-                <View className="flex-row items-center gap-2">
-                  <MaterialIcons name="check-circle" size={18} color={colors.success} />
-                  <Text className="text-sm text-foreground">Historique illimité</Text>
-                </View>
-              </View>
-
-              <View className="mt-2 pt-3 border-t border-primary/20">
-                <Text className="text-2xl font-bold text-primary">4,99€/mois</Text>
-                <Text className="text-xs text-muted">ou 49,99€/an (économisez 17%)</Text>
-              </View>
-
-              <Pressable
-                className="mt-4 bg-primary rounded-xl py-3 active:opacity-80"
-                onPress={() => {
-                  // TODO: Implémenter IAP ou redirection vers page de paiement
-                  console.log('Passer à Premium');
-                }}
+        {/* Subscription Plans */}
+        {tab === "subscription" && (
+          <View className="px-6 gap-4 mb-6">
+            {subscriptionProducts.map((product) => (
+              <TouchableOpacity
+                key={product.id}
+                onPress={() => handlePurchase(product)}
+                disabled={purchasing === product.id}
+                className="bg-surface p-4 rounded-lg border border-border active:opacity-80"
               >
-                <Text className="text-center text-white font-semibold">Passer à Premium</Text>
-              </Pressable>
-            </View>
+                <View className="flex-row justify-between items-start mb-2">
+                  <View className="flex-1">
+                    <Text className="text-lg font-semibold text-foreground">
+                      {product.name}
+                    </Text>
+                    <Text className="text-sm text-muted mt-1">
+                      {product.description}
+                    </Text>
+                  </View>
+                  {product.metadata?.interval === "year" && (
+                    <View className="bg-primary px-2 py-1 rounded">
+                      <Text className="text-xs font-semibold text-background">
+                        -20%
+                      </Text>
+                    </View>
+                  )}
+                </View>
 
-            {/* Plan Gratuit */}
-            <View className="bg-surface rounded-2xl p-4 gap-3">
-              <Text className="text-lg font-bold text-foreground">Plan Gratuit</Text>
-
-              <View className="gap-2">
-                <View className="flex-row items-center gap-2">
-                  <MaterialIcons name="check-circle" size={18} color={colors.muted} />
-                  <Text className="text-sm text-muted">3 alertes SOS gratuites</Text>
+                <View className="flex-row justify-between items-center mt-3">
+                  <Text className="text-2xl font-bold text-primary">
+                    ${product.price.toFixed(2)}
+                  </Text>
+                  {purchasing === product.id ? (
+                    <ActivityIndicator size="small" color={colors.primary} />
+                  ) : (
+                    <Text className="text-sm text-muted">
+                      {product.metadata?.interval === "year" ? "/an" : "/mois"}
+                    </Text>
+                  )}
                 </View>
-                <View className="flex-row items-center gap-2">
-                  <MaterialIcons name="check-circle" size={18} color={colors.muted} />
-                  <Text className="text-sm text-muted">1 SMS de test gratuit</Text>
-                </View>
-                <View className="flex-row items-center gap-2">
-                  <MaterialIcons name="check-circle" size={18} color={colors.muted} />
-                  <Text className="text-sm text-muted">10 SMS par jour</Text>
-                </View>
-                <View className="flex-row items-center gap-2">
-                  <MaterialIcons name="cancel" size={18} color={colors.error} />
-                  <Text className="text-sm text-error">Support limité</Text>
-                </View>
-              </View>
-            </View>
+              </TouchableOpacity>
+            ))}
           </View>
         )}
 
-        {/* Message Premium actif */}
-        {quota.subscriptionActive && (
-          <View className="bg-success/10 border border-success rounded-2xl p-4 gap-2">
-            <View className="flex-row items-center gap-2">
-              <MaterialIcons name="verified" size={24} color={colors.success} />
-              <View className="flex-1">
-                <Text className="text-lg font-bold text-success">Premium actif</Text>
-                <Text className="text-sm text-muted">Merci de nous faire confiance !</Text>
-              </View>
-            </View>
+        {/* Credit Packages */}
+        {tab === "credits" && (
+          <View className="px-6 gap-3 mb-6">
+            {creditProducts.map((product) => (
+              <TouchableOpacity
+                key={product.id}
+                onPress={() => handlePurchase(product)}
+                disabled={purchasing === product.id}
+                className="bg-surface p-3 rounded-lg border border-border flex-row justify-between items-center active:opacity-80"
+              >
+                <View className="flex-1">
+                  <Text className="font-semibold text-foreground">
+                    {product.name}
+                  </Text>
+                  <Text className="text-xs text-muted mt-1">
+                    {product.description}
+                  </Text>
+                </View>
+
+                <View className="items-end">
+                  {purchasing === product.id ? (
+                    <ActivityIndicator size="small" color={colors.primary} />
+                  ) : (
+                    <Text className="text-lg font-bold text-primary">
+                      ${product.price.toFixed(2)}
+                    </Text>
+                  )}
+                </View>
+              </TouchableOpacity>
+            ))}
           </View>
         )}
 
-        {/* FAQ */}
-        <View className="gap-4">
-          <Text className="text-lg font-semibold text-foreground">Questions fréquentes</Text>
-
-          <View className="gap-3">
-            <View className="gap-1">
-              <Text className="font-semibold text-foreground">Puis-je annuler mon abonnement ?</Text>
-              <Text className="text-sm text-muted">
-                Oui, vous pouvez annuler à tout moment sans frais supplémentaires.
+        {/* Info Section */}
+        <View className="px-6 py-4 bg-surface mx-6 rounded-lg mb-6">
+          <View className="flex-row items-start gap-2">
+            <MaterialIcons name="info" size={16} color={colors.primary} />
+            <View className="flex-1">
+              <Text className="text-sm font-semibold text-foreground mb-1">
+                Comment ça marche?
               </Text>
-            </View>
-
-            <View className="gap-1">
-              <Text className="font-semibold text-foreground">
-                Que se passe-t-il si j'épuise mes quotas ?
-              </Text>
-              <Text className="text-sm text-muted">
-                Vous ne pourrez pas envoyer d'alertes SOS ou de SMS jusqu'à la réinitialisation du quota.
-              </Text>
-            </View>
-
-            <View className="gap-1">
-              <Text className="font-semibold text-foreground">
-                Les quotas se réinitialisent-ils ?
-              </Text>
-              <Text className="text-sm text-muted">
-                Les alertes gratuites sont lifetime. Les SMS se réinitialisent chaque jour à minuit.
+              <Text className="text-xs text-muted leading-relaxed">
+                {tab === "subscription"
+                  ? "Avec un abonnement, vous recevez des alertes SMS illimitées. Vous pouvez annuler à tout moment."
+                  : "Achetez des crédits pour envoyer des alertes SMS. Chaque alerte coûte 1 crédit."}
               </Text>
             </View>
           </View>
         </View>
 
-        {/* Spacer */}
-        <View className="h-12" />
-      </View>
-    </ScrollView>
+        {/* Close Button */}
+        {onClose && (
+          <TouchableOpacity
+            onPress={onClose}
+            className="px-6 py-3 mx-6 border border-border rounded-lg mb-6"
+          >
+            <Text className="text-center text-foreground font-semibold">
+              Fermer
+            </Text>
+          </TouchableOpacity>
+        )}
+      </ScrollView>
+    </ScreenContainer>
   );
 }
