@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert } from "react-native";
-import { useRouter } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { stripeService, StripeProduct } from "@/lib/services/stripe-service";
 import { ScreenContainer } from "@/components/screen-container";
+import { StripeCheckoutWebView } from "@/components/stripe-checkout-webview";
 import { useColors } from "@/hooks/use-colors";
 import { cn } from "@/lib/utils";
 
@@ -19,6 +19,7 @@ export function Paywall({ onClose, initialTab = "subscription" }: PaywallProps) 
   const [loading, setLoading] = useState(true);
   const [purchasing, setPurchasing] = useState<string | null>(null);
   const [quotaStatus, setQuotaStatus] = useState<any>(null);
+  const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
 
   useEffect(() => {
     loadData();
@@ -38,20 +39,48 @@ export function Paywall({ onClose, initialTab = "subscription" }: PaywallProps) 
     try {
       const session = await stripeService.createCheckoutSession(product.id);
       if (session?.url) {
-        Alert.alert("Paiement", `Redirection vers la page de paiement pour ${product.name}`);
+        setCheckoutUrl(session.url);
       } else {
         Alert.alert("Erreur", "Impossible de créer la session de paiement");
+        setPurchasing(null);
       }
     } catch (error) {
       Alert.alert("Erreur", "Une erreur est survenue lors du paiement");
       console.error("Purchase error:", error);
-    } finally {
       setPurchasing(null);
     }
   };
 
+  const handleCheckoutSuccess = () => {
+    Alert.alert("Succès", "Paiement confirmé! Merci de votre achat.");
+    setCheckoutUrl(null);
+    setPurchasing(null);
+    loadData();
+    onClose?.();
+  };
+
+  const handleCheckoutCancel = () => {
+    setCheckoutUrl(null);
+    setPurchasing(null);
+  };
+
   const subscriptionProducts = products.filter((p) => p.type === "subscription");
   const creditProducts = products.filter((p) => p.type === "credits");
+
+  // Show WebView if checkout URL is set
+  if (checkoutUrl) {
+    return (
+      <StripeCheckoutWebView
+        checkoutUrl={checkoutUrl}
+        onSuccess={handleCheckoutSuccess}
+        onCancel={handleCheckoutCancel}
+        onError={(error) => {
+          Alert.alert("Erreur de paiement", error);
+          handleCheckoutCancel();
+        }}
+      />
+    );
+  }
 
   if (loading) {
     return (
@@ -186,14 +215,19 @@ export function Paywall({ onClose, initialTab = "subscription" }: PaywallProps) 
                 </View>
 
                 <View className="flex-row justify-between items-center mt-3">
-                  <Text className="text-2xl font-bold text-primary">
-                    ${product.price.toFixed(2)}
-                  </Text>
+                  <View>
+                    <Text className="text-2xl font-bold text-primary">
+                      ${product.price.toFixed(2)}
+                    </Text>
+                    <Text className="text-xs text-muted">
+                      {product.metadata?.interval === "year" ? "/an" : "/mois"}
+                    </Text>
+                  </View>
                   {purchasing === product.id ? (
                     <ActivityIndicator size="small" color={colors.primary} />
                   ) : (
-                    <Text className="text-sm text-muted">
-                      {product.metadata?.interval === "year" ? "/an" : "/mois"}
+                    <Text className="text-sm text-muted font-semibold">
+                      Payer
                     </Text>
                   )}
                 </View>

@@ -132,17 +132,16 @@ Fichiers: supabase/functions/trigger-sos, start-trip, test-sms, checkin
 - [x] 9 événements à tracker (app_opened, session_created, sos_triggered, etc.)
 - [x] Métriques (DAU, funnel, retention, cohorts)
 - [x] Dashboard mockup
-- [ ] À implémenter: Service analytics.ts + Edge Function track-event
-
-### L) Paywall/Subscription - MVP SIMPLIFIÉ
+- [ ] À implémenter: Service analytics.ts + Edge Function track-event### L) Paywall/Subscription - MVP AVEC WEBVIEW
 - [x] Architecture du Paywall (PAYWALL_SUBSCRIPTION_ARCHITECTURE.md)
 - [x] Analyse de rentabilité (PRICING_PROFITABILITY_ANALYSIS.md)
 - [x] Migration SQL tables subscription (migrations-003)
 - [x] Edge Function handle-stripe-webhook
 - [x] Service stripe-service.ts
-- [x] Composant Paywall.tsx
-- [ ] À implémenter Phase 2: Intégration Stripe complète + gating crédits
-
+- [x] Composant Paywall.tsx amélioré
+- [x] Composant StripeCheckoutWebView (WebView interne sécurisé)
+- [x] Intégration WebView dans Paywall
+- [ ] À implémenter en Phase 2: Gating crédits dans start-trip + webhook Stripe complet
 ---
 
 ## MVP READY - CHECKLIST FINALE
