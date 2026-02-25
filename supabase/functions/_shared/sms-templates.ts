@@ -35,7 +35,7 @@ function generateMapLink(lat: number | null | undefined, lng: number | null | un
   if (lat === null || lat === undefined || lng === null || lng === undefined) return null;
   if (typeof lat !== 'number' || typeof lng !== 'number') return null;
   
-  return `https://maps.google.com/?q=${lat},${lng}`;
+  return `https://maps.google.com/maps?q=${lat},${lng}`;
 }
 
 /**
@@ -82,7 +82,7 @@ export function buildLateSms(params: SmsTemplateParams): string {
   const hasPosition = generateMapLink(lat, lng);
   const timeDiff = formatTimeDifference(deadline);
 
-  const personRef = hasFirstName ? firstName.trim() : "la personne";
+  const personRef = hasFirstName ? firstName.trim() : "Utilisateur";
   const mapLink = generateMapLink(lat, lng);
 
   // Build the message based on available data
@@ -125,7 +125,7 @@ export function buildSosSms(params: SmsTemplateParams): string {
   if (hasFirstName) {
     message = `SafeWalk SOS : ${firstName.trim()} a déclenché une alerte urgente. Appelez-le/la maintenant`;
   } else {
-    message = `SafeWalk SOS : une alerte urgente a été déclenchée. Appelez la personne maintenant`;
+    message = `SafeWalk SOS : Utilisateur a déclenché une alerte urgente. Appelez-le/la maintenant`;
   }
 
   // Add phone if available
@@ -155,7 +155,7 @@ export function buildTestSms(params: SmsTemplateParams): string {
   if (hasFirstName) {
     return `SafeWalk test : tout est bien configuré. Vous recevrez un SMS comme celui-ci si ${firstName.trim()} ne confirme pas son arrivée.`;
   } else {
-    return `SafeWalk test : tout est bien configuré. Vous recevrez un SMS comme celui-ci si la personne ne confirme pas son arrivée.`;
+    return `SafeWalk test : tout est bien configuré. Vous recevrez un SMS comme celui-ci si Utilisateur ne confirme pas son arrivée.`;
   }
 }
 

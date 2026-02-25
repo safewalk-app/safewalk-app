@@ -294,6 +294,9 @@ Fichiers: supabase/functions/_shared/sms-templates.test.ts
 - [x] Tester buildTestSms() avec 2 variantes
 - [x] Tester les cas limites (undefined, null, empty string)
 - [x] Tester la validation des entrees
+- [x] Executer les 19 tests avec Deno - TOUS PASSES
+- [x] Corriger le format Google Maps URL
+- [x] Corriger le fallback firstName a "Utilisateur"
 
 ### X) Validation d'integration - COMPLETE
 Fichiers: SMS_TEMPLATES_INTEGRATION_GUIDE.md
