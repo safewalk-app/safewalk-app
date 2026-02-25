@@ -116,6 +116,35 @@ async function testSms(req: Request): Promise<Response> {
       );
     }
 
+    // HAUTE #13: Verifier la limite quotidienne de tests SMS (1 par jour)
+    const today = new Date().toISOString().split('T')[0];
+    const { data: testLogs, error: testLogsError } = await supabase
+      .from('rate_limit_logs')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('endpoint', 'test-sms')
+      .gte('timestamp', today + 'T00:00:00Z')
+      .lt('timestamp', today + 'T23:59:59Z');
+
+    if (testLogsError) {
+      console.error('Test logs check error:', testLogsError);
+    }
+
+    if (testLogs && testLogs.length >= 1) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: 'Vous avez deja teste un SMS aujourd\'hui. Limite: 1 par jour.',
+          errorCode: 'quota_reached',
+          smsSent: false,
+        }),
+        {
+          status: 429,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
+    }
+
     // Call consume_credit RPC to check if user can send test SMS
     const { data: creditData, error: creditError } = await supabase.rpc(
       "consume_credit",

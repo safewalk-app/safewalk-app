@@ -76,6 +76,28 @@ export default function NewSessionScreen() {
       return;
     }
 
+    // CRITIQUE #4: Verifier deadline valide (minimum 15 minutes)
+    const now = Date.now();
+    const minDeadline = now + (15 * 60 * 1000);
+    if (limitTime <= now) {
+      setToastMessage('La deadline doit etre dans le futur');
+      return;
+    }
+    if (limitTime < minDeadline) {
+      setToastMessage('La deadline doit etre au minimum dans 15 minutes');
+      return;
+    }
+
+    // CRITIQUE #5: Verifier localisation activee
+    if (!settings.locationEnabled) {
+      setToastMessage('Veuillez activer la localisation');
+      setTimeout(() => {
+        setToastMessage('');
+        router.push('/settings');
+      }, 2000);
+      return;
+    }
+
     // Check 2: Phone verification
     if (!phoneVerified) {
       setShowOtpModal(true);

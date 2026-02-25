@@ -288,12 +288,30 @@ export default function ActiveSessionScreen() {
   // Note: location retiré des dépendances pour éviter de recréer le timer à chaque mise à jour GPS
 
   const handleCompleteSession = async () => {
-    // Capturer la position GPS si activée
+    // HAUTE #8: Confirmation avant terminer session
+    Alert.alert(
+      'Terminer la sortie ?',
+      'Etes-vous sur de vouloir terminer cette sortie ?',
+      [
+        { text: 'Annuler', style: 'cancel' },
+        {
+          text: 'Terminer',
+          style: 'destructive',
+          onPress: async () => {
+            await _completeSession();
+          },
+        },
+      ]
+    );
+  };
+
+  const _completeSession = async () => {
+    // Capturer la position GPS si activee
     if (settings.locationEnabled && location) {
-      logger.debug('Position capturée:', location);
+      logger.debug('Position capturee:', location);
     }
 
-    // Si une alerte a été envoyée, envoyer un SMS de confirmation
+    // Si une alerte a ete envoyee, envoyer un SMS de confirmation
     if (sessionState === 'overdue' && alertSMSRef.current) {
       logger.debug('📤 Envoi SMS de confirmation "Je suis rentré"...');
       try {
@@ -637,7 +655,21 @@ export default function ActiveSessionScreen() {
             <View className="my-4">
               <SOSButton
                 onPress={async () => {
-                  // Fallback for tap (optional)
+                  // HAUTE #9: Confirmation SOS avec delai
+                  Alert.alert(
+                    'Declencher SOS ?',
+                    'Etes-vous en danger ? Cette action alertera vos contacts d\'urgence.',
+                    [
+                      { text: 'Annuler', style: 'cancel' },
+                      {
+                        text: 'OUI, SOS !',
+                        style: 'destructive',
+                        onPress: async () => {
+                          await triggerSOS();
+                        },
+                      },
+                    ]
+                  );
                 }}
                 isLoading={sosLoading}
                 className="w-full"

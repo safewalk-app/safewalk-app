@@ -49,6 +49,27 @@ export function useSOS(options: UseSOSOptions) {
       setIsLoading(true);
       setError(null);
 
+      // CRITIQUE #3: Verifier que le contact d'urgence est configure et valide
+      if (!settings.emergencyContactPhone || !settings.emergencyContactName) {
+        const { Alert } = require('react-native');
+        Alert.alert(
+          'Contact d\'urgence manquant',
+          'Veuillez configurer un contact d\'urgence avant de declencher SOS.'
+        );
+        throw new Error('Contact d\'urgence non configure');
+      }
+
+      // CRITIQUE #7: Verifier que les credits sont disponibles pour SOS
+      const hasCredits = currentSession?.subscription_active || (currentSession?.free_alerts_remaining || 0) > 0;
+      if (!hasCredits) {
+        const { Alert } = require('react-native');
+        Alert.alert(
+          'Credits insuffisants',
+          'Vous n\'avez pas assez de credits pour declencher une alerte SOS.'
+        );
+        throw new Error('Credits insuffisants');
+      }
+
       logger.info('🚨 Déclenchement SOS pour session:', sessionId);
 
       // Envoyer notification locale immédiate

@@ -387,3 +387,73 @@ Fichiers: RATE_LIMIT_MONITORING_DASHBOARD.md
 - [x] Documenter les actions recommandees
 - [x] Fournir les requetes SQL pour le monitoring
 - [x] Documenter la gestion des abus
+
+
+## PHASE 15: CORRECTION DES 28 PROBLEMES UX & LOGIQUE (V3.0+)
+
+### CRITIQUES (7 problemes)
+- [ ] Corriger le prenom "ben" en dur - Recuperer depuis profiles
+- [ ] Valider contact urgence avant test SMS
+- [ ] Valider numero urgence format E.164
+- [ ] Verifier contact urgence avant SOS
+- [ ] Ajouter deadline par defaut et validation
+- [ ] Verifier localisation avant creer session
+- [ ] Verifier credits avant SOS
+
+### HAUTE (8 problemes)
+- [ ] Ajouter confirmation avant terminer session
+- [ ] Ajouter confirmation avant SOS
+- [ ] Ajouter verification batterie
+- [ ] Ajouter verification connexion internet
+- [ ] Ajouter gestion erreurs Twilio
+- [ ] Ajouter limite tests SMS (1/jour)
+- [ ] Ajouter feedback chargement
+- [ ] Ajouter gestion erreurs reseau
+
+### MOYENNE (5 problemes)
+- [ ] Ajouter timer deadline visible
+- [ ] Ajouter confirmation checkin
+- [ ] Ajouter gestion erreurs localisation
+- [ ] Ajouter validation prenom
+- [ ] Ajouter validation numero telephone
+
+### BASSE (3 problemes)
+- [ ] Ajouter historique detaille
+- [ ] Ajouter notifications push
+- [ ] Ajouter theme sombre
+
+
+## PHASE 15: CORRECTION DES PROBLEMES UX (V3.0+) - PARTIAL
+
+### AD) Problemes CRITIQUES (7) - COMPLETE
+Fichiers: app/settings.tsx, hooks/use-sos.ts, app/new-session.tsx
+- [x] Validation du contact d'urgence avant test SMS
+- [x] Validation du format E.164 du numero d'urgence
+- [x] Verification du contact d'urgence avant SOS
+- [x] Verification de la deadline (minimum 15 minutes)
+- [x] Verification de la localisation activee
+- [x] Verification des credits avant demarrage session
+- [x] Verification des credits avant SOS
+
+### AE) Problemes HAUTE (8) - PARTIAL
+Fichiers: app/active-session.tsx, app/settings.tsx, supabase/functions/test-sms/index.ts, components/battery-warning.tsx
+- [x] Confirmation avant terminer session
+- [x] Confirmation avant SOS
+- [x] Limite quotidienne de tests SMS (1 par jour)
+- [x] Composant BatteryWarning cree
+- [ ] Verifications batterie/internet integrees
+- [ ] Gestion erreurs Twilio avec retry
+- [x] Verification credits avant SOS (deja fait)
+- [x] Verification credits avant session (deja fait)
+
+### AF) Problemes MOYENNE (5) - A FAIRE
+- [ ] Timer visible sur bouton (countdown)
+- [ ] Notifications push en arriere-plan
+- [ ] Affichage du temps restant avant deadline
+- [ ] Validation du numero de telephone avant sauvegarde
+- [ ] Affichage du statut de localisation en temps reel
+
+### AG) Problemes BASSE (3) - A FAIRE
+- [ ] Affichage des erreurs reseau avec retry
+- [ ] Cache des donnees utilisateur
+- [ ] Optimisation des performances

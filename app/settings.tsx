@@ -144,6 +144,25 @@ export default function SettingsScreen() {
 
   const handleTestSms = async () => {
     await triggerTestSms(async () => {
+      // CRITIQUE: Vérifier que le contact d'urgence est configuré
+      if (!contactPhone || !contactName) {
+        Alert.alert(
+          'Contact d\'urgence manquant',
+          'Veuillez d\'abord configurer un contact d\'urgence pour tester les SMS.'
+        );
+        return;
+      }
+
+      // CRITIQUE: Valider le format du numéro d'urgence
+      const cleanedPhone = cleanPhoneNumber(contactPhone);
+      if (!validatePhoneNumber(cleanedPhone)) {
+        Alert.alert(
+          'Numéro invalide',
+          'Le numéro d\'urgence n\'est pas au bon format. Utilisez +33 suivi de 9 chiffres.'
+        );
+        return;
+      }
+
       // Check phone_verified
       if (!profileData?.phone_verified) {
       Alert.alert('Téléphone non vérifié', 'Veuillez d\'abord vérifier votre numéro de téléphone.');
