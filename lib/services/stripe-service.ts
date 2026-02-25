@@ -8,6 +8,8 @@ export interface StripeProduct {
   currency: string;
   type: "subscription" | "credits";
   metadata?: Record<string, string>;
+  stripeProductId?: string;
+  stripePriceId?: string;
 }
 
 export interface StripeCheckoutSession {
@@ -18,12 +20,15 @@ export interface StripeCheckoutSession {
 class StripeService {
   private initialized = false;
   private stripePublishableKey: string | null = null;
+  private productsCache: StripeProduct[] = [];
+  private cacheTimestamp: number = 0;
+  private cacheDuration: number = 5 * 60 * 1000; // 5 minutes cache
 
   async initialize(): Promise<void> {
     if (this.initialized) return;
 
     // Get Stripe publishable key from environment
-    this.stripePublishableKey = process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY || null;
+    this.stripePublishableKey = process.env.EXPO_PUBLIC_STRIPE_PUBLIC_KEY || null;
 
     if (!this.stripePublishableKey) {
       console.warn("Stripe publishable key not configured");
@@ -33,9 +38,44 @@ class StripeService {
   }
 
   /**
-   * Get available products for purchase
+   * Get available products for purchase from Stripe API (dynamically)
    */
   async getProducts(): Promise<StripeProduct[]> {
+    try {
+      // Check if cache is still valid
+      const now = Date.now();
+      if (this.productsCache.length > 0 && now - this.cacheTimestamp < this.cacheDuration) {
+        console.log("Using cached products");
+        return this.productsCache;
+      }
+
+      // Fetch products from Edge Function
+      const { data, error } = await supabase.functions.invoke("get-stripe-products");
+
+      if (error) {
+        console.error("Error fetching products from Edge Function:", error);
+        // Return fallback products if Edge Function fails
+        return this.getFallbackProducts();
+      }
+
+      if (data?.products) {
+        this.productsCache = data.products;
+        this.cacheTimestamp = now;
+        console.log("Fetched products from Stripe API:", data.products.length);
+        return data.products;
+      }
+
+      return this.getFallbackProducts();
+    } catch (error) {
+      console.error("Error in getProducts:", error);
+      return this.getFallbackProducts();
+    }
+  }
+
+  /**
+   * Fallback products if API fails
+   */
+  private getFallbackProducts(): StripeProduct[] {
     return [
       // Subscriptions
       {
@@ -94,6 +134,14 @@ class StripeService {
         metadata: { credits: "500" },
       },
     ];
+  }
+
+  /**
+   * Clear products cache
+   */
+  clearCache(): void {
+    this.productsCache = [];
+    this.cacheTimestamp = 0;
   }
 
   /**

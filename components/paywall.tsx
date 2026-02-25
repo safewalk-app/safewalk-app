@@ -4,12 +4,19 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { stripeService, StripeProduct } from "@/lib/services/stripe-service";
 import { ScreenContainer } from "@/components/screen-container";
 import { StripeCheckoutWebView } from "@/components/stripe-checkout-webview";
+import { PaymentSuccessScreen } from "@/components/payment-success-screen";
 import { useColors } from "@/hooks/use-colors";
 import { cn } from "@/lib/utils";
 
 interface PaywallProps {
   onClose?: () => void;
   initialTab?: "subscription" | "credits";
+}
+
+interface SuccessState {
+  productName: string;
+  amount: number;
+  creditsAdded?: number;
 }
 
 export function Paywall({ onClose, initialTab = "subscription" }: PaywallProps) {
@@ -20,6 +27,7 @@ export function Paywall({ onClose, initialTab = "subscription" }: PaywallProps) 
   const [purchasing, setPurchasing] = useState<string | null>(null);
   const [quotaStatus, setQuotaStatus] = useState<any>(null);
   const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
+  const [successState, setSuccessState] = useState<SuccessState | null>(null);
 
   useEffect(() => {
     loadData();
@@ -51,12 +59,16 @@ export function Paywall({ onClose, initialTab = "subscription" }: PaywallProps) 
     }
   };
 
-  const handleCheckoutSuccess = () => {
-    Alert.alert("Succès", "Paiement confirmé! Merci de votre achat.");
+  const handleCheckoutSuccess = (product: StripeProduct) => {
+    // Show success screen instead of alert
+    setSuccessState({
+      productName: product.name,
+      amount: product.price,
+      creditsAdded: product.type === "credits" ? parseInt(product.metadata?.credits || "0") : undefined,
+    });
     setCheckoutUrl(null);
     setPurchasing(null);
     loadData();
-    onClose?.();
   };
 
   const handleCheckoutCancel = () => {
@@ -64,15 +76,33 @@ export function Paywall({ onClose, initialTab = "subscription" }: PaywallProps) 
     setPurchasing(null);
   };
 
+  const handleSuccessClose = () => {
+    setSuccessState(null);
+    onClose?.();
+  };
+
   const subscriptionProducts = products.filter((p) => p.type === "subscription");
   const creditProducts = products.filter((p) => p.type === "credits");
 
+  // Show success screen if payment succeeded
+  if (successState) {
+    return (
+      <PaymentSuccessScreen
+        productName={successState.productName}
+        amount={successState.amount}
+        creditsAdded={successState.creditsAdded}
+        onContinue={handleSuccessClose}
+      />
+    );
+  }
+
   // Show WebView if checkout URL is set
   if (checkoutUrl) {
+    const currentProduct = products.find((p) => p.id === purchasing);
     return (
       <StripeCheckoutWebView
         checkoutUrl={checkoutUrl}
-        onSuccess={handleCheckoutSuccess}
+        onSuccess={() => currentProduct && handleCheckoutSuccess(currentProduct)}
         onCancel={handleCheckoutCancel}
         onError={(error) => {
           Alert.alert("Erreur de paiement", error);
