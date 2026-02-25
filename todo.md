@@ -316,3 +316,74 @@ Fichiers: supabase/functions/_shared/*, supabase/functions/cron-check-deadlines/
 - [x] Verifier que toutes les Edge Functions sont actives
 - [x] Creer le guide de deploiement manuel (SUPABASE_DEPLOY_GUIDE.md)
 - [x] Confirmer le deploiement via Supabase Dashboard
+
+
+## PHASE 14: MONITORING AUTOMATIQUE DES ERREURS 429 (V2.9+)
+
+### Z) Migration SQL et RPC Functions - EN COURS
+Fichiers: supabase/migrations/migrations-005-rate-limit-monitoring.sql
+- [ ] Creer table rate_limit_errors (endpoint, user_id, ip_address, timestamp, error_count)
+- [ ] Creer table rate_limit_alerts (endpoint, severity, message, triggered_at, resolved_at)
+- [ ] Creer RPC function log_rate_limit_error()
+- [ ] Creer RPC function check_rate_limit_anomalies()
+- [ ] Creer RPC function create_rate_limit_alert()
+- [ ] Ajouter indexes pour les requetes rapides
+- [ ] Configurer RLS policies
+
+### AA) Logging des Erreurs 429 - EN COURS
+Fichiers: supabase/functions/_shared/rate-limiter.ts
+- [ ] Ajouter logRateLimitError() dans le middleware
+- [ ] Logger endpoint, user_id, ip_address, timestamp
+- [ ] Tracker les patterns d'abus (meme utilisateur/IP multiples fois)
+- [ ] Integrer dans toutes les Edge Functions
+
+### AB) Edge Function pour les Alertes - EN COURS
+Fichiers: supabase/functions/monitor-rate-limit-errors/index.ts
+- [ ] Creer Edge Function monitor-rate-limit-errors
+- [ ] Verifier les anomalies toutes les 5 minutes
+- [ ] Creer les alertes automatiques
+- [ ] Envoyer les alertes (Slack, Email, SMS)
+- [ ] Tracker les patterns d'abus
+
+### AC) Dashboard de Monitoring - EN COURS
+Fichiers: RATE_LIMIT_MONITORING_DASHBOARD.md
+- [ ] Creer le guide du dashboard
+- [ ] Documenter les metriques (erreurs/min, utilisateurs affectes, endpoints)
+- [ ] Documenter les seuils d'alerte
+- [ ] Documenter les actions recommandees
+
+
+## PHASE 14 UPDATE: MONITORING AUTOMATIQUE DES ERREURS 429 - COMPLETE
+
+### Z) Migration SQL et RPC Functions - COMPLETE
+Fichiers: supabase/migrations/migrations-005-rate-limit-monitoring.sql
+- [x] Creer table rate_limit_errors
+- [x] Creer table rate_limit_alerts
+- [x] Creer table rate_limit_abuse_patterns
+- [x] Creer 7 RPC functions (log, check, create, track, block, resolve, cleanup)
+- [x] Ajouter indexes pour les requetes rapides
+- [x] Configurer RLS policies
+
+### AA) Logging des Erreurs 429 - COMPLETE
+Fichiers: supabase/functions/_shared/rate-limiter.ts
+- [x] Ajouter logRateLimitError() dans le middleware
+- [x] Logger endpoint, user_id, ip_address, timestamp
+- [x] Tracker les patterns d'abus
+
+### AB) Edge Function pour les Alertes - COMPLETE
+Fichiers: supabase/functions/monitor-rate-limit-errors/index.ts
+- [x] Creer Edge Function monitor-rate-limit-errors
+- [x] Verifier les anomalies toutes les 5 minutes
+- [x] Creer les alertes automatiques
+- [x] Envoyer les alertes (Slack, Email, SMS)
+- [x] Tracker les patterns d'abus
+- [x] Bloquer les patterns CRITICAL automatiquement
+
+### AC) Dashboard de Monitoring - COMPLETE
+Fichiers: RATE_LIMIT_MONITORING_DASHBOARD.md
+- [x] Creer le guide du dashboard
+- [x] Documenter les metriques
+- [x] Documenter les seuils d'alerte (INFO, WARNING, CRITICAL)
+- [x] Documenter les actions recommandees
+- [x] Fournir les requetes SQL pour le monitoring
+- [x] Documenter la gestion des abus

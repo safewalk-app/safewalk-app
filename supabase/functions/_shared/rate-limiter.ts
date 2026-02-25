@@ -136,3 +136,29 @@ export function createRateLimitHttpResponse(resetAt: string) {
     },
   });
 }
+
+/**
+ * Logger une erreur 429 pour le monitoring
+ *
+ * @param supabase - Client Supabase
+ * @param userId - ID de l'utilisateur
+ * @param endpoint - Nom de l'endpoint
+ * @param ipAddress - Adresse IP (optionnel)
+ */
+export async function logRateLimitError(
+  supabase: ReturnType<typeof createClient>,
+  userId: string | null,
+  endpoint: string,
+  ipAddress?: string
+): Promise<void> {
+  try {
+    await supabase.rpc("log_rate_limit_error", {
+      p_endpoint: endpoint,
+      p_user_id: userId,
+      p_ip_address: ipAddress,
+    });
+  } catch (error) {
+    console.error("Rate limit error logging failed:", error);
+    // Continuer même si le logging échoue
+  }
+}
