@@ -8,6 +8,7 @@ import { TimerAnimation } from '@/components/ui/timer-animation';
 import { ScreenTransition } from '@/components/ui/screen-transition';
 import { CheckInModal } from '@/components/ui/check-in-modal';
 import { BackgroundWarningModal, shouldShowBackgroundWarning } from '@/components/background-warning-modal';
+import { useBatteryWarning, BatteryWarningBanner } from '@/components/battery-warning';
 import { useApp } from '@/lib/context/app-context';
 import { useCheckInNotifications } from '@/hooks/use-check-in-notifications';
 import { useRealTimeLocation } from '@/hooks/use-real-time-location';
@@ -30,6 +31,9 @@ import * as tripService from '@/lib/services/trip-service';
 export default function ActiveSessionScreen() {
   // Empêcher l'écran de s'éteindre pendant la session
   useKeepAwake();
+  
+  // Vérifier l'état de la batterie
+  const { batteryLevel, isLowBattery, isCriticalBattery } = useBatteryWarning();
   
   // Détecter l'état de la connectivité réseau
   const networkStatus = useNetworkStatus();
@@ -515,6 +519,17 @@ export default function ActiveSessionScreen() {
                 </View>
               </View>
             </GlassCard>
+          </ScreenTransition>
+        )}
+
+        {/* Bannière d'avertissement batterie */}
+        {(isLowBattery || isCriticalBattery) && (
+          <ScreenTransition delay={75} duration={350}>
+            <BatteryWarningBanner
+              batteryLevel={batteryLevel}
+              isLowBattery={isLowBattery}
+              isCriticalBattery={isCriticalBattery}
+            />
           </ScreenTransition>
         )}
 

@@ -441,7 +441,7 @@ Fichiers: app/active-session.tsx, app/settings.tsx, supabase/functions/test-sms/
 - [x] Confirmation avant SOS
 - [x] Limite quotidienne de tests SMS (1 par jour)
 - [x] Composant BatteryWarning cree
-- [ ] Verifications batterie/internet integrees
+- [x] Verifications batterie/internet integrees (hook + banniere dans active-session.tsx)
 - [ ] Gestion erreurs Twilio avec retry
 - [x] Verification credits avant SOS (deja fait)
 - [x] Verification credits avant session (deja fait)
