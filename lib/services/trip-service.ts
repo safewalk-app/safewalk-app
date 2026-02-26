@@ -5,6 +5,7 @@
 import { supabase } from "@/lib/supabase";
 import { logger } from "@/lib/logger";
 import { retryWithBackoff } from "@/lib/services/api-retry-helper";
+import { notify } from "@/lib/services/notification.service";
 
 export interface StartTripInput {
   deadlineISO: string;
@@ -114,6 +115,7 @@ export async function startTrip(input: StartTripInput): Promise<StartTripOutput>
 
     if (!profile?.phone_verified) {
       logger.warn("Start trip: Phone not verified", { userId: user.id });
+      notify('auth.otp_required');
       return {
         success: false,
         error: "Phone number not verified",
@@ -134,6 +136,9 @@ export async function startTrip(input: StartTripInput): Promise<StartTripOutput>
       if (error.status === 429) {
         const errorData = error.context?.json || {};
         logger.warn("Start trip: Rate limit exceeded", { retryAfter: errorData.retryAfter });
+        notify('error.rate_limited', {
+          variables: { seconds: errorData.retryAfter || 60 }
+        });
         return {
           success: false,
           error: errorData.message || "Trop de requêtes. Veuillez réessayer plus tard.",
@@ -157,6 +162,7 @@ export async function startTrip(input: StartTripInput): Promise<StartTripOutput>
       
       // Map error codes for UI handling
       if (errorCode === "no_credits") {
+        notify('credits.empty');
         return {
           success: false,
           error: "Crédits insuffisants",
@@ -164,6 +170,7 @@ export async function startTrip(input: StartTripInput): Promise<StartTripOutput>
         };
       }
       if (errorCode === "quota_reached") {
+        notify('alert.quota_reached');
         return {
           success: false,
           error: "Limite atteinte aujourd'hui",
@@ -171,6 +178,7 @@ export async function startTrip(input: StartTripInput): Promise<StartTripOutput>
         };
       }
       if (errorCode === "twilio_failed") {
+        notify('sms.failed_retry');
         return {
           success: false,
           error: "Impossible d'envoyer l'alerte, réessaiera",
@@ -182,6 +190,9 @@ export async function startTrip(input: StartTripInput): Promise<StartTripOutput>
     }
 
     logger.info("Trip started successfully", { tripId: data?.tripId });
+    notify('trip.started', {
+      variables: { deadline: new Date(data?.deadline).toLocaleTimeString('fr-FR') }
+    });
     return data as StartTripOutput;
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
@@ -214,6 +225,9 @@ export async function checkin(input: CheckinInput): Promise<CheckinOutput> {
       if (error.status === 429) {
         const errorData = error.context?.json || {};
         logger.warn("Checkin: Rate limit exceeded");
+        notify('error.rate_limited', {
+          variables: { seconds: errorData.retryAfter || 60 }
+        });
         return {
           success: false,
           error: errorData.message || "Trop de requêtes. Veuillez réessayer plus tard.",
@@ -230,6 +244,7 @@ export async function checkin(input: CheckinInput): Promise<CheckinOutput> {
     }
 
     logger.info("Checked in successfully", { tripId: data?.tripId });
+    notify('trip.checked_in');
     return data as CheckinOutput;
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
@@ -262,6 +277,9 @@ export async function extendTrip(input: ExtendInput): Promise<ExtendOutput> {
       if (error.status === 429) {
         const errorData = error.context?.json || {};
         logger.warn("Extend trip: Rate limit exceeded");
+        notify('error.rate_limited', {
+          variables: { seconds: errorData.retryAfter || 60 }
+        });
         return {
           success: false,
           error: errorData.message || "Trop de requêtes. Veuillez réessayer plus tard.",
@@ -278,6 +296,9 @@ export async function extendTrip(input: ExtendInput): Promise<ExtendOutput> {
     }
 
     logger.info("Trip extended successfully", { tripId: data?.tripId });
+    notify('trip.extended', {
+      variables: { minutes: input.addMinutes }
+    });
     return data as ExtendOutput;
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
