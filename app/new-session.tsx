@@ -64,33 +64,49 @@ export default function NewSessionScreen() {
     }
   };
 
+  // Déterminer la raison du blocage si applicable
+  const getBlockingReason = () => {
+    if (!settings.emergencyContactName || !settings.emergencyContactPhone) {
+      return {
+        reason: 'Contact d\'urgence manquant',
+        message: 'Ajoute un contact d\'urgence pour démarrer une sortie.',
+        action: 'Aller aux Paramètres',
+        onAction: () => router.push('/settings'),
+      };
+    }
+    if (!phoneVerified) {
+      return {
+        reason: 'Numéro non vérifié',
+        message: 'Vérifie ton numéro pour activer les alertes SMS.',
+        action: 'Vérifier maintenant',
+        onAction: () => setShowOtpModal(true),
+      };
+    }
+    const hasCredits = profileData.subscription_active || profileData.free_alerts_remaining > 0;
+    if (!hasCredits) {
+      return {
+        reason: 'Crédits insuffisants',
+        message: 'Tu as atteint la limite d\'aujourd\'hui. Ajoute des crédits pour continuer.',
+        action: 'Ajouter des crédits',
+        onAction: () => setShowPaywallModal(true),
+      };
+    }
+    if (!settings.locationEnabled) {
+      return {
+        reason: 'Localisation désactivée',
+        message: 'Active la localisation dans Paramètres pour partager ta position en cas d\'alerte.',
+        action: 'Aller aux Paramètres',
+        onAction: () => router.push('/settings'),
+      };
+    }
+    return null;
+  };
+
   const handleStartSession = async () => {
     await triggerStartSession(async () => {
     // Check 1: Emergency contact
     if (!settings.emergencyContactName || !settings.emergencyContactPhone) {
       setToastMessage('Configure un contact d\'urgence d\'abord');
-      setTimeout(() => {
-        setToastMessage('');
-        router.push('/settings');
-      }, 2000);
-      return;
-    }
-
-    // CRITIQUE #4: Verifier deadline valide (minimum 15 minutes)
-    const now = Date.now();
-    const minDeadline = now + (15 * 60 * 1000);
-    if (limitTime <= now) {
-      setToastMessage('La deadline doit etre dans le futur');
-      return;
-    }
-    if (limitTime < minDeadline) {
-      setToastMessage('La deadline doit etre au minimum dans 15 minutes');
-      return;
-    }
-
-    // CRITIQUE #5: Verifier localisation activee
-    if (!settings.locationEnabled) {
-      setToastMessage('Veuillez activer la localisation');
       setTimeout(() => {
         setToastMessage('');
         router.push('/settings');
@@ -108,6 +124,28 @@ export default function NewSessionScreen() {
     const hasCredits = profileData.subscription_active || profileData.free_alerts_remaining > 0;
     if (!hasCredits) {
       setShowPaywallModal(true);
+      return;
+    }
+
+    // Check 4: Localisation activee
+    if (!settings.locationEnabled) {
+      setToastMessage('Veuillez activer la localisation');
+      setTimeout(() => {
+        setToastMessage('');
+        router.push('/settings');
+      }, 2000);
+      return;
+    }
+
+    // Check 5: Deadline valide (minimum 15 minutes)
+    const now = Date.now();
+    const minDeadline = now + (15 * 60 * 1000);
+    if (limitTime <= now) {
+      setToastMessage('La deadline doit etre dans le futur');
+      return;
+    }
+    if (limitTime < minDeadline) {
+      setToastMessage('La deadline doit etre au minimum dans 15 minutes');
       return;
     }
 
