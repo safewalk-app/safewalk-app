@@ -448,9 +448,9 @@ Fichiers: app/active-session.tsx, app/settings.tsx, supabase/functions/test-sms/
 - [x] Verification credits avant SOS (deja fait)
 - [x] Verification credits avant session (deja fait)
 
-### AF) Problemes MOYENNE (5) - A FAIRE
-- [ ] Affichage du temps restant avant deadline
-- [ ] Validation du numero de telephone avant sauvegarde
+### AF) Problemes MOYENNE (5) - PARTIAL
+- [x] Affichage du temps restant avant deadline (hook useDeadlineTimer + barre progression)
+- [x] Validation du numero de telephone avant sauvegarde (E.164 strict + feedback detaille)
 - [ ] Affichage du statut de localisation en temps reel
 
 ### AG) Problemes BASSE (3) - A FAIRE

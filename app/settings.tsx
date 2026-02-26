@@ -11,7 +11,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useState, useEffect } from 'react';
 import { ToastPop } from '@/components/ui/toast-pop';
-import { validatePhoneNumber, formatPhoneInput, cleanPhoneNumber } from '@/lib/utils';
+import { formatPhoneInput, cleanPhoneNumber } from '@/lib/utils';
+import { validatePhoneNumber as validatePhoneNumberService, getValidationFeedback } from '@/lib/services/phone-validation-service';
 import { checkHealth } from '@/lib/services/api-client';
 import { sendEmergencySMS } from '@/lib/services/sms-service';
 import { useLocationPermission } from '@/hooks/use-location-permission';
@@ -33,12 +34,15 @@ export default function SettingsScreen() {
     const formatted = formatPhoneInput(text);
     setContactPhone(formatted);
     
-    // Validation en temps réel
+    // Validation en temps réel avec feedback détaillé
     const cleaned = cleanPhoneNumber(formatted);
     if (cleaned.length === 0) {
       setIsPhone1Valid(null); // Pas d'icône si vide
+      setPhoneError(null);
     } else {
-      setIsPhone1Valid(validatePhoneNumber(cleaned));
+      const result = validatePhoneNumberService(cleaned);
+      setIsPhone1Valid(result.isValid);
+      setPhoneError(result.feedback || null);
     }
   };
 
@@ -73,7 +77,7 @@ export default function SettingsScreen() {
     return () => clearTimeout(timer);
   }, [firstName]);
 
-  // Autosave contact 1 avec validation
+  // Autosave contact 1 avec validation stricte E.164
   useEffect(() => {
     const timer = setTimeout(() => {
       if (

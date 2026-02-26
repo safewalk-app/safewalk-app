@@ -11,6 +11,8 @@ interface PhoneValidationResult {
   errorCode?: OtpErrorCode;
   message?: string;
   displayFormat?: string;
+  feedback?: string;
+  isE164Valid?: boolean;
 }
 
 /**
@@ -104,6 +106,8 @@ export function validatePhoneNumber(input: string): PhoneValidationResult {
       isValid: false,
       errorCode: OtpErrorCode.EMPTY_PHONE,
       message: "Numéro de téléphone requis",
+      feedback: "Veuillez entrer un numéro de téléphone",
+      isE164Valid: false,
     };
   }
 
@@ -114,15 +118,36 @@ export function validatePhoneNumber(input: string): PhoneValidationResult {
       isValid: false,
       errorCode: OtpErrorCode.EMPTY_PHONE,
       message: "Numéro de téléphone requis",
+      feedback: "Veuillez entrer un numéro de téléphone",
+      isE164Valid: false,
     };
   }
 
+  // Compter les chiffres
+  const digits = extractDigits(trimmed);
+  
   // Vérifier si c'est un numéro français
   if (!isValidFrenchPhone(trimmed)) {
+    let feedback = "Format invalide. ";
+    
+    if (digits.length === 0) {
+      feedback += "Entrez au moins 9 chiffres.";
+    } else if (digits.length < 9) {
+      feedback += (9 - digits.length) + " chiffre(s) manquant(s).";
+    } else if (digits.length > 9) {
+      feedback += "Trop de chiffres (maximum 9).";
+    } else if (!trimmed.match(/^[0+]/)) {
+      feedback += "Commencez par 0 ou +33.";
+    } else {
+      feedback += "Utilisez le format: 06 12 34 56 78 ou +33 6 12 34 56 78";
+    }
+    
     return {
       isValid: false,
       errorCode: OtpErrorCode.INVALID_PHONE_FORMAT,
       message: "Format invalide. Utilisez +33... ou 06...",
+      feedback: feedback,
+      isE164Valid: false,
     };
   }
 
@@ -134,6 +159,8 @@ export function validatePhoneNumber(input: string): PhoneValidationResult {
       isValid: false,
       errorCode: OtpErrorCode.INVALID_PHONE_FORMAT,
       message: "Format invalide. Utilisez +33... ou 06...",
+      feedback: "Le numéro n'a pas pu être formaté au format E.164. Vérifiez le format.",
+      isE164Valid: false,
     };
   }
 
@@ -141,6 +168,8 @@ export function validatePhoneNumber(input: string): PhoneValidationResult {
     isValid: true,
     formatted,
     displayFormat: formatForDisplay(formatted),
+    feedback: "Numéro valide: " + formatForDisplay(formatted),
+    isE164Valid: true,
   };
 }
 
@@ -186,6 +215,51 @@ export function isCompletePhoneNumber(input: string): boolean {
 export function getMissingDigits(input: string): number {
   const digits = extractDigits(input);
   return Math.max(0, 9 - digits.length);
+}
+
+/**
+ * Valide strictement au format E.164
+ * @param phone Numéro au format E.164
+ * @returns true si valide au format E.164
+ */
+export function isStrictE164(phone: string): boolean {
+  if (!phone || typeof phone !== 'string') return false;
+  return isValidE164(phone);
+}
+
+/**
+ * Obtient un message de feedback détaillé pour la validation
+ * @param input Numéro brut
+ * @returns Message de feedback pour l'utilisateur
+ */
+export function getValidationFeedback(input: string): string {
+  const result = validatePhoneNumber(input);
+  return result.feedback || result.message || '';
+}
+
+/**
+ * Valide un numéro de téléphone au format E.164 avec message d'erreur détaillé
+ * @param phone Numéro au format E.164
+ * @returns { isValid, message }
+ */
+export function validateE164Strict(phone: string): { isValid: boolean; message?: string } {
+  if (!phone || typeof phone !== 'string') {
+    return {
+      isValid: false,
+      message: 'Numéro de téléphone requis',
+    };
+  }
+
+  if (!isValidE164(phone)) {
+    return {
+      isValid: false,
+      message: 'Format E.164 invalide. Attendu: +[1-9]XXX... (ex: +33612345678)',
+    };
+  }
+
+  return {
+    isValid: true,
+  };
 }
 
 /**

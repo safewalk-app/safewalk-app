@@ -24,6 +24,7 @@ import { useKeepAwake } from 'expo-keep-awake';
 import { useNetworkStatus } from '@/hooks/use-network-status';
 import { getNetworkErrorMessage } from '@/lib/utils/network-checker';
 import { useLocationTracking } from '@/hooks/use-location-tracking';
+import { useDeadlineTimer } from '@/hooks/use-deadline-timer';
 import { LongPressGestureHandler } from 'react-native-gesture-handler';
 import * as Haptics from 'expo-haptics';
 import * as tripService from '@/lib/services/trip-service';
@@ -77,6 +78,25 @@ export default function ActiveSessionScreen() {
       logger.error('Location tracking error:', error);
     },
   });
+  
+  // Hook pour afficher le countdown deadline en temps réel
+  const deadlineTimer = useDeadlineTimer(
+    currentSession?.deadline ? new Date(currentSession.deadline) : null,
+    () => {
+      // Callback quand deadline est atteinte
+      logger.debug('Deadline atteinte');
+    },
+    () => {
+      // Callback quand alerte imminente (< 5 minutes)
+      logger.debug('Alerte imminente: < 5 minutes avant deadline');
+      // Optionnel: envoyer une notification supplémentaire
+      sendNotification({
+        title: '⏰ Attention',
+        body: 'Moins de 5 minutes avant votre deadline!',
+        data: { type: 'deadline_alert_imminent' },
+      });
+    }
+  );
   
   const [remainingTime, setRemainingTime] = useState<string>('00:00:00');
   const [sessionState, setSessionState] = useState<'active' | 'grace' | 'overdue'>('active');
@@ -587,6 +607,18 @@ export default function ActiveSessionScreen() {
             >
               {remainingTime}
             </Text>
+            
+            {/* Barre de progression */}
+            <View className="mt-3 h-2 bg-gray-300 rounded-full overflow-hidden">
+              <View
+                className="h-full rounded-full"
+                style={{
+                  width: `${deadlineTimer.percentage}%`,
+                  backgroundColor: timerColor,
+                  opacity: 0.7,
+                }}
+              />
+            </View>
             
             {/* Informations détaillées */}
             <View className="gap-2 mt-3 pt-3 border-t" style={{ borderTopColor: timerColor + '20' }}>
