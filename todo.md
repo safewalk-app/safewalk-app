@@ -496,3 +496,36 @@ Fichiers: .env.production, server/_core/index.ts
 - [ ] Bundle size validé
 - [ ] API latency validé
 - [ ] Créer checkpoint V12.0
+
+
+## PHASE 13: LAZY LOADING & REDIS (V12.0) - COMPLÉTÉE ✅
+
+### S) Lazy Loading Implementation (3h) ✅ COMPLÈTE
+Fichiers: lib/services/index.ts, hooks/index.ts, app/_layout.tsx
+- [x] Créer lib/services/index.ts avec lazy loading des services lourds
+- [x] Créer hooks/index.ts avec lazy loading des hooks lourds
+- [x] Mettre à jour app/_layout.tsx avec Suspense boundary
+- [x] Créer LAZY_LOADING_QUICK_START.md avec guide rapide
+- [x] Créer LAZY_LOADING_IMPLEMENTATION.md avec avant/après détaillé
+
+### T) Redis Configuration (2-3h) ✅ COMPLÈTE
+Fichiers: server/services/redis.service.ts, server/services/cache.service.ts
+- [x] Installer Redis localement (redis-server 6.0.16)
+- [x] Créer server/services/redis.service.ts avec initRedis(), closeRedis(), getRedisClient()
+- [x] Créer server/services/cache.service.ts avec getCache(), setCache(), getCacheOrFetch(), invalidateCache()
+- [x] Créer server/__tests__/cache.service.test.ts avec 8 tests
+- [x] Installer dépendances npm: redis, @types/redis
+- [x] Créer test-redis.mjs avec 6 tests de validation
+- [x] Valider tous les tests Redis (100% passants)
+
+### U) Documentation ✅ COMPLÈTE
+- [x] REDIS_IMPLEMENTATION_GUIDE.md avec guide complet
+- [x] IMPLEMENTATION_PLAN_V12.md avec plan d'implémentation
+- [x] IMPLEMENTATION_V12_SUMMARY.md avec résumé des réalisations
+
+### V) Checkpoint V12.0 ✅ COMPLÈTE
+- [x] Tous les tests Redis passent
+- [x] Lazy loading architecture mise en place
+- [x] Redis installé et configuré
+- [x] Dépendances installées
+- [x] Documentation complète

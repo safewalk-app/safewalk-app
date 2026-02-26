@@ -2,7 +2,8 @@ import "@/global.css";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, Suspense } from "react";
+import { ActivityIndicator, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
 import { Platform } from "react-native";
@@ -46,6 +47,18 @@ function PushNotificationsSetup() {
     },
   });
   return null;
+}
+
+/**
+ * Fallback component shown while screens are loading
+ * Used by Suspense boundary for lazy-loaded screens
+ */
+function ScreenLoadingFallback() {
+  return (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#ffffff' }}>
+      <ActivityIndicator size="large" color="#0a7ea4" />
+    </View>
+  );
 }
 
 export default function RootLayout() {
@@ -104,32 +117,35 @@ export default function RootLayout() {
             <PermissionsCheck />
             <ToastContainerWrapper />
             <PushNotificationsSetup />
-            {/* Stack with all routes - flow screens without nav */}
-            {/* Expo Router Stack uses default slide animation from right */}
-            <Stack
-              screenOptions={{
-                headerShown: false,
-                // Slide animation from right (default for Expo Router)
-                animation: 'slide_from_right',
-              }}
-              initialRouteName="index"
-            >
-              {/* Onboarding */}
-              <Stack.Screen name="onboarding" />
-              
-              {/* Main screens with nav */}
-              <Stack.Screen name="index" />
-              <Stack.Screen name="settings" />
-              
-              {/* Flow screens without nav */}
-              <Stack.Screen name="new-session" />
-              <Stack.Screen name="active-session" />
-              <Stack.Screen name="alert-sent" />
-              <Stack.Screen name="history" />
-              
-              <Stack.Screen name="oauth/callback" />
-            </Stack>
-            <StatusBar style="auto" />
+            {/* Suspense boundary for lazy-loaded screens */}
+            <Suspense fallback={<ScreenLoadingFallback />}>
+              {/* Stack with all routes - flow screens without nav */}
+              {/* Expo Router Stack uses default slide animation from right */}
+              <Stack
+                screenOptions={{
+                  headerShown: false,
+                  // Slide animation from right (default for Expo Router)
+                  animation: 'slide_from_right',
+                }}
+                initialRouteName="index"
+              >
+                {/* Onboarding */}
+                <Stack.Screen name="onboarding" />
+                
+                {/* Main screens with nav */}
+                <Stack.Screen name="index" />
+                <Stack.Screen name="settings" />
+                
+                {/* Flow screens without nav */}
+                <Stack.Screen name="new-session" />
+                <Stack.Screen name="active-session" />
+                <Stack.Screen name="alert-sent" />
+                <Stack.Screen name="history" />
+                
+                <Stack.Screen name="oauth/callback" />
+              </Stack>
+              <StatusBar style="auto" />
+            </Suspense>
           </AppProvider>
         </ToastProvider>
       </QueryClientProvider>
