@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react';
+import { useRef } from 'react';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -6,6 +6,8 @@ import Animated, {
   withSequence,
   Easing,
 } from 'react-native-reanimated';
+import { useEffect } from 'react';
+import { useReduceMotion } from './use-reduce-motion';
 
 export type AnimationState = 'idle' | 'loading' | 'success' | 'error';
 
@@ -17,17 +19,24 @@ interface UseStateAnimationOptions {
 
 /**
  * Hook pour animer les changements d'état (loading, success, error)
+ * Respecte les préférences d'accessibilité (reduceMotionEnabled)
  * Fournit des valeurs animées pour opacity, scale et translateY
  */
 export function useStateAnimation(
   state: AnimationState,
   options: UseStateAnimationOptions = {}
 ) {
+  const reduceMotion = useReduceMotion();
   const {
     duration = 300,
     successDuration = 500,
     errorDuration = 600,
   } = options;
+
+  // Adapter les durées selon les préférences d'accessibilité
+  const animationDuration = reduceMotion ? 0 : duration;
+  const animationSuccessDuration = reduceMotion ? 0 : successDuration;
+  const animationErrorDuration = reduceMotion ? 0 : errorDuration;
 
   // Valeurs animées
   const opacity = useSharedValue(1);
@@ -49,11 +58,11 @@ export function useStateAnimation(
       case 'loading':
         // Fade in + scale down légèrement
         opacity.value = withTiming(0.8, {
-          duration: duration,
+          duration: animationDuration,
           easing: Easing.inOut(Easing.ease),
         });
         scale.value = withTiming(0.98, {
-          duration: duration,
+          duration: animationDuration,
           easing: Easing.inOut(Easing.ease),
         });
         break;
@@ -62,37 +71,37 @@ export function useStateAnimation(
         // Pulse effect: scale up puis retour à la normale
         scale.value = withSequence(
           withTiming(1.05, {
-            duration: successDuration / 2,
+            duration: animationSuccessDuration / 2,
             easing: Easing.out(Easing.ease),
           }),
           withTiming(1, {
-            duration: successDuration / 2,
+            duration: animationSuccessDuration / 2,
             easing: Easing.in(Easing.ease),
           })
         );
         opacity.value = withTiming(1, {
-          duration: successDuration,
+          duration: animationSuccessDuration,
           easing: Easing.inOut(Easing.ease),
         });
         break;
 
       case 'error':
-        // Shake effect: translateX gauche-droite
+        // Shake effect: translateY haut-bas
         translateY.value = withSequence(
           withTiming(-8, {
-            duration: errorDuration / 4,
+            duration: animationErrorDuration / 4,
             easing: Easing.inOut(Easing.ease),
           }),
           withTiming(8, {
-            duration: errorDuration / 4,
+            duration: animationErrorDuration / 4,
             easing: Easing.inOut(Easing.ease),
           }),
           withTiming(-4, {
-            duration: errorDuration / 4,
+            duration: animationErrorDuration / 4,
             easing: Easing.inOut(Easing.ease),
           }),
           withTiming(0, {
-            duration: errorDuration / 4,
+            duration: animationErrorDuration / 4,
             easing: Easing.inOut(Easing.ease),
           })
         );
@@ -102,20 +111,20 @@ export function useStateAnimation(
       default:
         // Retour à l'état normal
         opacity.value = withTiming(1, {
-          duration: duration,
+          duration: animationDuration,
           easing: Easing.inOut(Easing.ease),
         });
         scale.value = withTiming(1, {
-          duration: duration,
+          duration: animationDuration,
           easing: Easing.inOut(Easing.ease),
         });
         translateY.value = withTiming(0, {
-          duration: duration,
+          duration: animationDuration,
           easing: Easing.inOut(Easing.ease),
         });
         break;
     }
-  }, [state, opacity, scale, translateY, duration, successDuration, errorDuration]);
+  }, [state, opacity, scale, translateY, animationDuration, animationSuccessDuration, animationErrorDuration, reduceMotion]);
 
   return {
     animatedStyle,

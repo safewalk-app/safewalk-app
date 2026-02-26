@@ -2,6 +2,7 @@ import React from 'react';
 import { View, ViewProps } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { useStateAnimation, type AnimationState } from '@/hooks/use-state-animation';
+import { useReduceMotion } from '@/hooks/use-reduce-motion';
 
 interface FeedbackAnimationProps extends ViewProps {
   /**
@@ -28,7 +29,7 @@ interface FeedbackAnimationProps extends ViewProps {
 
 /**
  * Composant pour animer les changements d'état
- * Utilise le hook useStateAnimation pour fournir des animations subtiles
+ * Respecte les préférences d'accessibilité (reduceMotionEnabled)
  *
  * Exemples:
  * ```tsx
@@ -50,10 +51,17 @@ export function FeedbackAnimation({
   style,
   ...props
 }: FeedbackAnimationProps) {
+  const reduceMotion = useReduceMotion();
+  
+  // Adapter les durées selon les préférences d'accessibilité
+  const animationDuration = reduceMotion ? 0 : duration;
+  const animationSuccessDuration = reduceMotion ? 0 : successDuration;
+  const animationErrorDuration = reduceMotion ? 0 : errorDuration;
+  
   const { animatedStyle } = useStateAnimation(state, {
-    duration,
-    successDuration,
-    errorDuration,
+    duration: animationDuration,
+    successDuration: animationSuccessDuration,
+    errorDuration: animationErrorDuration,
   });
 
   return (
@@ -70,7 +78,10 @@ export function FeedbackAnimation({
  * Composant pour afficher un indicateur de chargement avec animation
  */
 export function LoadingIndicator() {
-  const { animatedStyle } = useStateAnimation('loading');
+  const reduceMotion = useReduceMotion();
+  const { animatedStyle } = useStateAnimation('loading', {
+    duration: reduceMotion ? 0 : 300,
+  });
 
   return (
     <Animated.View
@@ -93,7 +104,10 @@ export function LoadingIndicator() {
  * Composant pour afficher un message de succès avec animation
  */
 export function SuccessIndicator() {
-  const { animatedStyle } = useStateAnimation('success');
+  const reduceMotion = useReduceMotion();
+  const { animatedStyle } = useStateAnimation('success', {
+    successDuration: reduceMotion ? 0 : 500,
+  });
 
   return (
     <Animated.View
@@ -118,7 +132,10 @@ export function SuccessIndicator() {
  * Composant pour afficher un message d'erreur avec animation
  */
 export function ErrorIndicator() {
-  const { animatedStyle } = useStateAnimation('error');
+  const reduceMotion = useReduceMotion();
+  const { animatedStyle } = useStateAnimation('error', {
+    errorDuration: reduceMotion ? 0 : 600,
+  });
 
   return (
     <Animated.View

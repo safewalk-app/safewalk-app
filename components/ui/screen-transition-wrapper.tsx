@@ -9,6 +9,7 @@ import Animated, {
   FadeOutUp,
 } from 'react-native-reanimated';
 import { useEffect } from 'react';
+import { useReduceMotion } from '@/hooks/use-reduce-motion';
 
 interface ScreenTransitionWrapperProps extends ViewProps {
   /**
@@ -31,7 +32,7 @@ interface ScreenTransitionWrapperProps extends ViewProps {
 
 /**
  * Composant pour animer les transitions entre écrans
- * Fournit des animations subtiles et fluides
+ * Respecte les préférences d'accessibilité (reduceMotionEnabled)
  *
  * Exemples:
  * ```tsx
@@ -52,8 +53,12 @@ export function ScreenTransitionWrapper({
   style,
   ...props
 }: ScreenTransitionWrapperProps) {
+  const reduceMotion = useReduceMotion();
   const opacity = useSharedValue(0);
   const translateY = useSharedValue(type === 'slideUp' ? 50 : type === 'slideDown' ? -50 : 0);
+
+  // Adapter la durée selon les préférences d'accessibilité
+  const animationDuration = reduceMotion ? 0 : duration;
 
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
@@ -61,23 +66,30 @@ export function ScreenTransitionWrapper({
   }));
 
   useEffect(() => {
+    // Si réduire les animations, afficher directement
+    if (reduceMotion) {
+      opacity.value = 1;
+      translateY.value = 0;
+      return;
+    }
+
     // Délai avant l'animation
     const timer = setTimeout(() => {
       opacity.value = withTiming(1, {
-        duration,
+        duration: animationDuration,
         easing: Easing.inOut(Easing.ease),
       });
 
       if (type !== 'fade') {
         translateY.value = withTiming(0, {
-          duration,
+          duration: animationDuration,
           easing: Easing.inOut(Easing.ease),
         });
       }
     }, delay);
 
     return () => clearTimeout(timer);
-  }, [opacity, translateY, duration, delay, type]);
+  }, [opacity, translateY, animationDuration, delay, type, reduceMotion]);
 
   return (
     <Animated.View
@@ -91,6 +103,7 @@ export function ScreenTransitionWrapper({
 
 /**
  * Composant pour animer la sortie d'un écran
+ * Respecte les préférences d'accessibilité (reduceMotionEnabled)
  */
 export function ScreenTransitionExit({
   type = 'fade',
@@ -99,8 +112,12 @@ export function ScreenTransitionExit({
   style,
   ...props
 }: Omit<ScreenTransitionWrapperProps, 'delay'>) {
+  const reduceMotion = useReduceMotion();
   const opacity = useSharedValue(1);
   const translateY = useSharedValue(0);
+
+  // Adapter la durée selon les préférences d'accessibilité
+  const animationDuration = reduceMotion ? 0 : duration;
 
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
@@ -108,19 +125,29 @@ export function ScreenTransitionExit({
   }));
 
   useEffect(() => {
+    // Si réduire les animations, masquer directement
+    if (reduceMotion) {
+      opacity.value = 0;
+      if (type !== 'fade') {
+        const direction = type === 'slideUp' ? -50 : 50;
+        translateY.value = direction;
+      }
+      return;
+    }
+
     opacity.value = withTiming(0, {
-      duration,
+      duration: animationDuration,
       easing: Easing.inOut(Easing.ease),
     });
 
     if (type !== 'fade') {
       const direction = type === 'slideUp' ? -50 : 50;
       translateY.value = withTiming(direction, {
-        duration,
+        duration: animationDuration,
         easing: Easing.inOut(Easing.ease),
       });
     }
-  }, [opacity, translateY, duration, type]);
+  }, [opacity, translateY, animationDuration, type, reduceMotion]);
 
   return (
     <Animated.View
