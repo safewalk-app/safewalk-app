@@ -558,3 +558,43 @@ Fichiers: lib/context/loading-context.tsx, hooks/use-loading-indicator.ts, compo
 - [x] LOADING_INDICATOR_EXAMPLE.tsx (6 exemples pratiques)
 - [x] Intégration dans les fichiers existants
 - [x] Bonnes pratiques et dépannage
+
+
+## PHASE 15: LOADING INDICATORS INTEGRATION (V12.2) - COMPLÉTÉE ✅
+
+### Z) Integration in App Layout ✅ COMPLÈTE
+- [x] Ajouter LoadingProvider dans app/_layout.tsx
+- [x] Ajouter LoadingBar composant au layout principal
+- [x] Vérifier que le provider wraps tous les écrans
+
+### AA) Integration in Screens ✅ COMPLÈTE
+- [x] Mettre à jour new-session.tsx avec useLoadingWrapper
+- [x] Ajouter withSessionLoading hook pour startSession
+- [x] Mettre à jour active-session.tsx avec useLoadingWrapper
+- [x] Ajouter withCompleteLoading pour endSession
+- [x] Ajouter withExtendLoading pour addTimeToSession
+
+### AB) Testing ✅ COMPLÈTE
+- [x] Créer __tests__/loading-indicator.test.ts
+- [x] Tests pour LoadingContext (track, update, progress, state)
+- [x] Tests pour useLoadingIndicator (IDs, progress simulation, minDuration)
+- [x] Tests pour useLoadingWrapper (wrap, error handling, cleanup)
+- [x] Tests pour composants (render, progress display)
+- [x] Tests d'intégration (concurrent items, cleanup, duration)
+- [x] Tests de performance (rapid loading, memory)
+
+### AC) Documentation ✅ COMPLÈTE
+- [x] LOADING_INDICATOR_GUIDE.md (guide complet)
+- [x] LOADING_INDICATOR_EXAMPLE.tsx (6 exemples)
+- [x] Intégration dans lib/services/index.ts
+- [x] Intégration dans hooks/index.ts
+- [x] Bonnes pratiques et dépannage
+
+### AD) Architecture ✅ COMPLÈTE
+- [x] LoadingContext global avec LoadingProvider
+- [x] useLoading hook pour accès au contexte
+- [x] useLoadingIndicator pour contrôle manuel (start/finish)
+- [x] useLoadingWrapper pour wrapper automatique
+- [x] 4 composants d'affichage (LoadingBar, LoadingOverlay, LoadingBadge, LoadingIndicator)
+- [x] Support du tracking de progression 0-100%
+- [x] Animations fluides avec durée minimale configurable

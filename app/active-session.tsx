@@ -17,6 +17,7 @@ import { useRealTimeLocation } from '@/hooks/use-real-time-location';
 import { useLocationPermission } from '@/hooks/use-location-permission';
 import { useNotifications } from '@/hooks/use-notifications';
 import { useSOS } from '@/hooks/use-sos';
+import { useLoadingWrapper } from '@/hooks/use-loading-indicator';
 import { SOSButton } from '@/components/ui/sos-button';
 import { useRouter } from 'expo-router';
 import { useEffect, useState, useRef } from 'react';
@@ -34,6 +35,19 @@ import * as tripService from '@/lib/services/trip-service';
 export default function ActiveSessionScreen() {
   // Empêcher l'écran de s'éteindre pendant la session
   useKeepAwake();
+  
+  // Wrappers pour afficher les indicateurs de chargement
+  const withCompleteLoading = useLoadingWrapper({
+    name: 'Fin de la sortie',
+    type: 'service',
+    minDuration: 300,
+  });
+  
+  const withExtendLoading = useLoadingWrapper({
+    name: 'Extension de la sortie',
+    type: 'service',
+    minDuration: 300,
+  });
   
   // Vérifier l'état de la batterie
   const { batteryLevel, isLowBattery, isCriticalBattery } = useBatteryWarning();
@@ -335,46 +349,48 @@ export default function ActiveSessionScreen() {
   };
 
   const _completeSession = async () => {
-    // Capturer la position GPS si activee
-    if (settings.locationEnabled && location) {
-      logger.debug('Position capturee:', location);
-    }
-
-    // Si une alerte a ete envoyee, envoyer un SMS de confirmation
-    if (sessionState === 'overdue' && alertSMSRef.current) {
-      logger.debug('📤 Envoi SMS de confirmation "Je suis rentré"...');
-      try {
-        const { sendEmergencySMS } = await import('@/lib/services/sms-service');
-        const result = await sendEmergencySMS({
-          reason: 'confirmation',
-          contactName: settings.emergencyContactName || 'Contact',
-          contactPhone: settings.emergencyContactPhone || '',
-          firstName: settings.firstName || 'Votre contact',
-          note: currentSession?.note,
-          location: location || undefined,
-        });
-        
-        if (result.ok) {
-          logger.debug('✅ SMS de confirmation envoyé:', result.sid);
-          sendNotification({
-            title: '✅ Contact rassuré',
-            body: `${settings.emergencyContactName} a été informé que vous êtes bien rentré`,
-            data: { type: 'confirmation_sent' },
-          });
-        } else {
-          logger.error('❌ Échec envoi SMS confirmation:', result.error);
-        }
-      } catch (error) {
-        logger.error('❌ Erreur lors de l\'envoi du SMS de confirmation:', error);
+    await withCompleteLoading(async () => {
+      // Capturer la position GPS si activee
+      if (settings.locationEnabled && location) {
+        logger.debug('Position capturee:', location);
       }
-    }
 
-    await endSession();
-    router.push('/');
-  };
+      // Si une alerte a ete envoyee, envoyer un SMS de confirmation
+      if (sessionState === 'overdue' && alertSMSRef.current) {
+        logger.debug('📤 Envoi SMS de confirmation "Je suis rentré"...');
+        try {
+          const { sendEmergencySMS } = await import('@/lib/services/sms-service');
+          const result = await sendEmergencySMS({
+            reason: 'confirmation',
+            contactName: settings.emergencyContactName || 'Contact',
+            contactPhone: settings.emergencyContactPhone || '',
+            firstName: settings.firstName || 'Votre contact',
+            note: currentSession?.note,
+            location: location || undefined,
+          });
+          
+          if (result.ok) {
+            logger.debug('✅ SMS de confirmation envoyé:', result.sid);
+            sendNotification({
+              title: '✅ Contact rassuré',
+              body: `${settings.emergencyContactName} a été informé que vous êtes bien rentré`,
+              data: { type: 'confirmation_sent' },
+            });
+          } else {
+            logger.error('❌ Échec envoi SMS confirmation:', result.error);
+          }
+        } catch (error) {
+          logger.error('❌ Erreur lors de l\'envoi du SMS de confirmation:', error);
+        }
+      }
+
+      await endSession();
+      router.push('/');
+    });
+  }
 
   const handleExtendSession = async () => {
-    await addTimeToSession(15);
+    await withExtendLoading(() => addTimeToSession(15));
     // Afficher un toast de confirmation
     logger.debug('🔔 [Notification] Envoi notification d\'extension (+15 min)');
     sendNotification({

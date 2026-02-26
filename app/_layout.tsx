@@ -20,8 +20,10 @@ import type { EdgeInsets, Metrics, Rect } from "react-native-safe-area-context";
 import { initManusRuntime, subscribeSafeAreaInsets } from "@/lib/_core/manus-runtime";
 import { AppProvider } from "@/lib/context/app-context";
 import { ToastProvider } from "@/lib/context/toast-context";
+import { LoadingProvider } from "@/lib/context/loading-context";
 import { PermissionsCheck } from "@/components/permissions-check";
 import { ToastContainer } from "@/components/ui/toast";
+import { LoadingBar } from "@/components/ui/loading-indicator";
 import { useToast } from "@/lib/context/toast-context";
 import { usePushNotifications } from "@/hooks/use-push-notifications";
 
@@ -111,44 +113,48 @@ export default function RootLayout() {
 
   const content = (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <QueryClientProvider client={queryClient}>
-        <ToastProvider>
-          <AppProvider>
-            <PermissionsCheck />
-            <ToastContainerWrapper />
-            <PushNotificationsSetup />
-            {/* Suspense boundary for lazy-loaded screens */}
-            <Suspense fallback={<ScreenLoadingFallback />}>
-              {/* Stack with all routes - flow screens without nav */}
-              {/* Expo Router Stack uses default slide animation from right */}
-              <Stack
-                screenOptions={{
-                  headerShown: false,
-                  // Slide animation from right (default for Expo Router)
-                  animation: 'slide_from_right',
-                }}
-                initialRouteName="index"
-              >
-                {/* Onboarding */}
-                <Stack.Screen name="onboarding" />
-                
-                {/* Main screens with nav */}
-                <Stack.Screen name="index" />
-                <Stack.Screen name="settings" />
-                
-                {/* Flow screens without nav */}
-                <Stack.Screen name="new-session" />
-                <Stack.Screen name="active-session" />
-                <Stack.Screen name="alert-sent" />
-                <Stack.Screen name="history" />
-                
-                <Stack.Screen name="oauth/callback" />
-              </Stack>
-              <StatusBar style="auto" />
-            </Suspense>
-          </AppProvider>
-        </ToastProvider>
-      </QueryClientProvider>
+      <LoadingProvider>
+        <QueryClientProvider client={queryClient}>
+          <ToastProvider>
+            <AppProvider>
+              <PermissionsCheck />
+              <ToastContainerWrapper />
+              <PushNotificationsSetup />
+              {/* Suspense boundary for lazy-loaded screens */}
+              <Suspense fallback={<ScreenLoadingFallback />}>
+                {/* Stack with all routes - flow screens without nav */}
+                {/* Expo Router Stack uses default slide animation from right */}
+                <Stack
+                  screenOptions={{
+                    headerShown: false,
+                    // Slide animation from right (default for Expo Router)
+                    animation: 'slide_from_right',
+                  }}
+                  initialRouteName="index"
+                >
+                  {/* Onboarding */}
+                  <Stack.Screen name="onboarding" />
+                  
+                  {/* Main screens with nav */}
+                  <Stack.Screen name="index" />
+                  <Stack.Screen name="settings" />
+                  
+                  {/* Flow screens without nav */}
+                  <Stack.Screen name="new-session" />
+                  <Stack.Screen name="active-session" />
+                  <Stack.Screen name="alert-sent" />
+                  <Stack.Screen name="history" />
+                  
+                  <Stack.Screen name="oauth/callback" />
+                </Stack>
+                <StatusBar style="auto" />
+              </Suspense>
+            </AppProvider>
+          </ToastProvider>
+        </QueryClientProvider>
+        {/* Global loading indicator - visible across all screens */}
+        <LoadingBar />
+      </LoadingProvider>
     </GestureHandlerRootView>
   );
 

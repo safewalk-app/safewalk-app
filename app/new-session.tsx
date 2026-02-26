@@ -10,6 +10,7 @@ import { useApp } from '@/lib/context/app-context';
 import { useRouter } from 'expo-router';
 import { useState, useEffect } from 'react';
 import { useProfileData } from '@/hooks/use-profile-data';
+import { useLoadingWrapper } from '@/hooks/use-loading-indicator';
 import { ToastPop } from '@/components/ui/toast-pop';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { supabase } from '@/lib/supabase';
@@ -34,6 +35,13 @@ export default function NewSessionScreen() {
     message?: string;
   }>({ visible: false });
   const profileData = useProfileData();
+
+  // Wrapper pour afficher l'indicateur de chargement lors du démarrage de la sortie
+  const withSessionLoading = useLoadingWrapper({
+    name: 'Démarrage de la sortie',
+    type: 'service',
+    minDuration: 300,
+  });
 
   // Cooldown de 2 secondes entre les démarrages de sortie
   const { trigger: triggerStartSession, isOnCooldown, remainingTime } = useCooldown({
@@ -123,10 +131,13 @@ export default function NewSessionScreen() {
       setSubmitState('loading');
 
       try {
-        const result = await startSession({
-          deadline: limitTime,
-          note,
-        });
+        // Afficher l'indicateur de chargement pendant le démarrage de la sortie
+        const result = await withSessionLoading(() =>
+          startSession({
+            deadline: limitTime,
+            note,
+          })
+        );
 
         if (result.success) {
           setSubmitState('success');
