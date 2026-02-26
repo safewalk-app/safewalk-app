@@ -9,6 +9,8 @@ import { ScreenTransition } from '@/components/ui/screen-transition';
 import { CheckInModal } from '@/components/ui/check-in-modal';
 import { BackgroundWarningModal, shouldShowBackgroundWarning } from '@/components/background-warning-modal';
 import { useBatteryWarning, BatteryWarningBanner } from '@/components/battery-warning';
+import { GPSStatusIndicator } from '@/components/ui/gps-status-indicator';
+import { FeedbackAnimation } from '@/components/ui/feedback-animation';
 import { useApp } from '@/lib/context/app-context';
 import { useCheckInNotifications } from '@/hooks/use-check-in-notifications';
 import { useRealTimeLocation } from '@/hooks/use-real-time-location';
@@ -102,6 +104,9 @@ export default function ActiveSessionScreen() {
   const [sessionState, setSessionState] = useState<'active' | 'grace' | 'overdue'>('active');
   const [showCheckInModal, setShowCheckInModal] = useState(false);
   const [showWarningModal, setShowWarningModal] = useState(false);
+  const [confirmReturnState, setConfirmReturnState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [extendState, setExtendState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [cancelState, setCancelState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const timerNotificationRef = useRef<string | null>(null);
   const alertNotificationRef = useRef<string | null>(null);
   const alertSMSRef = useRef<string | null>(null); // Track si SMS d'alerte envoyé
@@ -656,23 +661,32 @@ export default function ActiveSessionScreen() {
           </GlassCard>
         </ScreenTransition>
 
+        {/* GPS Status Indicator */}
+        <ScreenTransition delay={100} duration={350}>
+          <GPSStatusIndicator enabled={settings.locationEnabled} className="mb-4" />
+        </ScreenTransition>
+
         {/* Je suis rentré Button */}
         <ScreenTransition delay={200} duration={350}>
-          <BigSuccessButton
-            label="✅ Je suis rentré"
-            onPress={handleCompleteSession}
-          />
+          <FeedbackAnimation state={confirmReturnState}>
+            <BigSuccessButton
+              label="✅ Je suis rentré"
+              onPress={handleCompleteSession}
+            />
+          </FeedbackAnimation>
         </ScreenTransition>
 
         {/* + 15 min Button */}
         <ScreenTransition delay={300} duration={350}>
           <View className="mt-3 mb-3">
-            <CushionPillButton
-              label="+ 15 min"
-              onPress={handleExtendSession}
-              variant="secondary"
-              size="lg"
-            />
+            <FeedbackAnimation state={extendState}>
+              <CushionPillButton
+                label="+ 15 min"
+                onPress={handleExtendSession}
+                variant="secondary"
+                size="lg"
+              />
+            </FeedbackAnimation>
           </View>
         </ScreenTransition>
 
@@ -727,34 +741,40 @@ export default function ActiveSessionScreen() {
 
         {/* Annuler la sortie */}
         <ScreenTransition delay={500} duration={350}>
-          <Pressable 
-            onPress={async () => {
-              Alert.alert(
-                'Annuler la sortie ?',
-                'Êtes-vous sûr de vouloir annuler cette sortie ?',
-                [
-                  { text: 'Non', style: 'cancel' },
-                  {
-                    text: 'Oui, annuler',
-                    style: 'destructive',
-                    onPress: async () => {
-                      const result = await tripService.cancelTrip(currentSession?.id || '');
-                      if (result.success) {
-                        router.push('/home');
-                      } else {
-                        Alert.alert('Erreur', result.error || 'Impossible d\'annuler la sortie');
-                      }
+          <FeedbackAnimation state={cancelState}>
+            <Pressable 
+              onPress={async () => {
+                Alert.alert(
+                  'Annuler la sortie ?',
+                  'Êtes-vous sûr de vouloir annuler cette sortie ?',
+                  [
+                    { text: 'Non', style: 'cancel' },
+                    {
+                      text: 'Oui, annuler',
+                      style: 'destructive',
+                      onPress: async () => {
+                        setCancelState('loading');
+                        const result = await tripService.cancelTrip(currentSession?.id || '');
+                        if (result.success) {
+                          setCancelState('success');
+                          setTimeout(() => router.push('/home'), 500);
+                        } else {
+                          setCancelState('error');
+                          Alert.alert('Erreur', result.error || 'Impossible d\'annuler la sortie');
+                          setTimeout(() => setCancelState('idle'), 1000);
+                        }
+                      },
                     },
-                  },
-                ]
-              );
-            }}
-            className="py-4"
-          >
-            <Text className="text-center text-base font-bold text-error">
-              Annuler la sortie
-            </Text>
-          </Pressable>
+                  ]
+                );
+              }}
+              className="py-4"
+            >
+              <Text className="text-center text-base font-bold text-error">
+                Annuler la sortie
+              </Text>
+            </Pressable>
+          </FeedbackAnimation>
         </ScreenTransition>
       </ScrollView>
     </View>
