@@ -1,0 +1,196 @@
+// REFACTORISATION TRIP-SERVICE.TS
+// Intégration du système centralisé de notifications pour les erreurs et succès
+
+// 1. AJOUTER L'IMPORT
+import { notify } from '@/lib/services/notification.service';
+
+// 2. REFACTORISER startTrip() - Gestion des erreurs (ligne 159-179)
+
+// Avant:
+/*
+      if (errorCode === "no_credits") {
+        return {
+          success: false,
+          error: "Crédits insuffisants",
+          errorCode: "no_credits",
+        };
+      }
+      if (errorCode === "quota_reached") {
+        return {
+          success: false,
+          error: "Limite atteinte aujourd'hui",
+          errorCode: "quota_reached",
+        };
+      }
+      if (errorCode === "twilio_failed") {
+        return {
+          success: false,
+          error: "Impossible d'envoyer l'alerte, réessaiera",
+          errorCode: "twilio_failed",
+        };
+      }
+*/
+
+// Après:
+if (errorCode === "no_credits") {
+  notify('credits.empty');
+  return {
+    success: false,
+    error: "Crédits insuffisants",
+    errorCode: "no_credits",
+  };
+}
+if (errorCode === "quota_reached") {
+  notify('alert.quota_reached');
+  return {
+    success: false,
+    error: "Limite atteinte aujourd'hui",
+    errorCode: "quota_reached",
+  };
+}
+if (errorCode === "twilio_failed") {
+  notify('sms.failed_retry');
+  return {
+    success: false,
+    error: "Impossible d'envoyer l'alerte, réessaiera",
+    errorCode: "twilio_failed",
+  };
+}
+
+// 3. REFACTORISER startTrip() - Erreur téléphone non vérifié (ligne 115-122)
+
+// Avant:
+/*
+    if (!profile?.phone_verified) {
+      logger.warn("Start trip: Phone not verified", { userId: user.id });
+      return {
+        success: false,
+        error: "Phone number not verified",
+        errorCode: "PHONE_NOT_VERIFIED",
+      };
+    }
+*/
+
+// Après:
+if (!profile?.phone_verified) {
+  logger.warn("Start trip: Phone not verified", { userId: user.id });
+  notify('auth.otp_required');
+  return {
+    success: false,
+    error: "Phone number not verified",
+    errorCode: "PHONE_NOT_VERIFIED",
+  };
+}
+
+// 4. REFACTORISER startTrip() - Erreur rate limit (ligne 134-142)
+
+// Avant:
+/*
+      if (error.status === 429) {
+        const errorData = error.context?.json || {};
+        logger.warn("Start trip: Rate limit exceeded", { retryAfter: errorData.retryAfter });
+        return {
+          success: false,
+          error: errorData.message || "Trop de requêtes. Veuillez réessayer plus tard.",
+          errorCode: "rate_limit_exceeded",
+          message: `Réessayez dans ${errorData.retryAfter || 60} secondes`,
+        };
+      }
+*/
+
+// Après:
+if (error.status === 429) {
+  const errorData = error.context?.json || {};
+  logger.warn("Start trip: Rate limit exceeded", { retryAfter: errorData.retryAfter });
+  notify('error.rate_limited', {
+    variables: { seconds: errorData.retryAfter || 60 }
+  });
+  return {
+    success: false,
+    error: errorData.message || "Trop de requêtes. Veuillez réessayer plus tard.",
+    errorCode: "rate_limit_exceeded",
+    message: `Réessayez dans ${errorData.retryAfter || 60} secondes`,
+  };
+}
+
+// 5. REFACTORISER checkin() - Erreur rate limit (ligne 214-221)
+
+// Avant:
+/*
+      if (error.status === 429) {
+        const errorData = error.context?.json || {};
+        logger.warn("Checkin: Rate limit exceeded");
+        return {
+          success: false,
+          error: errorData.message || "Trop de requêtes. Veuillez réessayer plus tard.",
+          errorCode: "rate_limit_exceeded",
+        };
+      }
+*/
+
+// Après:
+if (error.status === 429) {
+  const errorData = error.context?.json || {};
+  logger.warn("Checkin: Rate limit exceeded");
+  notify('error.rate_limited', {
+    variables: { seconds: errorData.retryAfter || 60 }
+  });
+  return {
+    success: false,
+    error: errorData.message || "Trop de requêtes. Veuillez réessayer plus tard.",
+    errorCode: "rate_limit_exceeded",
+  };
+}
+
+// 6. AJOUTER NOTIFICATION DE SUCCÈS startTrip()
+
+// Après la ligne 185 (succès):
+logger.info("Trip started successfully", { tripId: data?.tripId });
+notify('trip.started', {
+  variables: { deadline: new Date(data?.deadline).toLocaleTimeString('fr-FR') }
+});
+return data as StartTripOutput;
+
+// 7. AJOUTER NOTIFICATION DE SUCCÈS checkin()
+
+// Après la ligne 232 (succès):
+logger.info("Checked in successfully", { tripId: data?.tripId });
+notify('trip.checked_in');
+return data as CheckinOutput;
+
+// 8. REFACTORISER extendTrip() - Ajouter notification de succès
+
+// Après la ligne 280 (ou équivalent):
+logger.info("Trip extended successfully", { tripId: data?.tripId });
+notify('trip.extended', {
+  variables: { minutes: input.addMinutes }
+});
+return data as ExtendOutput;
+
+// 9. REFACTORISER sendTestSms() - Gestion des erreurs
+
+// À faire: Ajouter notify() pour les erreurs spécifiques
+// - 'no_credits' -> notify('credits.empty')
+// - 'quota_reached' -> notify('alert.quota_reached')
+// - 'twilio_failed' -> notify('sms.test_failed')
+// - Succès -> notify('sms.test_sent')
+
+// 10. REFACTORISER triggerSOS() - Gestion des erreurs
+
+// À faire: Ajouter notify() pour les erreurs et succès
+// - Succès -> notify('alert.sent')
+// - Erreur -> notify('error.sos_failed')
+
+// RÉSUMÉ DES CHANGEMENTS
+// - Suppression de messages hardcodés dans les retours d'erreur
+// - Ajout de notify() pour chaque cas d'erreur/succès
+// - Cohérence avec le reste de l'app
+// - Facilité de maintenance et traduction
+// - Réduction de ~30 lignes de code redondant
+
+// NOTES IMPORTANTES
+// 1. Les notifications sont affichées AVANT le retour de la fonction
+// 2. Les codes d'erreur restent dans le retour pour la logique UI
+// 3. Les notifications ne remplacent pas les logs
+// 4. Les variables dynamiques sont passées via le paramètre 'variables'
+// 5. Les fallbacks sont gérés automatiquement par le service
