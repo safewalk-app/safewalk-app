@@ -1,4 +1,4 @@
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { View, Text, ScrollView, Pressable, Alert } from 'react-native';
 import { BubbleBackground } from '@/components/ui/bubble-background';
 import { GlassCard } from '@/components/ui/glass-card';
 import { HeroCardPremium } from '@/components/ui/hero-card-premium';
@@ -9,12 +9,17 @@ import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useProfileData } from '@/hooks/use-profile-data';
+import { supabase } from '@/lib/supabase';
 
 export default function IndexScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { settings, currentSession } = useApp();
+  const profileData = useProfileData();
   const [remainingTime, setRemainingTime] = useState<string>('');
+  const [phoneVerified, setPhoneVerified] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   // Update remaining time every second
   useEffect(() => {
@@ -40,15 +45,131 @@ export default function IndexScreen() {
     return () => clearInterval(interval);
   }, [currentSession]);
 
-  const handleStartSession = () => {
-    if (!settings.emergencyContactName || !settings.emergencyContactPhone) {
-      router.push('/settings');
-      return;
+  // Check phone verification on mount
+  useEffect(() => {
+    checkPhoneVerification();
+  }, []);
+
+  const checkPhoneVerification = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('phone_verified')
+        .eq('id', user.id)
+        .single();
+
+      setPhoneVerified(profile?.phone_verified || false);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error checking phone verification:', error);
+      setLoading(false);
     }
-    router.push('/new-session');
   };
 
-  const hasContact = settings.emergencyContactName && settings.emergencyContactPhone;
+  // Déterminer l'état de sécurité dynamiquement
+  const getSecurityStatus = () => {
+    const hasContact = settings.emergencyContactName && settings.emergencyContactPhone;
+    const hasCredits = profileData.subscription_active || profileData.free_alerts_remaining > 0;
+
+    // Cas 1: Aucun contact
+    if (!hasContact) {
+      return {
+        status: 'inactive',
+        title: 'Sécurité inactive',
+        subtitle: 'Ajoute un contact d\'urgence pour activer les alertes.',
+        isReady: false,
+      };
+    }
+
+    // Cas 2: Configuration incomplète
+    if (!phoneVerified || !hasCredits || !settings.locationEnabled) {
+      const reasons = [];
+      if (!phoneVerified) reasons.push('téléphone non vérifié');
+      if (!hasCredits) reasons.push('crédits épuisés');
+      if (!settings.locationEnabled) reasons.push('localisation désactivée');
+
+      return {
+        status: 'incomplete',
+        title: 'Sécurité incomplète',
+        subtitle: 'Finalise la configuration pour activer les alertes.',
+        isReady: false,
+        reasons,
+      };
+    }
+
+    // Cas 3: Tout est prêt
+    return {
+      status: 'active',
+      title: 'Sécurité active',
+      subtitle: 'Tes alertes sont prêtes.',
+      isReady: true,
+    };
+  };
+
+  const securityStatus = getSecurityStatus();
+
+  // Logique du CTA principal
+  const handleStartSession = () => {
+    const hasContact = settings.emergencyContactName && settings.emergencyContactPhone;
+    const hasCredits = profileData.subscription_active || profileData.free_alerts_remaining > 0;
+
+    // Cas 1: Contact manquant
+    if (!hasContact) {
+      Alert.alert(
+        'Contact d\'urgence manquant',
+        'Ajoute un contact d\'urgence pour continuer.',
+        [
+          { text: 'Annuler', style: 'cancel' },
+          {
+            text: 'Aller aux Paramètres',
+            onPress: () => router.push('/settings'),
+          },
+        ]
+      );
+      return;
+    }
+
+    // Cas 2: Téléphone non vérifié
+    if (!phoneVerified) {
+      Alert.alert(
+        'Téléphone non vérifié',
+        'Vérifie ton numéro pour activer les alertes.',
+        [
+          { text: 'Annuler', style: 'cancel' },
+          {
+            text: 'Vérifier maintenant',
+            onPress: () => router.push('/verify-otp'),
+          },
+        ]
+      );
+      return;
+    }
+
+    // Cas 3: Crédits épuisés
+    if (!hasCredits) {
+      Alert.alert(
+        'Pas d\'alertes disponibles',
+        'Tu n\'as plus d\'alertes disponibles. Ajoute des crédits pour continuer.',
+        [
+          { text: 'Annuler', style: 'cancel' },
+          {
+            text: 'Ajouter des crédits',
+            onPress: () => router.push('/paywall'),
+          },
+        ]
+      );
+      return;
+    }
+
+    // Cas 4: Tout est prêt - aller vers new-session
+    router.push('/new-session');
+  };
 
   return (
     <View className="flex-1 bg-background">
@@ -71,7 +192,7 @@ export default function IndexScreen() {
               SafeWalk
             </Text>
             <Text className="text-base text-muted">
-              Reste en sécurité, partout.
+              Reste en sécurité, où que tu sois.
             </Text>
           </View>
         </ScreenTransition>
@@ -81,20 +202,20 @@ export default function IndexScreen() {
           <View className="mb-3">
             <HeroCardPremium
               title="Je sors"
-              description="Définis une heure de retour. Un proche est prévenu si tu ne confirmes pas."
-              buttonLabel="Commencer"
+              description="Définis une heure de retour. Ton contact est prévenu automatiquement si tu ne confirmes pas ton retour."
+              buttonLabel="Démarrer une sortie"
               onButtonPress={handleStartSession}
             />
           </View>
         </ScreenTransition>
 
-        {/* Status Card */}
+        {/* Status Card - Dynamique */}
         <ScreenTransition delay={200} duration={350}>
           <View className="mb-3">
             <StatusCard
-              status={hasContact ? 'active' : 'inactive'}
-              title={hasContact ? 'Sécurité active' : 'Sécurité inactive'}
-              subtitle={hasContact ? 'Contact configuré' : 'Configurer un contact'}
+              status={securityStatus.status}
+              title={securityStatus.title}
+              subtitle={securityStatus.subtitle}
               onPress={() => router.push('/settings')}
             />
           </View>
@@ -143,7 +264,7 @@ export default function IndexScreen() {
                   Conseil du jour
                 </Text>
                 <Text className="text-xs text-muted leading-relaxed">
-                  Partage toujours ton heure de retour avec un proche de confiance.
+                  Un petit réflexe utile : fixe toujours une heure de retour.
                 </Text>
               </GlassCard>
             </View>
