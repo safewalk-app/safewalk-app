@@ -5,6 +5,7 @@ import { PopTextField } from '@/components/ui/pop-text-field';
 import { CushionPillButton } from '@/components/ui/cushion-pill-button';
 import { TimeLimitPicker } from '@/components/ui/time-limit-picker';
 import { ScreenTransition } from '@/components/ui/screen-transition';
+import { FeedbackAnimation } from '@/components/ui/feedback-animation';
 import { useApp } from '@/lib/context/app-context';
 import { useRouter } from 'expo-router';
 import { useState, useEffect } from 'react';
@@ -26,6 +27,7 @@ export default function NewSessionScreen() {
   const [showPaywallModal, setShowPaywallModal] = useState(false);
   const [phoneVerified, setPhoneVerified] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [submitState, setSubmitState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [rateLimitError, setRateLimitError] = useState<{
     visible: boolean;
     message?: string;
@@ -300,13 +302,15 @@ export default function NewSessionScreen() {
           onDismiss={() => setRateLimitError({ visible: false })}
         />
 
-        <CushionPillButton
-          label={isOnCooldown ? `Attendre ${Math.ceil(remainingTime / 1000)}s` : "Démarrer"}
-          onPress={handleStartSession}
-          variant="success"
-          size="lg"
-          disabled={isOnCooldown || loading}
-        />
+        <FeedbackAnimation state={submitState}>
+          <CushionPillButton
+            label={isOnCooldown ? `Attendre ${Math.ceil(remainingTime / 1000)}s` : "Démarrer"}
+            onPress={handleStartSession}
+            variant="success"
+            size="lg"
+            disabled={isOnCooldown || loading}
+          />
+        </FeedbackAnimation>
       </View>
 
       {/* Toast */}
