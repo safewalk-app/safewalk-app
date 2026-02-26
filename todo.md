@@ -457,3 +457,42 @@ Fichiers: app/active-session.tsx, app/settings.tsx, supabase/functions/test-sms/
 - [ ] Affichage des erreurs reseau avec retry
 - [ ] Cache des donnees utilisateur
 - [ ] Optimisation des performances
+
+
+## PHASE 13: LAZY LOADING & REDIS (V12.0+)
+
+### S) Lazy Loading Implementation (3h)
+Fichiers: lib/services/index.ts, hooks/index.ts, app/_layout.tsx, app/new-session.tsx, app/active-session.tsx
+- [x] Créer lib/services/index.ts avec lazy loading des services lourds
+- [x] Créer hooks/index.ts avec lazy loading des hooks lourds
+- [ ] Mettre à jour app/_layout.tsx avec Suspense boundary
+- [ ] Mettre à jour app/new-session.tsx pour utiliser getTripService()
+- [ ] Mettre à jour app/active-session.tsx pour utiliser getUseDeadlineTimer()
+- [ ] Mettre à jour app/settings.tsx pour utiliser lazy loading
+- [ ] Mettre à jour app/home.tsx pour utiliser lazy loading
+- [ ] Valider bundle size < 2.8 MB
+
+### T) Redis Configuration (2-3h)
+Fichiers: server/services/redis.service.ts, server/services/cache.service.ts
+- [ ] Installer Redis localement (apt-get ou Docker)
+- [ ] Créer server/services/redis.service.ts avec initRedis()
+- [ ] Créer server/services/cache.service.ts avec getCacheOrFetch()
+- [ ] Intégrer cache dans les routes API (GET /user/:id, GET /active-trip/:userId)
+- [ ] Ajouter cache invalidation après mutations
+- [ ] Créer tests Redis (cache.test.ts)
+- [ ] Valider API latency < 200ms
+
+### U) Production Redis Setup (1h)
+Fichiers: .env.production, server/_core/index.ts
+- [ ] Configurer AWS ElastiCache ou Redis Cloud
+- [ ] Ajouter variables d'environnement (REDIS_HOST, REDIS_PORT, REDIS_PASSWORD)
+- [ ] Intégrer initRedis() dans le démarrage du serveur
+- [ ] Ajouter closeRedis() à l'arrêt du serveur
+- [ ] Configurer monitoring Redis (métriques, alertes)
+- [ ] Valider la connexion en production
+
+### V) Checkpoint V12.0 (30min)
+- [ ] Tous les tests passent
+- [ ] Bundle size validé
+- [ ] API latency validé
+- [ ] Créer checkpoint V12.0
