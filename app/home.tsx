@@ -15,6 +15,7 @@ import * as Location from 'expo-location';
 import { useColors } from '@/hooks/use-colors';
 import { logger } from '@/lib/logger';
 import { useProfileData } from '@/hooks/use-profile-data';
+import { notify, notifyBlocked } from '@/lib/services/notification.service';
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -86,8 +87,7 @@ export default function HomeScreen() {
     try {
       const result = await Notifications.requestPermissionsAsync();
       if (result.granted) {
-        setToastMessage('Notifications activées');
-        setShowToast(true);
+        notify('permission.notifications_required');
       }
     } catch (error) {
       logger.error('Error requesting notifications:', error);
@@ -98,8 +98,7 @@ export default function HomeScreen() {
     try {
       const result = await Location.requestForegroundPermissionsAsync();
       if (result.granted) {
-        setToastMessage('Localisation autorisée');
-        setShowToast(true);
+        notify('permission.location_required');
       }
     } catch (error) {
       logger.error('Error requesting location:', error);
@@ -108,11 +107,10 @@ export default function HomeScreen() {
 
   const handleStartSession = () => {
     if (!hasContact) {
-      setToastMessage('Configure un contact d\'urgence');
-      setShowToast(true);
-      setTimeout(() => {
-        router.push('/settings');
-      }, 1500);
+      notifyBlocked('contact.missing', {
+        action: 'Aller aux Paramètres',
+        onAction: () => router.push('/settings'),
+      });
       return;
     }
 
