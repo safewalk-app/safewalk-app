@@ -1,6 +1,7 @@
 import { API_BASE_URL } from '../config/api';
 import { cleanPhoneNumber, validatePhoneNumber } from '../utils';
 import { logger } from '../logger';
+import { notify } from './notification.service';
 
 /**
  * Service SMS Unifié - Point d'entrée unique pour tous les envois SMS
@@ -171,6 +172,7 @@ export async function sendEmergencySMS(options: SendEmergencySMSOptions): Promis
 
     if (!response.ok || !data.ok) {
       logger.error(`❌ [SMS Service] Échec envoi:`, data);
+      notify('error.sms_failed');
       return {
         ok: false,
         error: data.error || `HTTP ${response.status}`,
@@ -179,6 +181,9 @@ export async function sendEmergencySMS(options: SendEmergencySMSOptions): Promis
     }
 
     logger.info(`✅ [SMS Service] SMS envoyé (SID: ${data.sid})`);
+    notify('sms.sent', {
+      variables: { phone: options.contactPhone }
+    });
     return {
       ok: true,
       sid: data.sid,
@@ -186,6 +191,7 @@ export async function sendEmergencySMS(options: SendEmergencySMSOptions): Promis
     };
   } catch (error: any) {
     logger.error('❌ [SMS Service] Exception:', error);
+    notify('error.sms_failed');
     return {
       ok: false,
       error: error.message || 'Erreur réseau',
@@ -220,6 +226,9 @@ export async function sendFriendlyAlertSMS(params: SendFriendlyAlertOptions): Pr
 
       const data = await response.json();
       logger.info('✅ [SMS Service] Friendly alert envoyés:', data);
+      notify('sms.sent', {
+        variables: { phone: params.contacts.map(c => c.phone).join(', ') }
+      });
       return;
     } catch (error) {
       lastError = error as Error;
@@ -231,6 +240,7 @@ export async function sendFriendlyAlertSMS(params: SendFriendlyAlertOptions): Pr
     }
   }
 
+  notify('error.sms_failed');
   throw new Error(`Échec friendly alert après ${maxRetries} tentatives: ${lastError?.message}`);
 }
 
@@ -260,6 +270,9 @@ export async function sendFollowUpAlertSMS(params: SendFollowUpOptions): Promise
 
       const data = await response.json();
       logger.info('✅ [SMS Service] Follow-up envoyés:', data);
+      notify('sms.sent', {
+        variables: { phone: params.contacts.map(c => c.phone).join(', ') }
+      });
       return;
     } catch (error) {
       lastError = error as Error;
@@ -271,6 +284,7 @@ export async function sendFollowUpAlertSMS(params: SendFollowUpOptions): Promise
     }
   }
 
+  notify('error.sms_failed');
   throw new Error(`Échec follow-up après ${maxRetries} tentatives: ${lastError?.message}`);
 }
 
