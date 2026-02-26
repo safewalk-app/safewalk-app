@@ -8,6 +8,7 @@
  */
 
 import { logger } from '@/lib/logger';
+import { notify } from '@/lib/services/notification.service';
 
 // URL de l'API depuis les variables d'environnement
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://3000-izg08xkxsyk2siv7372nz-49e5cc45.us1.manus.computer';
@@ -39,6 +40,17 @@ async function apiCall<T = any>(
 
     if (!response.ok) {
       logger.error(`❌ [API] Erreur ${response.status}:`, data);
+      
+      if (response.status === 429) {
+        notify('error.rate_limited', {
+          variables: { seconds: data.retryAfter || 60 }
+        });
+      } else if (response.status >= 500) {
+        notify('error.server_error');
+      } else if (response.status >= 400) {
+        notify('error.api_error');
+      }
+      
       throw new Error(data.error || `HTTP ${response.status}`);
     }
 
@@ -46,6 +58,13 @@ async function apiCall<T = any>(
     return data;
   } catch (error: any) {
     logger.error(`❌ [API] Exception:`, error.message);
+    
+    if (error.message.includes('fetch')) {
+      notify('error.network_error');
+    } else if (!error.message.includes('HTTP')) {
+      notify('error.api_error');
+    }
+    
     throw error;
   }
 }
