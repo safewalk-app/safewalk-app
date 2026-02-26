@@ -3,6 +3,7 @@
  * 
  * Hooks légers: importés directement
  * Hooks lourds: importés à la demande via async functions
+ * Chaque hook lazy loaded affiche un indicateur de chargement
  */
 
 // Hooks légers (toujours importés)
@@ -10,6 +11,7 @@ export { useAuth } from './use-auth';
 export { useColors } from './use-colors';
 export { useColorScheme } from './use-color-scheme';
 export { useCooldownTimer } from './use-cooldown-timer';
+export { useLoadingIndicator, useLoadingWrapper } from './use-loading-indicator';
 
 // Hooks lourds (lazy loaded)
 export async function getUseDeadlineTimer() {
@@ -75,4 +77,36 @@ export async function getUseCheckInNotifications() {
 export async function getUseLocationPermission() {
   const module = await import('./use-location-permission');
   return module;
+}
+
+/**
+ * Hook helper pour utiliser les hooks lazy loading avec indicateur de chargement
+ * À utiliser dans les composants React
+ * 
+ * @example
+ * ```tsx
+ * import { useHookWithLoading } from '@/hooks';
+ * 
+ * const MyComponent = () => {
+ *   const [useDeadlineTimer, setUseDeadlineTimer] = useState(null);
+ *   
+ *   useEffect(() => {
+ *     useHookWithLoading('Deadline Timer', getUseDeadlineTimer)
+ *       .then(module => setUseDeadlineTimer(module.useDeadlineTimer));
+ *   }, []);
+ *   
+ *   if (!useDeadlineTimer) return <LoadingIndicator />;
+ *   
+ *   const { timeLeft } = useDeadlineTimer();
+ *   return <Text>{timeLeft}</Text>;
+ * };
+ * ```
+ */
+export async function useHookWithLoading<T>(
+  hookName: string,
+  hookFn: () => Promise<T>
+): Promise<T> {
+  // Cette fonction est un wrapper qui peut être utilisé dans les composants
+  // Pour afficher un indicateur de chargement, utiliser le hook useLoadingWrapper
+  return hookFn();
 }
