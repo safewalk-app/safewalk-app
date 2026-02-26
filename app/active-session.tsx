@@ -69,8 +69,8 @@ export default function ActiveSessionScreen() {
       logger.debug('✅ SOS envoyé avec succès:', result);
       // Afficher une notification de succès
       sendNotification({
-        title: '✅ SOS envoyé',
-        body: `Alerte envoyée à ${result.smsResults?.filter(r => r.status === 'sent').length} contact(s)`,
+              title: '✅ SOS envoyé',
+              body: `Alerte envoyée à ${result.smsResults?.filter(r => r.status === 'sent').length} contact(s). Tu es en sécurité ?`,
         data: { type: 'sos_success' },
       });
     },
@@ -78,8 +78,8 @@ export default function ActiveSessionScreen() {
       logger.error('❌ Erreur SOS:', error);
       // Afficher une notification d'erreur
       sendNotification({
-        title: '❌ Erreur SOS',
-        body: error.message || 'Échec de l\'envoi de l\'alerte',
+              title: '❌ Erreur SOS',
+              body: error.message || 'Échec de l\'envoi de l\'alerte SOS',
         data: { type: 'sos_error' },
       });
     },
@@ -107,8 +107,8 @@ export default function ActiveSessionScreen() {
       logger.debug('Alerte imminente: < 5 minutes avant deadline');
       // Optionnel: envoyer une notification supplémentaire
       sendNotification({
-        title: '⏰ Attention',
-        body: 'Moins de 5 minutes avant votre deadline!',
+        title: '⚠️ Attention',
+        body: 'Moins de 5 minutes avant ton retour prévu!',
         data: { type: 'deadline_alert_imminent' },
       });
     }
@@ -373,7 +373,7 @@ export default function ActiveSessionScreen() {
             logger.debug('✅ SMS de confirmation envoyé:', result.sid);
             sendNotification({
               title: '✅ Contact rassuré',
-              body: `${settings.emergencyContactName} a été informé que vous êtes bien rentré`,
+              body: `${settings.emergencyContactName} a été informé que tu es bien rentré`,
               data: { type: 'confirmation_sent' },
             });
           } else {
@@ -394,8 +394,8 @@ export default function ActiveSessionScreen() {
     // Afficher un toast de confirmation
     logger.debug('🔔 [Notification] Envoi notification d\'extension (+15 min)');
     sendNotification({
-      title: '✅ +15 minutes ajoutées',
-      body: 'Nouvelle heure limite : ' + new Date(currentSession!.deadline + 15 * 60 * 1000).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+            title: '✅ +15 minutes ajoutées',
+            body: 'Nouveau retour prévu : ' + new Date(currentSession!.deadline + 15 * 60 * 1000).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
       data: { type: 'extension_confirmed' },
     });
   };
@@ -503,10 +503,10 @@ export default function ActiveSessionScreen() {
               <Pressable
                 onPress={() => {
                   Alert.alert(
-                     locationPermission.enabled ? 'Position GPS active' : 'Position GPS désactivée',
+                     locationPermission.enabled ? 'Position partagée' : 'Position non partagée',
                     locationPermission.enabled
-                      ? 'Votre position GPS est partagée dans les SMS d\'alerte.'
-                      : 'Activez la localisation dans Paramètres pour partager votre position en cas d\'alerte.',
+                      ? 'Ta position est partagée en cas d\'alerte.'
+                      : 'Active la localisation dans Paramètres pour partager ta position en cas d\'alerte.',
                     [
                       { text: 'OK', style: 'default' },
                       locationPermission.enabled
@@ -555,7 +555,7 @@ export default function ActiveSessionScreen() {
                     Aucune connexion Internet
                   </Text>
                   <Text className="text-xs text-muted leading-relaxed">
-                    L'alerte SMS ne pourra pas être envoyée. Vérifiez votre connexion WiFi ou cellulaire.
+                    L'alerte SMS ne pourra pas être envoyée. Vérifie ta connexion WiFi ou cellulaire.
                   </Text>
                 </View>
               </View>
@@ -592,7 +592,7 @@ export default function ActiveSessionScreen() {
                   </Text>
                   <View className="flex-1">
                     <Text className="text-sm font-semibold text-foreground">
-                      {locationTracking.isTracking ? 'Suivi GPS actif' : locationTracking.error ? 'Erreur GPS' : 'Suivi GPS inactif'}
+                      {locationTracking.isTracking ? 'Position partagée' : locationTracking.error ? 'Erreur GPS' : 'Position non partagée'}
                     </Text>
                     {locationTracking.lastSentAt && (
                       <Text className="text-xs text-muted">
@@ -644,13 +644,13 @@ export default function ActiveSessionScreen() {
             {/* Informations détaillées */}
             <View className="gap-2 mt-3 pt-3 border-t" style={{ borderTopColor: timerColor + '20' }}>
               <View className="flex-row justify-between">
-                <Text className="text-sm text-muted">Heure limite (retour prévu) :</Text>
+                <Text className="text-sm text-muted">Retour prévu :</Text>
                 <Text className="text-sm font-semibold text-foreground">
                   {limitTimeStr}
                 </Text>
               </View>
               <View className="flex-row justify-between">
-                <Text className="text-sm text-muted">Heure d'alerte :</Text>
+                <Text className="text-sm text-muted">Alerte à :</Text>
                 <Text className="text-sm font-semibold text-foreground">
                   {deadlineStr}
                 </Text>
@@ -662,7 +662,7 @@ export default function ActiveSessionScreen() {
             {sessionState === 'grace' && (
               <View className="mt-3 pt-3 border-t" style={{ borderTopColor: timerColor + '20' }}>
                 <Text className="text-xs text-warning font-semibold">
-                  ⚠️ Vous êtes en retard par rapport à votre heure limite. L'alerte sera déclenchée à {deadlineStr}.
+                  ⚠️ Tu es en retard. L'alerte sera déclenchée à {deadlineStr}.
                 </Text>
               </View>
             )}
@@ -670,7 +670,7 @@ export default function ActiveSessionScreen() {
             {sessionState === 'overdue' && (
               <View className="mt-3 pt-3 border-t" style={{ borderTopColor: timerColor + '20' }}>
                 <Text className="text-xs text-error font-semibold">
-                  🚨 Alerte déclenchée ! Vos contacts d'urgence ont été notifiés.
+                  🚨 Alerte déclenchée ! Ton contact a été prévenu.
                 </Text>
               </View>
             )}
@@ -700,7 +700,7 @@ export default function ActiveSessionScreen() {
           <View className="mt-3 mb-3">
             <FeedbackAnimation state={extendState}>
               <CushionPillButton
-                label="+ 15 min"
+                label="Prolonger de 15 min"
                 onPress={handleExtendSession}
                 variant="secondary"
                 size="lg"
@@ -724,11 +724,11 @@ export default function ActiveSessionScreen() {
                 if (!result.success) {
                   const errorCode = result.errorCode;
                   if (errorCode === 'quota_reached') {
-                    Alert.alert('Limite atteinte', 'Tu as atteint la limite d\'alertes SOS pour aujourd\'hui.');
+                    Alert.alert('Limite atteinte', 'Tu as atteint la limite d\'alertes SOS pour aujourd\'hui. Essaie demain.');
                   } else if (errorCode === 'twilio_failed') {
-                    Alert.alert('Erreur d\'envoi', 'Impossible d\'envoyer l\'alerte SOS. Réessaiera automatiquement.');
+                    Alert.alert('Erreur d\'envoi', 'Impossible d\'envoyer l\'alerte SOS. Nous réessayerons automatiquement.');
                   } else {
-                    Alert.alert('Erreur SOS', result.error || 'Erreur lors de l\'envoi de l\'alerte SOS.');
+                    Alert.alert('Erreur SOS', result.error || 'Erreur lors de l\'envoi de l\'alerte SOS. Réessaie plus tard.');
                   }
                 }
               }
@@ -740,8 +740,8 @@ export default function ActiveSessionScreen() {
                 onPress={async () => {
                   // HAUTE #9: Confirmation SOS avec delai
                   Alert.alert(
-                    'Declencher SOS ?',
-                    'Etes-vous en danger ? Cette action alertera vos contacts d\'urgence.',
+                    'Déclencher SOS ?',
+                    'Es-tu en danger ? Cette action alertera ton contact d\'urgence.',
                     [
                       { text: 'Annuler', style: 'cancel' },
                       {
@@ -764,11 +764,11 @@ export default function ActiveSessionScreen() {
         {/* Annuler la sortie */}
         <ScreenTransition delay={500} duration={350}>
           <FeedbackAnimation state={cancelState}>
-            <Pressable 
+              <Pressable 
               onPress={async () => {
                 Alert.alert(
                   'Annuler la sortie ?',
-                  'Êtes-vous sûr de vouloir annuler cette sortie ?',
+                  'Es-tu sûr de vouloir annuler cette sortie ?',
                   [
                     { text: 'Non', style: 'cancel' },
                     {
