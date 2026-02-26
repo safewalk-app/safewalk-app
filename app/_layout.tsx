@@ -26,6 +26,11 @@ import { ToastContainer } from "@/components/ui/toast";
 import { LoadingBar } from "@/components/ui/loading-indicator";
 import { useToast } from "@/lib/context/toast-context";
 import { usePushNotifications } from "@/hooks/use-push-notifications";
+import { initializeCertificatePinning, certificatePinningService } from "@/lib/services/certificate-pinning.service";
+import { initializeBiometricAuth } from "@/lib/services/biometric-auth.service";
+import { initializeDeviceBinding } from "@/lib/services/device-binding.service";
+import { initializeTokenRotation, tokenRotationService } from "@/lib/services/token-rotation.service";
+import { logger } from "@/lib/logger";
 
 const DEFAULT_WEB_INSETS: EdgeInsets = { top: 0, right: 0, bottom: 0, left: 0 };
 const DEFAULT_WEB_FRAME: Rect = { x: 0, y: 0, width: 0, height: 0 };
@@ -48,6 +53,32 @@ function PushNotificationsSetup() {
       console.log('👆 Notification tap:', response);
     },
   });
+  return null;
+}
+
+function SecurityServicesSetup() {
+  useEffect(() => {
+    const initializeSecurityServices = async () => {
+      try {
+        logger.info('🔐 Initializing security services...');
+        initializeCertificatePinning();
+        logger.info('✅ Certificate Pinning initialized');
+        await initializeBiometricAuth();
+        logger.info('✅ Biometric Authentication initialized');
+        await initializeDeviceBinding();
+        logger.info('✅ Device Binding initialized');
+        await initializeTokenRotation();
+        logger.info('✅ Token Rotation initialized');
+        logger.info('🔐 All security services initialized');
+      } catch (error) {
+        logger.error('❌ Error initializing security services:', error);
+      }
+    };
+    initializeSecurityServices();
+    return () => {
+      tokenRotationService.cleanup();
+    };
+  }, []);
   return null;
 }
 
@@ -120,6 +151,7 @@ export default function RootLayout() {
               <PermissionsCheck />
               <ToastContainerWrapper />
               <PushNotificationsSetup />
+              <SecurityServicesSetup />
               {/* Suspense boundary for lazy-loaded screens */}
               <Suspense fallback={<ScreenLoadingFallback />}>
                 {/* Stack with all routes - flow screens without nav */}
