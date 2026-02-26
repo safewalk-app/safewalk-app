@@ -1,8 +1,15 @@
 {
-  "name": "app-template",
-  "version": "1.0.0",
+  "name": "safewalk-app",
+  "version": "10.0.0",
   "private": true,
   "main": "expo-router/entry",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "import": "./lib/index.js",
+      "require": "./lib/index.cjs"
+    }
+  },
   "scripts": {
     "dev": "concurrently -k \"pnpm dev:server\" \"pnpm dev:metro\"",
     "dev:server": "cross-env NODE_ENV=development tsx watch server/_core/index.ts",
