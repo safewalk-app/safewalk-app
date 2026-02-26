@@ -1,0 +1,215 @@
+// REFACTORISATION SETTINGS.TSX
+// Changements clés pour utiliser le système centralisé de notifications
+
+// 1. AJOUTER L'IMPORT
+import { notify, notifyBlocked, notifyConfirmation } from '@/lib/services/notification.service';
+
+// 2. REMPLACER LES MESSAGES DE VALIDATION CONTACT (ligne 152-168)
+
+// Avant:
+/*
+      if (!contactPhone || !contactName) {
+        Alert.alert(
+          'Contact d\'urgence manquant',
+          'Veuillez d\'abord configurer un contact d\'urgence pour tester les SMS.'
+        );
+        return;
+      }
+
+      const cleanedPhone = cleanPhoneNumber(contactPhone);
+      if (!validatePhoneNumber(cleanedPhone)) {
+        Alert.alert(
+          'Numéro invalide',
+          'Le numéro d\'urgence n\'est pas au bon format. Utilisez +33 suivi de 9 chiffres.'
+        );
+        return;
+      }
+*/
+
+// Après:
+if (!contactPhone || !contactName) {
+  notifyBlocked('contact.missing', {
+    action: 'Configurer',
+    onAction: () => {} // Déjà sur la page settings
+  });
+  return;
+}
+
+const cleanedPhone = cleanPhoneNumber(contactPhone);
+if (!validatePhoneNumber(cleanedPhone)) {
+  notify('contact.invalid');
+  return;
+}
+
+// 3. REMPLACER LES MESSAGES DE VÉRIFICATION TÉLÉPHONE (ligne 171-174)
+
+// Avant:
+/*
+      if (!profileData?.phone_verified) {
+        Alert.alert('Téléphone non vérifié', 'Veuillez d\'abord vérifier votre numéro de téléphone.');
+        return;
+      }
+*/
+
+// Après:
+if (!profileData?.phone_verified) {
+  notifyBlocked('auth.otp_required', {
+    action: 'Vérifier',
+    onAction: () => router.push('/otp-verification')
+  });
+  return;
+}
+
+// 4. REMPLACER LES MESSAGES DE CRÉDITS (ligne 177-180)
+
+// Avant:
+/*
+      if (profileData?.free_test_sms_remaining === 0 && !profileData?.subscription_active) {
+        Alert.alert('Pas de crédits', 'Vous n\'avez plus de SMS de test disponibles.');
+        return;
+      }
+*/
+
+// Après:
+if (profileData?.free_test_sms_remaining === 0 && !profileData?.subscription_active) {
+  notifyBlocked('credits.empty', {
+    action: 'Ajouter des crédits',
+    onAction: () => {} // Ouvrir paywall
+  });
+  return;
+}
+
+// 5. REMPLACER LES MESSAGES DE SUCCÈS SMS (ligne 186-188)
+
+// Avant:
+/*
+    if (result.success) {
+      setToastMessage('✅ SMS de test envoyé !');
+      setShowToast(true);
+*/
+
+// Après:
+if (result.success) {
+  notify('sms.test_sent', {
+    variables: { phone: contactPhone }
+  });
+
+// 6. REMPLACER LES MESSAGES D'ERREUR SMS (ligne 191-200)
+
+// Avant:
+/*
+      const errorCode = result.errorCode;
+      if (errorCode === 'no_credits') {
+        Alert.alert('Crédits insuffisants', 'Vous n\'avez plus de SMS de test disponibles.');
+      } else if (errorCode === 'quota_reached') {
+        Alert.alert('Limite atteinte', 'Vous avez atteint la limite d\'SMS pour aujourd\'hui.');
+      } else if (errorCode === 'twilio_failed') {
+        Alert.alert('Erreur d\'envoi', 'Impossible d\'envoyer le SMS. Réessaiera automatiquement.');
+      } else {
+        Alert.alert('Erreur', result.error || 'Impossible d\'envoyer le SMS de test');
+      }
+*/
+
+// Après:
+const errorCode = result.errorCode;
+if (errorCode === 'no_credits') {
+  notifyBlocked('credits.empty');
+} else if (errorCode === 'quota_reached') {
+  notify('alert.quota_reached');
+} else if (errorCode === 'twilio_failed') {
+  notify('sms.test_failed');
+} else {
+  notify('error.unknown');
+}
+
+// 7. REMPLACER LES MESSAGES D'AUTOSAVE (ligne 73-74, 98-99)
+
+// Avant:
+/*
+        setToastMessage('Prénom sauvegardé');
+        setShowToast(true);
+*/
+
+// Après:
+notify('settings.saved', {
+  variables: { field: 'Prénom' }
+});
+
+// 8. REMPLACER LES MESSAGES DE LOCALISATION (ligne 121-126)
+
+// Avant:
+/*
+      setToastMessage(
+        value
+          ? '✅ Localisation activée'
+          : 'Localisation désactivée'
+      );
+      setShowToast(true);
+*/
+
+// Après:
+notify(value ? 'permission.location_required' : 'permission.location_disabled');
+
+// 9. REMPLACER LES CONFIRMATIONS DE SUPPRESSION (ligne 205-222)
+
+// Avant:
+/*
+  const handleDeleteData = () => {
+    Alert.alert(
+      'Supprimer toutes les données ?',
+      'Cette action est irréversible.',
+      [
+        { text: 'Annuler', style: 'cancel' },
+        {
+          text: 'Supprimer',
+          style: 'destructive',
+          onPress: async () => {
+            await deleteAllData();
+            setToastMessage('Données supprimées');
+            setShowToast(true);
+          },
+        },
+      ]
+    );
+  };
+*/
+
+// Après:
+const handleDeleteData = () => {
+  notifyConfirmation('confirm.delete_data', {
+    onConfirm: async () => {
+      await deleteAllData();
+      notify('settings.data_deleted');
+    },
+  });
+};
+
+// 10. REMPLACER LES MESSAGES DE PERMISSION REFUSÉE (ligne 129-139)
+
+// Avant:
+/*
+      Alert.alert(
+        'Permission refusée',
+        'Pour activer la localisation, vous devez autoriser l\'accès dans les réglages de votre téléphone.',
+        [
+          { text: 'Annuler', style: 'cancel' },
+          {
+            text: 'Ouvrir Réglages',
+            onPress: () => locationPermission.openSettings(),
+          },
+        ]
+      );
+*/
+
+// Après:
+notifyBlocked('permission.location_required', {
+  action: 'Ouvrir Réglages',
+  onAction: () => locationPermission.openSettings(),
+});
+
+// RÉSUMÉ DES CHANGEMENTS
+// - Suppression de ~40 lignes de messages hardcodés
+// - Utilisation de 4 fonctions centralisées: notify(), notifyBlocked(), notifyConfirmation()
+// - Cohérence avec le reste de l'app
+// - Facilité de maintenance et traduction
+// - Réduction de la complexité du code
