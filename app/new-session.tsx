@@ -1,4 +1,4 @@
-import { ScrollView, Text, View, Modal } from 'react-native';
+import { ScrollView, View, Text, Pressable } from 'react-native';
 import { BubbleBackground } from '@/components/ui/bubble-background';
 import { GlassCard } from '@/components/ui/glass-card';
 import { PopTextField } from '@/components/ui/pop-text-field';
@@ -15,6 +15,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { supabase } from '@/lib/supabase';
 import { RateLimitErrorAlert } from '@/components/rate-limit-error-alert';
 import { useCooldown } from '@/lib/hooks/use-cooldown';
+import { notify, notifyBlocked } from '@/lib/services/notification.service';
 
 export default function NewSessionScreen() {
   const router = useRouter();
@@ -66,239 +67,164 @@ export default function NewSessionScreen() {
     }
   };
 
-  // Déterminer la raison du blocage si applicable
-  const getBlockingReason = () => {
+  // Vérifier les blocages et afficher les notifications appropriées
+  const checkBlockingConditions = () => {
     if (!settings.emergencyContactName || !settings.emergencyContactPhone) {
-      return {
-        reason: 'Contact d\'urgence manquant',
-        message: 'Ajoute un contact d\'urgence pour démarrer une sortie.',
+      notifyBlocked('contact.missing', {
         action: 'Aller aux Paramètres',
         onAction: () => router.push('/settings'),
-      };
+      });
+      return true;
     }
     if (!phoneVerified) {
-      return {
-        reason: 'Numéro non vérifié',
-        message: 'Vérifie ton numéro pour activer les alertes SMS.',
+      notifyBlocked('auth.otp_required', {
         action: 'Vérifier maintenant',
         onAction: () => setShowOtpModal(true),
-      };
+      });
+      return true;
     }
     const hasCredits = profileData.subscription_active || profileData.free_alerts_remaining > 0;
     if (!hasCredits) {
-      return {
-        reason: 'Crédits insuffisants',
-        message: 'Tu as atteint la limite d\'aujourd\'hui. Ajoute des crédits pour continuer.',
+      notifyBlocked('credits.empty', {
         action: 'Ajouter des crédits',
         onAction: () => setShowPaywallModal(true),
-      };
+      });
+      return true;
     }
     if (!settings.locationEnabled) {
-      return {
-        reason: 'Localisation désactivée',
-        message: 'Active la localisation dans Paramètres pour partager ta position en cas d\'alerte.',
+      notifyBlocked('permission.location_required', {
         action: 'Aller aux Paramètres',
         onAction: () => router.push('/settings'),
-      };
+      });
+      return true;
     }
-    return null;
+    return false;
   };
 
   const handleStartSession = async () => {
     await triggerStartSession(async () => {
-    // Check 1: Emergency contact
-    if (!settings.emergencyContactName || !settings.emergencyContactPhone) {
-      setToastMessage('Configure un contact d\'urgence d\'abord');
-      setTimeout(() => {
-        setToastMessage('');
-        router.push('/settings');
-      }, 2000);
-      return;
-    }
-
-    // Check 2: Phone verification
-    if (!phoneVerified) {
-      setShowOtpModal(true);
-      return;
-    }
-
-    // Check 3: Credits
-    const hasCredits = profileData.subscription_active || profileData.free_alerts_remaining > 0;
-    if (!hasCredits) {
-      setShowPaywallModal(true);
-      return;
-    }
-
-    // Check 4: Localisation activee
-    if (!settings.locationEnabled) {
-      setToastMessage('Veuillez activer la localisation');
-      setTimeout(() => {
-        setToastMessage('');
-        router.push('/settings');
-      }, 2000);
-      return;
-    }
-
-    // Check 5: Deadline valide (minimum 15 minutes)
-    const now = Date.now();
-    const minDeadline = now + (15 * 60 * 1000);
-    if (limitTime <= now) {
-      setToastMessage('La deadline doit etre dans le futur');
-      return;
-    }
-    if (limitTime < minDeadline) {
-      setToastMessage('La deadline doit etre au minimum dans 15 minutes');
-      return;
-    }
-
-    // All checks passed - start the session
-    try {
-      setLoading(true);
-      const result = await startSession(limitTime, note);
-      
-      // Check if startSession returned an error
-      if (!result || result.success === false) {
-        const errorCode = result?.errorCode;
-        
-        if (errorCode === 'no_credits') {
-          setShowPaywallModal(true);
-          setLoading(false);
-          return;
-        }
-        if (errorCode === 'quota_reached') {
-          setToastMessage('Limite atteinte aujourd\'hui');
-          setLoading(false);
-          setTimeout(() => setToastMessage(''), 3000);
-          return;
-        }
-        if (errorCode === 'twilio_failed') {
-          setToastMessage('Impossible d\'envoyer l\'alerte, réessaiera');
-          setLoading(false);
-          setTimeout(() => setToastMessage(''), 3000);
-          return;
-        }
-        
-        // Generic error
-        setToastMessage(result?.error || 'Erreur lors du démarrage');
-        setLoading(false);
-        setTimeout(() => setToastMessage(''), 3000);
+      // Vérifier les blocages
+      if (checkBlockingConditions()) {
         return;
       }
-      
-      setLoading(false);
-      router.push('/active-session');
-    } catch (error) {
-      setLoading(false);
-      setToastMessage('Erreur lors du démarrage');
-      setTimeout(() => setToastMessage(''), 3000);
-    }
+
+      // Vérifier deadline valide (minimum 15 minutes)
+      const now = Date.now();
+      const minDeadline = now + (15 * 60 * 1000);
+      if (limitTime <= now) {
+        notify('error.unknown');
+        return;
+      }
+      if (limitTime < minDeadline) {
+        notify('error.unknown');
+        return;
+      }
+
+      setSubmitState('loading');
+
+      try {
+        const result = await startSession({
+          deadline: limitTime,
+          note,
+        });
+
+        if (result.success) {
+          setSubmitState('success');
+          notify('trip.started');
+          setTimeout(() => {
+            router.replace('/active-session');
+          }, 500);
+        } else if (result.error === 'rate_limit') {
+          setRateLimitError({
+            visible: true,
+            message: result.message,
+          });
+          setSubmitState('error');
+        } else {
+          setSubmitState('error');
+          notify('error.unknown');
+        }
+      } catch (error) {
+        setSubmitState('error');
+        notify('error.unknown');
+      }
     });
   };
 
-  const handleOtpSuccess = () => {
-    setPhoneVerified(true);
-    setShowOtpModal(false);
-    setToastMessage('Numéro vérifié ! Tu peux maintenant démarrer une sortie.');
-    setTimeout(() => setToastMessage(''), 2000);
-  };
-
-  // CTA height for bottom padding calculation
-  const ctaHeight = 60;
-  const bottomPadding = ctaHeight + insets.bottom + 12;
+  if (loading) {
+    return (
+      <View className="flex-1 bg-background justify-center items-center">
+        <Text className="text-foreground">Chargement...</Text>
+      </View>
+    );
+  }
 
   return (
-    <View className="flex-1 bg-background">
-      <BubbleBackground />
+    <ScreenTransition>
+      <View className="flex-1 bg-background">
+        <BubbleBackground />
 
-      <ScrollView
-        contentContainerStyle={{ flexGrow: 1 }}
-        className="relative z-10"
-        showsVerticalScrollIndicator={false}
-        style={{
-          paddingHorizontal: 16,
-          paddingTop: insets.top + 12,
-          paddingBottom: bottomPadding,
-        }}
-      >
-        {/* Header */}
-        <ScreenTransition delay={0} duration={350}>
-          <View className="gap-1 mb-6">
-            <Text className="text-4xl font-bold text-foreground">Je sors</Text>
-            <Text className="text-base text-muted">
-              Tu penses rentrer vers quelle heure ?
-            </Text>
-          </View>
-        </ScreenTransition>
-
-        {/* Time Limit Picker */}
-        <ScreenTransition delay={100} duration={350}>
-          <View className="gap-3 mb-4">
-            <TimeLimitPicker
-              selectedTime={limitTime}
-              onTimeSelected={setLimitTime}
-              accessibilityLabel="Sélecteur d'heure de retour"
-              accessibilityHint="Choisissez l'heure à laquelle vous pensez rentrer"
-            />
-          </View>
-        </ScreenTransition>
-
-        {/* Card Où vas-tu */}
-        <ScreenTransition delay={200} duration={350}>
-          <GlassCard className="gap-2 mb-3">
-            <Text className="text-sm font-medium text-muted">
-              Où vas-tu ? (optionnel)
-            </Text>
-            <PopTextField
-              placeholder="Ex: Soirée chez Karim..."
-              value={note}
-              onChangeText={setNote}
-              accessibilityLabel="Champ Où vas-tu"
-              accessibilityHint="Entrez optionnellement votre destination"
-            />
-          </GlassCard>
-        </ScreenTransition>
-
-        {/* Card Contact d'urgence */}
-        <ScreenTransition delay={300} duration={350}>
-          <GlassCard className="gap-2 mb-3">
-            <Text className="text-sm font-medium text-muted">
-              Contact d'urgence
-            </Text>
-            <View className="flex-row items-center justify-between">
-              <View className="flex-1">
-                <Text className="text-base font-semibold text-foreground">
-                  {settings.emergencyContactName || 'Non configuré'}
-                </Text>
-                <Text className="text-sm text-muted mt-1">
-                  {settings.emergencyContactPhone || ''}
-                </Text>
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1 }}
+          className="relative z-10"
+          showsVerticalScrollIndicator={false}
+          style={{
+            paddingTop: insets.top + 16,
+            paddingBottom: insets.bottom + 16,
+          }}
+        >
+          <View className="px-4 gap-6">
+            {/* Hero Card */}
+            <GlassCard className="gap-3">
+              <View className="flex-row items-center gap-3">
+                <Text className="text-4xl">🚀</Text>
+                <View className="flex-1">
+                  <Text className="text-2xl font-bold text-foreground">Je sors</Text>
+                  <Text className="text-sm text-muted">
+                    Définis une heure de retour. Un proche est prévenu si tu ne confirmes pas.
+                  </Text>
+                </View>
               </View>
-            </View>
-          </GlassCard>
-        </ScreenTransition>
+            </GlassCard>
 
-        {/* Card Localisation */}
-        <ScreenTransition delay={400} duration={350}>
-          <GlassCard className="gap-2">
-            <View className="flex-row items-center justify-between">
-              <View className="flex-1">
-                <Text className="text-sm font-medium text-muted">
-                  Localisation
-                </Text>
-                <Text className="text-xs text-muted mt-1">
-                  Ajouter ta position en cas d'alerte
-                </Text>
-              </View>
-            </View>
-          </GlassCard>
-        </ScreenTransition>
-      </ScrollView>
+            {/* Time Limit Picker */}
+            <GlassCard className="gap-4">
+              <Text className="text-base font-semibold text-foreground">Heure limite</Text>
+              <TimeLimitPicker value={limitTime} onChange={setLimitTime} />
+            </GlassCard>
 
-      {/* Sticky CTA Bottom */}
-      <View
-        className="px-4 bg-background border-t border-border"
-        style={{ paddingBottom: insets.bottom + 12, paddingTop: 12 }}
-      >
+            {/* Note */}
+            <GlassCard className="gap-3">
+              <Text className="text-base font-semibold text-foreground">Note (optionnel)</Text>
+              <PopTextField
+                placeholder="Ex: Je vais à la gym, puis au café..."
+                value={note}
+                onChangeText={setNote}
+                multiline
+                numberOfLines={3}
+              />
+            </GlassCard>
+
+            {/* Start Button */}
+            <FeedbackAnimation state={submitState} onDismiss={() => setSubmitState('idle')}>
+              <CushionPillButton
+                onPress={handleStartSession}
+                disabled={isOnCooldown || submitState === 'loading'}
+                accessibilityLabel="Démarrer la sortie"
+                accessibilityHint={
+                  isOnCooldown
+                    ? `Attendre ${Math.ceil(remainingTime / 1000)}s avant de démarrer`
+                    : 'Démarre une nouvelle sortie avec l\'heure limite définie'
+                }
+              >
+                <Text className="text-lg font-bold text-background">
+                  {isOnCooldown ? `Attendre ${Math.ceil(remainingTime / 1000)}s` : 'Commencer'}
+                </Text>
+              </CushionPillButton>
+            </FeedbackAnimation>
+          </View>
+        </ScrollView>
+
         {/* Rate Limit Error Alert */}
         <RateLimitErrorAlert
           visible={rateLimitError.visible}
@@ -306,28 +232,11 @@ export default function NewSessionScreen() {
           onDismiss={() => setRateLimitError({ visible: false })}
         />
 
-        <FeedbackAnimation state={submitState}>
-          <CushionPillButton
-            label={isOnCooldown ? `Attendre ${Math.ceil(remainingTime / 1000)}s` : "Démarrer"}
-            onPress={handleStartSession}
-            variant="success"
-            size="lg"
-            disabled={isOnCooldown || loading}
-            accessibilityLabel="Bouton Démarrer"
-            accessibilityHint="Appuyez pour démarrer la sortie"
-            accessibilityState={{ disabled: isOnCooldown || loading }}
-          />
-        </FeedbackAnimation>
+        {/* Toast */}
+        {toastMessage && (
+          <ToastPop message={toastMessage} onDismiss={() => setToastMessage('')} />
+        )}
       </View>
-
-      {/* Toast */}
-      {toastMessage && (
-        <ToastPop
-          message={toastMessage}
-          type="error"
-          onDismiss={() => setToastMessage('')}
-        />
-      )}
-    </View>
+    </ScreenTransition>
   );
 }
