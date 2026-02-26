@@ -4,6 +4,7 @@
 
 import { supabase } from "@/lib/supabase";
 import { logger } from "@/lib/logger";
+import { retryWithBackoff } from "@/lib/services/api-retry-helper";
 
 export interface StartTripInput {
   deadlineISO: string;
@@ -120,9 +121,13 @@ export async function startTrip(input: StartTripInput): Promise<StartTripOutput>
       };
     }
 
-    const { data, error } = await supabase.functions.invoke("start-trip", {
-      body: input,
-    });
+    // Invoke start-trip with retry logic
+    const retryResult = await retryWithBackoff(
+      () => supabase.functions.invoke("start-trip", { body: input }),
+      { maxRetries: 3, initialDelayMs: 500 }
+    );
+
+    const { data, error } = retryResult.success ? retryResult.data! : { data: null, error: retryResult.error };
 
     if (error) {
       // Handle rate limit error (429)
@@ -196,9 +201,13 @@ export async function checkin(input: CheckinInput): Promise<CheckinOutput> {
   try {
     logger.info("Checking in", { tripId: input.tripId });
 
-    const { data, error } = await supabase.functions.invoke("checkin", {
-      body: input,
-    });
+    // Invoke checkin with retry logic
+    const retryResult = await retryWithBackoff(
+      () => supabase.functions.invoke("checkin", { body: input }),
+      { maxRetries: 3, initialDelayMs: 500 }
+    );
+
+    const { data, error } = retryResult.success ? retryResult.data! : { data: null, error: retryResult.error };
 
     if (error) {
       // Handle rate limit error (429)
@@ -240,9 +249,13 @@ export async function extendTrip(input: ExtendInput): Promise<ExtendOutput> {
   try {
     logger.info("Extending trip", { tripId: input.tripId, addMinutes: input.addMinutes });
 
-    const { data, error } = await supabase.functions.invoke("extend", {
-      body: input,
-    });
+    // Invoke extend with retry logic
+    const retryResult = await retryWithBackoff(
+      () => supabase.functions.invoke("extend", { body: input }),
+      { maxRetries: 3, initialDelayMs: 500 }
+    );
+
+    const { data, error } = retryResult.success ? retryResult.data! : { data: null, error: retryResult.error };
 
     if (error) {
       // Handle rate limit error (429)

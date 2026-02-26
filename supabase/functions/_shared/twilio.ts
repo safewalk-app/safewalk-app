@@ -1,5 +1,5 @@
 // Shared Twilio helper for all Edge Functions
-// Handles SMS sending with error handling and logging
+// Handles SMS sending with error handling, logging, and retry logic
 
 export interface TwilioConfig {
   accountSid: string;
@@ -11,6 +11,8 @@ export interface SendSmsOptions {
   to: string;
   message: string;
   config: TwilioConfig;
+  maxRetries?: number; // Default: 3
+  initialDelayMs?: number; // Default: 1000ms
 }
 
 export interface SendSmsResponse {
@@ -18,73 +20,166 @@ export interface SendSmsResponse {
   messageSid?: string;
   error?: string;
   errorCode?: string;
+  retryCount?: number;
+  lastAttemptTime?: number;
 }
 
 /**
- * Send SMS via Twilio API
+ * Exponential backoff delay calculator
+ * @param attempt Attempt number (0-based)
+ * @param initialDelayMs Initial delay in milliseconds
+ * @returns Delay in milliseconds with jitter
+ */
+export function calculateBackoffDelay(attempt: number, initialDelayMs: number = 1000): number {
+  // Exponential: 1s, 2s, 4s, 8s, etc.
+  const exponentialDelay = initialDelayMs * Math.pow(2, attempt);
+  
+  // Add jitter (±10%) to prevent thundering herd
+  const jitter = exponentialDelay * 0.1 * (Math.random() * 2 - 1);
+  
+  return Math.max(100, exponentialDelay + jitter);
+}
+
+/**
+ * Sleep utility for delays
+ * @param ms Milliseconds to sleep
+ */
+export async function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * Check if error is retryable
+ * @param statusCode HTTP status code
+ * @param errorCode Twilio error code
+ * @returns true if error is temporary and should be retried
+ */
+export function isRetryableError(statusCode: number, errorCode?: string): boolean {
+  // Retry on network/server errors
+  if (statusCode >= 500) return true; // 5xx server errors
+  if (statusCode === 429) return true; // Rate limited
+  if (statusCode === 408) return true; // Request timeout
+  if (statusCode === 503) return true; // Service unavailable
+  
+  // Don't retry on client errors (4xx) except those above
+  if (statusCode >= 400 && statusCode < 500) return false;
+  
+  // Retry on specific Twilio error codes
+  const retryableErrorCodes = [
+    'TWILIO_EXCEPTION', // Network error
+    'CONNECTION_ERROR',
+    'TIMEOUT',
+  ];
+  
+  return retryableErrorCodes.includes(errorCode || '');
+}
+
+/**
+ * Send SMS via Twilio API with retry logic
  * @param options SendSmsOptions with recipient, message, and Twilio config
  * @returns SendSmsResponse with messageSid or error details
  */
 export async function sendSms(options: SendSmsOptions): Promise<SendSmsResponse> {
-  const { to, message, config } = options;
+  const { to, message, config, maxRetries = 3, initialDelayMs = 1000 } = options;
+  
+  let lastError: SendSmsResponse = {
+    success: false,
+    error: 'Unknown error',
+    errorCode: 'UNKNOWN',
+  };
 
-  try {
-    // Validate inputs
-    if (!to || !message || !config.accountSid || !config.authToken || !config.fromNumber) {
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      // Validate inputs
+      if (!to || !message || !config.accountSid || !config.authToken || !config.fromNumber) {
+        return {
+          success: false,
+          error: 'Missing required parameters',
+          errorCode: 'INVALID_PARAMS',
+          retryCount: attempt,
+        };
+      }
+
+      // Twilio API endpoint
+      const url = `https://api.twilio.com/2010-04-01/Accounts/${config.accountSid}/Messages.json`;
+
+      // Prepare form data
+      const formData = new URLSearchParams();
+      formData.append('From', config.fromNumber);
+      formData.append('To', to);
+      formData.append('Body', message);
+
+      // Create Basic Auth header
+      const auth = btoa(`${config.accountSid}:${config.authToken}`);
+
+      // Send request
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Basic ${auth}`,
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: formData.toString(),
+      });
+
+      // Parse response
+      const data = await response.json() as Record<string, unknown>;
+
+      if (!response.ok) {
+        const errorData = data as Record<string, unknown>;
+        const errorCode = (errorData.code as string) || 'TWILIO_ERROR';
+        
+        lastError = {
+          success: false,
+          error: (errorData.message as string) || 'Twilio API error',
+          errorCode,
+          retryCount: attempt,
+          lastAttemptTime: Date.now(),
+        };
+
+        // Check if error is retryable
+        if (isRetryableError(response.status, errorCode) && attempt < maxRetries) {
+          const delayMs = calculateBackoffDelay(attempt, initialDelayMs);
+          console.warn(`[Twilio] Attempt ${attempt + 1}/${maxRetries + 1} failed (${response.status}), retrying in ${delayMs}ms...`);
+          await sleep(delayMs);
+          continue;
+        }
+
+        // Non-retryable error or max retries reached
+        return lastError;
+      }
+
+      // Success
       return {
-        success: false,
-        error: 'Missing required parameters',
-        errorCode: 'INVALID_PARAMS',
+        success: true,
+        messageSid: (data.sid as string) || undefined,
+        retryCount: attempt,
+        lastAttemptTime: Date.now(),
       };
-    }
-
-    // Twilio API endpoint
-    const url = `https://api.twilio.com/2010-04-01/Accounts/${config.accountSid}/Messages.json`;
-
-    // Prepare form data
-    const formData = new URLSearchParams();
-    formData.append('From', config.fromNumber);
-    formData.append('To', to);
-    formData.append('Body', message);
-
-    // Create Basic Auth header
-    const auth = btoa(`${config.accountSid}:${config.authToken}`);
-
-    // Send request
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Basic ${auth}`,
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: formData.toString(),
-    });
-
-    // Parse response
-    const data = await response.json() as Record<string, unknown>;
-
-    if (!response.ok) {
-      const errorData = data as Record<string, unknown>;
-      return {
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      
+      lastError = {
         success: false,
-        error: (errorData.message as string) || 'Twilio API error',
-        errorCode: (errorData.code as string) || 'TWILIO_ERROR',
+        error: errorMessage,
+        errorCode: 'TWILIO_EXCEPTION',
+        retryCount: attempt,
+        lastAttemptTime: Date.now(),
       };
-    }
 
-    // Success
-    return {
-      success: true,
-      messageSid: (data.sid as string) || undefined,
-    };
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    return {
-      success: false,
-      error: errorMessage,
-      errorCode: 'TWILIO_EXCEPTION',
-    };
+      // Retry on network errors
+      if (attempt < maxRetries) {
+        const delayMs = calculateBackoffDelay(attempt, initialDelayMs);
+        console.warn(`[Twilio] Attempt ${attempt + 1}/${maxRetries + 1} failed (network error), retrying in ${delayMs}ms...`);
+        await sleep(delayMs);
+        continue;
+      }
+
+      return lastError;
+    }
   }
+
+  return lastError;
 }
 
 /**

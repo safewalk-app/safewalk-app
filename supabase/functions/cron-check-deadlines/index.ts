@@ -7,6 +7,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
 import { sendSms, isValidPhoneNumber } from "../_shared/twilio.ts";
 import { buildLateSms } from "../_shared/sms-templates.ts";
+import { retryWithBackoff } from "../_shared/retry-helper.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -212,19 +213,29 @@ async function cronCheckDeadlines(req: Request): Promise<Response> {
           shareUserPhoneInAlerts: userData?.share_user_phone_in_alerts ?? false,
         });
 
-        // Send SMS via Twilio
-        const smsResult = await sendSms({
-          to: trip.contact_phone_number,
-          message: alertMessage,
-          config: {
-            accountSid: twilioAccountSid,
-            authToken: twilioAuthToken,
-            fromNumber: twilioFromNumber,
-          },
-        });
+        // Send SMS via Twilio with retry logic
+        const smsRetryResult = await retryWithBackoff(
+          () => sendSms({
+            to: trip.contact_phone_number,
+            message: alertMessage,
+            config: {
+              accountSid: twilioAccountSid,
+              authToken: twilioAuthToken,
+              fromNumber: twilioFromNumber,
+            },
+            maxRetries: 3,
+            initialDelayMs: 1000,
+          }),
+          {
+            maxRetries: 3,
+            initialDelayMs: 1000,
+          }
+        );
+        
+        const smsResult = smsRetryResult.success ? smsRetryResult.data! : { success: false, error: smsRetryResult.error?.message || 'Unknown error', errorCode: 'RETRY_FAILED' };
 
         if (!smsResult.success) {
-          console.error(`Trip ${trip.trip_id}: SMS failed`, smsResult.error);
+          console.error(`Trip ${trip.trip_id}: SMS failed after ${smsRetryResult.retryCount} retries`, smsResult.error);
 
           // Log failed SMS
           await supabase.from("sms_logs").insert({
@@ -234,6 +245,8 @@ async function cronCheckDeadlines(req: Request): Promise<Response> {
             sms_type: "alert",
             status: "failed",
             error_message: smsResult.error,
+            retry_count: smsRetryResult.retryCount,
+            duration_ms: smsRetryResult.totalDurationMs,
           });
 
           failedCount++;
@@ -248,12 +261,29 @@ async function cronCheckDeadlines(req: Request): Promise<Response> {
           sms_type: "alert",
           status: "sent",
           message_sid: smsResult.messageSid,
+          retry_count: smsRetryResult.retryCount,
+          duration_ms: smsRetryResult.totalDurationMs,
         });
 
         sentCount++;
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "Unknown error";
         console.error(`Trip ${trip.trip_id}: Processing error`, errorMessage);
+        
+        // Log processing error
+        try {
+          await supabase.from("sms_logs").insert({
+            user_id: trip.user_id,
+            contact_id: trip.contact_id,
+            session_id: trip.trip_id,
+            sms_type: "alert",
+            status: "failed",
+            error_message: errorMessage,
+          });
+        } catch (logError) {
+          console.error(`Failed to log error for trip ${trip.trip_id}:`, logError);
+        }
+        
         failedCount++;
       }
     }
@@ -267,6 +297,7 @@ async function cronCheckDeadlines(req: Request): Promise<Response> {
         processed: trips.length,
         sent: sentCount,
         failed: failedCount,
+        notes: `Processed ${trips.length} trips, sent ${sentCount} alerts, ${failedCount} failed`,
       });
     } catch (heartbeatError) {
       console.error("Failed to log cron heartbeat:", heartbeatError);

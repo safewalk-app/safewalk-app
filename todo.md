@@ -435,7 +435,7 @@ Fichiers: app/settings.tsx, hooks/use-sos.ts, app/new-session.tsx
 - [x] Verification des credits avant demarrage session
 - [x] Verification des credits avant SOS
 
-### AE) Problemes HAUTE (8) - PARTIAL
+### AE) Problemes HAUTE (8) - COMPLETE
 Fichiers: app/active-session.tsx, app/settings.tsx, supabase/functions/test-sms/index.ts, components/battery-warning.tsx
 - [x] Confirmation avant terminer session
 - [x] Confirmation avant SOS
@@ -444,7 +444,7 @@ Fichiers: app/active-session.tsx, app/settings.tsx, supabase/functions/test-sms/
 - [x] Verifications batterie/internet integrees (hook + banniere dans active-session.tsx)
 - [x] Notifications push en arriere-plan (expo-notifications deja configurees)
 - [x] Timers visibles sur boutons (OTP 60s, Demarrer 2s, Test SMS 5s)
-- [ ] Gestion erreurs Twilio avec retry
+- [x] Gestion erreurs Twilio avec retry (exponential backoff 3 tentatives)
 - [x] Verification credits avant SOS (deja fait)
 - [x] Verification credits avant session (deja fait)
 

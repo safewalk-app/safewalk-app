@@ -8,6 +8,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
 import { sendSms, isValidPhoneNumber } from "../_shared/twilio.ts";
 import { checkRateLimit, logRequest, createRateLimitHttpResponse } from "../_shared/rate-limiter.ts";
 import { buildTestSms } from "../_shared/sms-templates.ts";
+import { retryWithBackoff } from "../_shared/retry-helper.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -251,15 +252,26 @@ async function testSms(req: Request): Promise<Response> {
       firstName: userData?.first_name || undefined,
     });
 
-    const smsResult = await sendSms({
-      to: contactData.phone_number,
-      message: testMessage,
-      config: {
-        accountSid: twilioAccountSid,
-        authToken: twilioAuthToken,
-        fromNumber: twilioFromNumber,
-      },
-    });
+    // Send test SMS with retry logic
+    const smsRetryResult = await retryWithBackoff(
+      () => sendSms({
+        to: contactData.phone_number,
+        message: testMessage,
+        config: {
+          accountSid: twilioAccountSid,
+          authToken: twilioAuthToken,
+          fromNumber: twilioFromNumber,
+        },
+        maxRetries: 2, // Less retries for test SMS (not critical)
+        initialDelayMs: 1000,
+      }),
+      {
+        maxRetries: 2,
+        initialDelayMs: 1000,
+      }
+    );
+    
+    const smsResult = smsRetryResult.success ? smsRetryResult.data! : { success: false, error: smsRetryResult.error?.message || 'Unknown error', errorCode: 'RETRY_FAILED' };
 
     if (!smsResult.success) {
       // Log failed SMS attempt with retry tracking
@@ -269,8 +281,8 @@ async function testSms(req: Request): Promise<Response> {
         sms_type: "test",
         status: "failed",
         error_message: smsResult.error,
-        retry_count: 0,
-        retry_at: new Date(Date.now() + 1000).toISOString(), // Retry after 1 second
+        retry_count: smsRetryResult.retryCount,
+        duration_ms: smsRetryResult.totalDurationMs,
       });
 
       // Map Twilio errors to standard error codes
@@ -304,6 +316,8 @@ async function testSms(req: Request): Promise<Response> {
       sms_type: "test",
       status: "sent",
       message_sid: smsResult.messageSid,
+      retry_count: smsRetryResult.retryCount,
+      duration_ms: smsRetryResult.totalDurationMs,
     });
 
     // Success response

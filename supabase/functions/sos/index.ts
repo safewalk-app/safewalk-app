@@ -8,6 +8,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
 import { sendSms, isValidPhoneNumber } from "../_shared/twilio.ts";
 import { checkRateLimit, logRequest, createRateLimitHttpResponse } from "../_shared/rate-limiter.ts";
 import { buildSosSms } from "../_shared/sms-templates.ts";
+import { retryWithBackoff } from "../_shared/retry-helper.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -246,16 +247,26 @@ async function sos(req: Request): Promise<Response> {
       shareUserPhoneInAlerts: userData?.share_user_phone_in_alerts ?? false,
     });
 
-    // Send SOS SMS
-    const smsResult = await sendSms({
-      to: contactData.phone_number,
-      message: sosMessage,
-      config: {
-        accountSid: twilioAccountSid,
-        authToken: twilioAuthToken,
-        fromNumber: twilioFromNumber,
-      },
-    });
+    // Send SOS SMS with retry logic (SOS is critical, use 3 retries)
+    const smsRetryResult = await retryWithBackoff(
+      () => sendSms({
+        to: contactData.phone_number,
+        message: sosMessage,
+        config: {
+          accountSid: twilioAccountSid,
+          authToken: twilioAuthToken,
+          fromNumber: twilioFromNumber,
+        },
+        maxRetries: 3,
+        initialDelayMs: 500, // Faster retries for SOS (critical)
+      }),
+      {
+        maxRetries: 3,
+        initialDelayMs: 500,
+      }
+    );
+    
+    const smsResult = smsRetryResult.success ? smsRetryResult.data! : { success: false, error: smsRetryResult.error?.message || 'Unknown error', errorCode: 'RETRY_FAILED' };
 
     if (!smsResult.success) {
       // Log failed SOS attempt
@@ -265,6 +276,8 @@ async function sos(req: Request): Promise<Response> {
         sms_type: "sos",
         status: "failed",
         error_message: smsResult.error,
+        retry_count: smsRetryResult.retryCount,
+        duration_ms: smsRetryResult.totalDurationMs,
       });
 
       return new Response(
@@ -288,6 +301,8 @@ async function sos(req: Request): Promise<Response> {
       sms_type: "sos",
       status: "sent",
       message_sid: smsResult.messageSid,
+      retry_count: smsRetryResult.retryCount,
+      duration_ms: smsRetryResult.totalDurationMs,
     });
 
     // Update trip status to sos_triggered if tripId provided
