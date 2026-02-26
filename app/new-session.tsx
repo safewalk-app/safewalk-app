@@ -236,6 +236,8 @@ export default function NewSessionScreen() {
             <TimeLimitPicker
               selectedTime={limitTime}
               onTimeSelected={setLimitTime}
+              accessibilityLabel="Sélecteur d'heure de retour"
+              accessibilityHint="Choisissez l'heure à laquelle vous pensez rentrer"
             />
           </View>
         </ScreenTransition>
@@ -250,6 +252,8 @@ export default function NewSessionScreen() {
               placeholder="Ex: Soirée chez Karim..."
               value={note}
               onChangeText={setNote}
+              accessibilityLabel="Champ Où vas-tu"
+              accessibilityHint="Entrez optionnellement votre destination"
             />
           </GlassCard>
         </ScreenTransition>
@@ -309,6 +313,9 @@ export default function NewSessionScreen() {
             variant="success"
             size="lg"
             disabled={isOnCooldown || loading}
+            accessibilityLabel="Bouton Démarrer"
+            accessibilityHint="Appuyez pour démarrer la sortie"
+            accessibilityState={{ disabled: isOnCooldown || loading }}
           />
         </FeedbackAnimation>
       </View>

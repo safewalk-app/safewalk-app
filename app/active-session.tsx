@@ -672,6 +672,9 @@ export default function ActiveSessionScreen() {
             <BigSuccessButton
               label="✅ Je suis rentré"
               onPress={handleCompleteSession}
+              accessibilityLabel="Bouton Je suis rentré"
+              accessibilityHint="Appuyez pour confirmer votre retour"
+              accessibilityState={{ disabled: confirmReturnLoading }}
             />
           </FeedbackAnimation>
         </ScreenTransition>
@@ -685,6 +688,9 @@ export default function ActiveSessionScreen() {
                 onPress={handleExtendSession}
                 variant="secondary"
                 size="lg"
+                accessibilityLabel="Bouton Prolonger 15 minutes"
+                accessibilityHint="Appuyez pour ajouter 15 minutes à votre sortie"
+                accessibilityState={{ disabled: extendLoading }}
               />
             </FeedbackAnimation>
           </View>
@@ -713,7 +719,7 @@ export default function ActiveSessionScreen() {
             }}
             minDurationMs={2000}
           >
-            <View className="my-4">
+            <View className="my-4" accessible={true} accessibilityRole="button" accessibilityLabel="Bouton SOS" accessibilityHint="Appui long 2 secondes pour déclencher l'alerte d'urgence" accessibilityState={{ disabled: sosLoading }}>
               <SOSButton
                 onPress={async () => {
                   // HAUTE #9: Confirmation SOS avec delai

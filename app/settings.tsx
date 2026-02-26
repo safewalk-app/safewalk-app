@@ -261,6 +261,8 @@ export default function SettingsScreen() {
                 placeholder="Ben"
                 value={firstName}
                 onChangeText={setFirstName}
+                accessibilityLabel="Champ Prénom"
+                accessibilityHint="Entrez votre prénom"
               />
             </GlassCard>
           </View>
@@ -287,6 +289,8 @@ export default function SettingsScreen() {
                   placeholder="Nom"
                   value={contactName}
                   onChangeText={setContactName}
+                  accessibilityLabel="Champ Nom du contact d'urgence"
+                  accessibilityHint="Entrez le nom du contact d'alerte"
                 />
 
                 <View className="flex-row items-center gap-2">
@@ -296,6 +300,8 @@ export default function SettingsScreen() {
                       value={contactPhone}
                       onChangeText={handlePhoneChange}
                       keyboardType="phone-pad"
+                      accessibilityLabel="Champ Numéro de téléphone"
+                      accessibilityHint="Entrez votre numéro de téléphone au format E.164 (ex: +33612345678)"
                     />
                     {phoneError && (
                       <Text className="text-xs text-error mt-1">
@@ -337,6 +343,11 @@ export default function SettingsScreen() {
                     onValueChange={handleLocationToggle}
                     trackColor={{ false: '#E5E7EB', true: '#2DE2A6' }}
                     thumbColor="#FFFFFF"
+                    accessible={true}
+                    accessibilityLabel="Commutateur Partage de position"
+                    accessibilityHint="Activez pour partager votre localisation en cas d'alerte"
+                    accessibilityRole="switch"
+                    accessibilityState={{ checked: locationEnabled }}
                   />
                 </View>
               </GlassCard>
@@ -357,6 +368,11 @@ export default function SettingsScreen() {
             onPress={handleTestSms}
             disabled={isSendingTestSms || isOnCooldown}
             className="mb-4"
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel="Bouton Test SMS"
+            accessibilityHint="Appuyez pour envoyer un SMS de test"
+            accessibilityState={{ disabled: isSendingTestSms || isOnCooldown }}
           >
             <GlassCard className={`flex-row items-center justify-center gap-2 py-4 ${isOnCooldown ? 'opacity-50' : ''}`}>
               {isSendingTestSms ? (
@@ -380,6 +396,10 @@ export default function SettingsScreen() {
           <Pressable 
             onPress={() => router.push('/about')}
             className="mb-4"
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel="Bouton À propos"
+            accessibilityHint="Appuyez pour voir les informations sur l'app"
           >
             <GlassCard className="flex-row items-center justify-center gap-2 py-4">
               <MaterialIcons name="info" size={20} color="#0a7ea4" />

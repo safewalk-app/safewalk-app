@@ -173,13 +173,15 @@ export default function HomeScreen() {
               description="Définis une heure de retour. Un SMS est envoyé automatiquement si tu ne confirmes pas."
               buttonLabel="Commencer"
               onButtonPress={handleStartSession}
+              accessibilityLabel="Bouton Je sors"
+              accessibilityHint="Appuyez pour démarrer une nouvelle sortie"
             />
           </View>
         </ScreenTransition>
 
         {/* Checklist d'État */}
         <ScreenTransition delay={200} duration={350}>
-          <View className="mb-6">
+          <View className="mb-6" accessible={true} accessibilityRole="text" accessibilityLabel="État du système">
             <Text className="text-xs font-semibold text-muted uppercase tracking-wide mb-3">
               État du système
             </Text>
