@@ -1,4 +1,4 @@
-import { ScrollView, View, Text, Pressable } from 'react-native';
+import { View, Text, ScrollView, Pressable, Switch, Alert } from 'react-native';
 import { BubbleBackground } from '@/components/ui/bubble-background';
 import { GlassCard } from '@/components/ui/glass-card';
 import { PopTextField } from '@/components/ui/pop-text-field';
@@ -17,6 +17,7 @@ import { supabase } from '@/lib/supabase';
 import { RateLimitErrorAlert } from '@/components/rate-limit-error-alert';
 import { useCooldown } from '@/lib/hooks/use-cooldown';
 import { notify, notifyBlocked } from '@/lib/services/notification.service';
+import { MaterialIcons } from '@expo/vector-icons';
 
 export default function NewSessionScreen() {
   const router = useRouter();
@@ -30,6 +31,7 @@ export default function NewSessionScreen() {
   const [phoneVerified, setPhoneVerified] = useState(false);
   const [loading, setLoading] = useState(true);
   const [submitState, setSubmitState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [blockingReason, setBlockingReason] = useState<string | null>(null);
   const [rateLimitError, setRateLimitError] = useState<{
     visible: boolean;
     message?: string;
@@ -75,56 +77,80 @@ export default function NewSessionScreen() {
     }
   };
 
-  // Vérifier les blocages et afficher les notifications appropriées
+  // Vérifier les blocages et retourner la raison du blocage
   const checkBlockingConditions = () => {
     if (!settings.emergencyContactName || !settings.emergencyContactPhone) {
-      notifyBlocked('contact.missing', {
-        action: 'Aller aux Paramètres',
-        onAction: () => router.push('/settings'),
-      });
+      setBlockingReason('contact.missing');
       return true;
     }
     if (!phoneVerified) {
-      notifyBlocked('auth.otp_required', {
-        action: 'Vérifier maintenant',
-        onAction: () => setShowOtpModal(true),
-      });
+      setBlockingReason('auth.otp_required');
       return true;
     }
     const hasCredits = profileData.subscription_active || profileData.free_alerts_remaining > 0;
     if (!hasCredits) {
-      notifyBlocked('credits.empty', {
-        action: 'Ajouter des crédits',
-        onAction: () => setShowPaywallModal(true),
-      });
+      setBlockingReason('credits.empty');
       return true;
     }
-    if (!settings.locationEnabled) {
-      notifyBlocked('permission.location_required', {
-        action: 'Aller aux Paramètres',
-        onAction: () => router.push('/settings'),
-      });
-      return true;
-    }
+    // GPS est optionnel - ne pas bloquer
+    setBlockingReason(null);
     return false;
   };
 
-  const handleStartSession = async () => {
-    await triggerStartSession(async () => {
-      // Vérifier les blocages
-      if (checkBlockingConditions()) {
-        return;
-      }
+  // Obtenir le message et l'action pour le blocage
+  const getBlockingMessage = () => {
+    switch (blockingReason) {
+      case 'contact.missing':
+        return {
+          title: 'Contact d\'urgence manquant',
+          message: 'Ajoute un contact d\'urgence pour continuer.',
+          action: 'Aller aux Paramètres',
+          onAction: () => router.push('/settings'),
+        };
+      case 'auth.otp_required':
+        return {
+          title: 'Téléphone non vérifié',
+          message: 'Vérifie ton numéro pour activer les alertes.',
+          action: 'Vérifier maintenant',
+          onAction: () => setShowOtpModal(true),
+        };
+      case 'credits.empty':
+        return {
+          title: 'Pas d\'alertes disponibles',
+          message: 'Tu n\'as plus d\'alertes disponibles. Ajoute des crédits pour continuer.',
+          action: 'Ajouter des crédits',
+          onAction: () => setShowPaywallModal(true),
+        };
+      default:
+        return null;
+    }
+  };
 
+  const handleStartSession = async () => {
+    // Vérifier les blocages avant de démarrer
+    if (checkBlockingConditions()) {
+      const blockingMsg = getBlockingMessage();
+      if (blockingMsg) {
+        Alert.alert(blockingMsg.title, blockingMsg.message, [
+          { text: 'Annuler', style: 'cancel' },
+          { text: blockingMsg.action, onPress: blockingMsg.onAction },
+        ]);
+      }
+      return;
+    }
+
+    await triggerStartSession(async () => {
       // Vérifier deadline valide (minimum 15 minutes)
       const now = Date.now();
       const minDeadline = now + (15 * 60 * 1000);
       if (limitTime <= now) {
-        notify('error.unknown');
+        notify('error.invalid_time');
+        setSubmitState('error');
         return;
       }
       if (limitTime < minDeadline) {
-        notify('error.unknown');
+        notify('error.invalid_time');
+        setSubmitState('error');
         return;
       }
 
@@ -170,6 +196,26 @@ export default function NewSessionScreen() {
     );
   }
 
+  // Déterminer le message du bouton selon l'état
+  const getButtonMessage = () => {
+    if (isOnCooldown) {
+      return `Attendre ${Math.ceil(remainingTime / 1000)}s`;
+    }
+    if (blockingReason) {
+      switch (blockingReason) {
+        case 'contact.missing':
+          return 'Ajoute un contact d\'urgence';
+        case 'auth.otp_required':
+          return 'Vérifie ton numéro';
+        case 'credits.empty':
+          return 'Tu n\'as plus d\'alertes';
+        default:
+          return 'Démarrer la sortie';
+      }
+    }
+    return 'Démarrer la sortie';
+  };
+
   return (
     <ScreenTransition>
       <View className="flex-1 bg-background">
@@ -192,7 +238,7 @@ export default function NewSessionScreen() {
                 <View className="flex-1">
                   <Text className="text-2xl font-bold text-foreground">Je sors</Text>
                   <Text className="text-sm text-muted">
-                    Définis une heure de retour. Un proche est prévenu si tu ne confirmes pas.
+                    Tu penses rentrer vers quelle heure ?
                   </Text>
                 </View>
               </View>
@@ -200,15 +246,18 @@ export default function NewSessionScreen() {
 
             {/* Time Limit Picker */}
             <GlassCard className="gap-4">
-              <Text className="text-base font-semibold text-foreground">Heure limite</Text>
+              <Text className="text-base font-semibold text-foreground">Retour prévu</Text>
               <TimeLimitPicker value={limitTime} onChange={setLimitTime} />
+              <Text className="text-xs text-muted mt-2">
+                Si tu ne confirmes pas ton retour, ton contact sera prévenu automatiquement.
+              </Text>
             </GlassCard>
 
-            {/* Note */}
+            {/* Destination */}
             <GlassCard className="gap-3">
-              <Text className="text-base font-semibold text-foreground">Note (optionnel)</Text>
+              <Text className="text-base font-semibold text-foreground">Où vas-tu ? (optionnel)</Text>
               <PopTextField
-                placeholder="Ex: Je vais à la gym, puis au café..."
+                placeholder="Ex. Soirée chez Karim"
                 value={note}
                 onChangeText={setNote}
                 multiline
@@ -216,11 +265,76 @@ export default function NewSessionScreen() {
               />
             </GlassCard>
 
+            {/* Contact d'urgence */}
+            <GlassCard className="gap-3">
+              <View className="flex-row items-center gap-2">
+                <MaterialIcons name="emergency" size={16} color="#FF4D4D" />
+                <Text className="text-base font-semibold text-foreground">
+                  Contact d'urgence
+                </Text>
+              </View>
+              {settings.emergencyContactName && settings.emergencyContactPhone ? (
+                <>
+                  <View className="gap-2">
+                    <Text className="text-sm text-muted">Nom</Text>
+                    <Text className="text-base font-medium text-foreground">
+                      {settings.emergencyContactName}
+                    </Text>
+                  </View>
+                  <View className="gap-2">
+                    <Text className="text-sm text-muted">Téléphone</Text>
+                    <Text className="text-base font-medium text-foreground">
+                      {settings.emergencyContactPhone}
+                    </Text>
+                  </View>
+                  <Text className="text-xs text-muted mt-2">
+                    Cette personne recevra une alerte si tu ne confirmes pas ton retour.
+                  </Text>
+                </>
+              ) : (
+                <Pressable onPress={() => router.push('/settings')}>
+                  <Text className="text-sm text-primary font-medium">
+                    Ajoute un contact d'urgence pour activer les alertes.
+                  </Text>
+                </Pressable>
+              )}
+            </GlassCard>
+
+            {/* Localisation */}
+            <GlassCard className="gap-3">
+              <View className="flex-row items-center justify-between">
+                <View className="flex-row items-center gap-2 flex-1">
+                  <MaterialIcons name="location-on" size={16} color="#3A86FF" />
+                  <Text className="text-base font-semibold text-foreground">
+                    Partager ma position en cas d'alerte
+                  </Text>
+                </View>
+                <Switch
+                  value={settings.locationEnabled}
+                  onValueChange={(value) => {
+                    // Cette action est gérée dans les paramètres
+                    // Ici on affiche juste l'état
+                  }}
+                  trackColor={{ false: '#E5E7EB', true: '#2DE2A6' }}
+                  thumbColor="#FFFFFF"
+                  disabled={true}
+                />
+              </View>
+              <Text className="text-xs text-muted mt-2">
+                Ta position n'est envoyée qu'en cas d'alerte.
+              </Text>
+              {!settings.locationEnabled && (
+                <Text className="text-xs text-warning mt-1">
+                  La localisation est désactivée. Tu peux continuer sans elle.
+                </Text>
+              )}
+            </GlassCard>
+
             {/* Start Button */}
             <FeedbackAnimation state={submitState} onDismiss={() => setSubmitState('idle')}>
               <CushionPillButton
                 onPress={handleStartSession}
-                disabled={isOnCooldown || submitState === 'loading'}
+                disabled={isOnCooldown || submitState === 'loading' || blockingReason !== null}
                 accessibilityLabel="Démarrer la sortie"
                 accessibilityHint={
                   isOnCooldown
@@ -229,7 +343,7 @@ export default function NewSessionScreen() {
                 }
               >
                 <Text className="text-lg font-bold text-background">
-                  {isOnCooldown ? `Attendre ${Math.ceil(remainingTime / 1000)}s` : 'Commencer'}
+                  {getButtonMessage()}
                 </Text>
               </CushionPillButton>
             </FeedbackAnimation>
