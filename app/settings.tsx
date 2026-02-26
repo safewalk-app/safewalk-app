@@ -249,21 +249,24 @@ export default function SettingsScreen() {
               Profil
             </Text>
 
-            {/* Card "Ton prénom" */}
+            {/* Card "Mon prénom" */}
             <GlassCard className="gap-2">
               <View className="flex-row items-center gap-2">
                 <MaterialIcons name="person" size={16} color="#6C63FF" />
                 <Text className="text-sm font-semibold text-muted">
-                  Prénom
+                  Mon prénom
                 </Text>
               </View>
               <PopTextField
-                placeholder="Ben"
+                placeholder="Ex. Ben"
                 value={firstName}
                 onChangeText={setFirstName}
-                accessibilityLabel="Champ Prénom"
+                accessibilityLabel="Champ Mon prénom"
                 accessibilityHint="Entrez votre prénom"
               />
+              <Text className="text-xs text-muted mt-2">
+                Ce prénom sera utilisé dans les alertes envoyées à ton contact.
+              </Text>
             </GlassCard>
           </View>
         </ScreenTransition>
@@ -275,18 +278,18 @@ export default function SettingsScreen() {
               Sécurité
             </Text>
 
-            {/* Card "Contact d'urgence 1" */}
+            {/* Card "Contact d'urgence" */}
             <View className="mb-3">
               <GlassCard className="gap-2">
                 <View className="flex-row items-center gap-2">
                   <MaterialIcons name="emergency" size={16} color="#FF4D4D" />
                   <Text className="text-sm font-semibold text-foreground">
-                    Contact 1
+                    Contact d'urgence
                   </Text>
                 </View>
                 
                 <PopTextField
-                  placeholder="Nom"
+                  placeholder="Ex. Sarah"
                   value={contactName}
                   onChangeText={setContactName}
                   accessibilityLabel="Champ Nom du contact d'urgence"
@@ -295,6 +298,9 @@ export default function SettingsScreen() {
 
                 <View className="flex-row items-center gap-2">
                   <View className="flex-1">
+                    <Text className="text-xs font-semibold text-muted mb-1">
+                      Téléphone
+                    </Text>
                     <PopTextField
                       placeholder="+33 6 12 34 56 78"
                       value={contactPhone}
@@ -321,6 +327,9 @@ export default function SettingsScreen() {
                     )}
                   </View>
                 </View>
+                <Text className="text-xs text-muted mt-2">
+                  Cette personne sera prévenue automatiquement si tu ne confirmes pas ton retour.
+                </Text>
               </GlassCard>
             </View>
 
@@ -328,14 +337,14 @@ export default function SettingsScreen() {
 
 
 
-            {/* Card "Localisation" */}
+            {/* Card "Partager ma position en cas d'alerte" */}
             <View className="mb-3">
               <GlassCard className="gap-2">
                 <View className="flex-row items-center justify-between">
                   <View className="flex-row items-center gap-2 flex-1">
                     <MaterialIcons name="location-on" size={16} color="#3A86FF" />
                     <Text className="text-sm font-semibold text-foreground">
-                      Partage de position
+                      Partager ma position en cas d'alerte
                     </Text>
                   </View>
                   <Switch
@@ -344,12 +353,15 @@ export default function SettingsScreen() {
                     trackColor={{ false: '#E5E7EB', true: '#2DE2A6' }}
                     thumbColor="#FFFFFF"
                     accessible={true}
-                    accessibilityLabel="Commutateur Partage de position"
+                    accessibilityLabel="Commutateur Partager ma position en cas d'alerte"
                     accessibilityHint="Activez pour partager votre localisation en cas d'alerte"
                     accessibilityRole="switch"
                     accessibilityState={{ checked: locationEnabled }}
                   />
                 </View>
+                <Text className="text-xs text-muted mt-2">
+                  Ta position n'est envoyée qu'en cas d'alerte.
+                </Text>
               </GlassCard>
             </View>
           </View>
@@ -362,7 +374,7 @@ export default function SettingsScreen() {
           onDismiss={() => setRateLimitError({ visible: false })}
         />
 
-        {/* Bouton "Test SMS" */}
+        {/* Bouton "Tester les alertes par SMS" */}
         <ScreenTransition delay={250} duration={350}>
           <Pressable 
             onPress={handleTestSms}
@@ -370,22 +382,27 @@ export default function SettingsScreen() {
             className="mb-4"
             accessible={true}
             accessibilityRole="button"
-            accessibilityLabel="Bouton Test SMS"
+            accessibilityLabel="Bouton Tester les alertes par SMS"
             accessibilityHint="Appuyez pour envoyer un SMS de test"
             accessibilityState={{ disabled: isSendingTestSms || isOnCooldown }}
           >
-            <GlassCard className={`flex-row items-center justify-center gap-2 py-4 ${isOnCooldown ? 'opacity-50' : ''}`}>
-              {isSendingTestSms ? (
-                <ActivityIndicator size="small" color="#0a7ea4" />
-              ) : (
-                <MaterialIcons name="message" size={20} color="#0a7ea4" />
-              )}
-              <Text className="text-base font-semibold text-foreground">
-                {isSendingTestSms
-                  ? 'Envoi en cours...'
-                  : isOnCooldown
-                    ? `Attendre ${Math.ceil(remainingTime / 1000)}s`
-                    : 'Tester SMS'}
+            <GlassCard className={`gap-2 py-4 ${isOnCooldown ? 'opacity-50' : ''}`}>
+              <View className="flex-row items-center justify-center gap-2">
+                {isSendingTestSms ? (
+                  <ActivityIndicator size="small" color="#0a7ea4" />
+                ) : (
+                  <MaterialIcons name="message" size={20} color="#0a7ea4" />
+                )}
+                <Text className="text-base font-semibold text-foreground">
+                  {isSendingTestSms
+                    ? 'Envoi en cours...'
+                    : isOnCooldown
+                      ? `Attendre ${Math.ceil(remainingTime / 1000)}s`
+                      : 'Tester les alertes par SMS'}
+                </Text>
+              </View>
+              <Text className="text-xs text-muted text-center">
+                Vérifie que ton contact reçoit bien les alertes.
               </Text>
             </GlassCard>
           </Pressable>
@@ -401,21 +418,31 @@ export default function SettingsScreen() {
             accessibilityLabel="Bouton À propos"
             accessibilityHint="Appuyez pour voir les informations sur l'app"
           >
-            <GlassCard className="flex-row items-center justify-center gap-2 py-4">
-              <MaterialIcons name="info" size={20} color="#0a7ea4" />
-              <Text className="text-base font-semibold text-foreground">
-                À propos
+            <GlassCard className="gap-2 py-4">
+              <View className="flex-row items-center justify-center gap-2">
+                <MaterialIcons name="info" size={20} color="#0a7ea4" />
+                <Text className="text-base font-semibold text-foreground">
+                  À propos
+                </Text>
+              </View>
+              <Text className="text-xs text-muted text-center">
+                Comment fonctionne SafeWalk et comment tes données sont utilisées.
               </Text>
             </GlassCard>
           </Pressable>
         </ScreenTransition>
 
-        {/* Bouton "Supprimer mes données" */}
+        {/* Bouton "Supprimer mon compte" */}
         <ScreenTransition delay={350} duration={350}>
           <Pressable onPress={handleDeleteData}>
-            <Text className="text-center text-base font-bold text-error">
-              Supprimer mes données
-            </Text>
+            <View className="gap-1">
+              <Text className="text-center text-base font-bold text-error">
+                Supprimer mon compte
+              </Text>
+              <Text className="text-center text-xs text-muted">
+                Supprime ton compte et les données associées.
+              </Text>
+            </View>
           </Pressable>
         </ScreenTransition>
       </View>
