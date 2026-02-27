@@ -1,4 +1,4 @@
-import { useRef, useCallback } from "react";
+import { useRef, useCallback } from 'react';
 
 interface UseDebounceOptions {
   delay?: number;
@@ -23,7 +23,7 @@ interface UseDebounceOptions {
  */
 export function useDebounce<T extends (...args: any[]) => any>(
   callback: T,
-  options: UseDebounceOptions = {}
+  options: UseDebounceOptions = {},
 ): T {
   const { delay = 300, leading = false, trailing = true } = options;
   const timeoutRef = useRef<NodeJS.Timeout>();
@@ -49,6 +49,6 @@ export function useDebounce<T extends (...args: any[]) => any>(
         leadingRef.current = true;
       }, delay);
     },
-    [callback, delay, leading, trailing]
+    [callback, delay, leading, trailing],
   ) as T;
 }

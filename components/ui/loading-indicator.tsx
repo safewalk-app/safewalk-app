@@ -1,6 +1,6 @@
 /**
  * Loading Indicator Component
- * 
+ *
  * Affiche un indicateur de chargement avec barre de progression
  * pour les composants lazy loading
  */
@@ -25,10 +25,7 @@ interface LoadingIndicatorProps {
  * Composant pour afficher les indicateurs de chargement
  * Doit être placé dans le layout principal pour être visible globalement
  */
-export function LoadingIndicator({
-  position = 'top',
-  showDetails = false,
-}: LoadingIndicatorProps) {
+export function LoadingIndicator({ position = 'top', showDetails = false }: LoadingIndicatorProps) {
   const { loadingItems, isLoading, totalProgress } = useLoading();
   const colors = useColors();
   const [displayProgress, setDisplayProgress] = useState(0);
@@ -36,7 +33,7 @@ export function LoadingIndicator({
   // Animer la progression
   useEffect(() => {
     const interval = setInterval(() => {
-      setDisplayProgress(prev => {
+      setDisplayProgress((prev) => {
         const diff = totalProgress - prev;
         if (diff > 0) {
           return prev + Math.ceil(diff / 5);
@@ -107,11 +104,7 @@ export function LoadingIndicator({
                 marginBottom: index < loadingItems.length - 1 ? 8 : 0,
               }}
             >
-              <ActivityIndicator
-                size="small"
-                color={colors.primary}
-                style={{ marginRight: 8 }}
-              />
+              <ActivityIndicator size="small" color={colors.primary} style={{ marginRight: 8 }} />
               <Text
                 style={{
                   flex: 1,

@@ -1,21 +1,25 @@
 # Configuration du Webhook Twilio - SafeWalk
 
 ## 🎯 Objectif
+
 Configurer Twilio pour envoyer les confirmations de SMS (statut de livraison) à l'API SafeWalk en temps réel.
 
 ## 📋 Informations Requises
 
 ### URL du Webhook
+
 ```
 https://api.manus.im/api/webhooks/twilio
 ```
 
 ### Méthode HTTP
+
 ```
 POST
 ```
 
 ### Paramètres Attendus
+
 Twilio envoie les données suivantes au webhook :
 
 ```json
@@ -30,6 +34,7 @@ Twilio envoie les données suivantes au webhook :
 ```
 
 ### Statuts Possibles
+
 - **sent** — SMS envoyé avec succès
 - **delivered** — SMS livré au destinataire
 - **failed** — Échec de l'envoi
@@ -104,13 +109,8 @@ import twilio from 'twilio';
 export async function validateTwilioRequest(req: Request) {
   const signature = req.headers['x-twilio-signature'] as string;
   const url = `${process.env.API_URL}/api/webhooks/twilio`;
-  
-  return twilio.validateRequest(
-    process.env.TWILIO_AUTH_TOKEN!,
-    signature,
-    url,
-    req.body
-  );
+
+  return twilio.validateRequest(process.env.TWILIO_AUTH_TOKEN!, signature, url, req.body);
 }
 ```
 

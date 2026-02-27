@@ -41,11 +41,7 @@ export function StatusChecklist({ items }: StatusChecklistProps) {
   return (
     <View className="gap-2">
       {items.map((item) => (
-        <Pressable
-          key={item.id}
-          onPress={item.onPress}
-          disabled={!item.onPress}
-        >
+        <Pressable key={item.id} onPress={item.onPress} disabled={!item.onPress}>
           {({ pressed }) => (
             <View
               className="flex-row items-center gap-3 p-3 rounded-lg"
@@ -59,18 +55,11 @@ export function StatusChecklist({ items }: StatusChecklistProps) {
                 size={20}
                 color={getStatusColor(item.status)}
               />
-              <Text
-                className="flex-1 text-sm font-medium text-foreground"
-                numberOfLines={1}
-              >
+              <Text className="flex-1 text-sm font-medium text-foreground" numberOfLines={1}>
                 {item.label}
               </Text>
               {item.onPress && (
-                <MaterialIcons
-                  name="chevron-right"
-                  size={20}
-                  color={colors.muted}
-                />
+                <MaterialIcons name="chevron-right" size={20} color={colors.muted} />
               )}
             </View>
           )}

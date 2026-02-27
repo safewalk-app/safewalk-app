@@ -82,6 +82,7 @@ supabase functions list
 ```
 
 Vous devriez voir :
+
 ```
 trigger-sos    https://kycuteffcbqizyqlhczc.supabase.co/functions/v1/trigger-sos
 ```
@@ -169,13 +170,13 @@ const response = await fetch(
 
 ## Avantages
 
-| Aspect | Express (Manus) | Edge Functions (Supabase) |
-|--------|-----------------|---------------------------|
-| **Coût** | Gratuit (temporaire) | Gratuit (inclus) |
-| **Maintenance** | Vous gérez le serveur | Supabase gère tout |
-| **Scalabilité** | Limitée | Illimitée |
-| **Déploiement** | Manuel | Automatique |
-| **Monitoring** | Logs Manus | Logs Supabase |
+| Aspect          | Express (Manus)       | Edge Functions (Supabase) |
+| --------------- | --------------------- | ------------------------- |
+| **Coût**        | Gratuit (temporaire)  | Gratuit (inclus)          |
+| **Maintenance** | Vous gérez le serveur | Supabase gère tout        |
+| **Scalabilité** | Limitée               | Illimitée                 |
+| **Déploiement** | Manuel                | Automatique               |
+| **Monitoring**  | Logs Manus            | Logs Supabase             |
 
 ---
 
@@ -247,4 +248,4 @@ supabase link --project-ref kycuteffcbqizyqlhczc
 
 ---
 
-*Guide créé le 19 Février 2026*
+_Guide créé le 19 Février 2026_

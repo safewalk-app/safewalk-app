@@ -48,7 +48,7 @@ export function useReduceMotion(): boolean {
         // Par défaut, ne pas réduire les animations
         setReduceMotion(false);
       } catch (error) {
-        console.warn('Erreur lors de la vérification des préférences d\'accessibilité:', error);
+        console.warn("Erreur lors de la vérification des préférences d'accessibilité:", error);
         setReduceMotion(false);
       }
     };
@@ -83,10 +83,7 @@ export function useAnimationDuration(normalDuration: number): number {
  * });
  * ```
  */
-export function useAnimationConfig<T>(config: {
-  normal: T;
-  reduced: T;
-}): T {
+export function useAnimationConfig<T>(config: { normal: T; reduced: T }): T {
   const reduceMotion = useReduceMotion();
   return reduceMotion ? config.reduced : config.normal;
 }

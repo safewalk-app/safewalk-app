@@ -1,144 +1,214 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Politique de Confidentialité - SafeWalk</title>
-    <meta name="description" content="Politique de confidentialité de SafeWalk. Vos données restent sur votre téléphone.">
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
+    <meta
+      name="description"
+      content="Politique de confidentialité de SafeWalk. Vos données restent sur votre téléphone."
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
     <header>
-        <div class="container">
-            <h1><a href="index.html">🚀 SafeWalk</a></h1>
-            <p class="tagline">Politique de Confidentialité</p>
-        </div>
+      <div class="container">
+        <h1><a href="index.html">🚀 SafeWalk</a></h1>
+        <p class="tagline">Politique de Confidentialité</p>
+      </div>
     </header>
 
     <main class="container legal-content">
-        <p class="last-updated"><strong>Dernière mise à jour</strong> : 3 février 2026</p>
+      <p class="last-updated"><strong>Dernière mise à jour</strong> : 3 février 2026</p>
 
-        <section>
-            <h2>Introduction</h2>
-            <p>SafeWalk est une application de sécurité personnelle qui vous permet de partager votre position avec vos contacts d'urgence en cas de besoin. Nous prenons votre vie privée très au sérieux.</p>
-        </section>
+      <section>
+        <h2>Introduction</h2>
+        <p>
+          SafeWalk est une application de sécurité personnelle qui vous permet de partager votre
+          position avec vos contacts d'urgence en cas de besoin. Nous prenons votre vie privée très
+          au sérieux.
+        </p>
+      </section>
 
-        <section>
-            <h2>Données Collectées</h2>
-            
-            <h3>1. Données de Localisation</h3>
-            <p><strong>Pourquoi</strong> : SafeWalk collecte votre position GPS uniquement pour la partager avec vos contacts d'urgence en cas d'alerte.</p>
-            <p><strong>Quand</strong> :</p>
-            <ul>
-                <li>Lorsque vous démarrez une session de trajet</li>
-                <li>Lorsqu'une alerte est déclenchée (retard ou SOS)</li>
-                <li>Uniquement pendant que l'application est active</li>
-            </ul>
-            <p><strong>Stockage</strong> : Votre position est stockée localement sur votre appareil et n'est envoyée qu'à vos contacts d'urgence via SMS en cas d'alerte.</p>
+      <section>
+        <h2>Données Collectées</h2>
 
-            <h3>2. Contacts d'Urgence</h3>
-            <p><strong>Pourquoi</strong> : Nous stockons les noms et numéros de téléphone de vos contacts d'urgence pour pouvoir les alerter en cas de besoin.</p>
-            <p><strong>Stockage</strong> : Ces informations sont stockées localement sur votre appareil uniquement (AsyncStorage). Elles ne sont jamais envoyées à nos serveurs sauf lors de l'envoi d'un SMS d'alerte.</p>
+        <h3>1. Données de Localisation</h3>
+        <p>
+          <strong>Pourquoi</strong> : SafeWalk collecte votre position GPS uniquement pour la
+          partager avec vos contacts d'urgence en cas d'alerte.
+        </p>
+        <p><strong>Quand</strong> :</p>
+        <ul>
+          <li>Lorsque vous démarrez une session de trajet</li>
+          <li>Lorsqu'une alerte est déclenchée (retard ou SOS)</li>
+          <li>Uniquement pendant que l'application est active</li>
+        </ul>
+        <p>
+          <strong>Stockage</strong> : Votre position est stockée localement sur votre appareil et
+          n'est envoyée qu'à vos contacts d'urgence via SMS en cas d'alerte.
+        </p>
 
-            <h3>3. Paramètres de l'Application</h3>
-            <p><strong>Pourquoi</strong> : Nous stockons vos préférences (nom, tolérance de retard, etc.) pour personnaliser votre expérience.</p>
-            <p><strong>Stockage</strong> : Stocké localement sur votre appareil uniquement.</p>
-        </section>
+        <h3>2. Contacts d'Urgence</h3>
+        <p>
+          <strong>Pourquoi</strong> : Nous stockons les noms et numéros de téléphone de vos contacts
+          d'urgence pour pouvoir les alerter en cas de besoin.
+        </p>
+        <p>
+          <strong>Stockage</strong> : Ces informations sont stockées localement sur votre appareil
+          uniquement (AsyncStorage). Elles ne sont jamais envoyées à nos serveurs sauf lors de
+          l'envoi d'un SMS d'alerte.
+        </p>
 
-        <section>
-            <h2>Utilisation des Données</h2>
-            <p>Vos données sont utilisées <strong>uniquement</strong> pour :</p>
-            <ol>
-                <li><strong>Envoyer des alertes SMS</strong> à vos contacts d'urgence avec votre position GPS</li>
-                <li><strong>Afficher votre position</strong> dans l'interface de l'application</li>
-                <li><strong>Personnaliser</strong> votre expérience (nom, préférences)</li>
-            </ol>
-            <p class="highlight"><strong>Nous ne vendons jamais vos données à des tiers.</strong></p>
-        </section>
+        <h3>3. Paramètres de l'Application</h3>
+        <p>
+          <strong>Pourquoi</strong> : Nous stockons vos préférences (nom, tolérance de retard, etc.)
+          pour personnaliser votre expérience.
+        </p>
+        <p><strong>Stockage</strong> : Stocké localement sur votre appareil uniquement.</p>
+      </section>
 
-        <section>
-            <h2>Partage des Données</h2>
-            <p>Vos données sont partagées uniquement dans les cas suivants :</p>
-            <ol>
-                <li><strong>SMS d'alerte</strong> : Votre position GPS et votre nom sont envoyés par SMS à vos contacts d'urgence via Twilio (service d'envoi de SMS)</li>
-                <li><strong>Aucun autre partage</strong> : Vos données ne sont jamais partagées avec d'autres applications ou services</li>
-            </ol>
-        </section>
+      <section>
+        <h2>Utilisation des Données</h2>
+        <p>Vos données sont utilisées <strong>uniquement</strong> pour :</p>
+        <ol>
+          <li>
+            <strong>Envoyer des alertes SMS</strong> à vos contacts d'urgence avec votre position
+            GPS
+          </li>
+          <li><strong>Afficher votre position</strong> dans l'interface de l'application</li>
+          <li><strong>Personnaliser</strong> votre expérience (nom, préférences)</li>
+        </ol>
+        <p class="highlight"><strong>Nous ne vendons jamais vos données à des tiers.</strong></p>
+      </section>
 
-        <section>
-            <h2>Services Tiers</h2>
-            <h3>Twilio (Envoi de SMS)</h3>
-            <p>SafeWalk utilise Twilio pour envoyer des SMS d'alerte à vos contacts. Twilio traite temporairement votre numéro de téléphone et le contenu du message pour l'envoi. Consultez la <a href="https://www.twilio.com/legal/privacy" target="_blank" rel="noopener">Politique de Confidentialité de Twilio</a>.</p>
-        </section>
+      <section>
+        <h2>Partage des Données</h2>
+        <p>Vos données sont partagées uniquement dans les cas suivants :</p>
+        <ol>
+          <li>
+            <strong>SMS d'alerte</strong> : Votre position GPS et votre nom sont envoyés par SMS à
+            vos contacts d'urgence via Twilio (service d'envoi de SMS)
+          </li>
+          <li>
+            <strong>Aucun autre partage</strong> : Vos données ne sont jamais partagées avec
+            d'autres applications ou services
+          </li>
+        </ol>
+      </section>
 
-        <section>
-            <h2>Sécurité</h2>
-            <ul>
-                <li><strong>Stockage local</strong> : Toutes vos données sont stockées localement sur votre appareil</li>
-                <li><strong>Chiffrement</strong> : Les communications avec notre serveur sont chiffrées (HTTPS)</li>
-                <li><strong>Pas de compte</strong> : Aucune inscription requise, aucune donnée centralisée</li>
-            </ul>
-        </section>
+      <section>
+        <h2>Services Tiers</h2>
+        <h3>Twilio (Envoi de SMS)</h3>
+        <p>
+          SafeWalk utilise Twilio pour envoyer des SMS d'alerte à vos contacts. Twilio traite
+          temporairement votre numéro de téléphone et le contenu du message pour l'envoi. Consultez
+          la
+          <a href="https://www.twilio.com/legal/privacy" target="_blank" rel="noopener"
+            >Politique de Confidentialité de Twilio</a
+          >.
+        </p>
+      </section>
 
-        <section>
-            <h2>Vos Droits</h2>
-            <p>Vous avez le droit de :</p>
-            <ol>
-                <li><strong>Accéder</strong> à vos données : Toutes vos données sont accessibles dans les Paramètres de l'application</li>
-                <li><strong>Supprimer</strong> vos données : Désinstallez l'application pour supprimer toutes les données locales</li>
-                <li><strong>Modifier</strong> vos données : Modifiez vos contacts et préférences à tout moment dans les Paramètres</li>
-            </ol>
-        </section>
+      <section>
+        <h2>Sécurité</h2>
+        <ul>
+          <li>
+            <strong>Stockage local</strong> : Toutes vos données sont stockées localement sur votre
+            appareil
+          </li>
+          <li>
+            <strong>Chiffrement</strong> : Les communications avec notre serveur sont chiffrées
+            (HTTPS)
+          </li>
+          <li>
+            <strong>Pas de compte</strong> : Aucune inscription requise, aucune donnée centralisée
+          </li>
+        </ul>
+      </section>
 
-        <section>
-            <h2>Permissions Requises</h2>
-            
-            <h3>Localisation (GPS)</h3>
-            <p><strong>Pourquoi</strong> : Pour partager votre position avec vos contacts d'urgence en cas d'alerte.</p>
-            <p><strong>Quand</strong> : Uniquement pendant une session active ou lors d'une alerte.</p>
+      <section>
+        <h2>Vos Droits</h2>
+        <p>Vous avez le droit de :</p>
+        <ol>
+          <li>
+            <strong>Accéder</strong> à vos données : Toutes vos données sont accessibles dans les
+            Paramètres de l'application
+          </li>
+          <li>
+            <strong>Supprimer</strong> vos données : Désinstallez l'application pour supprimer
+            toutes les données locales
+          </li>
+          <li>
+            <strong>Modifier</strong> vos données : Modifiez vos contacts et préférences à tout
+            moment dans les Paramètres
+          </li>
+        </ol>
+      </section>
 
-            <h3>Notifications</h3>
-            <p><strong>Pourquoi</strong> : Pour vous rappeler de confirmer votre retour et vous alerter en cas de dépassement de l'heure limite.</p>
-            <p><strong>Quand</strong> : Selon les paramètres de votre session.</p>
-        </section>
+      <section>
+        <h2>Permissions Requises</h2>
 
-        <section>
-            <h2>Données des Mineurs</h2>
-            <p>SafeWalk n'est pas destiné aux enfants de moins de 13 ans. Nous ne collectons pas sciemment de données auprès d'enfants de moins de 13 ans.</p>
-        </section>
+        <h3>Localisation (GPS)</h3>
+        <p>
+          <strong>Pourquoi</strong> : Pour partager votre position avec vos contacts d'urgence en
+          cas d'alerte.
+        </p>
+        <p><strong>Quand</strong> : Uniquement pendant une session active ou lors d'une alerte.</p>
 
-        <section>
-            <h2>Modifications de cette Politique</h2>
-            <p>Nous pouvons mettre à jour cette politique de temps en temps. Les modifications seront publiées dans l'application avec la date de mise à jour.</p>
-        </section>
+        <h3>Notifications</h3>
+        <p>
+          <strong>Pourquoi</strong> : Pour vous rappeler de confirmer votre retour et vous alerter
+          en cas de dépassement de l'heure limite.
+        </p>
+        <p><strong>Quand</strong> : Selon les paramètres de votre session.</p>
+      </section>
 
-        <section>
-            <h2>Contact</h2>
-            <p>Pour toute question concernant cette politique de confidentialité, contactez-nous à :</p>
-            <p><strong>Email</strong> : <a href="mailto:privacy@safewalk.app">privacy@safewalk.app</a></p>
-        </section>
+      <section>
+        <h2>Données des Mineurs</h2>
+        <p>
+          SafeWalk n'est pas destiné aux enfants de moins de 13 ans. Nous ne collectons pas
+          sciemment de données auprès d'enfants de moins de 13 ans.
+        </p>
+      </section>
 
-        <section class="summary-box">
-            <h2>Résumé Simple</h2>
-            <ul class="summary-list">
-                <li>✅ Vos données restent sur votre téléphone</li>
-                <li>✅ Aucune inscription, aucun compte</li>
-                <li>✅ Position GPS partagée uniquement en cas d'alerte</li>
-                <li>✅ Aucune vente de données à des tiers</li>
-                <li>✅ Vous contrôlez tout depuis les Paramètres</li>
-            </ul>
-        </section>
+      <section>
+        <h2>Modifications de cette Politique</h2>
+        <p>
+          Nous pouvons mettre à jour cette politique de temps en temps. Les modifications seront
+          publiées dans l'application avec la date de mise à jour.
+        </p>
+      </section>
+
+      <section>
+        <h2>Contact</h2>
+        <p>Pour toute question concernant cette politique de confidentialité, contactez-nous à :</p>
+        <p>
+          <strong>Email</strong> : <a href="mailto:privacy@safewalk.app">privacy@safewalk.app</a>
+        </p>
+      </section>
+
+      <section class="summary-box">
+        <h2>Résumé Simple</h2>
+        <ul class="summary-list">
+          <li>✅ Vos données restent sur votre téléphone</li>
+          <li>✅ Aucune inscription, aucun compte</li>
+          <li>✅ Position GPS partagée uniquement en cas d'alerte</li>
+          <li>✅ Aucune vente de données à des tiers</li>
+          <li>✅ Vous contrôlez tout depuis les Paramètres</li>
+        </ul>
+      </section>
     </main>
 
     <footer>
-        <div class="container">
-            <nav class="footer-nav">
-                <a href="index.html">Accueil</a>
-                <a href="terms.html">Conditions d'utilisation</a>
-                <a href="support.html">Support</a>
-            </nav>
-            <p class="copyright">&copy; 2026 SafeWalk. Tous droits réservés.</p>
-        </div>
+      <div class="container">
+        <nav class="footer-nav">
+          <a href="index.html">Accueil</a>
+          <a href="terms.html">Conditions d'utilisation</a>
+          <a href="support.html">Support</a>
+        </nav>
+        <p class="copyright">&copy; 2026 SafeWalk. Tous droits réservés.</p>
+      </div>
     </footer>
-</body>
+  </body>
 </html>

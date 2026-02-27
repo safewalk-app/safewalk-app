@@ -1,9 +1,11 @@
 # SafeWalk - Store Listing
 
 ## App Name
+
 **SafeWalk**
 
 ## Subtitle / Short Description (80 characters max)
+
 Reste en sécurité, partout. Alerte tes proches si tu ne rentres pas.
 
 ## Description (App Store / Google Play)
@@ -103,29 +105,35 @@ Because your safety and that of your loved ones matter. SafeWalk gives you peace
 ## Keywords
 
 ### Français
+
 sécurité, alerte, urgence, GPS, localisation, contact, retour, nuit, protection, SOS, surveillance, trajet, rentrer, seul, sécurisé
 
 ### English
+
 safety, alert, emergency, GPS, location, contact, return, night, protection, SOS, monitoring, journey, walk, alone, secure
 
 ---
 
 ## Category
+
 **Lifestyle** / **Safety**
 
 ---
 
 ## Age Rating
+
 **12+** (Mild themes related to personal safety)
 
 ---
 
 ## Support URL
+
 https://safewalk.app/support
 
 ---
 
 ## Privacy Policy URL
+
 https://safewalk.app/privacy
 
 ---

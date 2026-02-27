@@ -1,7 +1,7 @@
-import * as SecureStore from "expo-secure-store";
-import { Platform } from "react-native";
-import { SESSION_TOKEN_KEY, USER_INFO_KEY } from "@/constants/oauth";
-import { logger } from "../logger";
+import * as SecureStore from 'expo-secure-store';
+import { Platform } from 'react-native';
+import { SESSION_TOKEN_KEY, USER_INFO_KEY } from '@/constants/oauth';
+import { logger } from '../logger';
 
 export type User = {
   id: number;
@@ -15,21 +15,21 @@ export type User = {
 export async function getSessionToken(): Promise<string | null> {
   try {
     // Web platform uses cookie-based auth, no manual token management needed
-    if (Platform.OS === "web") {
-      logger.info("[Auth] Web platform uses cookie-based auth, skipping token retrieval");
+    if (Platform.OS === 'web') {
+      logger.info('[Auth] Web platform uses cookie-based auth, skipping token retrieval');
       return null;
     }
 
     // Use SecureStore for native
-    logger.info("[Auth] Getting session token...");
+    logger.info('[Auth] Getting session token...');
     const token = await SecureStore.getItemAsync(SESSION_TOKEN_KEY);
     logger.info(
-      "[Auth] Session token retrieved from SecureStore:",
-      token ? `present (${token.substring(0, 20)}...)` : "missing",
+      '[Auth] Session token retrieved from SecureStore:',
+      token ? `present (${token.substring(0, 20)}...)` : 'missing',
     );
     return token;
   } catch (error) {
-    logger.error("[Auth] Failed to get session token:", error);
+    logger.error('[Auth] Failed to get session token:', error);
     return null;
   }
 }
@@ -37,17 +37,17 @@ export async function getSessionToken(): Promise<string | null> {
 export async function setSessionToken(token: string): Promise<void> {
   try {
     // Web platform uses cookie-based auth, no manual token management needed
-    if (Platform.OS === "web") {
-      logger.info("[Auth] Web platform uses cookie-based auth, skipping token storage");
+    if (Platform.OS === 'web') {
+      logger.info('[Auth] Web platform uses cookie-based auth, skipping token storage');
       return;
     }
 
     // Use SecureStore for native
-    logger.info("[Auth] Setting session token...", token.substring(0, 20) + "...");
+    logger.info('[Auth] Setting session token...', token.substring(0, 20) + '...');
     await SecureStore.setItemAsync(SESSION_TOKEN_KEY, token);
-    logger.info("[Auth] Session token stored in SecureStore successfully");
+    logger.info('[Auth] Session token stored in SecureStore successfully');
   } catch (error) {
-    logger.error("[Auth] Failed to set session token:", error);
+    logger.error('[Auth] Failed to set session token:', error);
     throw error;
   }
 }
@@ -55,26 +55,26 @@ export async function setSessionToken(token: string): Promise<void> {
 export async function removeSessionToken(): Promise<void> {
   try {
     // Web platform uses cookie-based auth, logout is handled by server clearing cookie
-    if (Platform.OS === "web") {
-      logger.info("[Auth] Web platform uses cookie-based auth, skipping token removal");
+    if (Platform.OS === 'web') {
+      logger.info('[Auth] Web platform uses cookie-based auth, skipping token removal');
       return;
     }
 
     // Use SecureStore for native
-    logger.info("[Auth] Removing session token...");
+    logger.info('[Auth] Removing session token...');
     await SecureStore.deleteItemAsync(SESSION_TOKEN_KEY);
-    logger.info("[Auth] Session token removed from SecureStore successfully");
+    logger.info('[Auth] Session token removed from SecureStore successfully');
   } catch (error) {
-    logger.error("[Auth] Failed to remove session token:", error);
+    logger.error('[Auth] Failed to remove session token:', error);
   }
 }
 
 export async function getUserInfo(): Promise<User | null> {
   try {
-    logger.info("[Auth] Getting user info...");
+    logger.info('[Auth] Getting user info...');
 
     let info: string | null = null;
-    if (Platform.OS === "web") {
+    if (Platform.OS === 'web') {
       // Use localStorage for web
       info = window.localStorage.getItem(USER_INFO_KEY);
     } else {
@@ -83,40 +83,40 @@ export async function getUserInfo(): Promise<User | null> {
     }
 
     if (!info) {
-      logger.info("[Auth] No user info found");
+      logger.info('[Auth] No user info found');
       return null;
     }
     const user = JSON.parse(info);
-    logger.info("[Auth] User info retrieved:", user);
+    logger.info('[Auth] User info retrieved:', user);
     return user;
   } catch (error) {
-    logger.error("[Auth] Failed to get user info:", error);
+    logger.error('[Auth] Failed to get user info:', error);
     return null;
   }
 }
 
 export async function setUserInfo(user: User): Promise<void> {
   try {
-    logger.info("[Auth] Setting user info...", user);
+    logger.info('[Auth] Setting user info...', user);
 
-    if (Platform.OS === "web") {
+    if (Platform.OS === 'web') {
       // Use localStorage for web
       window.localStorage.setItem(USER_INFO_KEY, JSON.stringify(user));
-      logger.info("[Auth] User info stored in localStorage successfully");
+      logger.info('[Auth] User info stored in localStorage successfully');
       return;
     }
 
     // Use SecureStore for native
     await SecureStore.setItemAsync(USER_INFO_KEY, JSON.stringify(user));
-    logger.info("[Auth] User info stored in SecureStore successfully");
+    logger.info('[Auth] User info stored in SecureStore successfully');
   } catch (error) {
-    logger.error("[Auth] Failed to set user info:", error);
+    logger.error('[Auth] Failed to set user info:', error);
   }
 }
 
 export async function clearUserInfo(): Promise<void> {
   try {
-    if (Platform.OS === "web") {
+    if (Platform.OS === 'web') {
       // Use localStorage for web
       window.localStorage.removeItem(USER_INFO_KEY);
       return;
@@ -125,6 +125,6 @@ export async function clearUserInfo(): Promise<void> {
     // Use SecureStore for native
     await SecureStore.deleteItemAsync(USER_INFO_KEY);
   } catch (error) {
-    logger.error("[Auth] Failed to clear user info:", error);
+    logger.error('[Auth] Failed to clear user info:', error);
   }
 }

@@ -8,14 +8,12 @@ describe.skip('Follow-up and Confirmation SMS', () => {
 
   it('should send follow-up SMS after 10 minutes', async () => {
     const params = {
-      contacts: [
-        { name: 'Marie', phone: '+33763458273' },
-      ],
+      contacts: [{ name: 'Marie', phone: '+33763458273' }],
       userName: 'Ben',
       location: { latitude: 48.8566, longitude: 2.3522 },
     };
 
-    console.log('📤 Envoi d\'une relance SMS...');
+    console.log("📤 Envoi d'une relance SMS...");
 
     const response = await fetch(`${API_URL}/api/friendly-sms/follow-up`, {
       method: 'POST',
@@ -61,7 +59,7 @@ describe.skip('Follow-up and Confirmation SMS', () => {
       userName: 'Ben',
     };
 
-    console.log('📤 Envoi d\'un SMS de confirmation...');
+    console.log("📤 Envoi d'un SMS de confirmation...");
 
     const response = await fetch(`${API_URL}/api/friendly-sms/confirmation`, {
       method: 'POST',

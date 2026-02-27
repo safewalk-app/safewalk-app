@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import { supabase } from '@/lib/supabase';
 
 export interface StripeProduct {
   id: string;
@@ -6,7 +6,7 @@ export interface StripeProduct {
   description: string;
   price: number;
   currency: string;
-  type: "subscription" | "credits";
+  type: 'subscription' | 'credits';
   metadata?: Record<string, string>;
   stripeProductId?: string;
   stripePriceId?: string;
@@ -31,7 +31,7 @@ class StripeService {
     this.stripePublishableKey = process.env.EXPO_PUBLIC_STRIPE_PUBLIC_KEY || null;
 
     if (!this.stripePublishableKey) {
-      console.warn("Stripe publishable key not configured");
+      console.warn('Stripe publishable key not configured');
     }
 
     this.initialized = true;
@@ -45,15 +45,15 @@ class StripeService {
       // Check if cache is still valid
       const now = Date.now();
       if (this.productsCache.length > 0 && now - this.cacheTimestamp < this.cacheDuration) {
-        console.log("Using cached products");
+        console.log('Using cached products');
         return this.productsCache;
       }
 
       // Fetch products from Edge Function
-      const { data, error } = await supabase.functions.invoke("get-stripe-products");
+      const { data, error } = await supabase.functions.invoke('get-stripe-products');
 
       if (error) {
-        console.error("Error fetching products from Edge Function:", error);
+        console.error('Error fetching products from Edge Function:', error);
         // Return fallback products if Edge Function fails
         return this.getFallbackProducts();
       }
@@ -61,13 +61,13 @@ class StripeService {
       if (data?.products) {
         this.productsCache = data.products;
         this.cacheTimestamp = now;
-        console.log("Fetched products from Stripe API:", data.products.length);
+        console.log('Fetched products from Stripe API:', data.products.length);
         return data.products;
       }
 
       return this.getFallbackProducts();
     } catch (error) {
-      console.error("Error in getProducts:", error);
+      console.error('Error in getProducts:', error);
       return this.getFallbackProducts();
     }
   }
@@ -79,59 +79,59 @@ class StripeService {
     return [
       // Subscriptions
       {
-        id: "price_premium_monthly",
-        name: "Premium Mensuel",
-        description: "Alertes SMS illimitées",
+        id: 'price_premium_monthly',
+        name: 'Premium Mensuel',
+        description: 'Alertes SMS illimitées',
         price: 9.99,
-        currency: "USD",
-        type: "subscription",
-        metadata: { plan_id: "premium", interval: "month" },
+        currency: 'USD',
+        type: 'subscription',
+        metadata: { plan_id: 'premium', interval: 'month' },
       },
       {
-        id: "price_premium_annual",
-        name: "Premium Annuel",
-        description: "Alertes SMS illimitées + 20% de réduction",
+        id: 'price_premium_annual',
+        name: 'Premium Annuel',
+        description: 'Alertes SMS illimitées + 20% de réduction',
         price: 79.99,
-        currency: "USD",
-        type: "subscription",
-        metadata: { plan_id: "premium_annual", interval: "year" },
+        currency: 'USD',
+        type: 'subscription',
+        metadata: { plan_id: 'premium_annual', interval: 'year' },
       },
       // Credits
       {
-        id: "price_credits_10",
-        name: "10 Crédits",
-        description: "10 alertes SMS",
+        id: 'price_credits_10',
+        name: '10 Crédits',
+        description: '10 alertes SMS',
         price: 0.99,
-        currency: "USD",
-        type: "credits",
-        metadata: { credits: "10" },
+        currency: 'USD',
+        type: 'credits',
+        metadata: { credits: '10' },
       },
       {
-        id: "price_credits_50",
-        name: "50 Crédits",
-        description: "50 alertes SMS",
+        id: 'price_credits_50',
+        name: '50 Crédits',
+        description: '50 alertes SMS',
         price: 4.99,
-        currency: "USD",
-        type: "credits",
-        metadata: { credits: "50" },
+        currency: 'USD',
+        type: 'credits',
+        metadata: { credits: '50' },
       },
       {
-        id: "price_credits_100",
-        name: "100 Crédits",
-        description: "100 alertes SMS",
+        id: 'price_credits_100',
+        name: '100 Crédits',
+        description: '100 alertes SMS',
         price: 9.99,
-        currency: "USD",
-        type: "credits",
-        metadata: { credits: "100" },
+        currency: 'USD',
+        type: 'credits',
+        metadata: { credits: '100' },
       },
       {
-        id: "price_credits_500",
-        name: "500 Crédits",
-        description: "500 alertes SMS",
+        id: 'price_credits_500',
+        name: '500 Crédits',
+        description: '500 alertes SMS',
         price: 39.99,
-        currency: "USD",
-        type: "credits",
-        metadata: { credits: "500" },
+        currency: 'USD',
+        type: 'credits',
+        metadata: { credits: '500' },
       },
     ];
   }
@@ -149,13 +149,15 @@ class StripeService {
    */
   async createCheckoutSession(productId: string): Promise<StripeCheckoutSession | null> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) {
-        throw new Error("User not authenticated");
+        throw new Error('User not authenticated');
       }
 
       // Call Edge Function to create checkout session
-      const { data, error } = await supabase.functions.invoke("create-stripe-checkout", {
+      const { data, error } = await supabase.functions.invoke('create-stripe-checkout', {
         body: {
           productId,
           userId: user.id,
@@ -164,13 +166,13 @@ class StripeService {
       });
 
       if (error) {
-        console.error("Error creating checkout session:", error);
+        console.error('Error creating checkout session:', error);
         return null;
       }
 
       return data as StripeCheckoutSession;
     } catch (error) {
-      console.error("Error in createCheckoutSession:", error);
+      console.error('Error in createCheckoutSession:', error);
       return null;
     }
   }
@@ -180,23 +182,25 @@ class StripeService {
    */
   async getSubscriptionStatus() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) {
-        throw new Error("User not authenticated");
+        throw new Error('User not authenticated');
       }
 
-      const { data, error } = await supabase.rpc("get_user_subscription", {
+      const { data, error } = await supabase.rpc('get_user_subscription', {
         p_user_id: user.id,
       });
 
       if (error) {
-        console.error("Error fetching subscription:", error);
+        console.error('Error fetching subscription:', error);
         return null;
       }
 
       return data && data.length > 0 ? data[0] : null;
     } catch (error) {
-      console.error("Error in getSubscriptionStatus:", error);
+      console.error('Error in getSubscriptionStatus:', error);
       return null;
     }
   }
@@ -206,23 +210,25 @@ class StripeService {
    */
   async getCreditsBalance() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) {
-        throw new Error("User not authenticated");
+        throw new Error('User not authenticated');
       }
 
-      const { data, error } = await supabase.rpc("get_user_credits", {
+      const { data, error } = await supabase.rpc('get_user_credits', {
         p_user_id: user.id,
       });
 
       if (error) {
-        console.error("Error fetching credits:", error);
+        console.error('Error fetching credits:', error);
         return null;
       }
 
       return data && data.length > 0 ? data[0] : null;
     } catch (error) {
-      console.error("Error in getCreditsBalance:", error);
+      console.error('Error in getCreditsBalance:', error);
       return null;
     }
   }
@@ -232,23 +238,25 @@ class StripeService {
    */
   async getQuotaStatus() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) {
-        throw new Error("User not authenticated");
+        throw new Error('User not authenticated');
       }
 
-      const { data, error } = await supabase.rpc("get_quota_status", {
+      const { data, error } = await supabase.rpc('get_quota_status', {
         p_user_id: user.id,
       });
 
       if (error) {
-        console.error("Error fetching quota status:", error);
+        console.error('Error fetching quota status:', error);
         return null;
       }
 
       return data && data.length > 0 ? data[0] : null;
     } catch (error) {
-      console.error("Error in getQuotaStatus:", error);
+      console.error('Error in getQuotaStatus:', error);
       return null;
     }
   }
@@ -258,23 +266,25 @@ class StripeService {
    */
   async cancelSubscription(): Promise<boolean> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) {
-        throw new Error("User not authenticated");
+        throw new Error('User not authenticated');
       }
 
-      const { error } = await supabase.rpc("cancel_subscription", {
+      const { error } = await supabase.rpc('cancel_subscription', {
         p_user_id: user.id,
       });
 
       if (error) {
-        console.error("Error cancelling subscription:", error);
+        console.error('Error cancelling subscription:', error);
         return false;
       }
 
       return true;
     } catch (error) {
-      console.error("Error in cancelSubscription:", error);
+      console.error('Error in cancelSubscription:', error);
       return false;
     }
   }
@@ -284,26 +294,28 @@ class StripeService {
    */
   async getTransactionHistory(limit: number = 10) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) {
-        throw new Error("User not authenticated");
+        throw new Error('User not authenticated');
       }
 
       const { data, error } = await supabase
-        .from("transactions")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
+        .from('transactions')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
         .limit(limit);
 
       if (error) {
-        console.error("Error fetching transactions:", error);
+        console.error('Error fetching transactions:', error);
         return [];
       }
 
       return data || [];
     } catch (error) {
-      console.error("Error in getTransactionHistory:", error);
+      console.error('Error in getTransactionHistory:', error);
       return [];
     }
   }

@@ -4,7 +4,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
  * Tests pour les corrections des 2 bugs critiques
  */
 
-describe('Bug Fixes - Sélecteur d\'heure et Timer', () => {
+describe("Bug Fixes - Sélecteur d'heure et Timer", () => {
   // ============================================================================
   // BUG #1: Sélecteur d'heure ambigüe
   // ============================================================================
@@ -18,7 +18,7 @@ describe('Bug Fixes - Sélecteur d\'heure et Timer', () => {
           now.getMonth(),
           now.getDate(),
           now.getHours() - 1, // 1 heure avant maintenant
-          now.getMinutes()
+          now.getMinutes(),
         );
 
         // Si l'utilisateur sélectionne une heure passée avec "Aujourd'hui"
@@ -37,7 +37,7 @@ describe('Bug Fixes - Sélecteur d\'heure et Timer', () => {
           now.getMonth(),
           now.getDate(),
           14, // 14:00
-          0
+          0,
         );
 
         // Le système devrait passer à demain
@@ -53,13 +53,7 @@ describe('Bug Fixes - Sélecteur d\'heure et Timer', () => {
         const now = new Date();
         now.setHours(15, 30, 0);
 
-        const selectedTime = new Date(
-          now.getFullYear(),
-          now.getMonth(),
-          now.getDate(),
-          14,
-          0
-        );
+        const selectedTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 14, 0);
 
         if (selectedTime < now) {
           selectedTime.setDate(selectedTime.getDate() + 1);
@@ -132,11 +126,7 @@ describe('Bug Fixes - Sélecteur d\'heure et Timer', () => {
         const remainingUntilDeadline = deadline - now;
 
         const state =
-          remainingUntilLimit > 0
-            ? 'active'
-            : remainingUntilDeadline > 0
-              ? 'grace'
-              : 'overdue';
+          remainingUntilLimit > 0 ? 'active' : remainingUntilDeadline > 0 ? 'grace' : 'overdue';
 
         expect(state).toBe('grace');
       });
@@ -150,11 +140,7 @@ describe('Bug Fixes - Sélecteur d\'heure et Timer', () => {
         const remainingUntilDeadline = deadline - now;
 
         const state =
-          remainingUntilLimit > 0
-            ? 'active'
-            : remainingUntilDeadline > 0
-              ? 'grace'
-              : 'overdue';
+          remainingUntilLimit > 0 ? 'active' : remainingUntilDeadline > 0 ? 'grace' : 'overdue';
 
         expect(state).toBe('overdue');
       });
@@ -284,7 +270,7 @@ describe('Bug Fixes - Sélecteur d\'heure et Timer', () => {
   describe('Intégration des 2 corrections', () => {
     it('should correctly handle full session flow with corrected logic', () => {
       const now = Date.now();
-      
+
       // Utilisateur sélectionne 14:00 aujourd'hui
       const selectedTime = new Date(now);
       selectedTime.setHours(14, 0, 0);

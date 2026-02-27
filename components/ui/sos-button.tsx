@@ -1,4 +1,4 @@
-import { logger } from "@/lib/utils/logger";
+import { logger } from '@/lib/utils/logger';
 import React, { useState } from 'react';
 import { View, Text, Pressable, Modal, Alert } from 'react-native';
 import { useColors } from '@/hooks/use-colors';
@@ -16,13 +16,18 @@ export interface SOSButtonProps {
  * Composant SOSButton - Bouton rouge d'alerte d'urgence
  * Affiche une confirmation avant d'envoyer l'alerte SOS
  */
-export function SOSButton({ onPress, isLoading = false, disabled = false, className }: SOSButtonProps) {
+export function SOSButton({
+  onPress,
+  isLoading = false,
+  disabled = false,
+  className,
+}: SOSButtonProps) {
   const colors = useColors();
   const [showConfirmation, setShowConfirmation] = useState(false);
 
   const handleSOSPress = async () => {
     logger.debug('🚨 [SOSButton] Bouton SOS cliqué');
-    
+
     // Haptic feedback intense
     try {
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
@@ -65,7 +70,7 @@ export function SOSButton({ onPress, isLoading = false, disabled = false, classN
           'flex-row items-center justify-center gap-3 px-8 py-5 rounded-full active:opacity-85',
           'bg-red-500 shadow-2xl',
           (disabled || isLoading) && 'opacity-50',
-          className
+          className,
         )}
         style={{
           shadowColor: '#FF0000',
@@ -76,11 +81,14 @@ export function SOSButton({ onPress, isLoading = false, disabled = false, classN
         }}
       >
         <Text className="text-white text-3xl font-bold">🚨</Text>
-        <Text className="text-white font-bold text-xl" style={{
-          textShadowColor: 'rgba(0, 0, 0, 0.3)',
-          textShadowOffset: { width: 1, height: 1 },
-          textShadowRadius: 2,
-        }}>
+        <Text
+          className="text-white font-bold text-xl"
+          style={{
+            textShadowColor: 'rgba(0, 0, 0, 0.3)',
+            textShadowOffset: { width: 1, height: 1 },
+            textShadowRadius: 2,
+          }}
+        >
           {isLoading ? 'Envoi...' : 'SOS URGENCE'}
         </Text>
       </Pressable>
@@ -100,9 +108,7 @@ export function SOSButton({ onPress, isLoading = false, disabled = false, classN
             {/* Titre */}
             <View className="items-center gap-3">
               <Text className="text-5xl">🚨</Text>
-              <Text className="text-2xl font-bold text-foreground text-center">
-                Alerte SOS
-              </Text>
+              <Text className="text-2xl font-bold text-foreground text-center">Alerte SOS</Text>
               <Text className="text-sm text-muted text-center">
                 Êtes-vous sûr ? Un SMS d'urgence sera envoyé à vos contacts immédiatement.
               </Text>
@@ -134,9 +140,7 @@ export function SOSButton({ onPress, isLoading = false, disabled = false, classN
                 disabled={isLoading}
                 className="flex-1 items-center justify-center py-3 rounded-xl bg-red-500 active:opacity-80"
               >
-                <Text className="text-white font-bold">
-                  {isLoading ? '⏳' : '🚨'} Confirmer
-                </Text>
+                <Text className="text-white font-bold">{isLoading ? '⏳' : '🚨'} Confirmer</Text>
               </Pressable>
             </View>
 

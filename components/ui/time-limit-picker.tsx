@@ -1,12 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import {
-  View,
-  Text,
-  Pressable,
-  Modal,
-  SafeAreaView,
-  ScrollView,
-} from 'react-native';
+import { View, Text, Pressable, Modal, SafeAreaView, ScrollView } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useColors } from '@/hooks/use-colors';
@@ -17,10 +10,7 @@ interface TimeLimitPickerProps {
   onTimeSelected: (timestamp: number) => void;
 }
 
-export function TimeLimitPicker({
-  selectedTime,
-  onTimeSelected,
-}: TimeLimitPickerProps) {
+export function TimeLimitPicker({ selectedTime, onTimeSelected }: TimeLimitPickerProps) {
   const colors = useColors();
   const [showPicker, setShowPicker] = useState(false);
   const [tempDate, setTempDate] = useState(new Date(selectedTime));
@@ -43,7 +33,7 @@ export function TimeLimitPicker({
         now.getMonth(),
         now.getDate(),
         tempDate.getHours(),
-        tempDate.getMinutes()
+        tempDate.getMinutes(),
       );
 
       // Vérifier si l'heure est passée
@@ -57,7 +47,7 @@ export function TimeLimitPicker({
         now.getMonth(),
         now.getDate() + 1,
         tempDate.getHours(),
-        tempDate.getMinutes()
+        tempDate.getMinutes(),
       );
     }
 
@@ -72,7 +62,7 @@ export function TimeLimitPicker({
       now.getMonth(),
       now.getDate(),
       tempDate.getHours(),
-      tempDate.getMinutes()
+      tempDate.getMinutes(),
     );
     return selectedDay === 'today' && selectedDateOnly < now;
   }, [selectedDay, tempDate]);
@@ -110,22 +100,13 @@ export function TimeLimitPicker({
       >
         <View className="flex-row items-center justify-between">
           <View className="flex-1">
-            <Text
-              style={{ color: colors.muted }}
-              className="text-sm font-medium mb-2"
-            >
+            <Text style={{ color: colors.muted }} className="text-sm font-medium mb-2">
               Heure limite
             </Text>
-            <Text
-              style={{ color: colors.foreground }}
-              className="text-4xl font-bold"
-            >
+            <Text style={{ color: colors.foreground }} className="text-4xl font-bold">
               {timeStr}
             </Text>
-            <Text
-              style={{ color: colors.muted }}
-              className="text-xs font-medium mt-2"
-            >
+            <Text style={{ color: colors.muted }} className="text-xs font-medium mt-2">
               {displayDateStr}
             </Text>
           </View>
@@ -140,13 +121,8 @@ export function TimeLimitPicker({
         animationType="slide"
         onRequestClose={() => setShowPicker(false)}
       >
-        <SafeAreaView
-          style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' }}
-        >
-          <Pressable
-            style={{ flex: 1 }}
-            onPress={() => setShowPicker(false)}
-          />
+        <SafeAreaView style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <Pressable style={{ flex: 1 }} onPress={() => setShowPicker(false)} />
 
           <View
             style={{
@@ -176,18 +152,14 @@ export function TimeLimitPicker({
                     paddingVertical: 10,
                     paddingHorizontal: 16,
                     borderRadius: 20,
-                    backgroundColor:
-                      selectedDay === 'today' ? colors.primary : colors.surface,
+                    backgroundColor: selectedDay === 'today' ? colors.primary : colors.surface,
                     opacity: pressed ? 0.8 : 1,
                   },
                 ]}
               >
                 <Text
                   style={{
-                    color:
-                      selectedDay === 'today'
-                        ? '#ffffff'
-                        : colors.foreground,
+                    color: selectedDay === 'today' ? '#ffffff' : colors.foreground,
                   }}
                   className="text-center font-semibold"
                 >
@@ -203,18 +175,14 @@ export function TimeLimitPicker({
                     paddingVertical: 10,
                     paddingHorizontal: 16,
                     borderRadius: 20,
-                    backgroundColor:
-                      selectedDay === 'tomorrow' ? colors.primary : colors.surface,
+                    backgroundColor: selectedDay === 'tomorrow' ? colors.primary : colors.surface,
                     opacity: pressed ? 0.8 : 1,
                   },
                 ]}
               >
                 <Text
                   style={{
-                    color:
-                      selectedDay === 'tomorrow'
-                        ? '#ffffff'
-                        : colors.foreground,
+                    color: selectedDay === 'tomorrow' ? '#ffffff' : colors.foreground,
                   }}
                   className="text-center font-semibold"
                 >
@@ -248,10 +216,7 @@ export function TimeLimitPicker({
                   marginBottom: 16,
                 }}
               >
-                <Text
-                  style={{ color: '#F59E0B' }}
-                  className="text-sm font-semibold"
-                >
+                <Text style={{ color: '#F59E0B' }} className="text-sm font-semibold">
                   ⚠️ Cette heure est passée, le jour a changé à demain
                 </Text>
               </View>
@@ -267,16 +232,10 @@ export function TimeLimitPicker({
                 marginBottom: 16,
               }}
             >
-              <Text
-                style={{ color: colors.muted }}
-                className="text-xs font-medium mb-1"
-              >
+              <Text style={{ color: colors.muted }} className="text-xs font-medium mb-1">
                 Vous rentrerez à :
               </Text>
-              <Text
-                style={{ color: colors.foreground }}
-                className="text-lg font-bold"
-              >
+              <Text style={{ color: colors.foreground }} className="text-lg font-bold">
                 {finalDatePreview.toLocaleTimeString('fr-FR', {
                   hour: '2-digit',
                   minute: '2-digit',

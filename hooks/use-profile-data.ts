@@ -26,10 +26,12 @@ export function useProfileData(): ProfileData {
 
   const loadProfileData = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
       if (!user) {
-        setData(prev => ({
+        setData((prev) => ({
           ...prev,
           loading: false,
           error: 'No user found',
@@ -39,13 +41,15 @@ export function useProfileData(): ProfileData {
 
       const { data: profile, error } = await supabase
         .from('profiles')
-        .select('free_alerts_remaining, free_test_sms_remaining, subscription_active, phone_verified')
+        .select(
+          'free_alerts_remaining, free_test_sms_remaining, subscription_active, phone_verified',
+        )
         .eq('id', user.id)
         .single();
 
       if (error) {
         console.error('Error loading profile:', error);
-        setData(prev => ({
+        setData((prev) => ({
           ...prev,
           loading: false,
           error: error.message,
@@ -63,7 +67,7 @@ export function useProfileData(): ProfileData {
       });
     } catch (error) {
       console.error('Unexpected error loading profile:', error);
-      setData(prev => ({
+      setData((prev) => ({
         ...prev,
         loading: false,
         error: 'Failed to load profile',

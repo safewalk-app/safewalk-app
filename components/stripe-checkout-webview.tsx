@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, ActivityIndicator, TouchableOpacity } from "react-native";
-import { WebView, WebViewMessageEvent } from "react-native-webview";
-import { MaterialIcons } from "@expo/vector-icons";
-import { useColors } from "@/hooks/use-colors";
-import { cn } from "@/lib/utils";
+import React, { useEffect, useState } from 'react';
+import { View, Text, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { WebView, WebViewMessageEvent } from 'react-native-webview';
+import { MaterialIcons } from '@expo/vector-icons';
+import { useColors } from '@/hooks/use-colors';
+import { cn } from '@/lib/utils';
 
 interface StripeCheckoutWebViewProps {
   checkoutUrl: string;
@@ -23,17 +23,17 @@ export function StripeCheckoutWebView({
   const [error, setError] = useState<string | null>(null);
 
   const handleNavigationStateChange = (navState: any) => {
-    console.log("[Stripe WebView] Navigation:", navState.url);
+    console.log('[Stripe WebView] Navigation:', navState.url);
 
     // Check if payment was successful
-    if (navState.url.includes("success=true")) {
-      console.log("[Stripe WebView] Payment successful!");
+    if (navState.url.includes('success=true')) {
+      console.log('[Stripe WebView] Payment successful!');
       onSuccess?.();
     }
 
     // Check if user cancelled
-    if (navState.url.includes("canceled=true")) {
-      console.log("[Stripe WebView] Payment cancelled");
+    if (navState.url.includes('canceled=true')) {
+      console.log('[Stripe WebView] Payment cancelled');
       onCancel?.();
     }
   };
@@ -41,18 +41,18 @@ export function StripeCheckoutWebView({
   const handleMessage = (event: WebViewMessageEvent) => {
     try {
       const data = JSON.parse(event.nativeEvent.data);
-      console.log("[Stripe WebView] Message:", data);
+      console.log('[Stripe WebView] Message:', data);
 
-      if (data.type === "success") {
+      if (data.type === 'success') {
         onSuccess?.();
-      } else if (data.type === "cancel") {
+      } else if (data.type === 'cancel') {
         onCancel?.();
-      } else if (data.type === "error") {
+      } else if (data.type === 'error') {
         setError(data.message);
         onError?.(data.message);
       }
     } catch (err) {
-      console.error("[Stripe WebView] Error parsing message:", err);
+      console.error('[Stripe WebView] Error parsing message:', err);
     }
   };
 
@@ -65,10 +65,7 @@ export function StripeCheckoutWebView({
             Erreur de paiement
           </Text>
           <Text className="text-sm text-muted text-center">{error}</Text>
-          <TouchableOpacity
-            onPress={onCancel}
-            className="mt-4 bg-primary px-6 py-3 rounded-lg"
-          >
+          <TouchableOpacity onPress={onCancel} className="mt-4 bg-primary px-6 py-3 rounded-lg">
             <Text className="text-background font-semibold">Fermer</Text>
           </TouchableOpacity>
         </View>
@@ -103,8 +100,8 @@ export function StripeCheckoutWebView({
           onLoadEnd={() => setLoading(false)}
           onError={(syntheticEvent) => {
             const { nativeEvent } = syntheticEvent;
-            console.error("[Stripe WebView] Error:", nativeEvent);
-            setError("Impossible de charger la page de paiement");
+            console.error('[Stripe WebView] Error:', nativeEvent);
+            setError('Impossible de charger la page de paiement');
             onError?.(nativeEvent.description);
           }}
           javaScriptEnabled={true}
@@ -120,9 +117,7 @@ export function StripeCheckoutWebView({
       {/* Security Badge */}
       <View className="px-4 py-3 bg-surface border-t border-border flex-row items-center justify-center gap-2">
         <MaterialIcons name="lock" size={16} color={colors.success} />
-        <Text className="text-xs text-muted">
-          Paiement sécurisé par Stripe
-        </Text>
+        <Text className="text-xs text-muted">Paiement sécurisé par Stripe</Text>
       </View>
     </View>
   );

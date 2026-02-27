@@ -63,14 +63,10 @@ export function HeroCardPremium({
         <Text className="text-5xl">{emoji}</Text>
 
         {/* Title */}
-        <Text className="text-3xl font-bold text-white">
-          {title}
-        </Text>
+        <Text className="text-3xl font-bold text-white">{title}</Text>
 
         {/* Description */}
-        <Text className="text-base text-white opacity-90 leading-relaxed">
-          {description}
-        </Text>
+        <Text className="text-base text-white opacity-90 leading-relaxed">{description}</Text>
       </View>
 
       {/* Button */}

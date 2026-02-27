@@ -56,7 +56,7 @@ export function useLocationPermission() {
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
       setIsLoading(false);
     } catch (error) {
-      logger.error('Erreur lors du chargement de l\'état des permissions:', error);
+      logger.error("Erreur lors du chargement de l'état des permissions:", error);
       setIsLoading(false);
     }
   };
@@ -66,7 +66,7 @@ export function useLocationPermission() {
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
       setState(newState);
     } catch (error) {
-      logger.error('Erreur lors de la sauvegarde de l\'état des permissions:', error);
+      logger.error("Erreur lors de la sauvegarde de l'état des permissions:", error);
     }
   };
 
@@ -78,8 +78,7 @@ export function useLocationPermission() {
     try {
       logger.info('[Location Permission] Demande de permission...');
       const { status } = await Location.requestForegroundPermissionsAsync();
-      const newStatus: PermissionStatus =
-        status === 'granted' ? 'granted' : 'denied';
+      const newStatus: PermissionStatus = status === 'granted' ? 'granted' : 'denied';
 
       const newState: LocationPermissionState = {
         status: newStatus,
@@ -99,51 +98,56 @@ export function useLocationPermission() {
   /**
    * Activer/désactiver la localisation (appelé depuis le toggle)
    */
-  const toggleLocation = useCallback(async (enable: boolean): Promise<{
-    success: boolean;
-    needsPermission: boolean;
-    needsSettings: boolean;
-  }> => {
-    logger.info('[Location Permission] Toggle:', enable);
+  const toggleLocation = useCallback(
+    async (
+      enable: boolean,
+    ): Promise<{
+      success: boolean;
+      needsPermission: boolean;
+      needsSettings: boolean;
+    }> => {
+      logger.info('[Location Permission] Toggle:', enable);
 
-    if (!enable) {
-      // Désactiver la localisation
-      const newState: LocationPermissionState = {
-        ...state,
-        enabled: false,
-      };
-      await saveState(newState);
-      return { success: true, needsPermission: false, needsSettings: false };
-    }
+      if (!enable) {
+        // Désactiver la localisation
+        const newState: LocationPermissionState = {
+          ...state,
+          enabled: false,
+        };
+        await saveState(newState);
+        return { success: true, needsPermission: false, needsSettings: false };
+      }
 
-    // Activer la localisation
-    if (state.status === 'granted') {
-      // Permission déjà accordée
-      const newState: LocationPermissionState = {
-        ...state,
-        enabled: true,
-      };
-      await saveState(newState);
-      return { success: true, needsPermission: false, needsSettings: false };
-    }
+      // Activer la localisation
+      if (state.status === 'granted') {
+        // Permission déjà accordée
+        const newState: LocationPermissionState = {
+          ...state,
+          enabled: true,
+        };
+        await saveState(newState);
+        return { success: true, needsPermission: false, needsSettings: false };
+      }
 
-    if (state.status === 'undetermined') {
-      // Permission jamais demandée => demander maintenant
-      const granted = await requestPermission();
+      if (state.status === 'undetermined') {
+        // Permission jamais demandée => demander maintenant
+        const granted = await requestPermission();
+        return {
+          success: granted,
+          needsPermission: !granted,
+          needsSettings: false,
+        };
+      }
+
+      // Permission refusée => ne pas redemander, afficher message + bouton Settings
       return {
-        success: granted,
-        needsPermission: !granted,
-        needsSettings: false,
+        success: false,
+        needsPermission: false,
+        needsSettings: true,
       };
-    }
-
-    // Permission refusée => ne pas redemander, afficher message + bouton Settings
-    return {
-      success: false,
-      needsPermission: false,
-      needsSettings: true,
-    };
-  }, [state, requestPermission]);
+    },
+    [state, requestPermission],
+  );
 
   /**
    * Ouvrir les réglages de l'app
@@ -156,7 +160,7 @@ export function useLocationPermission() {
         await Linking.openSettings();
       }
     } catch (error) {
-      logger.error('Erreur lors de l\'ouverture des réglages:', error);
+      logger.error("Erreur lors de l'ouverture des réglages:", error);
     }
   }, []);
 
@@ -169,7 +173,9 @@ export function useLocationPermission() {
     accuracy?: number;
   } | null> => {
     if (state.status !== 'granted' || !state.enabled) {
-      logger.info('[Location Permission] Position non disponible (permission non accordée ou désactivée)');
+      logger.info(
+        '[Location Permission] Position non disponible (permission non accordée ou désactivée)',
+      );
       return null;
     }
 

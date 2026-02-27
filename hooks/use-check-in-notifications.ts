@@ -5,7 +5,7 @@ import { logger } from '@/lib/logger';
 
 /**
  * Hook pour gérer les notifications de check-in automatique
- * 
+ *
  * Logic:
  * 1. À la création d'une sortie, calculer midTime = now + (limitTime - now)/2
  * 2. Programmer une notification locale à midTime: "Tout va bien ?"
@@ -55,23 +55,26 @@ export function useCheckInNotifications() {
           });
 
           // Programmer la 2e notification (10 min après la 1ère)
-          secondNotificationTimeoutRef.current = setTimeout(async () => {
-            try {
-              // Vérifier que la session est toujours active et pas de check-in confirmé
-              if (currentSession.status === 'active' && !currentSession.checkInOk) {
-                await Notifications.scheduleNotificationAsync({
-                  content: {
-                    title: 'On confirme que tout va bien ?',
-                    body: 'Réponds rapidement pour éviter une alerte',
-                    data: { type: 'check-in-reminder', sessionId: currentSession.id },
-                  },
-                  trigger: null, // Envoyer immédiatement
-                });
+          secondNotificationTimeoutRef.current = setTimeout(
+            async () => {
+              try {
+                // Vérifier que la session est toujours active et pas de check-in confirmé
+                if (currentSession.status === 'active' && !currentSession.checkInOk) {
+                  await Notifications.scheduleNotificationAsync({
+                    content: {
+                      title: 'On confirme que tout va bien ?',
+                      body: 'Réponds rapidement pour éviter une alerte',
+                      data: { type: 'check-in-reminder', sessionId: currentSession.id },
+                    },
+                    trigger: null, // Envoyer immédiatement
+                  });
+                }
+              } catch (error) {
+                logger.error('Error sending 2nd check-in notification:', error);
               }
-            } catch (error) {
-              logger.error('Error sending 2nd check-in notification:', error);
-            }
-          }, 10 * 60 * 1000); // 10 minutes
+            },
+            10 * 60 * 1000,
+          ); // 10 minutes
         } catch (error) {
           logger.error('Error sending check-in notification:', error);
         }

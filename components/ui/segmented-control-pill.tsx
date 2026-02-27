@@ -27,11 +27,7 @@ export function SegmentedControlPill({
 
   return (
     <View className="gap-2">
-      {label && (
-        <Text className="text-sm font-semibold text-foreground">
-          {label}
-        </Text>
-      )}
+      {label && <Text className="text-sm font-semibold text-foreground">{label}</Text>}
 
       <View
         className="flex-row gap-2 p-2 rounded-2xl"
@@ -52,7 +48,7 @@ export function SegmentedControlPill({
                 <View
                   className={cn(
                     'py-2 px-3 rounded-xl items-center justify-center',
-                    isSelected ? 'bg-primary' : 'bg-transparent'
+                    isSelected ? 'bg-primary' : 'bg-transparent',
                   )}
                   style={{
                     opacity: pressed ? 0.8 : 1,
@@ -61,7 +57,7 @@ export function SegmentedControlPill({
                   <Text
                     className={cn(
                       'font-semibold text-sm',
-                      isSelected ? 'text-white' : 'text-foreground'
+                      isSelected ? 'text-white' : 'text-foreground',
                     )}
                   >
                     {option.label}

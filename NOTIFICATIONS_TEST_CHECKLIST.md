@@ -9,6 +9,7 @@
 ## 📋 Guide de Test
 
 Pour chaque notification, vérifier:
+
 - ✅ Le message s'affiche correctement
 - ✅ Les variables sont remplacées (pas de `{variable}` visible)
 - ✅ Le fallback est utilisé si variable manquante
@@ -23,6 +24,7 @@ Pour chaque notification, vérifier:
 ### VOYAGE (Trip) - 5 notifications
 
 #### ✅ trip.started
+
 - **Clé:** `trip.started`
 - **Type:** success
 - **Display:** toast
@@ -34,6 +36,7 @@ Pour chaque notification, vérifier:
 - [ ] Pas de variables à remplacer
 
 #### ✅ trip.extended
+
 - **Clé:** `trip.extended`
 - **Type:** success
 - **Display:** toast
@@ -47,6 +50,7 @@ Pour chaque notification, vérifier:
 - [ ] Fallback "15" utilisé si variable manquante
 
 #### ✅ trip.checked_in
+
 - **Clé:** `trip.checked_in`
 - **Type:** success
 - **Display:** toast
@@ -58,6 +62,7 @@ Pour chaque notification, vérifier:
 - [ ] Pas de variables à remplacer
 
 #### ✅ trip.stopped
+
 - **Clé:** `trip.stopped`
 - **Type:** success
 - **Display:** toast
@@ -69,6 +74,7 @@ Pour chaque notification, vérifier:
 - [ ] Pas de variables à remplacer
 
 #### ✅ trip.cancelled
+
 - **Clé:** `trip.cancelled`
 - **Type:** info
 - **Display:** toast
@@ -84,6 +90,7 @@ Pour chaque notification, vérifier:
 ### ALERTES (Alert) - 4 notifications
 
 #### ⚠️ alert.warning
+
 - **Clé:** `alert.warning`
 - **Type:** warning
 - **Display:** banner
@@ -98,6 +105,7 @@ Pour chaque notification, vérifier:
 - [ ] Fallback utilisé si variables manquantes
 
 #### ✅ alert.sent
+
 - **Clé:** `alert.sent`
 - **Type:** success
 - **Display:** toast
@@ -111,6 +119,7 @@ Pour chaque notification, vérifier:
 - [ ] Fallback utilisé si variable manquante
 
 #### ❌ alert.failed
+
 - **Clé:** `alert.failed`
 - **Type:** error
 - **Display:** banner
@@ -122,6 +131,7 @@ Pour chaque notification, vérifier:
 - [ ] Pas de variables à remplacer
 
 #### 🚫 alert.quota_reached
+
 - **Clé:** `alert.quota_reached`
 - **Type:** critical
 - **Display:** modal
@@ -137,6 +147,7 @@ Pour chaque notification, vérifier:
 ### SOS - 4 notifications
 
 #### 📤 sos.sending
+
 - **Clé:** `sos.sending`
 - **Type:** critical
 - **Display:** modal
@@ -148,6 +159,7 @@ Pour chaque notification, vérifier:
 - [ ] Pas de variables à remplacer
 
 #### ✅ sos.sent
+
 - **Clé:** `sos.sent`
 - **Type:** success
 - **Display:** modal
@@ -161,6 +173,7 @@ Pour chaque notification, vérifier:
 - [ ] Fallback utilisé si variable manquante
 
 #### ❌ sos.failed
+
 - **Clé:** `sos.failed`
 - **Type:** error
 - **Display:** modal
@@ -172,6 +185,7 @@ Pour chaque notification, vérifier:
 - [ ] Pas de variables à remplacer
 
 #### 🚫 sos.quota_reached
+
 - **Clé:** `sos.quota_reached`
 - **Type:** critical
 - **Display:** modal
@@ -187,6 +201,7 @@ Pour chaque notification, vérifier:
 ### CONTACT - 4 notifications
 
 #### ✅ contact.saved
+
 - **Clé:** `contact.saved`
 - **Type:** success
 - **Display:** toast
@@ -198,6 +213,7 @@ Pour chaque notification, vérifier:
 - [ ] Pas de variables à remplacer
 
 #### ✅ contact.deleted
+
 - **Clé:** `contact.deleted`
 - **Type:** info
 - **Display:** toast
@@ -209,6 +225,7 @@ Pour chaque notification, vérifier:
 - [ ] Pas de variables à remplacer
 
 #### 🚫 contact.missing
+
 - **Clé:** `contact.missing`
 - **Type:** error
 - **Display:** modal
@@ -220,6 +237,7 @@ Pour chaque notification, vérifier:
 - [ ] Bouton "Aller aux Paramètres" fonctionne
 
 #### ❌ contact.invalid
+
 - **Clé:** `contact.invalid`
 - **Type:** error
 - **Display:** toast
@@ -235,6 +253,7 @@ Pour chaque notification, vérifier:
 ### AUTHENTIFICATION (Auth) - 4 notifications
 
 #### 🚫 auth.otp_required
+
 - **Clé:** `auth.otp_required`
 - **Type:** error
 - **Display:** modal
@@ -246,6 +265,7 @@ Pour chaque notification, vérifier:
 - [ ] Bouton "Vérifier maintenant" fonctionne
 
 #### ✅ auth.otp_sent
+
 - **Clé:** `auth.otp_sent`
 - **Type:** success
 - **Display:** toast
@@ -257,6 +277,7 @@ Pour chaque notification, vérifier:
 - [ ] Pas de variables à remplacer
 
 #### ✅ auth.otp_verified
+
 - **Clé:** `auth.otp_verified`
 - **Type:** success
 - **Display:** toast
@@ -268,6 +289,7 @@ Pour chaque notification, vérifier:
 - [ ] Pas de variables à remplacer
 
 #### ❌ auth.otp_failed
+
 - **Clé:** `auth.otp_failed`
 - **Type:** error
 - **Display:** toast
@@ -283,6 +305,7 @@ Pour chaque notification, vérifier:
 ### CRÉDITS - 3 notifications
 
 #### 🚫 credits.empty
+
 - **Clé:** `credits.empty`
 - **Type:** error
 - **Display:** modal
@@ -294,6 +317,7 @@ Pour chaque notification, vérifier:
 - [ ] Pas de variables à remplacer
 
 #### ⚠️ credits.low
+
 - **Clé:** `credits.low`
 - **Type:** warning
 - **Display:** banner
@@ -307,6 +331,7 @@ Pour chaque notification, vérifier:
 - [ ] Fallback utilisé si variable manquante
 
 #### ✅ credits.added
+
 - **Clé:** `credits.added`
 - **Type:** success
 - **Display:** toast
@@ -322,6 +347,7 @@ Pour chaque notification, vérifier:
 ### PERMISSIONS - 3 notifications
 
 #### 🚫 permission.location_required
+
 - **Clé:** `permission.location_required`
 - **Type:** error
 - **Display:** modal
@@ -333,6 +359,7 @@ Pour chaque notification, vérifier:
 - [ ] Bouton "Aller aux Paramètres" fonctionne
 
 #### ⚠️ permission.notifications_required
+
 - **Clé:** `permission.notifications_required`
 - **Type:** warning
 - **Display:** banner
@@ -344,6 +371,7 @@ Pour chaque notification, vérifier:
 - [ ] Pas de variables à remplacer
 
 #### 🚫 permission.phone_required
+
 - **Clé:** `permission.phone_required`
 - **Type:** error
 - **Display:** modal
@@ -359,6 +387,7 @@ Pour chaque notification, vérifier:
 ### ERREURS - 3 notifications
 
 #### ❌ error.network
+
 - **Clé:** `error.network`
 - **Type:** error
 - **Display:** banner
@@ -370,6 +399,7 @@ Pour chaque notification, vérifier:
 - [ ] Pas de variables à remplacer
 
 #### ❌ error.sms_failed
+
 - **Clé:** `error.sms_failed`
 - **Type:** error
 - **Display:** banner
@@ -381,6 +411,7 @@ Pour chaque notification, vérifier:
 - [ ] Pas de variables à remplacer
 
 #### ❌ error.unknown
+
 - **Clé:** `error.unknown`
 - **Type:** error
 - **Display:** modal
@@ -396,6 +427,7 @@ Pour chaque notification, vérifier:
 ### SMS - 2 notifications
 
 #### ✅ sms.test_sent
+
 - **Clé:** `sms.test_sent`
 - **Type:** success
 - **Display:** toast
@@ -409,6 +441,7 @@ Pour chaque notification, vérifier:
 - [ ] Fallback utilisé si variable manquante
 
 #### ❌ sms.test_failed
+
 - **Clé:** `sms.test_failed`
 - **Type:** error
 - **Display:** toast
@@ -424,6 +457,7 @@ Pour chaque notification, vérifier:
 ### CONFIRMATIONS - 3 notifications
 
 #### confirm.stop_trip
+
 - **Clé:** `confirm.stop_trip`
 - **Type:** info
 - **Display:** modal
@@ -435,6 +469,7 @@ Pour chaque notification, vérifier:
 - [ ] Pas de variables à remplacer
 
 #### confirm.delete_data
+
 - **Clé:** `confirm.delete_data`
 - **Type:** critical
 - **Display:** modal
@@ -446,6 +481,7 @@ Pour chaque notification, vérifier:
 - [ ] Pas de variables à remplacer
 
 #### confirm.trigger_sos
+
 - **Clé:** `confirm.trigger_sos`
 - **Type:** critical
 - **Display:** modal
@@ -460,19 +496,19 @@ Pour chaque notification, vérifier:
 
 ## 📊 Résumé du Test
 
-| Catégorie | Total | Testées | Passées | Échouées |
-|-----------|-------|---------|---------|----------|
-| Trip | 5 | 0 | 0 | 0 |
-| Alert | 4 | 0 | 0 | 0 |
-| SOS | 4 | 0 | 0 | 0 |
-| Contact | 4 | 0 | 0 | 0 |
-| Auth | 4 | 0 | 0 | 0 |
-| Credits | 3 | 0 | 0 | 0 |
-| Permission | 3 | 0 | 0 | 0 |
-| Error | 3 | 0 | 0 | 0 |
-| SMS | 2 | 0 | 0 | 0 |
-| Confirm | 3 | 0 | 0 | 0 |
-| **TOTAL** | **40** | **0** | **0** | **0** |
+| Catégorie  | Total  | Testées | Passées | Échouées |
+| ---------- | ------ | ------- | ------- | -------- |
+| Trip       | 5      | 0       | 0       | 0        |
+| Alert      | 4      | 0       | 0       | 0        |
+| SOS        | 4      | 0       | 0       | 0        |
+| Contact    | 4      | 0       | 0       | 0        |
+| Auth       | 4      | 0       | 0       | 0        |
+| Credits    | 3      | 0       | 0       | 0        |
+| Permission | 3      | 0       | 0       | 0        |
+| Error      | 3      | 0       | 0       | 0        |
+| SMS        | 2      | 0       | 0       | 0        |
+| Confirm    | 3      | 0       | 0       | 0        |
+| **TOTAL**  | **40** | **0**   | **0**   | **0**    |
 
 ---
 

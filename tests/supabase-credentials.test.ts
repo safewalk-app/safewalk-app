@@ -28,7 +28,7 @@ describe('Supabase Credentials Validation', () => {
 
   it('should be able to connect to Supabase', async () => {
     const { createClient } = await import('@supabase/supabase-js');
-    
+
     // Use service role key for backend connection
     const supabase = createClient(
       process.env.SUPABASE_URL!,
@@ -38,12 +38,12 @@ describe('Supabase Credentials Validation', () => {
           autoRefreshToken: false,
           persistSession: false,
         },
-      }
+      },
     );
 
     // Test basic connection by querying users table
     const { data, error } = await supabase.from('users').select('id').limit(1);
-    
+
     // Connection should work
     expect(error).toBeNull();
     expect(Array.isArray(data)).toBe(true);

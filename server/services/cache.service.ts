@@ -1,6 +1,6 @@
 /**
  * Cache Service
- * 
+ *
  * Gère le caching côté serveur avec Redis
  * Fournit des fonctions pour get, set, delete, et invalidate
  */
@@ -20,7 +20,7 @@ export async function getCache<T>(key: string): Promise<T | null> {
   try {
     const client = getRedisClient();
     const cached = await client.get(key);
-    
+
     if (!cached) {
       return null;
     }
@@ -35,11 +35,7 @@ export async function getCache<T>(key: string): Promise<T | null> {
 /**
  * Stocker une valeur dans Redis
  */
-export async function setCache<T>(
-  key: string,
-  data: T,
-  ttl: number = DEFAULT_TTL
-): Promise<void> {
+export async function setCache<T>(key: string, data: T, ttl: number = DEFAULT_TTL): Promise<void> {
   if (!isRedisConnected()) {
     return;
   }
@@ -77,7 +73,7 @@ export async function deleteCache(key: string): Promise<void> {
 export async function getCacheOrFetch<T>(
   key: string,
   fetchFn: () => Promise<T>,
-  ttl: number = DEFAULT_TTL
+  ttl: number = DEFAULT_TTL,
 ): Promise<T> {
   // 1. Vérifier le cache
   const cached = await getCache<T>(key);
@@ -111,7 +107,7 @@ export async function invalidateCache(pattern: string): Promise<void> {
   try {
     const client = getRedisClient();
     const keys = await client.keys(pattern);
-    
+
     if (keys.length > 0) {
       await client.del(keys);
       console.log(`[Cache] Invalidated ${keys.length} keys matching ${pattern}`);

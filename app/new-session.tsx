@@ -46,7 +46,11 @@ export default function NewSessionScreen() {
   });
 
   // Cooldown de 2 secondes entre les démarrages de sortie
-  const { trigger: triggerStartSession, isOnCooldown, remainingTime } = useCooldown({
+  const {
+    trigger: triggerStartSession,
+    isOnCooldown,
+    remainingTime,
+  } = useCooldown({
     duration: 2000,
   });
 
@@ -57,7 +61,9 @@ export default function NewSessionScreen() {
 
   const checkPhoneVerification = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) {
         setLoading(false);
         return;
@@ -102,8 +108,8 @@ export default function NewSessionScreen() {
     switch (blockingReason) {
       case 'contact.missing':
         return {
-          title: 'Contact d\'urgence manquant',
-          message: 'Ajoute un contact d\'urgence pour continuer.',
+          title: "Contact d'urgence manquant",
+          message: "Ajoute un contact d'urgence pour continuer.",
           action: 'Aller aux Paramètres',
           onAction: () => router.push('/settings'),
         };
@@ -116,8 +122,8 @@ export default function NewSessionScreen() {
         };
       case 'credits.empty':
         return {
-          title: 'Pas d\'alertes disponibles',
-          message: 'Tu n\'as plus d\'alertes disponibles. Ajoute des crédits pour continuer.',
+          title: "Pas d'alertes disponibles",
+          message: "Tu n'as plus d'alertes disponibles. Ajoute des crédits pour continuer.",
           action: 'Ajouter des crédits',
           onAction: () => setShowPaywallModal(true),
         };
@@ -142,7 +148,7 @@ export default function NewSessionScreen() {
     await triggerStartSession(async () => {
       // Vérifier deadline valide (minimum 15 minutes)
       const now = Date.now();
-      const minDeadline = now + (15 * 60 * 1000);
+      const minDeadline = now + 15 * 60 * 1000;
       if (limitTime <= now) {
         notify('error.invalid_time');
         setSubmitState('error');
@@ -162,7 +168,7 @@ export default function NewSessionScreen() {
           startSession({
             deadline: limitTime,
             note,
-          })
+          }),
         );
 
         if (result.success) {
@@ -204,11 +210,11 @@ export default function NewSessionScreen() {
     if (blockingReason) {
       switch (blockingReason) {
         case 'contact.missing':
-          return 'Ajoute un contact d\'urgence';
+          return "Ajoute un contact d'urgence";
         case 'auth.otp_required':
           return 'Vérifie ton numéro';
         case 'credits.empty':
-          return 'Tu n\'as plus d\'alertes';
+          return "Tu n'as plus d'alertes";
         default:
           return 'Démarrer la sortie';
       }
@@ -237,9 +243,7 @@ export default function NewSessionScreen() {
                 <Text className="text-4xl">🚀</Text>
                 <View className="flex-1">
                   <Text className="text-2xl font-bold text-foreground">Je sors</Text>
-                  <Text className="text-sm text-muted">
-                    Tu penses rentrer vers quelle heure ?
-                  </Text>
+                  <Text className="text-sm text-muted">Tu penses rentrer vers quelle heure ?</Text>
                 </View>
               </View>
             </GlassCard>
@@ -255,7 +259,9 @@ export default function NewSessionScreen() {
 
             {/* Destination */}
             <GlassCard className="gap-3">
-              <Text className="text-base font-semibold text-foreground">Où vas-tu ? (optionnel)</Text>
+              <Text className="text-base font-semibold text-foreground">
+                Où vas-tu ? (optionnel)
+              </Text>
               <PopTextField
                 placeholder="Ex. Soirée chez Karim"
                 value={note}
@@ -269,9 +275,7 @@ export default function NewSessionScreen() {
             <GlassCard className="gap-3">
               <View className="flex-row items-center gap-2">
                 <MaterialIcons name="emergency" size={16} color="#FF4D4D" />
-                <Text className="text-base font-semibold text-foreground">
-                  Contact d'urgence
-                </Text>
+                <Text className="text-base font-semibold text-foreground">Contact d'urgence</Text>
               </View>
               {settings.emergencyContactName && settings.emergencyContactPhone ? (
                 <>
@@ -339,12 +343,10 @@ export default function NewSessionScreen() {
                 accessibilityHint={
                   isOnCooldown
                     ? `Attendre ${Math.ceil(remainingTime / 1000)}s avant de démarrer`
-                    : 'Démarre une nouvelle sortie avec l\'heure limite définie'
+                    : "Démarre une nouvelle sortie avec l'heure limite définie"
                 }
               >
-                <Text className="text-lg font-bold text-background">
-                  {getButtonMessage()}
-                </Text>
+                <Text className="text-lg font-bold text-background">{getButtonMessage()}</Text>
               </CushionPillButton>
             </FeedbackAnimation>
           </View>
@@ -358,9 +360,7 @@ export default function NewSessionScreen() {
         />
 
         {/* Toast */}
-        {toastMessage && (
-          <ToastPop message={toastMessage} onDismiss={() => setToastMessage('')} />
-        )}
+        {toastMessage && <ToastPop message={toastMessage} onDismiss={() => setToastMessage('')} />}
       </View>
     </ScreenTransition>
   );

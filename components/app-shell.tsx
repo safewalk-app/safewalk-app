@@ -21,7 +21,7 @@ export function AppShell({ children }: AppShellProps) {
       { label: 'Accueil', icon: 'home' as const, route: '/home' },
       { label: 'Paramètres', icon: 'settings' as const, route: '/settings' },
     ],
-    []
+    [],
   );
 
   const handleNavPress = (route: string) => {
@@ -34,11 +34,7 @@ export function AppShell({ children }: AppShellProps) {
       {children}
 
       {/* Floating Bottom Nav Capsule */}
-      <FloatingBottomNavCapsule
-        items={navItems}
-        activeRoute={pathname}
-        onPress={handleNavPress}
-      />
+      <FloatingBottomNavCapsule items={navItems} activeRoute={pathname} onPress={handleNavPress} />
     </View>
   );
 }

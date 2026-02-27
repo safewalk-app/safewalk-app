@@ -4,27 +4,29 @@
 
 ### App Store (iOS)
 
-| Appareil | Résolution | Ratio |
-|----------|-----------|-------|
+| Appareil                 | Résolution     | Ratio  |
+| ------------------------ | -------------- | ------ |
 | iPhone 6.7" (15 Pro Max) | 1290 x 2796 px | 9:19.5 |
 | iPhone 6.5" (11 Pro Max) | 1242 x 2688 px | 9:19.5 |
-| iPhone 5.5" (8 Plus) | 1242 x 2208 px | 9:16 |
-| iPad Pro 12.9" | 2048 x 2732 px | 3:4 |
+| iPhone 5.5" (8 Plus)     | 1242 x 2208 px | 9:16   |
+| iPad Pro 12.9"           | 2048 x 2732 px | 3:4    |
 
 ### Google Play (Android)
 
-| Type | Résolution | Ratio |
-|------|-----------|-------|
-| Phone | 1080 x 1920 px minimum | 9:16 |
-| 7" Tablet | 1200 x 1920 px | 5:8 |
-| 10" Tablet | 1600 x 2560 px | 5:8 |
+| Type       | Résolution             | Ratio |
+| ---------- | ---------------------- | ----- |
+| Phone      | 1080 x 1920 px minimum | 9:16  |
+| 7" Tablet  | 1200 x 1920 px         | 5:8   |
+| 10" Tablet | 1600 x 2560 px         | 5:8   |
 
 ## Screenshots à créer
 
 ### 1. Écran Home (Accueil)
+
 **Fichier** : `01-home.png`
 
 **Contenu** :
+
 - Titre "SafeWalk"
 - Sous-titre "Reste en sécurité, partout."
 - Hero Card violette avec rocket "Je sors"
@@ -32,13 +34,16 @@
 - Conseil du jour
 
 **Texte marketing (overlay)** :
+
 > "Rentre en sécurité  
 > Alerte automatique si tu ne confirmes pas ton retour"
 
 ### 2. Écran New Session (Je sors)
+
 **Fichier** : `02-new-session.png`
 
 **Contenu** :
+
 - Titre "Je sors"
 - Card "Heure limite" (ex: 02:30)
 - Card "Où vas-tu ?" (optionnel)
@@ -47,13 +52,16 @@
 - Bouton "Démarrer"
 
 **Texte marketing (overlay)** :
+
 > "Définis ton heure de retour  
 > Ajoute un contact de confiance"
 
 ### 3. Écran Active Session (Sortie en cours)
+
 **Fichier** : `03-active-session.png`
 
 **Contenu** :
+
 - Titre "Sortie en cours"
 - Timer géant "01:45:23" (temps restant)
 - "Heure limite : 02:30"
@@ -63,13 +71,16 @@
 - Bouton danger "Annuler ta sortie"
 
 **Texte marketing (overlay)** :
+
 > "Confirme ton retour en un clic  
 > Ou ajoute 15 minutes si besoin"
 
 ### 4. Écran Settings (Paramètres)
+
 **Fichier** : `04-settings.png`
 
 **Contenu** :
+
 - Card "Ton prénom" (Ben)
 - Card "Contact d'urgence" (Marie +33 6 12 34 56 78)
 - Segmented control "Tolérance" (10/15/30)
@@ -77,13 +88,16 @@
 - Bouton danger "Supprimer mes données"
 
 **Texte marketing (overlay)** :
+
 > "Personnalise ta sécurité  
 > Toutes les données restent sur ton téléphone"
 
 ### 5. Écran Alert Sent (Alerte envoyée)
+
 **Fichier** : `05-alert-sent.png`
 
 **Contenu** :
+
 - Titre "🚨 Alerte envoyée"
 - Recap : "Marie a été prévenue par SMS"
 - Position GPS (si disponible)
@@ -92,6 +106,7 @@
 - Bouton "Appeler 112"
 
 **Texte marketing (overlay)** :
+
 > "Alerte automatique avec ta position GPS  
 > Tes proches sont prévenus immédiatement"
 
@@ -100,6 +115,7 @@
 ### Sur iPhone (Expo Go)
 
 1. **Installer Expo Go** :
+
    ```bash
    # Scanner le QR code dans l'interface Preview
    # Ou télécharger depuis l'App Store
@@ -117,6 +133,7 @@
 ### Sur Android (Expo Go)
 
 1. **Installer Expo Go** :
+
    ```bash
    # Scanner le QR code dans l'interface Preview
    # Ou télécharger depuis Google Play
@@ -174,11 +191,13 @@ convert 01-home.png -resize 1080x1920 screenshots/android/01-home.png
 ### Ajouter du texte marketing (optionnel)
 
 Utiliser un outil comme :
+
 - **Figma** (gratuit) : figma.com
 - **Canva** (gratuit) : canva.com
 - **Photoshop** (payant)
 
 **Template recommandé** :
+
 - Font : SF Pro Display (iOS) ou Roboto (Android)
 - Taille : 48-64px
 - Couleur : Blanc avec ombre portée

@@ -1,4 +1,4 @@
-import { logger } from "@/lib/utils/logger";
+import { logger } from '@/lib/utils/logger';
 import { View, Text, Pressable, Switch, Alert, ScrollView, ActivityIndicator } from 'react-native';
 import { router } from 'expo-router';
 import { BubbleBackground } from '@/components/ui/bubble-background';
@@ -12,7 +12,10 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useState, useEffect } from 'react';
 import { ToastPop } from '@/components/ui/toast-pop';
 import { formatPhoneInput, cleanPhoneNumber } from '@/lib/utils';
-import { validatePhoneNumber as validatePhoneNumberService, getValidationFeedback } from '@/lib/services/phone-validation-service';
+import {
+  validatePhoneNumber as validatePhoneNumberService,
+  getValidationFeedback,
+} from '@/lib/services/phone-validation-service';
 import { checkHealth } from '@/lib/services/api-client';
 import { sendEmergencySMS } from '@/lib/services/sms-service';
 import { useLocationPermission } from '@/hooks/use-location-permission';
@@ -33,7 +36,7 @@ export default function SettingsScreen() {
   const handlePhoneChange = (text: string) => {
     const formatted = formatPhoneInput(text);
     setContactPhone(formatted);
-    
+
     // Validation en temps réel avec feedback détaillé
     const cleaned = cleanPhoneNumber(formatted);
     if (cleaned.length === 0) {
@@ -45,8 +48,6 @@ export default function SettingsScreen() {
       setPhoneError(result.feedback || null);
     }
   };
-
-
 
   const locationPermission = useLocationPermission();
   const [locationEnabled, setLocationEnabled] = useState(locationPermission.enabled);
@@ -61,7 +62,11 @@ export default function SettingsScreen() {
   }>({ visible: false });
 
   // Cooldown de 5 secondes entre les SMS de test
-  const { trigger: triggerTestSms, isOnCooldown, remainingTime } = useCooldown({
+  const {
+    trigger: triggerTestSms,
+    isOnCooldown,
+    remainingTime,
+  } = useCooldown({
     duration: 5000,
   });
 
@@ -102,10 +107,6 @@ export default function SettingsScreen() {
     return () => clearTimeout(timer);
   }, [contactName, contactPhone]);
 
-
-
-
-
   // Synchroniser locationEnabled avec le hook
   useEffect(() => {
     setLocationEnabled(locationPermission.enabled);
@@ -118,24 +119,20 @@ export default function SettingsScreen() {
     if (result.success) {
       // Succès
       updateSettings({ locationEnabled: value });
-      setToastMessage(
-        value
-          ? '✅ Localisation activée'
-          : 'Localisation désactivée'
-      );
+      setToastMessage(value ? '✅ Localisation activée' : 'Localisation désactivée');
       setShowToast(true);
     } else if (result.needsSettings) {
       // Permission refusée => afficher message + bouton Settings
       Alert.alert(
         'Permission refusée',
-        'Pour activer la localisation, vous devez autoriser l\'accès dans les réglages de votre téléphone.',
+        "Pour activer la localisation, vous devez autoriser l'accès dans les réglages de votre téléphone.",
         [
           { text: 'Annuler', style: 'cancel' },
           {
             text: 'Ouvrir Réglages',
             onPress: () => locationPermission.openSettings(),
           },
-        ]
+        ],
       );
     } else if (result.needsPermission) {
       // Permission refusée après demande
@@ -144,15 +141,13 @@ export default function SettingsScreen() {
     }
   };
 
-
-
   const handleTestSms = async () => {
     await triggerTestSms(async () => {
       // CRITIQUE: Vérifier que le contact d'urgence est configuré
       if (!contactPhone || !contactName) {
         Alert.alert(
-          'Contact d\'urgence manquant',
-          'Veuillez d\'abord configurer un contact d\'urgence pour tester les SMS.'
+          "Contact d'urgence manquant",
+          "Veuillez d'abord configurer un contact d'urgence pour tester les SMS.",
         );
         return;
       }
@@ -162,63 +157,62 @@ export default function SettingsScreen() {
       if (!validatePhoneNumber(cleanedPhone)) {
         Alert.alert(
           'Numéro invalide',
-          'Le numéro d\'urgence n\'est pas au bon format. Utilisez +33 suivi de 9 chiffres.'
+          "Le numéro d'urgence n'est pas au bon format. Utilisez +33 suivi de 9 chiffres.",
         );
         return;
       }
 
       // Check phone_verified
       if (!profileData?.phone_verified) {
-      Alert.alert('Téléphone non vérifié', 'Veuillez d\'abord vérifier votre numéro de téléphone.');
-      return;
-    }
-
-    // Check credits
-    if (profileData?.free_test_sms_remaining === 0 && !profileData?.subscription_active) {
-      Alert.alert('Pas de crédits', 'Vous n\'avez plus de SMS de test disponibles.');
-      return;
-    }
-
-    setIsSendingTestSms(true);
-    const result = await tripService.sendTestSms();
-    setIsSendingTestSms(false);
-
-    if (result.success) {
-      setToastMessage('✅ SMS de test envoyé !');
-      setShowToast(true);
-    } else {
-      // Handle specific error codes
-      const errorCode = result.errorCode;
-      if (errorCode === 'no_credits') {
-        Alert.alert('Crédits insuffisants', 'Vous n\'avez plus de SMS de test disponibles.');
-      } else if (errorCode === 'quota_reached') {
-        Alert.alert('Limite atteinte', 'Vous avez atteint la limite d\'SMS pour aujourd\'hui.');
-      } else if (errorCode === 'twilio_failed') {
-        Alert.alert('Erreur d\'envoi', 'Impossible d\'envoyer le SMS. Réessaiera automatiquement.');
-      } else {
-        Alert.alert('Erreur', result.error || 'Impossible d\'envoyer le SMS de test');
+        Alert.alert(
+          'Téléphone non vérifié',
+          "Veuillez d'abord vérifier votre numéro de téléphone.",
+        );
+        return;
       }
-    }
+
+      // Check credits
+      if (profileData?.free_test_sms_remaining === 0 && !profileData?.subscription_active) {
+        Alert.alert('Pas de crédits', "Vous n'avez plus de SMS de test disponibles.");
+        return;
+      }
+
+      setIsSendingTestSms(true);
+      const result = await tripService.sendTestSms();
+      setIsSendingTestSms(false);
+
+      if (result.success) {
+        setToastMessage('✅ SMS de test envoyé !');
+        setShowToast(true);
+      } else {
+        // Handle specific error codes
+        const errorCode = result.errorCode;
+        if (errorCode === 'no_credits') {
+          Alert.alert('Crédits insuffisants', "Vous n'avez plus de SMS de test disponibles.");
+        } else if (errorCode === 'quota_reached') {
+          Alert.alert('Limite atteinte', "Vous avez atteint la limite d'SMS pour aujourd'hui.");
+        } else if (errorCode === 'twilio_failed') {
+          Alert.alert("Erreur d'envoi", "Impossible d'envoyer le SMS. Réessaiera automatiquement.");
+        } else {
+          Alert.alert('Erreur', result.error || "Impossible d'envoyer le SMS de test");
+        }
+      }
     });
   };
 
   const handleDeleteData = () => {
-    Alert.alert(
-      'Supprimer toutes les données ?',
-      'Cette action est irréversible.',
-      [
-        { text: 'Annuler', style: 'cancel' },
-        {
-          text: 'Supprimer',
-          style: 'destructive',
-          onPress: async () => {
-            await deleteAllData();
-            setToastMessage('Données supprimées');
-            setShowToast(true);
-          },
+    Alert.alert('Supprimer toutes les données ?', 'Cette action est irréversible.', [
+      { text: 'Annuler', style: 'cancel' },
+      {
+        text: 'Supprimer',
+        style: 'destructive',
+        onPress: async () => {
+          await deleteAllData();
+          setToastMessage('Données supprimées');
+          setShowToast(true);
         },
-      ]
-    );
+      },
+    ]);
   };
 
   return (
@@ -236,9 +230,7 @@ export default function SettingsScreen() {
         {/* Header */}
         <ScreenTransition delay={0} duration={350}>
           <View className="gap-1 mb-4">
-            <Text className="text-4xl font-bold text-foreground">
-              Paramètres
-            </Text>
+            <Text className="text-4xl font-bold text-foreground">Paramètres</Text>
           </View>
         </ScreenTransition>
 
@@ -253,9 +245,7 @@ export default function SettingsScreen() {
             <GlassCard className="gap-2">
               <View className="flex-row items-center gap-2">
                 <MaterialIcons name="person" size={16} color="#6C63FF" />
-                <Text className="text-sm font-semibold text-muted">
-                  Mon prénom
-                </Text>
+                <Text className="text-sm font-semibold text-muted">Mon prénom</Text>
               </View>
               <PopTextField
                 placeholder="Ex. Ben"
@@ -283,11 +273,9 @@ export default function SettingsScreen() {
               <GlassCard className="gap-2">
                 <View className="flex-row items-center gap-2">
                   <MaterialIcons name="emergency" size={16} color="#FF4D4D" />
-                  <Text className="text-sm font-semibold text-foreground">
-                    Contact d'urgence
-                  </Text>
+                  <Text className="text-sm font-semibold text-foreground">Contact d'urgence</Text>
                 </View>
-                
+
                 <PopTextField
                   placeholder="Ex. Sarah"
                   value={contactName}
@@ -298,9 +286,7 @@ export default function SettingsScreen() {
 
                 <View className="flex-row items-center gap-2">
                   <View className="flex-1">
-                    <Text className="text-xs font-semibold text-muted mb-1">
-                      Téléphone
-                    </Text>
+                    <Text className="text-xs font-semibold text-muted mb-1">Téléphone</Text>
                     <PopTextField
                       placeholder="+33 6 12 34 56 78"
                       value={contactPhone}
@@ -309,11 +295,7 @@ export default function SettingsScreen() {
                       accessibilityLabel="Champ Numéro de téléphone"
                       accessibilityHint="Entrez votre numéro de téléphone au format E.164 (ex: +33612345678)"
                     />
-                    {phoneError && (
-                      <Text className="text-xs text-error mt-1">
-                        {phoneError}
-                      </Text>
-                    )}
+                    {phoneError && <Text className="text-xs text-error mt-1">{phoneError}</Text>}
                   </View>
                   <View className="p-2">
                     {isPhone1Valid === true && (
@@ -332,10 +314,6 @@ export default function SettingsScreen() {
                 </Text>
               </GlassCard>
             </View>
-
-
-
-
 
             {/* Card "Partager ma position en cas d'alerte" */}
             <View className="mb-3">
@@ -376,7 +354,7 @@ export default function SettingsScreen() {
 
         {/* Bouton "Tester les alertes par SMS" */}
         <ScreenTransition delay={250} duration={350}>
-          <Pressable 
+          <Pressable
             onPress={handleTestSms}
             disabled={isSendingTestSms || isOnCooldown}
             className="mb-4"
@@ -410,7 +388,7 @@ export default function SettingsScreen() {
 
         {/* Bouton "À propos" */}
         <ScreenTransition delay={300} duration={350}>
-          <Pressable 
+          <Pressable
             onPress={() => router.push('/about')}
             className="mb-4"
             accessible={true}
@@ -421,9 +399,7 @@ export default function SettingsScreen() {
             <GlassCard className="gap-2 py-4">
               <View className="flex-row items-center justify-center gap-2">
                 <MaterialIcons name="info" size={20} color="#0a7ea4" />
-                <Text className="text-base font-semibold text-foreground">
-                  À propos
-                </Text>
+                <Text className="text-base font-semibold text-foreground">À propos</Text>
               </View>
               <Text className="text-xs text-muted text-center">
                 Comment fonctionne SafeWalk et comment tes données sont utilisées.

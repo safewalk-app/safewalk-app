@@ -43,7 +43,7 @@ describe('Twilio Configuration', () => {
       const limitTime = '14:00';
       const tolerance = 15;
       const message = `ALERTE: retour non confirmé à ${limitTime} (+${tolerance} min)`;
-      
+
       expect(message).toContain('ALERTE');
       expect(message).toContain('14:00');
       expect(message).toContain('15 min');

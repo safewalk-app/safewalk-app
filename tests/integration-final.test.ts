@@ -11,7 +11,7 @@ describe('SafeWalk Final Integration', () => {
     it('should calculate animation duration', () => {
       const animationDuration = 1500; // 1.5s
       const scale = [1, 1.02, 1]; // scale values
-      
+
       expect(animationDuration).toBe(1500);
       expect(scale[1]).toBeGreaterThan(scale[0]);
       console.log(`✅ Animation duration: ${animationDuration}ms`);
@@ -85,7 +85,7 @@ describe('SafeWalk Final Integration', () => {
       expect(flow).toHaveLength(6);
       expect(flow[0].status).toBe('active');
       expect(flow[5].status).toBe('confirmed');
-      console.log(`✅ Full flow completed: ${flow.map(f => f.step).join(' → ')}`);
+      console.log(`✅ Full flow completed: ${flow.map((f) => f.step).join(' → ')}`);
     });
   });
 });

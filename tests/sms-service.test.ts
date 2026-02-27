@@ -5,7 +5,7 @@ import { sendEmergencySMS } from '../lib/services/sms-service';
 vi.mock('../lib/services/api-client', () => ({
   sendSMS: vi.fn(async (to: string, message: string) => {
     console.log(`[MOCK] sendSMS appelé avec to=${to}, message length=${message.length}`);
-    
+
     // Simuler un succès
     return {
       ok: true,
@@ -70,7 +70,7 @@ describe('SMS Service', () => {
 
   it('should normalize French phone numbers to E.164', async () => {
     const { sendSMS } = await import('../lib/services/api-client');
-    
+
     await sendEmergencySMS({
       reason: 'test',
       contactName: 'Jean',
@@ -79,11 +79,8 @@ describe('SMS Service', () => {
     });
 
     // Vérifier que sendSMS a été appelé avec +33612345678
-    expect(sendSMS).toHaveBeenCalledWith(
-      '+33612345678',
-      expect.any(String)
-    );
-    
+    expect(sendSMS).toHaveBeenCalledWith('+33612345678', expect.any(String));
+
     console.log('✅ Normalisation E.164 validée');
   });
 

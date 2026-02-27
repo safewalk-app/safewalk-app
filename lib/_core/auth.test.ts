@@ -16,23 +16,18 @@ describe('Auth Service', () => {
   describe('saveSessionToken', () => {
     it('should save session token securely', async () => {
       const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...';
-      
+
       vi.mocked(SecureStore.setItemAsync).mockResolvedValueOnce(undefined);
 
       await auth.saveSessionToken(token);
 
-      expect(SecureStore.setItemAsync).toHaveBeenCalledWith(
-        'SESSION_TOKEN_KEY',
-        token
-      );
+      expect(SecureStore.setItemAsync).toHaveBeenCalledWith('SESSION_TOKEN_KEY', token);
     });
 
     it('should handle save error', async () => {
       const token = 'token123';
-      
-      vi.mocked(SecureStore.setItemAsync).mockRejectedValueOnce(
-        new Error('SecureStore error')
-      );
+
+      vi.mocked(SecureStore.setItemAsync).mockRejectedValueOnce(new Error('SecureStore error'));
 
       await expect(auth.saveSessionToken(token)).rejects.toThrow();
     });
@@ -41,7 +36,7 @@ describe('Auth Service', () => {
   describe('getSessionToken', () => {
     it('should retrieve session token', async () => {
       const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...';
-      
+
       vi.mocked(SecureStore.getItemAsync).mockResolvedValueOnce(token);
 
       const result = await auth.getSessionToken();
@@ -59,9 +54,7 @@ describe('Auth Service', () => {
     });
 
     it('should handle retrieval error', async () => {
-      vi.mocked(SecureStore.getItemAsync).mockRejectedValueOnce(
-        new Error('SecureStore error')
-      );
+      vi.mocked(SecureStore.getItemAsync).mockRejectedValueOnce(new Error('SecureStore error'));
 
       await expect(auth.getSessionToken()).rejects.toThrow();
     });
@@ -77,9 +70,7 @@ describe('Auth Service', () => {
     });
 
     it('should handle delete error', async () => {
-      vi.mocked(SecureStore.deleteItemAsync).mockRejectedValueOnce(
-        new Error('SecureStore error')
-      );
+      vi.mocked(SecureStore.deleteItemAsync).mockRejectedValueOnce(new Error('SecureStore error'));
 
       await expect(auth.deleteSessionToken()).rejects.toThrow();
     });

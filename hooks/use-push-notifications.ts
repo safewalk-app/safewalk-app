@@ -31,15 +31,11 @@ export function usePushNotifications(handlers?: PushNotificationHandler) {
 
     // Enregistrer les listeners
     if (handlers?.onNotificationReceived) {
-      notificationListener.current = onNotificationReceived(
-        handlers.onNotificationReceived
-      );
+      notificationListener.current = onNotificationReceived(handlers.onNotificationReceived);
     }
 
     if (handlers?.onNotificationResponse) {
-      responseListener.current = onNotificationResponse(
-        handlers.onNotificationResponse
-      );
+      responseListener.current = onNotificationResponse(handlers.onNotificationResponse);
     }
 
     // Nettoyer les listeners
@@ -90,20 +86,16 @@ export function usePushToken() {
 /**
  * Hook pour écouter les notifications SOS
  */
-export function useSOSNotificationListener(
-  onSOSAlert?: (data: Record<string, string>) => void
-) {
+export function useSOSNotificationListener(onSOSAlert?: (data: Record<string, string>) => void) {
   useEffect(() => {
-    const subscription = Notifications.addNotificationResponseReceivedListener(
-      (response) => {
-        const { data } = response.notification.request.content;
+    const subscription = Notifications.addNotificationResponseReceivedListener((response) => {
+      const { data } = response.notification.request.content;
 
-        if (data?.type === 'alert_triggered') {
-          logger.info('🚨 Notification SOS reçue:', data);
-          onSOSAlert?.(data);
-        }
+      if (data?.type === 'alert_triggered') {
+        logger.info('🚨 Notification SOS reçue:', data);
+        onSOSAlert?.(data);
       }
-    );
+    });
 
     return () => subscription.remove();
   }, [onSOSAlert]);
@@ -115,33 +107,31 @@ export function useSOSNotificationListener(
 export async function registerPushTokenWithServer(
   supabaseClient: any,
   userId: string,
-  token: string
+  token: string,
 ) {
   try {
     logger.info('📤 Enregistrement du token push sur le serveur');
 
-    const { error } = await supabaseClient
-      .from('user_push_tokens')
-      .upsert(
-        {
-          user_id: userId,
-          token,
-          platform: 'expo',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: 'user_id' }
-      );
+    const { error } = await supabaseClient.from('user_push_tokens').upsert(
+      {
+        user_id: userId,
+        token,
+        platform: 'expo',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'user_id' },
+    );
 
     if (error) {
-      logger.error('❌ Erreur lors de l\'enregistrement du token:', error);
+      logger.error("❌ Erreur lors de l'enregistrement du token:", error);
       return false;
     }
 
     logger.info('✅ Token push enregistré sur le serveur');
     return true;
   } catch (error) {
-    logger.error('❌ Exception lors de l\'enregistrement du token:', error);
+    logger.error("❌ Exception lors de l'enregistrement du token:", error);
     return false;
   }
 }
@@ -149,10 +139,7 @@ export async function registerPushTokenWithServer(
 /**
  * Récupérer les tokens push d'un utilisateur
  */
-export async function getPushTokensForUser(
-  supabaseClient: any,
-  userId: string
-): Promise<string[]> {
+export async function getPushTokensForUser(supabaseClient: any, userId: string): Promise<string[]> {
   try {
     const { data, error } = await supabaseClient
       .from('user_push_tokens')
@@ -180,7 +167,7 @@ export async function sendSOSPushNotification(
   userName: string,
   notificationType: string,
   additionalInfo?: string,
-  location?: { latitude: number; longitude: number }
+  location?: { latitude: number; longitude: number },
 ) {
   try {
     if (pushTokens.length === 0) {
@@ -190,28 +177,25 @@ export async function sendSOSPushNotification(
 
     logger.info(`📤 Envoi de ${pushTokens.length} notifications SOS`);
 
-    const { data, error } = await supabaseClient.functions.invoke(
-      'send-sos-notification',
-      {
-        body: {
-          pushTokens,
-          userName,
-          notificationType,
-          additionalInfo,
-          location,
-        },
-      }
-    );
+    const { data, error } = await supabaseClient.functions.invoke('send-sos-notification', {
+      body: {
+        pushTokens,
+        userName,
+        notificationType,
+        additionalInfo,
+        location,
+      },
+    });
 
     if (error) {
-      logger.error('❌ Erreur lors de l\'envoi des notifications:', error);
+      logger.error("❌ Erreur lors de l'envoi des notifications:", error);
       return false;
     }
 
     logger.info('✅ Notifications SOS envoyées:', data);
     return true;
   } catch (error) {
-    logger.error('❌ Exception lors de l\'envoi des notifications:', error);
+    logger.error("❌ Exception lors de l'envoi des notifications:", error);
     return false;
   }
 }

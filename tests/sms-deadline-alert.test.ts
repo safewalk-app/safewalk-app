@@ -16,8 +16,8 @@ describe.skip('SMS Deadline Alert', () => {
     const tolerance = 0;
     const location = { latitude: 48.8566, longitude: 2.3522 };
 
-    console.log('📤 Envoi d\'une alerte SMS...');
-    
+    console.log("📤 Envoi d'une alerte SMS...");
+
     const response = await fetch(`${API_URL}/api/sms/alert`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -29,9 +29,9 @@ describe.skip('SMS Deadline Alert', () => {
 
     const data = await response.json();
     console.log('📋 Réponse:', JSON.stringify(data, null, 2));
-    
+
     expect(data.success).toBe(true);
-    console.log('✅ SMS d\'alerte envoyé avec succès');
+    console.log("✅ SMS d'alerte envoyé avec succès");
   });
 
   it('should reject empty phone numbers', async () => {

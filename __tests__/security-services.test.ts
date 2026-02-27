@@ -118,7 +118,9 @@ describe('Biometric Authentication Service', () => {
   it('devrait obtenir les labels de biométrie', () => {
     expect(biometricAuthService.getBiometricLabel(BiometricType.FACE_ID)).toBe('Face ID');
     expect(biometricAuthService.getBiometricLabel(BiometricType.TOUCH_ID)).toBe('Touch ID');
-    expect(biometricAuthService.getBiometricLabel(BiometricType.FINGERPRINT)).toBe('Empreinte digitale');
+    expect(biometricAuthService.getBiometricLabel(BiometricType.FINGERPRINT)).toBe(
+      'Empreinte digitale',
+    );
   });
 
   it('devrait obtenir les messages de biométrie', () => {
@@ -126,7 +128,7 @@ describe('Biometric Authentication Service', () => {
     expect(message).toContain('Face ID');
   });
 
-  it('devrait invalider le cache d\'authentification', () => {
+  it("devrait invalider le cache d'authentification", () => {
     const remaining = biometricAuthService.getAuthenticationCacheRemainingTime();
     expect(remaining).toBe(0);
 
@@ -231,7 +233,7 @@ describe('Token Rotation Service', () => {
     expect(typeof time).toBe('number');
   });
 
-  it('devrait obtenir le temps jusqu\'à la prochaine rotation', () => {
+  it("devrait obtenir le temps jusqu'à la prochaine rotation", () => {
     const time = tokenRotationService.getTimeUntilNextRotation();
     expect(typeof time).toBe('number');
     expect(time).toBeGreaterThanOrEqual(0);

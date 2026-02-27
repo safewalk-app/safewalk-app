@@ -1,29 +1,29 @@
-import { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  ActivityIndicator,
-} from "react-native";
-import { useRouter, useLocalSearchParams } from "expo-router";
-import { ScreenContainer } from "@/components/screen-container";
-import { OtpInput } from "@/components/otp-input";
-import { ErrorAlert, ErrorMessage } from "@/components/error-alert";
-import { otpService } from "@/lib/services/otp-service";
-import { logger } from "@/lib/logger";
-import { useColors } from "@/hooks/use-colors";
-import { cn } from "@/lib/utils";
+import { useState, useEffect } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import { ScreenContainer } from '@/components/screen-container';
+import { OtpInput } from '@/components/otp-input';
+import { ErrorAlert, ErrorMessage } from '@/components/error-alert';
+import { otpService } from '@/lib/services/otp-service';
+import { logger } from '@/lib/logger';
+import { useColors } from '@/hooks/use-colors';
+import { cn } from '@/lib/utils';
 import {
   OtpErrorCode,
   getErrorTitle,
   getErrorType,
   canResendOtp,
   shouldChangePhone,
-} from "@/lib/types/otp-errors";
-import * as Haptics from "expo-haptics";
-import { markSessionOtpVerified } from "@/lib/services/otp-session-guard";
-import { showErrorToast, showSuccessToast, showWarningToast, showOtpExpiredToast, showOtpTooManyAttemptsToast } from "@/lib/services/toast-service";
+} from '@/lib/types/otp-errors';
+import * as Haptics from 'expo-haptics';
+import { markSessionOtpVerified } from '@/lib/services/otp-session-guard';
+import {
+  showErrorToast,
+  showSuccessToast,
+  showWarningToast,
+  showOtpExpiredToast,
+  showOtpTooManyAttemptsToast,
+} from '@/lib/services/toast-service';
 
 /**
  * OTP Verification Screen
@@ -38,7 +38,7 @@ export default function OtpVerificationScreen() {
     returnTo?: string;
   }>();
 
-  const [otpCode, setOtpCode] = useState("");
+  const [otpCode, setOtpCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
   const [timeLeft, setTimeLeft] = useState(600); // 10 minutes
@@ -64,7 +64,7 @@ export default function OtpVerificationScreen() {
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
   // Handle OTP verification
@@ -72,7 +72,7 @@ export default function OtpVerificationScreen() {
     if (!phoneNumber) {
       setError({
         code: OtpErrorCode.EMPTY_PHONE,
-        message: "Numéro de téléphone non trouvé",
+        message: 'Numéro de téléphone non trouvé',
       });
       return;
     }
@@ -81,7 +81,7 @@ export default function OtpVerificationScreen() {
     if (otpCode.length !== 6) {
       setError({
         code: OtpErrorCode.INVALID_OTP_FORMAT,
-        message: "Le code doit avoir 6 chiffres",
+        message: 'Le code doit avoir 6 chiffres',
       });
       return;
     }
@@ -89,7 +89,7 @@ export default function OtpVerificationScreen() {
     if (!/^\d{6}$/.test(otpCode)) {
       setError({
         code: OtpErrorCode.INVALID_OTP_FORMAT,
-        message: "Le code doit contenir uniquement des chiffres",
+        message: 'Le code doit contenir uniquement des chiffres',
       });
       return;
     }
@@ -101,15 +101,13 @@ export default function OtpVerificationScreen() {
       const result = await otpService.verifyOtp(phoneNumber, otpCode);
 
       if (result.success && result.verified) {
-        logger.info("[OTP] Vérification réussie");
-        await Haptics.notificationAsync(
-          Haptics.NotificationFeedbackType.Success
-        );
-        showSuccessToast("✅ Vérification réussie", "Votre numéro a été vérifié.");
+        logger.info('[OTP] Vérification réussie');
+        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        showSuccessToast('✅ Vérification réussie', 'Votre numéro a été vérifié.');
 
         // Marquer l'utilisateur comme vérifié OTP
         await markSessionOtpVerified(phoneNumber);
-        logger.info("[OTP] Utilisateur marqué comme vérifié");
+        logger.info('[OTP] Utilisateur marqué comme vérifié');
 
         // Navigate back or to next screen
         if (returnTo) {
@@ -119,9 +117,8 @@ export default function OtpVerificationScreen() {
         }
       } else {
         // Handle error response
-        const errorCode = (result.errorCode ||
-          OtpErrorCode.SERVER_ERROR) as OtpErrorCode;
-        const message = result.error || "Vérification échouée";
+        const errorCode = (result.errorCode || OtpErrorCode.SERVER_ERROR) as OtpErrorCode;
+        const message = result.error || 'Vérification échouée';
 
         setError({
           code: errorCode,
@@ -132,9 +129,7 @@ export default function OtpVerificationScreen() {
         setAttemptsRemaining(result.attemptsRemaining ?? 3);
 
         // Haptic feedback for error
-        await Haptics.notificationAsync(
-          Haptics.NotificationFeedbackType.Error
-        );
+        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
 
         // Afficher le toast d'erreur approprié
         if (errorCode === OtpErrorCode.MAX_ATTEMPTS_EXCEEDED) {
@@ -142,21 +137,24 @@ export default function OtpVerificationScreen() {
         } else if (errorCode === OtpErrorCode.OTP_EXPIRED) {
           showOtpExpiredToast();
         } else {
-          showErrorToast("❌ Vérification échouée", message);
+          showErrorToast('❌ Vérification échouée', message);
         }
 
-        logger.warn("[OTP] Vérification échouée:", {
+        logger.warn('[OTP] Vérification échouée:', {
           errorCode,
           attemptsRemaining: result.attemptsRemaining,
         });
       }
     } catch (err) {
-      logger.error("[OTP] Erreur vérification:", err);
+      logger.error('[OTP] Erreur vérification:', err);
       setError({
         code: OtpErrorCode.NETWORK_ERROR,
-        message: "Erreur réseau. Vérifiez votre connexion.",
+        message: 'Erreur réseau. Vérifiez votre connexion.',
       });
-      showErrorToast("🌐 Erreur réseau", "Impossible de vérifier le code. Vérifiez votre connexion.");
+      showErrorToast(
+        '🌐 Erreur réseau',
+        'Impossible de vérifier le code. Vérifiez votre connexion.',
+      );
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
       setLoading(false);
@@ -168,29 +166,26 @@ export default function OtpVerificationScreen() {
     if (!phoneNumber) {
       setError({
         code: OtpErrorCode.EMPTY_PHONE,
-        message: "Numéro de téléphone non trouvé",
+        message: 'Numéro de téléphone non trouvé',
       });
       return;
     }
 
     setResendLoading(true);
     setError(null);
-    setOtpCode("");
+    setOtpCode('');
 
     try {
       const result = await otpService.sendOtp(phoneNumber);
 
       if (result.success) {
-        logger.info("[OTP] Renvoi réussi");
+        logger.info('[OTP] Renvoi réussi');
         setTimeLeft(result.expiresIn || 600);
         setAttemptsRemaining(3);
-        await Haptics.notificationAsync(
-          Haptics.NotificationFeedbackType.Success
-        );
+        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       } else {
         // Handle error response
-        const errorCode = (result.errorCode ||
-          OtpErrorCode.SERVER_ERROR) as OtpErrorCode;
+        const errorCode = (result.errorCode || OtpErrorCode.SERVER_ERROR) as OtpErrorCode;
         const message = result.error || "Impossible d'envoyer le code";
 
         setError({
@@ -198,17 +193,15 @@ export default function OtpVerificationScreen() {
           message,
         });
 
-        await Haptics.notificationAsync(
-          Haptics.NotificationFeedbackType.Error
-        );
+        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
 
-        logger.warn("[OTP] Renvoi échoué:", { errorCode });
+        logger.warn('[OTP] Renvoi échoué:', { errorCode });
       }
     } catch (err) {
-      logger.error("[OTP] Erreur renvoi:", err);
+      logger.error('[OTP] Erreur renvoi:', err);
       setError({
         code: OtpErrorCode.NETWORK_ERROR,
-        message: "Erreur réseau. Vérifiez votre connexion.",
+        message: 'Erreur réseau. Vérifiez votre connexion.',
       });
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
@@ -219,35 +212,24 @@ export default function OtpVerificationScreen() {
   // Handle change phone number
   const handleChangePhone = () => {
     router.push({
-      pathname: "/phone-verification",
+      pathname: '/phone-verification',
       params: { returnTo },
     });
   };
 
   // Determine if we can resend
   const canResend = error ? canResendOtp(error.code) : true;
-  const shouldShowChangePhone = error
-    ? shouldChangePhone(error.code)
-    : false;
+  const shouldShowChangePhone = error ? shouldChangePhone(error.code) : false;
 
   return (
     <ScreenContainer className="p-4">
-      <ScrollView
-        contentContainerStyle={{ flexGrow: 1 }}
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
         <View className="flex-1 justify-between gap-8 py-4">
           {/* Header */}
           <View className="gap-2">
-            <Text className="text-3xl font-bold text-foreground">
-              Vérification
-            </Text>
-            <Text className="text-base text-muted">
-              Entrez le code reçu par SMS
-            </Text>
-            <Text className="text-sm text-muted mt-2">
-              Numéro: {phoneNumber}
-            </Text>
+            <Text className="text-3xl font-bold text-foreground">Vérification</Text>
+            <Text className="text-base text-muted">Entrez le code reçu par SMS</Text>
+            <Text className="text-sm text-muted mt-2">Numéro: {phoneNumber}</Text>
           </View>
 
           {/* Content */}
@@ -262,7 +244,7 @@ export default function OtpVerificationScreen() {
                 action={
                   canResend
                     ? {
-                        label: "Renvoyer le code",
+                        label: 'Renvoyer le code',
                         onPress: handleResend,
                         loading: resendLoading,
                       }
@@ -287,13 +269,9 @@ export default function OtpVerificationScreen() {
                 {/* Timer */}
                 <View className="items-center">
                   <Text className="text-sm text-muted">
-                    Code expire dans:{" "}
+                    Code expire dans:{' '}
                     <Text
-                      className={
-                        timeLeft < 60
-                          ? "text-error font-semibold"
-                          : "text-foreground"
-                      }
+                      className={timeLeft < 60 ? 'text-error font-semibold' : 'text-foreground'}
                     >
                       {formatTime(timeLeft)}
                     </Text>
@@ -324,9 +302,7 @@ export default function OtpVerificationScreen() {
                   onPress={handleChangePhone}
                   className="bg-warning rounded-lg px-4 py-2"
                 >
-                  <Text className="text-center font-semibold text-white">
-                    Changer le numéro
-                  </Text>
+                  <Text className="text-center font-semibold text-white">Changer le numéro</Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -340,10 +316,8 @@ export default function OtpVerificationScreen() {
                 onPress={handleVerify}
                 disabled={loading || otpCode.length !== 6}
                 className={cn(
-                  "py-3 rounded-full items-center justify-center",
-                  otpCode.length === 6 && !loading
-                    ? "bg-primary"
-                    : "bg-primary/50"
+                  'py-3 rounded-full items-center justify-center',
+                  otpCode.length === 6 && !loading ? 'bg-primary' : 'bg-primary/50',
                 )}
                 style={{
                   opacity: loading || otpCode.length !== 6 ? 0.6 : 1,
@@ -352,9 +326,7 @@ export default function OtpVerificationScreen() {
                 {loading ? (
                   <ActivityIndicator color={colors.background} size="small" />
                 ) : (
-                  <Text className="text-base font-semibold text-background">
-                    Vérifier
-                  </Text>
+                  <Text className="text-base font-semibold text-background">Vérifier</Text>
                 )}
               </TouchableOpacity>
 
@@ -372,12 +344,13 @@ export default function OtpVerificationScreen() {
                 ) : (
                   <Text className="text-base font-semibold text-foreground">
                     {timeLeft > 300
-                      ? `Renvoyer le code (${Math.floor(
-                          (600 - timeLeft) / 60
-                        )}:${((600 - timeLeft) % 60)
+                      ? `Renvoyer le code (${Math.floor((600 - timeLeft) / 60)}:${(
+                          (600 - timeLeft) %
+                          60
+                        )
                           .toString()
-                          .padStart(2, "0")})`
-                      : "Renvoyer le code"}
+                          .padStart(2, '0')})`
+                      : 'Renvoyer le code'}
                   </Text>
                 )}
               </TouchableOpacity>
@@ -387,9 +360,7 @@ export default function OtpVerificationScreen() {
                 onPress={() => router.back()}
                 className="py-3 rounded-full items-center justify-center"
               >
-                <Text className="text-base font-semibold text-muted">
-                  Annuler
-                </Text>
+                <Text className="text-base font-semibold text-muted">Annuler</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -401,18 +372,14 @@ export default function OtpVerificationScreen() {
                 onPress={handleChangePhone}
                 className="py-3 rounded-full items-center justify-center bg-primary"
               >
-                <Text className="text-base font-semibold text-background">
-                  Changer le numéro
-                </Text>
+                <Text className="text-base font-semibold text-background">Changer le numéro</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
                 onPress={() => router.back()}
                 className="py-3 rounded-full items-center justify-center"
               >
-                <Text className="text-base font-semibold text-muted">
-                  Annuler
-                </Text>
+                <Text className="text-base font-semibold text-muted">Annuler</Text>
               </TouchableOpacity>
             </View>
           )}

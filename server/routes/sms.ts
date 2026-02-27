@@ -1,22 +1,23 @@
-import { logger } from "../utils/logger";
+import { logger } from '../utils/logger';
 import { Router, Request, Response } from 'express';
 import twilio from 'twilio';
 
 const router = Router();
 
 // Initialiser le client Twilio
-const twilioClient = twilio(
-  process.env.TWILIO_ACCOUNT_SID,
-  process.env.TWILIO_AUTH_TOKEN
-);
+const twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 
 /**
  * GET /api/sms/health
  * Health check pour vérifier que l'API SMS est accessible
  */
 router.get('/health', (req: Request, res: Response) => {
-  const hasCredentials = !!(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_PHONE_NUMBER);
-  
+  const hasCredentials = !!(
+    process.env.TWILIO_ACCOUNT_SID &&
+    process.env.TWILIO_AUTH_TOKEN &&
+    process.env.TWILIO_PHONE_NUMBER
+  );
+
   return res.status(200).json({
     ok: true,
     service: 'SMS API',
@@ -28,7 +29,7 @@ router.get('/health', (req: Request, res: Response) => {
 /**
  * POST /api/sms/send
  * Envoyer un SMS simple via Twilio
- * 
+ *
  * Body:
  * {
  *   "to": "+33612345678",
@@ -36,8 +37,11 @@ router.get('/health', (req: Request, res: Response) => {
  * }
  */
 router.post('/send', async (req: Request, res: Response) => {
-  logger.debug('📨 [SMS] Requête reçue:', { to: req.body.to, messageLength: req.body.message?.length });
-  
+  logger.debug('📨 [SMS] Requête reçue:', {
+    to: req.body.to,
+    messageLength: req.body.message?.length,
+  });
+
   try {
     const { to, message } = req.body;
 
@@ -51,7 +55,11 @@ router.post('/send', async (req: Request, res: Response) => {
     }
 
     // Vérifier les credentials Twilio
-    if (!process.env.TWILIO_ACCOUNT_SID || !process.env.TWILIO_AUTH_TOKEN || !process.env.TWILIO_PHONE_NUMBER) {
+    if (
+      !process.env.TWILIO_ACCOUNT_SID ||
+      !process.env.TWILIO_AUTH_TOKEN ||
+      !process.env.TWILIO_PHONE_NUMBER
+    ) {
       logger.error('❌ [SMS] Credentials Twilio manquantes');
       return res.status(500).json({
         ok: false,
@@ -89,7 +97,7 @@ router.post('/send', async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     logger.error('❌ [SMS] Erreur Twilio:', error);
-    
+
     // Extraire les détails de l'erreur Twilio
     const errorDetails = {
       message: error.message || 'Unknown error',

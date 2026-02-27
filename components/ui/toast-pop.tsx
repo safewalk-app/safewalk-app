@@ -14,12 +14,7 @@ export interface ToastPopProps {
  * ToastPop - Notification toast avec haptic feedback
  * Types : success (vert), error (rouge), warning (orange), info (bleu)
  */
-export function ToastPop({
-  message,
-  type = 'info',
-  duration = 3000,
-  onDismiss,
-}: ToastPopProps) {
+export function ToastPop({ message, type = 'info', duration = 3000, onDismiss }: ToastPopProps) {
   const [fadeAnim] = useState(new Animated.Value(0));
 
   const typeStyles = {
@@ -93,14 +88,8 @@ export function ToastPop({
         elevation: 5,
       }}
     >
-      <MaterialIcons
-        name={style.icon as any}
-        size={20}
-        color="#FFFFFF"
-      />
-      <Text className="flex-1 text-white font-semibold text-sm">
-        {message}
-      </Text>
+      <MaterialIcons name={style.icon as any} size={20} color="#FFFFFF" />
+      <Text className="flex-1 text-white font-semibold text-sm">{message}</Text>
     </Animated.View>
   );
 }

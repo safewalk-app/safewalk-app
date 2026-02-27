@@ -37,11 +37,13 @@ Supabase Database
 ### 1. Installer Supabase CLI
 
 **Sur Mac :**
+
 ```bash
 brew install supabase/tap/supabase
 ```
 
 **Sur Linux/Windows :**
+
 ```bash
 npm install -g supabase
 ```
@@ -76,6 +78,7 @@ supabase functions deploy trigger-sos
 ```
 
 **Résultat attendu :**
+
 ```
 ✓ Function deployed successfully
   URL: https://kycuteffcbqizyqlhczc.supabase.co/functions/v1/trigger-sos
@@ -88,6 +91,7 @@ supabase functions list
 ```
 
 Vous devriez voir :
+
 ```
 trigger-sos    https://kycuteffcbqizyqlhczc.supabase.co/functions/v1/trigger-sos
 ```
@@ -209,6 +213,7 @@ supabase link --project-ref kycuteffcbqizyqlhczc
 ### SMS non reçu
 
 **Vérifier :**
+
 1. Le numéro est au format E.164 (ex: +33763458273)
 2. Twilio a du crédit
 3. Vérifier les logs : `supabase functions logs trigger-sos --tail`
@@ -217,12 +222,12 @@ supabase link --project-ref kycuteffcbqizyqlhczc
 
 ## Coûts
 
-| Service | Coût |
-|---------|------|
-| Supabase (gratuit) | $0 |
-| Supabase (pro) | $25/mois |
-| Twilio | ~$0.05 par SMS |
-| **Total** | **Gratuit à $25/mois** |
+| Service            | Coût                   |
+| ------------------ | ---------------------- |
+| Supabase (gratuit) | $0                     |
+| Supabase (pro)     | $25/mois               |
+| Twilio             | ~$0.05 par SMS         |
+| **Total**          | **Gratuit à $25/mois** |
 
 ---
 
@@ -240,4 +245,4 @@ supabase link --project-ref kycuteffcbqizyqlhczc
 
 ---
 
-*Guide créé le 19 Février 2026*
+_Guide créé le 19 Février 2026_

@@ -7,7 +7,12 @@ const EXPO_PUSH_API = 'https://exp.host/--/api/v2/push/send';
 interface SOSNotificationRequest {
   pushTokens: string[];
   userName: string;
-  notificationType: 'alert_triggered' | 'alert_confirmed' | 'alert_cancelled' | 'extension_granted' | 'session_ended';
+  notificationType:
+    | 'alert_triggered'
+    | 'alert_confirmed'
+    | 'alert_cancelled'
+    | 'extension_granted'
+    | 'session_ended';
   additionalInfo?: string;
   location?: {
     latitude: number;
@@ -33,9 +38,9 @@ function createNotificationContent(
   type: string,
   userName: string,
   additionalInfo?: string,
-  location?: { latitude: number; longitude: number }
+  location?: { latitude: number; longitude: number },
 ): { title: string; body: string; priority: 'default' | 'high' | 'max'; badge?: number } {
-  const locationStr = location 
+  const locationStr = location
     ? ` (${location.latitude.toFixed(4)}, ${location.longitude.toFixed(4)})`
     : '';
 
@@ -85,13 +90,13 @@ function createNotificationContent(
  */
 async function sendExpoPushNotification(
   token: string,
-  notification: ExpoNotification
+  notification: ExpoNotification,
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const response = await fetch(EXPO_PUSH_API, {
       method: 'POST',
       headers: {
-        'Accept': 'application/json',
+        Accept: 'application/json',
         'Accept-Encoding': 'gzip, deflate',
         'Content-Type': 'application/json',
       },
@@ -119,10 +124,10 @@ async function sendExpoPushNotification(
 Deno.serve(async (req) => {
   // Vérifier la méthode HTTP
   if (req.method !== 'POST') {
-    return new Response(
-      JSON.stringify({ error: 'Method not allowed' }),
-      { status: 405, headers: { 'Content-Type': 'application/json' } }
-    );
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+      status: 405,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 
   try {
@@ -130,27 +135,29 @@ Deno.serve(async (req) => {
 
     // Valider les données
     if (!body.pushTokens || body.pushTokens.length === 0) {
-      return new Response(
-        JSON.stringify({ error: 'No push tokens provided' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify({ error: 'No push tokens provided' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
     if (!body.userName) {
-      return new Response(
-        JSON.stringify({ error: 'User name is required' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify({ error: 'User name is required' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
-    console.log(`📤 [send-sos-notification] Envoi de ${body.pushTokens.length} notifications (${body.notificationType})`);
+    console.log(
+      `📤 [send-sos-notification] Envoi de ${body.pushTokens.length} notifications (${body.notificationType})`,
+    );
 
     // Créer le contenu de la notification
     const content = createNotificationContent(
       body.notificationType,
       body.userName,
       body.additionalInfo,
-      body.location
+      body.location,
     );
 
     // Envoyer les notifications
@@ -173,8 +180,8 @@ Deno.serve(async (req) => {
           priority: content.priority,
           badge: content.badge,
           channelId: body.notificationType === 'alert_triggered' ? 'sos-alerts' : 'info',
-        })
-      )
+        }),
+      ),
     );
 
     // Compter les succès et les erreurs
@@ -193,7 +200,7 @@ Deno.serve(async (req) => {
           failed: errorCount,
         },
       }),
-      { status: 200, headers: { 'Content-Type': 'application/json' } }
+      { status: 200, headers: { 'Content-Type': 'application/json' } },
     );
   } catch (error) {
     console.error('❌ Erreur dans send-sos-notification:', error);
@@ -202,7 +209,7 @@ Deno.serve(async (req) => {
         error: 'Internal server error',
         message: String(error),
       }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
+      { status: 500, headers: { 'Content-Type': 'application/json' } },
     );
   }
 });

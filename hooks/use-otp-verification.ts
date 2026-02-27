@@ -1,6 +1,6 @@
-import { useState, useCallback } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { logger } from "@/lib/logger";
+import { useState, useCallback } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { logger } from '@/lib/logger';
 
 interface OtpVerificationState {
   isVerified: boolean;
@@ -8,7 +8,7 @@ interface OtpVerificationState {
   verifiedAt: number | null;
 }
 
-const OTP_STORAGE_KEY = "safewalk_otp_verification";
+const OTP_STORAGE_KEY = 'safewalk_otp_verification';
 
 /**
  * Hook to manage OTP verification state
@@ -30,33 +30,30 @@ export function useOtpVerification() {
       if (stored) {
         const parsed = JSON.parse(stored);
         setState(parsed);
-        logger.info("[OTP] Verification state loaded from storage");
+        logger.info('[OTP] Verification state loaded from storage');
       }
     } catch (error) {
-      logger.error("[OTP] Failed to load verification state:", error);
+      logger.error('[OTP] Failed to load verification state:', error);
     } finally {
       setLoading(false);
     }
   }, []);
 
   // Mark as verified
-  const markAsVerified = useCallback(
-    async (phoneNumber: string) => {
-      try {
-        const newState: OtpVerificationState = {
-          isVerified: true,
-          verifiedPhoneNumber: phoneNumber,
-          verifiedAt: Date.now(),
-        };
-        setState(newState);
-        await AsyncStorage.setItem(OTP_STORAGE_KEY, JSON.stringify(newState));
-        logger.info("[OTP] User marked as verified:", phoneNumber);
-      } catch (error) {
-        logger.error("[OTP] Failed to mark as verified:", error);
-      }
-    },
-    []
-  );
+  const markAsVerified = useCallback(async (phoneNumber: string) => {
+    try {
+      const newState: OtpVerificationState = {
+        isVerified: true,
+        verifiedPhoneNumber: phoneNumber,
+        verifiedAt: Date.now(),
+      };
+      setState(newState);
+      await AsyncStorage.setItem(OTP_STORAGE_KEY, JSON.stringify(newState));
+      logger.info('[OTP] User marked as verified:', phoneNumber);
+    } catch (error) {
+      logger.error('[OTP] Failed to mark as verified:', error);
+    }
+  }, []);
 
   // Clear verification (logout)
   const clearVerification = useCallback(async () => {
@@ -67,9 +64,9 @@ export function useOtpVerification() {
         verifiedAt: null,
       });
       await AsyncStorage.removeItem(OTP_STORAGE_KEY);
-      logger.info("[OTP] Verification cleared");
+      logger.info('[OTP] Verification cleared');
     } catch (error) {
-      logger.error("[OTP] Failed to clear verification:", error);
+      logger.error('[OTP] Failed to clear verification:', error);
     }
   }, []);
 

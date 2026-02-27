@@ -19,7 +19,7 @@ describe('Cache Service', () => {
     try {
       await initRedis();
       // Attendre que Redis soit prêt
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
     } catch (error) {
       console.log('Redis not available for tests, skipping...');
     }
@@ -39,10 +39,10 @@ describe('Cache Service', () => {
     }
 
     const testData = { id: 1, name: 'Test User', email: 'test@example.com' };
-    
+
     await setCache('test:user:1', testData, 3600);
     const cached = await getCache('test:user:1');
-    
+
     expect(cached).toEqual(testData);
   });
 
@@ -63,10 +63,10 @@ describe('Cache Service', () => {
     }
 
     const testData = { id: 2, name: 'Test User 2' };
-    
+
     await setCache('test:user:2', testData);
     await deleteCache('test:user:2');
-    
+
     const cached = await getCache('test:user:2');
     expect(cached).toBeNull();
   });
@@ -147,16 +147,16 @@ describe('Cache Service', () => {
     }
 
     const testData = { id: 7, name: 'Expiring User' };
-    
+
     // Set cache with 1 second TTL
     await setCache('test:user:7', testData, 1);
-    
+
     // Should exist immediately
     let cached = await getCache('test:user:7');
     expect(cached).toEqual(testData);
 
     // Wait for expiration
-    await new Promise(resolve => setTimeout(resolve, 1100));
+    await new Promise((resolve) => setTimeout(resolve, 1100));
 
     // Should be expired
     cached = await getCache('test:user:7');

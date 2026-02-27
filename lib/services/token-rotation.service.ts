@@ -1,9 +1,9 @@
 /**
  * Token Rotation Service
- * 
+ *
  * Rafraîchit automatiquement les tokens pour limiter l'exposition
  * en cas de compromission
- * 
+ *
  * Fonctionnalités:
  * - Rotation automatique des tokens (15 min par défaut)
  * - Détection des tokens expirés
@@ -72,14 +72,14 @@ class TokenRotationService {
       // Écouter les changements d'état de l'app
       this.appStateSubscription = AppState.addEventListener(
         'change',
-        this.handleAppStateChange.bind(this)
+        this.handleAppStateChange.bind(this),
       );
 
       logger.info('✅ [Token Rotation] Service initialisé', {
         rotationInterval: `${TOKEN_ROTATION_CONFIG.ROTATION_INTERVAL / 1000 / 60} min`,
       });
     } catch (error) {
-      logger.error('❌ [Token Rotation] Erreur lors de l\'initialisation:', error);
+      logger.error("❌ [Token Rotation] Erreur lors de l'initialisation:", error);
     }
   }
 
@@ -208,10 +208,10 @@ class TokenRotationService {
 
       // Retry logic
       if (retryCount < TOKEN_ROTATION_CONFIG.MAX_RETRY_ATTEMPTS) {
-        logger.info(`🔄 [Token Rotation] Nouvelle tentative dans ${TOKEN_ROTATION_CONFIG.RETRY_DELAY / 1000}s`);
-        await new Promise((resolve) =>
-          setTimeout(resolve, TOKEN_ROTATION_CONFIG.RETRY_DELAY)
+        logger.info(
+          `🔄 [Token Rotation] Nouvelle tentative dans ${TOKEN_ROTATION_CONFIG.RETRY_DELAY / 1000}s`,
         );
+        await new Promise((resolve) => setTimeout(resolve, TOKEN_ROTATION_CONFIG.RETRY_DELAY));
         return this.rotateTokens(retryCount + 1);
       }
 
@@ -242,7 +242,7 @@ class TokenRotationService {
         expiresAt: newExpiresAt,
       };
     } catch (error) {
-      logger.error('❌ [Token Rotation] Erreur lors de l\'appel API:', error);
+      logger.error("❌ [Token Rotation] Erreur lors de l'appel API:", error);
       throw error;
     }
   }
@@ -301,7 +301,9 @@ class TokenRotationService {
     } else {
       this.stopAutoRotation();
     }
-    logger.info(`${enabled ? '✅' : '⛔'} [Token Rotation] Rotation automatique ${enabled ? 'activée' : 'désactivée'}`);
+    logger.info(
+      `${enabled ? '✅' : '⛔'} [Token Rotation] Rotation automatique ${enabled ? 'activée' : 'désactivée'}`,
+    );
   }
 
   /**

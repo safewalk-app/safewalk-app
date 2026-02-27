@@ -16,12 +16,14 @@ Toutes les corrections de contraste ont été implémentées pour atteindre la c
 ### 1. Couleur d'Erreur (Danger)
 
 **Avant:**
+
 ```
 Couleur: #FF4D4D (Rouge clair)
 Contraste avec blanc: 3.9:1 ❌ (Non conforme WCAG AA)
 ```
 
 **Après:**
+
 ```
 Couleur: #DC2626 (Rouge foncé)
 Contraste avec blanc: 5.5:1 ✅ (Conforme WCAG AA)
@@ -31,6 +33,7 @@ Amélioration: +1.6 points de contraste
 **Fichier modifié:** `theme.config.js`
 
 **Utilisation:**
+
 - Boutons "Annuler", "Supprimer"
 - Alertes d'erreur
 - Messages d'erreur
@@ -41,12 +44,14 @@ Amélioration: +1.6 points de contraste
 ### 2. Couleur d'Avertissement (Warning)
 
 **Avant:**
+
 ```
 Couleur: #F59E0B (Orange clair)
 Contraste avec blanc: 4.2:1 ❌ (Non conforme WCAG AA)
 ```
 
 **Après:**
+
 ```
 Couleur: #D97706 (Orange foncé)
 Contraste avec blanc: 5.8:1 ✅ (Conforme WCAG AA)
@@ -56,6 +61,7 @@ Amélioration: +1.6 points de contraste
 **Fichier modifié:** `theme.config.js`
 
 **Utilisation:**
+
 - Alertes d'avertissement
 - Messages d'avertissement
 - Icônes d'avertissement
@@ -66,6 +72,7 @@ Amélioration: +1.6 points de contraste
 ### 3. Texte Secondaire sur Fond Primaire
 
 **Avant:**
+
 ```
 Texte: #6B7280 (Gris)
 Fond: #6C63FF (Primaire)
@@ -73,6 +80,7 @@ Contraste: 1.8:1 ❌ (Non conforme WCAG AA)
 ```
 
 **Après:**
+
 ```
 Texte: #FFFFFF (Blanc)
 Fond: #6C63FF (Primaire)
@@ -81,11 +89,13 @@ Amélioration: +5.0 points de contraste
 ```
 
 **Fichiers modifiés:**
+
 - Tous les composants utilisant texte secondaire sur fond primaire
 - Cartes avec fond bleu primaire
 - Boutons primaires avec sous-texte
 
 **Utilisation:**
+
 - Sous-titres sur cartes primaires
 - Texte secondaire sur boutons primaires
 - Descriptions sur fond primaire
@@ -95,6 +105,7 @@ Amélioration: +5.0 points de contraste
 ## ✅ Vérification des Corrections
 
 ### Contraste Blanc sur Erreur (#DC2626)
+
 ```
 Ratio: 5.5:1
 Statut: ✅ WCAG AA (Normal)
@@ -102,6 +113,7 @@ Statut: ✅ WCAG AAA (Large)
 ```
 
 ### Contraste Blanc sur Avertissement (#D97706)
+
 ```
 Ratio: 5.8:1
 Statut: ✅ WCAG AA (Normal)
@@ -109,6 +121,7 @@ Statut: ✅ WCAG AAA (Large)
 ```
 
 ### Contraste Blanc sur Primaire (#6C63FF)
+
 ```
 Ratio: 6.8:1
 Statut: ✅ WCAG AAA (Normal + Large)
@@ -118,43 +131,46 @@ Statut: ✅ WCAG AAA (Normal + Large)
 
 ## 📊 Tableau de Conformité Avant/Après
 
-| Élément | Avant | Après | Statut |
-|---------|-------|-------|--------|
-| Erreur (blanc) | 3.9:1 ❌ | 5.5:1 ✅ | Conforme |
-| Avertissement (blanc) | 4.2:1 ❌ | 5.8:1 ✅ | Conforme |
-| Texte secondaire sur primaire | 1.8:1 ❌ | 6.8:1 ✅ | Conforme |
-| Foreground sur blanc | 17.5:1 ✅ | 17.5:1 ✅ | Inchangé |
-| Foreground sur primaire | 6.8:1 ✅ | 6.8:1 ✅ | Inchangé |
+| Élément                       | Avant     | Après     | Statut   |
+| ----------------------------- | --------- | --------- | -------- |
+| Erreur (blanc)                | 3.9:1 ❌  | 5.5:1 ✅  | Conforme |
+| Avertissement (blanc)         | 4.2:1 ❌  | 5.8:1 ✅  | Conforme |
+| Texte secondaire sur primaire | 1.8:1 ❌  | 6.8:1 ✅  | Conforme |
+| Foreground sur blanc          | 17.5:1 ✅ | 17.5:1 ✅ | Inchangé |
+| Foreground sur primaire       | 6.8:1 ✅  | 6.8:1 ✅  | Inchangé |
 
 ---
 
 ## 🎨 Nouvelle Palette de Couleurs
 
-| Nom | Couleur | Utilisation | Contraste |
-|-----|---------|-------------|-----------|
-| Primary | #6C63FF | Boutons, accents | 6.8:1 ✅ |
-| Secondary | #3A86FF | Liens, accents | 9.2:1 ✅ |
-| Success | #2DE2A6 | Succès, validation | 5.2:1 ✅ |
-| Error | #DC2626 | Erreurs, alertes | 5.5:1 ✅ |
-| Warning | #D97706 | Avertissements | 5.8:1 ✅ |
-| Foreground | #0B1220 | Texte principal | 17.5:1 ✅ |
-| Muted | #6B7280 | Texte secondaire | 4.8:1 ✅ |
+| Nom        | Couleur | Utilisation        | Contraste |
+| ---------- | ------- | ------------------ | --------- |
+| Primary    | #6C63FF | Boutons, accents   | 6.8:1 ✅  |
+| Secondary  | #3A86FF | Liens, accents     | 9.2:1 ✅  |
+| Success    | #2DE2A6 | Succès, validation | 5.2:1 ✅  |
+| Error      | #DC2626 | Erreurs, alertes   | 5.5:1 ✅  |
+| Warning    | #D97706 | Avertissements     | 5.8:1 ✅  |
+| Foreground | #0B1220 | Texte principal    | 17.5:1 ✅ |
+| Muted      | #6B7280 | Texte secondaire   | 4.8:1 ✅  |
 
 ---
 
 ## 🧪 Impact Visuel
 
 ### Couleur d'Erreur
+
 - **Avant:** #FF4D4D (Rouge clair, moins visible)
 - **Après:** #DC2626 (Rouge foncé, plus visible et accessible)
 - **Impact:** Meilleure visibilité, surtout pour les daltoniens
 
 ### Couleur d'Avertissement
+
 - **Avant:** #F59E0B (Orange clair, moins visible)
 - **Après:** #D97706 (Orange foncé, plus visible et accessible)
 - **Impact:** Meilleure visibilité, surtout pour les daltoniens
 
 ### Texte sur Primaire
+
 - **Avant:** Gris sur bleu (très faible contraste)
 - **Après:** Blanc sur bleu (excellent contraste)
 - **Impact:** Texte beaucoup plus lisible
@@ -165,12 +181,12 @@ Statut: ✅ WCAG AAA (Normal + Large)
 
 ### Statut Global: ✅ CONFORME WCAG AA
 
-| Critère | Avant | Après | Statut |
-|---------|-------|-------|--------|
-| 1.4.3 Contrast (Minimum) | ⚠️ | ✅ | Conforme |
-| 2.3.3 Animation from Interactions | ✅ | ✅ | Conforme |
-| 2.1.1 Keyboard | 🔄 | 🔄 | À tester |
-| 4.1.3 Status Messages | 🔄 | 🔄 | À tester |
+| Critère                           | Avant | Après | Statut   |
+| --------------------------------- | ----- | ----- | -------- |
+| 1.4.3 Contrast (Minimum)          | ⚠️    | ✅    | Conforme |
+| 2.3.3 Animation from Interactions | ✅    | ✅    | Conforme |
+| 2.1.1 Keyboard                    | 🔄    | 🔄    | À tester |
+| 4.1.3 Status Messages             | 🔄    | 🔄    | À tester |
 
 ---
 
@@ -186,6 +202,7 @@ Statut: ✅ WCAG AAA (Normal + Large)
 ## 🔍 Vérification Manuelle
 
 Les corrections ont été vérifiées avec:
+
 - WebAIM Contrast Checker
 - Accessible Colors
 - Calculs manuels de contraste

@@ -19,6 +19,7 @@ SafeWalk utilise maintenant un **système de notifications centralisé, dynamiqu
 Source unique de vérité pour tous les messages.
 
 **Chaque notification contient:**
+
 - `key` - Identifiant unique (ex: `trip.started`)
 - `type` - Type (success, info, error, critical, warning)
 - `display` - Mode d'affichage (toast, banner, modal, alert)
@@ -28,6 +29,7 @@ Source unique de vérité pour tous les messages.
 - `fallback` - Valeurs par défaut si variable manquante
 
 **Exemple:**
+
 ```typescript
 'trip.extended': {
   key: 'trip.extended',
@@ -45,6 +47,7 @@ Source unique de vérité pour tous les messages.
 Moteur unique pour afficher les notifications.
 
 **Fonctions principales:**
+
 - `notify(key, options)` - Affiche une notification
 - `notifySuccess(message)` - Notification de succès
 - `notifyError(message)` - Notification d'erreur
@@ -59,9 +62,15 @@ Enregistre le contexte global pour afficher les notifications.
 
 ```typescript
 registerNotificationContext({
-  showToast: (message, type, duration) => { /* ... */ },
-  showBanner: (message, type, onDismiss) => { /* ... */ },
-  showModal: (title, message, type, buttons) => { /* ... */ },
+  showToast: (message, type, duration) => {
+    /* ... */
+  },
+  showBanner: (message, type, onDismiss) => {
+    /* ... */
+  },
+  showModal: (title, message, type, buttons) => {
+    /* ... */
+  },
 });
 ```
 
@@ -82,7 +91,7 @@ notify('trip.started');
 
 ```typescript
 notify('trip.extended', {
-  variables: { minutes: 15 }
+  variables: { minutes: 15 },
 });
 
 // Message affiché: "Ta sortie a été prolongée de 15 min."
@@ -92,7 +101,7 @@ notify('trip.extended', {
 
 ```typescript
 notify('alert.sent', {
-  variables: { contactName: undefined } // Manquant
+  variables: { contactName: undefined }, // Manquant
 });
 
 // Message affiché: "ton contact a bien été prévenu."
@@ -126,6 +135,7 @@ notifyBlocked('contact.missing', {
 ## 📚 Clés de Notifications Disponibles
 
 ### Voyage (Trip)
+
 - `trip.started` - Sortie démarrée ✅
 - `trip.extended` - Sortie prolongée ✅
 - `trip.checked_in` - Check-in confirmé ✅
@@ -133,49 +143,58 @@ notifyBlocked('contact.missing', {
 - `trip.cancelled` - Sortie annulée ✅
 
 ### Alertes (Alert)
+
 - `alert.warning` - Alerte imminente ⚠️
 - `alert.sent` - Alerte envoyée ✅
 - `alert.failed` - Échec d'alerte ❌
 - `alert.quota_reached` - Quota atteint 🚫
 
 ### SOS
+
 - `sos.sending` - SOS en cours d'envoi 📤
 - `sos.sent` - SOS envoyé ✅
 - `sos.failed` - Échec SOS ❌
 - `sos.quota_reached` - Quota SOS atteint 🚫
 
 ### Contact
+
 - `contact.saved` - Contact sauvegardé ✅
 - `contact.deleted` - Contact supprimé ✅
 - `contact.missing` - Contact manquant 🚫
 - `contact.invalid` - Contact invalide ❌
 
 ### Authentification (Auth)
+
 - `auth.otp_required` - OTP requis 🚫
 - `auth.otp_sent` - OTP envoyé ✅
 - `auth.otp_verified` - OTP vérifié ✅
 - `auth.otp_failed` - Échec OTP ❌
 
 ### Crédits
+
 - `credits.empty` - Crédits épuisés 🚫
 - `credits.low` - Crédits faibles ⚠️
 - `credits.added` - Crédits ajoutés ✅
 
 ### Permissions
+
 - `permission.location_required` - Localisation requise 🚫
 - `permission.notifications_required` - Notifications requises ⚠️
 - `permission.phone_required` - Téléphone requis 🚫
 
 ### Erreurs
+
 - `error.network` - Erreur réseau ❌
 - `error.sms_failed` - Échec SMS ❌
 - `error.unknown` - Erreur inconnue ❌
 
 ### SMS
+
 - `sms.test_sent` - SMS de test envoyé ✅
 - `sms.test_failed` - Échec SMS de test ❌
 
 ### Confirmations
+
 - `confirm.stop_trip` - Confirmation d'annulation
 - `confirm.delete_data` - Confirmation de suppression
 - `confirm.trigger_sos` - Confirmation de SOS
@@ -185,21 +204,25 @@ notifyBlocked('contact.missing', {
 ## 🎨 Modes d'Affichage
 
 ### Toast (Notification Temporaire)
+
 - Durée: 2-3 secondes
 - Utilisation: Succès, infos rapides
 - Exemple: "Sortie démarrée"
 
 ### Banner (Barre Persistante)
+
 - Durée: Persistant (0)
 - Utilisation: Avertissements, alertes
 - Exemple: "Sans confirmation, ton contact sera prévenu dans 5 min"
 
 ### Modal (Dialogue)
+
 - Durée: Persistant (0)
 - Utilisation: Blocages, erreurs critiques
 - Exemple: "Contact d'urgence manquant"
 
 ### Alert (Alerte Native)
+
 - Durée: Persistant (0)
 - Utilisation: Confirmations, erreurs
 - Exemple: "Êtes-vous sûr?"
@@ -208,13 +231,13 @@ notifyBlocked('contact.missing', {
 
 ## 🔄 Types de Notifications
 
-| Type | Couleur | Icône | Utilisation |
-|------|---------|-------|-------------|
-| `success` | 🟢 Vert | ✅ | Actions réussies |
-| `info` | 🔵 Bleu | ℹ️ | Informations |
-| `warning` | 🟡 Orange | ⚠️ | Avertissements |
-| `error` | 🔴 Rouge | ❌ | Erreurs |
-| `critical` | 🔴 Rouge Foncé | 🚨 | Alertes critiques |
+| Type       | Couleur        | Icône | Utilisation       |
+| ---------- | -------------- | ----- | ----------------- |
+| `success`  | 🟢 Vert        | ✅    | Actions réussies  |
+| `info`     | 🔵 Bleu        | ℹ️    | Informations      |
+| `warning`  | 🟡 Orange      | ⚠️    | Avertissements    |
+| `error`    | 🔴 Rouge       | ❌    | Erreurs           |
+| `critical` | 🔴 Rouge Foncé | 🚨    | Alertes critiques |
 
 ---
 
@@ -226,7 +249,7 @@ notifyBlocked('contact.missing', {
 // app/home.tsx
 const handleStartSession = () => {
   if (!hasContact) {
-    setToastMessage('Configure un contact d\'urgence');
+    setToastMessage("Configure un contact d'urgence");
     setShowToast(true);
     setTimeout(() => {
       router.push('/settings');
@@ -280,7 +303,7 @@ const handleStartSession = () => {
 import { notify } from '@/lib/services/notification.service';
 
 notify('my.new_notification', {
-  variables: { variable: 'valeur' }
+  variables: { variable: 'valeur' },
 });
 ```
 
@@ -305,27 +328,32 @@ const config = getNotificationConfig(key, locale);
 ## ✅ Checklist de Validation
 
 ### Notifications Toast
+
 - [x] `trip.started` - Affiche "C'est noté, ta sortie a commencé."
 - [x] `trip.extended` - Affiche "Ta sortie a été prolongée de {minutes} min."
 - [x] `contact.saved` - Affiche "Contact sauvegardé."
 - [x] `sms.test_sent` - Affiche "SMS de test envoyé à {phone}."
 
 ### Notifications Banner
+
 - [x] `alert.warning` - Affiche "Sans confirmation, {contactName} sera prévenu dans {minutes} min."
 - [x] `alert.failed` - Affiche "On n'a pas réussi à envoyer l'alerte. Réessaie dès que possible."
 - [x] `error.network` - Affiche "Pas de connexion internet. Réessaie dès que possible."
 
 ### Notifications Modal
+
 - [x] `contact.missing` - Affiche "Ajoute un contact d'urgence pour démarrer une sortie."
 - [x] `auth.otp_required` - Affiche "Vérifie ton numéro pour activer les alertes SMS."
 - [x] `credits.empty` - Affiche "Tu as atteint la limite d'aujourd'hui. Ajoute des crédits pour continuer."
 
 ### Variables Dynamiques
+
 - [x] Variables présentes - Remplacées correctement
 - [x] Variables manquantes - Utilise le fallback
 - [x] Pas de "undefined" - Jamais affichés
 
 ### Cohérence
+
 - [x] Ton unifié - Humain, rassurant, chaleureux
 - [x] Pas de duplication - Chaque message une seule fois
 - [x] Facile à maintenir - Centralisé et structuré
@@ -334,26 +362,28 @@ const config = getNotificationConfig(key, locale);
 
 ## 📊 Statistiques
 
-| Métrique | Valeur |
-|----------|--------|
-| Notifications définies | 40+ |
-| Clés uniques | 40+ |
-| Fichiers centralisés | 2 |
-| Fichiers refactorisés | 4+ |
-| Messages dupliqués supprimés | 8+ |
-| Lignes de code réduites | ~200 |
+| Métrique                     | Valeur |
+| ---------------------------- | ------ |
+| Notifications définies       | 40+    |
+| Clés uniques                 | 40+    |
+| Fichiers centralisés         | 2      |
+| Fichiers refactorisés        | 4+     |
+| Messages dupliqués supprimés | 8+     |
+| Lignes de code réduites      | ~200   |
 
 ---
 
 ## 🎓 Bonnes Pratiques
 
 ✅ **À Faire:**
+
 - Utiliser les clés prédéfinies
 - Passer les variables via `options.variables`
 - Laisser le service gérer l'affichage
 - Ajouter les nouvelles notifications au registre
 
 ❌ **À Éviter:**
+
 - Écrire des messages en dur dans les composants
 - Utiliser `Alert.alert()` directement
 - Dupliquer des messages
@@ -363,12 +393,12 @@ const config = getNotificationConfig(key, locale);
 
 ## 🔗 Fichiers Clés
 
-| Fichier | Rôle |
-|---------|------|
-| `lib/config/notifications.config.ts` | Registre central |
+| Fichier                                | Rôle                |
+| -------------------------------------- | ------------------- |
+| `lib/config/notifications.config.ts`   | Registre central    |
 | `lib/services/notification.service.ts` | Service d'affichage |
-| `NOTIFICATIONS_AUDIT.md` | Audit du hardcode |
-| `NOTIFICATIONS_SYSTEM.md` | Cette documentation |
+| `NOTIFICATIONS_AUDIT.md`               | Audit du hardcode   |
+| `NOTIFICATIONS_SYSTEM.md`              | Cette documentation |
 
 ---
 

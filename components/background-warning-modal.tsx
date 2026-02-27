@@ -22,45 +22,48 @@ export function BackgroundWarningModal({ visible, onClose }: BackgroundWarningMo
   };
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="fade"
-      onRequestClose={handleClose}
-    >
-      <View style={{ 
-        flex: 1, 
-        backgroundColor: 'rgba(0,0,0,0.5)', 
-        justifyContent: 'center', 
-        alignItems: 'center',
-        padding: 20,
-      }}>
-        <View style={{
-          backgroundColor: colors.background,
-          borderRadius: 16,
-          padding: 24,
-          maxWidth: 400,
-          width: '100%',
-        }}>
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={handleClose}>
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          justifyContent: 'center',
+          alignItems: 'center',
+          padding: 20,
+        }}
+      >
+        <View
+          style={{
+            backgroundColor: colors.background,
+            borderRadius: 16,
+            padding: 24,
+            maxWidth: 400,
+            width: '100%',
+          }}
+        >
           <ScrollView showsVerticalScrollIndicator={false}>
             {/* Titre */}
-            <Text style={{
-              fontSize: 24,
-              fontWeight: 'bold',
-              color: colors.foreground,
-              marginBottom: 16,
-              textAlign: 'center',
-            }}>
+            <Text
+              style={{
+                fontSize: 24,
+                fontWeight: 'bold',
+                color: colors.foreground,
+                marginBottom: 16,
+                textAlign: 'center',
+              }}
+            >
               ⚠️ Important pour votre sécurité
             </Text>
 
             {/* Message principal */}
-            <Text style={{
-              fontSize: 16,
-              color: colors.foreground,
-              marginBottom: 20,
-              lineHeight: 24,
-            }}>
+            <Text
+              style={{
+                fontSize: 16,
+                color: colors.foreground,
+                marginBottom: 20,
+                lineHeight: 24,
+              }}
+            >
               Pour que les alertes fonctionnent correctement, vous devez :
             </Text>
 
@@ -87,18 +90,23 @@ export function BackgroundWarningModal({ visible, onClose }: BackgroundWarningMo
             </View>
 
             {/* Note */}
-            <View style={{
-              backgroundColor: colors.surface,
-              padding: 12,
-              borderRadius: 8,
-              marginBottom: 20,
-            }}>
-              <Text style={{
-                fontSize: 14,
-                color: colors.muted,
-                lineHeight: 20,
-              }}>
-                💡 <Text style={{ fontWeight: '600' }}>Astuce :</Text> Laissez l'écran allumé pendant votre sortie pour une fiabilité maximale.
+            <View
+              style={{
+                backgroundColor: colors.surface,
+                padding: 12,
+                borderRadius: 8,
+                marginBottom: 20,
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 14,
+                  color: colors.muted,
+                  lineHeight: 20,
+                }}
+              >
+                💡 <Text style={{ fontWeight: '600' }}>Astuce :</Text> Laissez l'écran allumé
+                pendant votre sortie pour une fiabilité maximale.
               </Text>
             </View>
 
@@ -111,17 +119,19 @@ export function BackgroundWarningModal({ visible, onClose }: BackgroundWarningMo
                 marginBottom: 20,
               }}
             >
-              <View style={{
-                width: 24,
-                height: 24,
-                borderRadius: 4,
-                borderWidth: 2,
-                borderColor: colors.primary,
-                backgroundColor: dontShowAgain ? colors.primary : 'transparent',
-                justifyContent: 'center',
-                alignItems: 'center',
-                marginRight: 12,
-              }}>
+              <View
+                style={{
+                  width: 24,
+                  height: 24,
+                  borderRadius: 4,
+                  borderWidth: 2,
+                  borderColor: colors.primary,
+                  backgroundColor: dontShowAgain ? colors.primary : 'transparent',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  marginRight: 12,
+                }}
+              >
                 {dontShowAgain && (
                   <Text style={{ color: '#fff', fontSize: 16, fontWeight: 'bold' }}>✓</Text>
                 )}
@@ -151,12 +161,14 @@ export function BackgroundWarningModal({ visible, onClose }: BackgroundWarningMo
                   opacity: pressed ? 0.8 : 1,
                 })}
               >
-                <Text style={{
-                  color: colors.primary,
-                  fontSize: 16,
-                  fontWeight: '600',
-                  textAlign: 'center',
-                }}>
+                <Text
+                  style={{
+                    color: colors.primary,
+                    fontSize: 16,
+                    fontWeight: '600',
+                    textAlign: 'center',
+                  }}
+                >
                   ⚙️ Ouvrir les paramètres
                 </Text>
               </Pressable>
@@ -171,12 +183,14 @@ export function BackgroundWarningModal({ visible, onClose }: BackgroundWarningMo
                   opacity: pressed ? 0.8 : 1,
                 })}
               >
-                <Text style={{
-                  color: '#fff',
-                  fontSize: 16,
-                  fontWeight: '600',
-                  textAlign: 'center',
-                }}>
+                <Text
+                  style={{
+                    color: '#fff',
+                    fontSize: 16,
+                    fontWeight: '600',
+                    textAlign: 'center',
+                  }}
+                >
                   J'ai compris
                 </Text>
               </Pressable>
@@ -197,25 +211,31 @@ interface InstructionItemProps {
 
 function InstructionItem({ icon, title, description, colors }: InstructionItemProps) {
   return (
-    <View style={{
-      flexDirection: 'row',
-      marginBottom: 16,
-    }}>
+    <View
+      style={{
+        flexDirection: 'row',
+        marginBottom: 16,
+      }}
+    >
       <Text style={{ fontSize: 24, marginRight: 12 }}>{icon}</Text>
       <View style={{ flex: 1 }}>
-        <Text style={{
-          fontSize: 16,
-          fontWeight: '600',
-          color: colors.foreground,
-          marginBottom: 4,
-        }}>
+        <Text
+          style={{
+            fontSize: 16,
+            fontWeight: '600',
+            color: colors.foreground,
+            marginBottom: 4,
+          }}
+        >
           {title}
         </Text>
-        <Text style={{
-          fontSize: 14,
-          color: colors.muted,
-          lineHeight: 20,
-        }}>
+        <Text
+          style={{
+            fontSize: 14,
+            color: colors.muted,
+            lineHeight: 20,
+          }}
+        >
           {description}
         </Text>
       </View>

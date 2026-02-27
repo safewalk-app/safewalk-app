@@ -17,7 +17,7 @@ describe('API URL Validation', () => {
   it.skip('should be able to reach the health endpoint (requires production server)', async () => {
     const response = await fetch(`${API_URL}/api/sms/health`);
     expect(response.ok).toBe(true);
-    
+
     const data = await response.json();
     expect(data.ok).toBe(true);
     expect(data.service).toBe('SMS API');
@@ -37,7 +37,7 @@ describe('API URL Validation', () => {
     });
 
     expect(response.ok).toBe(true);
-    
+
     const data = await response.json();
     expect(data.ok).toBe(true);
     expect(data.sid).toBeDefined();

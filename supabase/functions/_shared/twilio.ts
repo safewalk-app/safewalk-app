@@ -33,10 +33,10 @@ export interface SendSmsResponse {
 export function calculateBackoffDelay(attempt: number, initialDelayMs: number = 1000): number {
   // Exponential: 1s, 2s, 4s, 8s, etc.
   const exponentialDelay = initialDelayMs * Math.pow(2, attempt);
-  
+
   // Add jitter (±10%) to prevent thundering herd
   const jitter = exponentialDelay * 0.1 * (Math.random() * 2 - 1);
-  
+
   return Math.max(100, exponentialDelay + jitter);
 }
 
@@ -60,17 +60,17 @@ export function isRetryableError(statusCode: number, errorCode?: string): boolea
   if (statusCode === 429) return true; // Rate limited
   if (statusCode === 408) return true; // Request timeout
   if (statusCode === 503) return true; // Service unavailable
-  
+
   // Don't retry on client errors (4xx) except those above
   if (statusCode >= 400 && statusCode < 500) return false;
-  
+
   // Retry on specific Twilio error codes
   const retryableErrorCodes = [
     'TWILIO_EXCEPTION', // Network error
     'CONNECTION_ERROR',
     'TIMEOUT',
   ];
-  
+
   return retryableErrorCodes.includes(errorCode || '');
 }
 
@@ -81,7 +81,7 @@ export function isRetryableError(statusCode: number, errorCode?: string): boolea
  */
 export async function sendSms(options: SendSmsOptions): Promise<SendSmsResponse> {
   const { to, message, config, maxRetries = 3, initialDelayMs = 1000 } = options;
-  
+
   let lastError: SendSmsResponse = {
     success: false,
     error: 'Unknown error',
@@ -116,19 +116,19 @@ export async function sendSms(options: SendSmsOptions): Promise<SendSmsResponse>
       const response = await fetch(url, {
         method: 'POST',
         headers: {
-          'Authorization': `Basic ${auth}`,
+          Authorization: `Basic ${auth}`,
           'Content-Type': 'application/x-www-form-urlencoded',
         },
         body: formData.toString(),
       });
 
       // Parse response
-      const data = await response.json() as Record<string, unknown>;
+      const data = (await response.json()) as Record<string, unknown>;
 
       if (!response.ok) {
         const errorData = data as Record<string, unknown>;
         const errorCode = (errorData.code as string) || 'TWILIO_ERROR';
-        
+
         lastError = {
           success: false,
           error: (errorData.message as string) || 'Twilio API error',
@@ -140,7 +140,9 @@ export async function sendSms(options: SendSmsOptions): Promise<SendSmsResponse>
         // Check if error is retryable
         if (isRetryableError(response.status, errorCode) && attempt < maxRetries) {
           const delayMs = calculateBackoffDelay(attempt, initialDelayMs);
-          console.warn(`[Twilio] Attempt ${attempt + 1}/${maxRetries + 1} failed (${response.status}), retrying in ${delayMs}ms...`);
+          console.warn(
+            `[Twilio] Attempt ${attempt + 1}/${maxRetries + 1} failed (${response.status}), retrying in ${delayMs}ms...`,
+          );
           await sleep(delayMs);
           continue;
         }
@@ -158,7 +160,7 @@ export async function sendSms(options: SendSmsOptions): Promise<SendSmsResponse>
       };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      
+
       lastError = {
         success: false,
         error: errorMessage,
@@ -170,7 +172,9 @@ export async function sendSms(options: SendSmsOptions): Promise<SendSmsResponse>
       // Retry on network errors
       if (attempt < maxRetries) {
         const delayMs = calculateBackoffDelay(attempt, initialDelayMs);
-        console.warn(`[Twilio] Attempt ${attempt + 1}/${maxRetries + 1} failed (network error), retrying in ${delayMs}ms...`);
+        console.warn(
+          `[Twilio] Attempt ${attempt + 1}/${maxRetries + 1} failed (network error), retrying in ${delayMs}ms...`,
+        );
         await sleep(delayMs);
         continue;
       }
@@ -230,7 +234,7 @@ export function createOverdueAlertMessage(
   deadline: Date,
   shareLocation: boolean,
   latitude?: number,
-  longitude?: number
+  longitude?: number,
 ): string {
   const timeStr = deadline.toLocaleTimeString('fr-FR', {
     hour: '2-digit',
@@ -253,7 +257,7 @@ export function createOverdueAlertMessage(
  * @returns SMS message text
  */
 export function createTestSmsMessage(): string {
-  return '✅ SafeWalk: Ceci est un SMS de test. Votre contact d\'urgence a bien été configuré.';
+  return "✅ SafeWalk: Ceci est un SMS de test. Votre contact d'urgence a bien été configuré.";
 }
 
 /**
@@ -268,7 +272,7 @@ export function createSosAlertMessage(
   userName: string,
   shareLocation: boolean,
   latitude?: number,
-  longitude?: number
+  longitude?: number,
 ): string {
   let message = `🆘 Alerte SOS SafeWalk: ${userName} a déclenché une alerte d'urgence immédiate.`;
 

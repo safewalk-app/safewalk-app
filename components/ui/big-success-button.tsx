@@ -14,11 +14,7 @@ export interface BigSuccessButtonProps {
  * Avec icône checkmark et haptic feedback
  * Polish: opacity 1.0, height 66, shadow forte, scale press 0.96
  */
-export function BigSuccessButton({
-  label,
-  onPress,
-  disabled = false,
-}: BigSuccessButtonProps) {
+export function BigSuccessButton({ label, onPress, disabled = false }: BigSuccessButtonProps) {
   const handlePress = () => {
     if (!disabled && onPress) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -48,16 +44,8 @@ export function BigSuccessButton({
             elevation: pressed ? 6 : 5,
           }}
         >
-          <MaterialIcons
-            name="check-circle"
-            size={28}
-            color="#FFFFFF"
-          />
-          <Text 
-            className="text-white font-bold text-xl"
-            numberOfLines={1}
-            adjustsFontSizeToFit
-          >
+          <MaterialIcons name="check-circle" size={28} color="#FFFFFF" />
+          <Text className="text-white font-bold text-xl" numberOfLines={1} adjustsFontSizeToFit>
             {label}
           </Text>
         </View>

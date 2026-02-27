@@ -1,6 +1,6 @@
 /**
  * API Client - Point d'entrée unique pour tous les appels API
- * 
+ *
  * Configuration:
  * - URL de base: EXPO_PUBLIC_API_URL (définie dans .env)
  * - Logs automatiques en développement
@@ -11,7 +11,9 @@ import { logger } from '@/lib/logger';
 import { notify } from '@/lib/services/notification.service';
 
 // URL de l'API depuis les variables d'environnement
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://3000-izg08xkxsyk2siv7372nz-49e5cc45.us1.manus.computer';
+const API_URL =
+  process.env.EXPO_PUBLIC_API_URL ||
+  'https://3000-izg08xkxsyk2siv7372nz-49e5cc45.us1.manus.computer';
 
 // Log de l'URL utilisée (utile pour debug)
 logger.info('🔗 [API Client] URL configurée:', API_URL);
@@ -19,14 +21,11 @@ logger.info('🔗 [API Client] URL configurée:', API_URL);
 /**
  * Effectuer un appel API
  */
-async function apiCall<T = any>(
-  endpoint: string,
-  options: RequestInit = {}
-): Promise<T> {
+async function apiCall<T = any>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const url = `${API_URL}${endpoint}`;
-  
+
   logger.info(`📡 [API] ${options.method || 'GET'} ${endpoint}`);
-  
+
   try {
     const response = await fetch(url, {
       ...options,
@@ -40,17 +39,17 @@ async function apiCall<T = any>(
 
     if (!response.ok) {
       logger.error(`❌ [API] Erreur ${response.status}:`, data);
-      
+
       if (response.status === 429) {
         notify('error.rate_limited', {
-          variables: { seconds: data.retryAfter || 60 }
+          variables: { seconds: data.retryAfter || 60 },
         });
       } else if (response.status >= 500) {
         notify('error.server_error');
       } else if (response.status >= 400) {
         notify('error.api_error');
       }
-      
+
       throw new Error(data.error || `HTTP ${response.status}`);
     }
 
@@ -58,13 +57,13 @@ async function apiCall<T = any>(
     return data;
   } catch (error: any) {
     logger.error(`❌ [API] Exception:`, error.message);
-    
+
     if (error.message.includes('fetch')) {
       notify('error.network_error');
     } else if (!error.message.includes('HTTP')) {
       notify('error.api_error');
     }
-    
+
     throw error;
   }
 }
@@ -73,7 +72,12 @@ async function apiCall<T = any>(
  * Health Check
  * GET /api/sms/health
  */
-export async function checkHealth(): Promise<{ ok: boolean; service: string; timestamp: string; twilioConfigured: boolean }> {
+export async function checkHealth(): Promise<{
+  ok: boolean;
+  service: string;
+  timestamp: string;
+  twilioConfigured: boolean;
+}> {
   return apiCall('/api/sms/health');
 }
 
@@ -81,7 +85,10 @@ export async function checkHealth(): Promise<{ ok: boolean; service: string; tim
  * Envoyer un SMS
  * POST /api/sms/send
  */
-export async function sendSMS(to: string, message: string): Promise<{ ok: boolean; sid?: string; error?: string }> {
+export async function sendSMS(
+  to: string,
+  message: string,
+): Promise<{ ok: boolean; sid?: string; error?: string }> {
   return apiCall('/api/sms/send', {
     method: 'POST',
     body: JSON.stringify({ to, message }),

@@ -44,17 +44,17 @@ export async function sendFriendlyAlertSMS(params: AlertSMSParams): Promise<stri
     // Construire le message friendly
     let message = `SafeWalk 🫶\n`;
     message += `${params.userName} n'a pas encore confirmé qu'il est bien rentré (limite ${params.limitTimeStr} + 15 min).\n`;
-    
+
     if (params.note) {
       message += `"${params.note}"\n`;
     }
-    
+
     if (params.location) {
       message += `📍 https://maps.google.com/?q=${params.location.latitude},${params.location.longitude}\n`;
     } else {
       message += `📍 Position indisponible\n`;
     }
-    
+
     message += `Tu peux lui passer un petit appel ?`;
 
     console.log(`📤 Envoi SMS friendly à ${params.phoneNumber}:`);
@@ -86,7 +86,7 @@ export async function sendFriendlyAlertSMSToMultiple(
   userName: string,
   limitTimeStr: string,
   note?: string,
-  location?: { latitude: number; longitude: number }
+  location?: { latitude: number; longitude: number },
 ): Promise<Array<{ phone: string; messageSid: string; status: string }>> {
   const results: Array<{ phone: string; messageSid: string; status: string }> = [];
 
@@ -138,7 +138,7 @@ export async function sendFollowUpAlertSMS(params: FollowUpSMSParams): Promise<s
     let message = `SafeWalk 🫶\n`;
     message += `Toujours pas de confirmation de ${params.userName}.\n`;
     message += `Si tu peux, réessaye de l'appeler 🙏\n`;
-    
+
     if (params.location) {
       message += `📍 https://maps.google.com/?q=${params.location.latitude},${params.location.longitude}`;
     } else {
@@ -154,7 +154,9 @@ export async function sendFollowUpAlertSMS(params: FollowUpSMSParams): Promise<s
       to: params.phoneNumber,
     });
 
-    console.log(`✅ SMS de relance envoyé avec succès à ${params.phoneNumber} (SID: ${result.sid})`);
+    console.log(
+      `✅ SMS de relance envoyé avec succès à ${params.phoneNumber} (SID: ${result.sid})`,
+    );
     return result.sid;
   } catch (error) {
     console.error(`❌ Erreur lors de l'envoi du SMS de relance à ${params.phoneNumber}:`, error);
@@ -186,10 +188,15 @@ export async function sendConfirmationSMS(params: ConfirmationSMSParams): Promis
       to: params.phoneNumber,
     });
 
-    console.log(`✅ SMS de confirmation envoyé avec succès à ${params.phoneNumber} (SID: ${result.sid})`);
+    console.log(
+      `✅ SMS de confirmation envoyé avec succès à ${params.phoneNumber} (SID: ${result.sid})`,
+    );
     return result.sid;
   } catch (error) {
-    console.error(`❌ Erreur lors de l'envoi du SMS de confirmation à ${params.phoneNumber}:`, error);
+    console.error(
+      `❌ Erreur lors de l'envoi du SMS de confirmation à ${params.phoneNumber}:`,
+      error,
+    );
     throw error;
   }
 }
@@ -200,7 +207,7 @@ export async function sendConfirmationSMS(params: ConfirmationSMSParams): Promis
 export async function sendFollowUpAlertSMSToMultiple(
   contacts: Array<{ name: string; phone: string }>,
   userName: string,
-  location?: { latitude: number; longitude: number }
+  location?: { latitude: number; longitude: number },
 ): Promise<Array<{ phone: string; messageSid: string; status: string }>> {
   const results: Array<{ phone: string; messageSid: string; status: string }> = [];
 
@@ -235,7 +242,7 @@ export async function sendFollowUpAlertSMSToMultiple(
  */
 export async function sendConfirmationSMSToMultiple(
   contacts: Array<{ name: string; phone: string }>,
-  userName: string
+  userName: string,
 ): Promise<Array<{ phone: string; messageSid: string; status: string }>> {
   const results: Array<{ phone: string; messageSid: string; status: string }> = [];
 

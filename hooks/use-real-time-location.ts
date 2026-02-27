@@ -77,10 +77,7 @@ export function useRealTimeLocation(options: UseRealTimeLocationOptions = {}) {
           (newLocation) => {
             if (isMounted) {
               // Vérifier la précision minimale
-              if (
-                !newLocation.coords.accuracy ||
-                newLocation.coords.accuracy <= minAccuracy
-              ) {
+              if (!newLocation.coords.accuracy || newLocation.coords.accuracy <= minAccuracy) {
                 setLocation({
                   latitude: newLocation.coords.latitude,
                   longitude: newLocation.coords.longitude,
@@ -89,7 +86,7 @@ export function useRealTimeLocation(options: UseRealTimeLocationOptions = {}) {
                 });
               }
             }
-          }
+          },
         );
 
         watchSubscriptionRef.current = subscription;

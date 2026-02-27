@@ -4,13 +4,16 @@
 // Input: { tripId, addMinutes }
 // Output: { success, message, tripId, newDeadline }
 
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
-import { checkRateLimit, logRequest, createRateLimitHttpResponse } from "../_shared/rate-limiter.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
+import {
+  checkRateLimit,
+  logRequest,
+  createRateLimitHttpResponse,
+} from '../_shared/rate-limiter.ts';
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
 interface ExtendRequest {
@@ -29,77 +32,77 @@ interface ExtendResponse {
 
 async function extend(req: Request): Promise<Response> {
   // Handle CORS
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders });
   }
 
   try {
     // Get authorization header
-    const authHeader = req.headers.get("Authorization");
+    const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
       return new Response(
         JSON.stringify({
           success: false,
-          error: "Missing authorization header",
-          errorCode: "UNAUTHORIZED",
+          error: 'Missing authorization header',
+          errorCode: 'UNAUTHORIZED',
         }),
         {
           status: 401,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        },
       );
     }
 
     // Create Supabase client
-    const supabaseUrl = Deno.env.get("SUPABASE_URL");
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
     if (!supabaseUrl || !supabaseServiceKey) {
       return new Response(
         JSON.stringify({
           success: false,
-          error: "Missing Supabase configuration",
-          errorCode: "CONFIG_ERROR",
+          error: 'Missing Supabase configuration',
+          errorCode: 'CONFIG_ERROR',
         }),
         {
           status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        },
       );
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Verify JWT and get user
-    const token = authHeader.replace("Bearer ", "");
+    const token = authHeader.replace('Bearer ', '');
     const { data, error: authError } = await supabase.auth.getUser(token);
 
     if (authError || !data.user) {
       return new Response(
         JSON.stringify({
           success: false,
-          error: "Invalid or expired token",
-          errorCode: "INVALID_TOKEN",
+          error: 'Invalid or expired token',
+          errorCode: 'INVALID_TOKEN',
         }),
         {
           status: 401,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        },
       );
     }
 
     const userId = data.user.id;
 
     // RATE LIMITING: Check if user has exceeded rate limit
-    const ipAddress = req.headers.get("x-forwarded-for") || "unknown";
-    const rateLimitResult = await checkRateLimit(supabase, userId, "extend", ipAddress);
+    const ipAddress = req.headers.get('x-forwarded-for') || 'unknown';
+    const rateLimitResult = await checkRateLimit(supabase, userId, 'extend', ipAddress);
 
     if (!rateLimitResult.isAllowed) {
-      await logRequest(supabase, userId, "extend", ipAddress);
+      await logRequest(supabase, userId, 'extend', ipAddress);
       return createRateLimitHttpResponse(rateLimitResult.resetAt);
     }
 
-    await logRequest(supabase, userId, "extend", ipAddress);
+    await logRequest(supabase, userId, 'extend', ipAddress);
 
     // Parse request body
     const body = (await req.json()) as ExtendRequest;
@@ -110,13 +113,13 @@ async function extend(req: Request): Promise<Response> {
       return new Response(
         JSON.stringify({
           success: false,
-          error: "Missing or invalid tripId or addMinutes",
-          errorCode: "INVALID_INPUT",
+          error: 'Missing or invalid tripId or addMinutes',
+          errorCode: 'INVALID_INPUT',
         }),
         {
           status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        },
       );
     }
 
@@ -125,50 +128,50 @@ async function extend(req: Request): Promise<Response> {
       return new Response(
         JSON.stringify({
           success: false,
-          error: "Cannot extend more than 24 hours",
-          errorCode: "EXTENSION_TOO_LONG",
+          error: 'Cannot extend more than 24 hours',
+          errorCode: 'EXTENSION_TOO_LONG',
         }),
         {
           status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        },
       );
     }
 
     // Get current trip
     const { data: tripData, error: tripError } = await supabase
-      .from("sessions")
-      .select("id, user_id, status, deadline")
-      .eq("id", tripId)
-      .eq("user_id", userId)
+      .from('sessions')
+      .select('id, user_id, status, deadline')
+      .eq('id', tripId)
+      .eq('user_id', userId)
       .single();
 
     if (tripError || !tripData) {
       return new Response(
         JSON.stringify({
           success: false,
-          error: "Trip not found or unauthorized",
-          errorCode: "NOT_FOUND",
+          error: 'Trip not found or unauthorized',
+          errorCode: 'NOT_FOUND',
         }),
         {
           status: 404,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        },
       );
     }
 
     // Check if trip is still active or alerted (can extend both)
-    if (tripData.status !== "active" && tripData.status !== "alerted") {
+    if (tripData.status !== 'active' && tripData.status !== 'alerted') {
       return new Response(
         JSON.stringify({
           success: false,
           error: `Trip is already ${tripData.status}`,
-          errorCode: "TRIP_NOT_ACTIVE",
+          errorCode: 'TRIP_NOT_ACTIVE',
         }),
         {
           status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        },
       );
     }
 
@@ -181,30 +184,30 @@ async function extend(req: Request): Promise<Response> {
       deadline: newDeadline.toISOString(),
     };
     // If trip was alerted, reset to active and clear alert_sent_at
-    if (tripData.status === "alerted") {
-      updatePayload.status = "active";
+    if (tripData.status === 'alerted') {
+      updatePayload.status = 'active';
       updatePayload.alert_sent_at = null;
     }
 
     const { data: updatedTrip, error: updateError } = await supabase
-      .from("sessions")
+      .from('sessions')
       .update(updatePayload)
-      .eq("id", tripId)
+      .eq('id', tripId)
       .select()
       .single();
 
     if (updateError || !updatedTrip) {
-      console.error("Extend update error:", updateError);
+      console.error('Extend update error:', updateError);
       return new Response(
         JSON.stringify({
           success: false,
-          error: "Failed to extend trip",
-          errorCode: "DB_ERROR",
+          error: 'Failed to extend trip',
+          errorCode: 'DB_ERROR',
         }),
         {
           status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        },
       );
     }
 
@@ -218,22 +221,22 @@ async function extend(req: Request): Promise<Response> {
 
     return new Response(JSON.stringify(response), {
       status: 200,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    console.error("Extend error:", errorMessage);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Extend error:', errorMessage);
 
     return new Response(
       JSON.stringify({
         success: false,
         error: errorMessage,
-        errorCode: "EXCEPTION",
+        errorCode: 'EXCEPTION',
       }),
       {
         status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      },
     );
   }
 }

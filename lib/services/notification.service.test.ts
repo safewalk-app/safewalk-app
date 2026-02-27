@@ -20,7 +20,7 @@ describe('NotificationService', () => {
       expect(Toast.show).toHaveBeenCalledWith(
         expect.objectContaining({
           type: 'success',
-        })
+        }),
       );
     });
 
@@ -34,7 +34,7 @@ describe('NotificationService', () => {
       expect(Toast.show).toHaveBeenCalledWith(
         expect.objectContaining({
           type: 'error',
-        })
+        }),
       );
     });
 
@@ -48,7 +48,7 @@ describe('NotificationService', () => {
       expect(Toast.show).toHaveBeenCalledWith(
         expect.objectContaining({
           type: 'warning',
-        })
+        }),
       );
     });
 
@@ -60,7 +60,7 @@ describe('NotificationService', () => {
       expect(Toast.show).toHaveBeenCalledWith(
         expect.objectContaining({
           text1: 'Notification',
-        })
+        }),
       );
     });
 
@@ -74,21 +74,25 @@ describe('NotificationService', () => {
       expect(Toast.show).toHaveBeenCalledWith(
         expect.objectContaining({
           text1: expect.stringContaining('60'),
-        })
+        }),
       );
     });
 
     it('should respect duration setting', () => {
       vi.mocked(Toast.show).mockImplementationOnce(() => {});
 
-      notificationService.notify('trip_started', {
-        duration: 60,
-      }, 5000);
+      notificationService.notify(
+        'trip_started',
+        {
+          duration: 60,
+        },
+        5000,
+      );
 
       expect(Toast.show).toHaveBeenCalledWith(
         expect.objectContaining({
           duration: 5000,
-        })
+        }),
       );
     });
   });
@@ -100,13 +104,13 @@ describe('NotificationService', () => {
       notificationService.notifyBlocked(
         'phone_not_configured',
         () => console.log('Navigate to settings'),
-        { phone: '+33612345678' }
+        { phone: '+33612345678' },
       );
 
       expect(Toast.show).toHaveBeenCalledWith(
         expect.objectContaining({
           type: 'error',
-        })
+        }),
       );
     });
   });

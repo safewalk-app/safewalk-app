@@ -1,6 +1,7 @@
 # SafeWalk V1 - Design System "Pop Bubble"
 
 ## Objectifs
+
 1. **UI pixel-perfect** : Copier exactement le style des maquettes (pop/bubble/Apple-friendly)
 2. **UX simple** : 2 taps pour démarrer, 1 tap pour terminer
 3. **Paramètres autosave** : Aucun bouton "Enregistrer", sauvegarde automatique + toast
@@ -9,20 +10,21 @@
 
 ## Design Tokens
 
-| Token | Valeur | Usage |
-|-------|--------|-------|
-| **Primary Purple** | #6C63FF | Boutons, accents, hero card |
-| **Primary Blue** | #3A86FF | Accents secondaires |
-| **Mint** | #2DE2A6 | Succès, confirmation |
-| **Danger** | #FF4D4D | Actions dangereuses |
-| **Text** | #0B1220 | Texte principal |
-| **Secondary** | #6B7280 | Texte secondaire |
-| **Background** | #F6F7FF | Fond avec bulles (opacity 0.04–0.08) |
-| **Card** | Blanc translucide (opacity 0.92–0.96) | Cards principales |
+| Token              | Valeur                                | Usage                                |
+| ------------------ | ------------------------------------- | ------------------------------------ |
+| **Primary Purple** | #6C63FF                               | Boutons, accents, hero card          |
+| **Primary Blue**   | #3A86FF                               | Accents secondaires                  |
+| **Mint**           | #2DE2A6                               | Succès, confirmation                 |
+| **Danger**         | #FF4D4D                               | Actions dangereuses                  |
+| **Text**           | #0B1220                               | Texte principal                      |
+| **Secondary**      | #6B7280                               | Texte secondaire                     |
+| **Background**     | #F6F7FF                               | Fond avec bulles (opacity 0.04–0.08) |
+| **Card**           | Blanc translucide (opacity 0.92–0.96) | Cards principales                    |
 
 ---
 
 ## Spacing (Compact)
+
 - Padding horizontal global : 16–18px
 - Header → Hero : 12–16px
 - Hero → Status : 12–16px
@@ -66,12 +68,14 @@
 ## Écrans V1 Obligatoires
 
 ### 1. Accueil (Home)
+
 - "SafeWalk" grand + sous-titre "Restez en sécurité, partout."
 - HeroCard violette avec rocket visible, "Je sors", description, bouton pill "Commencer"
 - StatusCard : ✅ "Sécurité active" / "Contact configuré" OU ⚠️ "Sécurité inactive" / "Configurer un contact"
 - Pas de grosse card "Paramètres" (le menu suffit)
 
 ### 2. Paramètres (Settings) - AUTOSAVE
+
 - Cards : prénom, contact (nom+tel) + microcopy
 - Tolérance segmented 10/15/30
 - Toggle localisation + microcopy
@@ -79,6 +83,7 @@
 - Aucun bouton enregistrer (autosave + toast)
 
 ### 3. Je sors (New Session)
+
 - Title "Je sors" + sous-titre
 - Card "Heure limite" avec valeur large (02:30) + tap ouvre time picker modal
 - Card "Où vas-tu ? (optionnel)"
@@ -87,6 +92,7 @@
 - CTA "Démarrer"
 
 ### 4. Sortie en cours (Active Session)
+
 - "Sortie en cours"
 - Card avec gros "02:30"
 - Bouton vert "Je suis rentré"
@@ -94,11 +100,13 @@
 - "Annuler ta sortie" (danger) + confirm modal
 
 ### 5. Alerte envoyée (Alert Sent)
+
 - "🚨 Alerte envoyée"
 - Recap + position si dispo
 - "Je vais bien" + appeler contact / 112
 
 ### 6. Historique (History)
+
 - Liste cards (date + statut ✅/🚨/⛔)
 
 ---
@@ -113,6 +121,7 @@
   - `/history` (depuis Home)
 
 **Règles** :
+
 - Si contact non configuré : Home CTA redirige vers Paramètres + toast "Configure un contact"
 - Une seule session active max
 

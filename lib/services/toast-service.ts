@@ -45,7 +45,7 @@ export function showSuccessToast(title: string, message?: string, duration = 300
     logger.warn('⚠️ Toast store not initialized');
     return;
   }
-  
+
   toastStore.showToast({
     type: 'success',
     title,
@@ -57,12 +57,16 @@ export function showSuccessToast(title: string, message?: string, duration = 300
 /**
  * Afficher un toast d'erreur
  */
-export function showErrorToast(title: string, message?: string, action?: { label: string; onPress: () => void }) {
+export function showErrorToast(
+  title: string,
+  message?: string,
+  action?: { label: string; onPress: () => void },
+) {
   if (!toastStore) {
     logger.warn('⚠️ Toast store not initialized');
     return;
   }
-  
+
   toastStore.showToast({
     type: 'error',
     title,
@@ -80,7 +84,7 @@ export function showWarningToast(title: string, message?: string, duration = 400
     logger.warn('⚠️ Toast store not initialized');
     return;
   }
-  
+
   toastStore.showToast({
     type: 'warning',
     title,
@@ -97,7 +101,7 @@ export function showInfoToast(title: string, message?: string, duration = 3000) 
     logger.warn('⚠️ Toast store not initialized');
     return;
   }
-  
+
   toastStore.showToast({
     type: 'info',
     title,
@@ -113,7 +117,7 @@ export function showNetworkErrorToast(retry?: () => void) {
   showErrorToast(
     '🌐 Erreur réseau',
     'Impossible de se connecter. Vérifiez votre connexion.',
-    retry ? { label: 'Réessayer', onPress: retry } : undefined
+    retry ? { label: 'Réessayer', onPress: retry } : undefined,
   );
 }
 
@@ -121,16 +125,17 @@ export function showNetworkErrorToast(retry?: () => void) {
  * Afficher un toast pour erreur serveur
  */
 export function showServerErrorToast(statusCode?: number, retry?: () => void) {
-  const message = statusCode === 401 
-    ? 'Authentification échouée. Veuillez vous reconnecter.'
-    : statusCode === 403
-    ? 'Accès refusé.'
-    : 'Erreur serveur. Veuillez réessayer.';
-  
+  const message =
+    statusCode === 401
+      ? 'Authentification échouée. Veuillez vous reconnecter.'
+      : statusCode === 403
+        ? 'Accès refusé.'
+        : 'Erreur serveur. Veuillez réessayer.';
+
   showErrorToast(
     '⚠️ Erreur serveur',
     message,
-    retry ? { label: 'Réessayer', onPress: retry } : undefined
+    retry ? { label: 'Réessayer', onPress: retry } : undefined,
   );
 }
 
@@ -141,14 +146,14 @@ export function showOtpExpiredToast(onResend?: () => void) {
   showWarningToast(
     '⏰ Code OTP expiré',
     'Votre code OTP a expiré. Demandez un nouveau code.',
-    5000
+    5000,
   );
-  
+
   if (onResend) {
     showInfoToast(
       '📨 Renvoyer le code',
       'Appuyez sur "Renvoyer" pour recevoir un nouveau code OTP.',
-      0 // Manuel
+      0, // Manuel
     );
   }
 }
@@ -160,7 +165,7 @@ export function showOtpTooManyAttemptsToast(waitMinutes: number) {
   showErrorToast(
     '🔒 Trop de tentatives',
     `Attendez ${waitMinutes} minutes avant de réessayer.`,
-    0 // Manuel
+    0, // Manuel
   );
 }
 
@@ -170,8 +175,8 @@ export function showOtpTooManyAttemptsToast(waitMinutes: number) {
 export function showSmsSendErrorToast(retry?: () => void) {
   showErrorToast(
     '📱 SMS non envoyé',
-    'Impossible d\'envoyer le SMS. Vérifiez votre connexion.',
-    retry ? { label: 'Réessayer', onPress: retry } : undefined
+    "Impossible d'envoyer le SMS. Vérifiez votre connexion.",
+    retry ? { label: 'Réessayer', onPress: retry } : undefined,
   );
 }
 
@@ -179,11 +184,7 @@ export function showSmsSendErrorToast(retry?: () => void) {
  * Afficher un toast pour SMS envoyé avec succès
  */
 export function showSmsSentToast() {
-  showSuccessToast(
-    '✅ SMS envoyé',
-    'Votre SMS a été envoyé avec succès.',
-    3000
-  );
+  showSuccessToast('✅ SMS envoyé', 'Votre SMS a été envoyé avec succès.', 3000);
 }
 
 /**
@@ -193,7 +194,7 @@ export function showSessionExpiredToast() {
   showWarningToast(
     '⏰ Session expirée',
     'Votre session de vérification OTP a expiré. Veuillez vous reconnecter.',
-    0 // Manuel
+    0, // Manuel
   );
 }
 
@@ -203,8 +204,8 @@ export function showSessionExpiredToast() {
 export function showLocationUnavailableToast() {
   showWarningToast(
     '📍 Localisation non disponible',
-    'Impossible d\'accéder à votre localisation. Vérifiez les permissions.',
-    4000
+    "Impossible d'accéder à votre localisation. Vérifiez les permissions.",
+    4000,
   );
 }
 
@@ -215,19 +216,24 @@ export function showPermissionDeniedToast(permission: string) {
   showErrorToast(
     '🔒 Permission refusée',
     `Vous devez autoriser l'accès à ${permission} pour continuer.`,
-    0 // Manuel
+    0, // Manuel
   );
 }
 
 /**
  * Afficher un toast générique
  */
-export function showGenericToast(type: ToastType, title: string, message?: string, duration?: number) {
+export function showGenericToast(
+  type: ToastType,
+  title: string,
+  message?: string,
+  duration?: number,
+) {
   if (!toastStore) {
     logger.warn('⚠️ Toast store not initialized');
     return;
   }
-  
+
   toastStore.showToast({
     type,
     title,

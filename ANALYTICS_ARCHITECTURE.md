@@ -3,6 +3,7 @@
 ## Vue d'ensemble
 
 Analytics track les événements utilisateur pour comprendre:
+
 - **Engagement** - Combien d'utilisateurs créent des sorties?
 - **Retention** - Combien reviennent chaque jour?
 - **Safety features** - Combien utilisent SOS? Combien checkin?
@@ -74,26 +75,26 @@ Analytics track les événements utilisateur pour comprendre:
 
 ### Événements Critiques
 
-| Événement | Données | Fréquence | Importance |
-|-----------|---------|-----------|-----------|
-| `app_opened` | user_id, device, app_version | À chaque ouverture | 🔴 CRITIQUE |
-| `session_created` | user_id, duration, contact_id | Chaque sortie | 🔴 CRITIQUE |
-| `sos_triggered` | user_id, session_id, reason | À chaque SOS | 🔴 CRITIQUE |
-| `session_checked_in` | user_id, session_id, delay | Chaque checkin | 🔴 CRITIQUE |
-| `session_extended` | user_id, session_id, new_duration | Chaque extension | 🟡 IMPORTANT |
-| `contact_configured` | user_id, contact_id, phone_number | Chaque config | 🟡 IMPORTANT |
-| `error_occurred` | user_id, error_code, error_message | Chaque erreur | 🟡 IMPORTANT |
-| `test_sms_sent` | user_id, contact_id, success | Chaque test | 🟢 OPTIONNEL |
-| `otp_verified` | user_id, phone_number | Chaque vérification | 🟡 IMPORTANT |
+| Événement            | Données                            | Fréquence           | Importance   |
+| -------------------- | ---------------------------------- | ------------------- | ------------ |
+| `app_opened`         | user_id, device, app_version       | À chaque ouverture  | 🔴 CRITIQUE  |
+| `session_created`    | user_id, duration, contact_id      | Chaque sortie       | 🔴 CRITIQUE  |
+| `sos_triggered`      | user_id, session_id, reason        | À chaque SOS        | 🔴 CRITIQUE  |
+| `session_checked_in` | user_id, session_id, delay         | Chaque checkin      | 🔴 CRITIQUE  |
+| `session_extended`   | user_id, session_id, new_duration  | Chaque extension    | 🟡 IMPORTANT |
+| `contact_configured` | user_id, contact_id, phone_number  | Chaque config       | 🟡 IMPORTANT |
+| `error_occurred`     | user_id, error_code, error_message | Chaque erreur       | 🟡 IMPORTANT |
+| `test_sms_sent`      | user_id, contact_id, success       | Chaque test         | 🟢 OPTIONNEL |
+| `otp_verified`       | user_id, phone_number              | Chaque vérification | 🟡 IMPORTANT |
 
 ### Schéma d'événement
 
 ```typescript
 interface AnalyticsEvent {
-  event_name: string;           // app_opened, session_created, etc.
-  user_id: string;              // UUID
-  session_id?: string;          // UUID (si applicable)
-  contact_id?: string;          // UUID (si applicable)
+  event_name: string; // app_opened, session_created, etc.
+  user_id: string; // UUID
+  session_id?: string; // UUID (si applicable)
+  contact_id?: string; // UUID (si applicable)
   properties: Record<string, any>; // Données supplémentaires
   device_info: {
     platform: 'ios' | 'android' | 'web';
@@ -101,8 +102,8 @@ interface AnalyticsEvent {
     os_version: string;
     device_model: string;
   };
-  timestamp: string;            // ISO 8601
-  created_at: string;           // Timestamp serveur
+  timestamp: string; // ISO 8601
+  created_at: string; // Timestamp serveur
 }
 ```
 
@@ -209,22 +210,22 @@ AS $$
 BEGIN
   RETURN QUERY
   WITH daily_stats AS (
-    SELECT 
+    SELECT
       DATE(ae.created_at) as date,
       COUNT(DISTINCT ae.user_id) as total_users,
-      COUNT(DISTINCT CASE 
+      COUNT(DISTINCT CASE
         WHEN NOT EXISTS (
-          SELECT 1 FROM analytics_events ae2 
-          WHERE ae2.user_id = ae.user_id 
+          SELECT 1 FROM analytics_events ae2
+          WHERE ae2.user_id = ae.user_id
           AND DATE(ae2.created_at) < DATE(ae.created_at)
-        ) THEN ae.user_id 
+        ) THEN ae.user_id
       END) as new_users,
-      COUNT(DISTINCT CASE 
+      COUNT(DISTINCT CASE
         WHEN EXISTS (
-          SELECT 1 FROM analytics_events ae2 
-          WHERE ae2.user_id = ae.user_id 
+          SELECT 1 FROM analytics_events ae2
+          WHERE ae2.user_id = ae.user_id
           AND DATE(ae2.created_at) < DATE(ae.created_at)
-        ) THEN ae.user_id 
+        ) THEN ae.user_id
       END) as returning_users,
       COUNT(DISTINCT CASE WHEN ae.event_name = 'session_created' THEN ae.session_id END) as active_sessions,
       COUNT(DISTINCT CASE WHEN ae.event_name = 'sos_triggered' THEN ae.session_id END) as sos_triggered,
@@ -234,12 +235,12 @@ BEGIN
     GROUP BY DATE(ae.created_at)
   ),
   with_trend AS (
-    SELECT 
+    SELECT
       *,
       LAG(total_users) OVER (ORDER BY date) as prev_total_users
     FROM daily_stats
   )
-  SELECT 
+  SELECT
     date,
     total_users,
     new_users,
@@ -247,7 +248,7 @@ BEGIN
     active_sessions,
     sos_triggered,
     sessions_completed,
-    CASE 
+    CASE
       WHEN prev_total_users IS NULL THEN 'new'
       WHEN total_users > prev_total_users THEN 'up'
       WHEN total_users < prev_total_users THEN 'down'
@@ -274,28 +275,28 @@ AS $$
 BEGIN
   RETURN QUERY
   WITH funnel_steps AS (
-    SELECT 
+    SELECT
       'app_opened' as step,
       COUNT(DISTINCT CASE WHEN event_name = 'app_opened' THEN user_id END) as count,
       1 as step_order
     FROM analytics_events
     WHERE created_at > NOW() - (p_days || ' days')::INTERVAL
     UNION ALL
-    SELECT 
+    SELECT
       'session_created' as step,
       COUNT(DISTINCT CASE WHEN event_name = 'session_created' THEN user_id END) as count,
       2 as step_order
     FROM analytics_events
     WHERE created_at > NOW() - (p_days || ' days')::INTERVAL
     UNION ALL
-    SELECT 
+    SELECT
       'sos_triggered' as step,
       COUNT(DISTINCT CASE WHEN event_name = 'sos_triggered' THEN session_id END) as count,
       3 as step_order
     FROM analytics_events
     WHERE created_at > NOW() - (p_days || ' days')::INTERVAL
     UNION ALL
-    SELECT 
+    SELECT
       'session_checked_in' as step,
       COUNT(DISTINCT CASE WHEN event_name = 'session_checked_in' THEN session_id END) as count,
       4 as step_order
@@ -303,7 +304,7 @@ BEGIN
     WHERE created_at > NOW() - (p_days || ' days')::INTERVAL
   ),
   with_conversion AS (
-    SELECT 
+    SELECT
       step,
       count,
       ROUND(100.0 * count / (SELECT count FROM funnel_steps WHERE step_order = 1), 2) as conversion_rate,
@@ -329,7 +330,7 @@ LANGUAGE plpgsql
 AS $$
 BEGIN
   RETURN QUERY
-  SELECT 
+  SELECT
     auc.cohort_week,
     auc.users_count,
     auc.active_users,
@@ -357,7 +358,7 @@ AS $$
 BEGIN
   RETURN QUERY
   WITH error_events AS (
-    SELECT 
+    SELECT
       ae.properties->>'error_code' as error_code,
       ae.user_id,
       COUNT(*) as count
@@ -367,7 +368,7 @@ BEGIN
     GROUP BY ae.properties->>'error_code', ae.user_id
   ),
   error_stats AS (
-    SELECT 
+    SELECT
       error_code,
       SUM(count) as total_count,
       COUNT(DISTINCT user_id) as affected_users
@@ -375,14 +376,14 @@ BEGIN
     GROUP BY error_code
   ),
   with_percentage AS (
-    SELECT 
+    SELECT
       error_code,
       total_count as count,
       ROUND(100.0 * total_count / (SELECT SUM(total_count) FROM error_stats), 2) as percentage,
       affected_users
     FROM error_stats
   )
-  SELECT 
+  SELECT
     error_code,
     count,
     percentage,
@@ -401,7 +402,7 @@ $$;
 ```typescript
 // supabase/functions/track-event/index.ts
 
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
 
 interface TrackEventRequest {
   event_name: string;
@@ -411,61 +412,64 @@ interface TrackEventRequest {
 }
 
 async function trackEvent(req: Request) {
-  if (req.method !== "POST") {
-    return new Response("Method not allowed", { status: 405 });
+  if (req.method !== 'POST') {
+    return new Response('Method not allowed', { status: 405 });
   }
 
   const supabase = createClient(
-    Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    Deno.env.get('SUPABASE_URL')!,
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
   );
 
-  const { event_name, session_id, contact_id, properties } = await req.json() as TrackEventRequest;
+  const { event_name, session_id, contact_id, properties } =
+    (await req.json()) as TrackEventRequest;
 
   // Récupérer l'utilisateur depuis le JWT
-  const authHeader = req.headers.get("Authorization");
+  const authHeader = req.headers.get('Authorization');
   if (!authHeader) {
-    return new Response("Unauthorized", { status: 401 });
+    return new Response('Unauthorized', { status: 401 });
   }
 
-  const token = authHeader.replace("Bearer ", "");
-  const { data: { user } } = await supabase.auth.getUser(token);
+  const token = authHeader.replace('Bearer ', '');
+  const {
+    data: { user },
+  } = await supabase.auth.getUser(token);
 
   if (!user) {
-    return new Response("Unauthorized", { status: 401 });
+    return new Response('Unauthorized', { status: 401 });
   }
 
   // Valider l'événement
   const validEvents = [
-    "app_opened",
-    "session_created",
-    "sos_triggered",
-    "session_checked_in",
-    "session_extended",
-    "contact_configured",
-    "error_occurred",
-    "test_sms_sent",
-    "otp_verified",
+    'app_opened',
+    'session_created',
+    'sos_triggered',
+    'session_checked_in',
+    'session_extended',
+    'contact_configured',
+    'error_occurred',
+    'test_sms_sent',
+    'otp_verified',
   ];
 
   if (!validEvents.includes(event_name)) {
-    return new Response(
-      JSON.stringify({ error: "Invalid event name" }),
-      { status: 400, headers: { "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({ error: 'Invalid event name' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 
   // Extraire les infos du device depuis le header User-Agent
-  const userAgent = req.headers.get("User-Agent") || "";
+  const userAgent = req.headers.get('User-Agent') || '';
   const deviceInfo = {
-    platform: userAgent.includes("iOS") ? "ios" : userAgent.includes("Android") ? "android" : "web",
-    app_version: properties?.app_version || "unknown",
-    os_version: properties?.os_version || "unknown",
-    device_model: properties?.device_model || "unknown",
+    platform: userAgent.includes('iOS') ? 'ios' : userAgent.includes('Android') ? 'android' : 'web',
+    app_version: properties?.app_version || 'unknown',
+    os_version: properties?.os_version || 'unknown',
+    device_model: properties?.device_model || 'unknown',
   };
 
   // Insérer l'événement
-  const { error } = await supabase.from("analytics_events").insert({
+  const { error } = await supabase.from('analytics_events').insert({
     event_name,
     user_id: user.id,
     session_id,
@@ -477,16 +481,16 @@ async function trackEvent(req: Request) {
   });
 
   if (error) {
-    console.error("Error tracking event:", error);
-    return new Response(
-      JSON.stringify({ error: "Failed to track event" }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
-    );
+    console.error('Error tracking event:', error);
+    return new Response(JSON.stringify({ error: 'Failed to track event' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 
   return new Response(JSON.stringify({ success: true }), {
     status: 200,
-    headers: { "Content-Type": "application/json" },
+    headers: { 'Content-Type': 'application/json' },
   });
 }
 
@@ -502,7 +506,7 @@ Deno.serve(trackEvent);
 ```typescript
 // lib/services/analytics.ts
 
-import { supabase } from "@/lib/supabase";
+import { supabase } from '@/lib/supabase';
 
 export interface AnalyticsEvent {
   event_name: string;
@@ -514,36 +518,38 @@ export interface AnalyticsEvent {
 class AnalyticsService {
   async trackEvent(event: AnalyticsEvent): Promise<void> {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       if (!session) return;
 
       const response = await fetch(
         `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/track-event`,
         {
-          method: "POST",
+          method: 'POST',
           headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
             Authorization: `Bearer ${session.access_token}`,
           },
           body: JSON.stringify(event),
-        }
+        },
       );
 
       if (!response.ok) {
-        console.error("Failed to track event:", response.statusText);
+        console.error('Failed to track event:', response.statusText);
       }
     } catch (error) {
-      console.error("Error tracking event:", error);
+      console.error('Error tracking event:', error);
     }
   }
 
   async trackAppOpened(): Promise<void> {
-    await this.trackEvent({ event_name: "app_opened" });
+    await this.trackEvent({ event_name: 'app_opened' });
   }
 
   async trackSessionCreated(session_id: string, duration: number): Promise<void> {
     await this.trackEvent({
-      event_name: "session_created",
+      event_name: 'session_created',
       session_id,
       properties: { duration },
     });
@@ -551,14 +557,14 @@ class AnalyticsService {
 
   async trackSosTriggered(session_id: string): Promise<void> {
     await this.trackEvent({
-      event_name: "sos_triggered",
+      event_name: 'sos_triggered',
       session_id,
     });
   }
 
   async trackSessionCheckedIn(session_id: string, delay: number): Promise<void> {
     await this.trackEvent({
-      event_name: "session_checked_in",
+      event_name: 'session_checked_in',
       session_id,
       properties: { delay },
     });
@@ -566,7 +572,7 @@ class AnalyticsService {
 
   async trackError(error_code: string, error_message: string): Promise<void> {
     await this.trackEvent({
-      event_name: "error_occurred",
+      event_name: 'error_occurred',
       properties: { error_code, error_message },
     });
   }
@@ -587,10 +593,10 @@ export default function NewSessionScreen() {
     try {
       // Créer la sortie
       const session = await tripService.startTrip(contactId, duration);
-      
+
       // Tracker l'événement
       await analyticsService.trackSessionCreated(session.id, duration);
-      
+
       // Naviguer vers la sortie active
       router.push(`/active-session/${session.id}`);
     } catch (error) {
@@ -663,6 +669,7 @@ export default function NewSessionScreen() {
 ## 7. Implémentation Étape par Étape
 
 ### Phase 1: Tables et RPC (3 jours)
+
 - [ ] Créer table `analytics_events`
 - [ ] Créer table `analytics_daily_active_users`
 - [ ] Créer table `analytics_session_funnel`
@@ -673,11 +680,13 @@ export default function NewSessionScreen() {
 - [ ] Créer RPC `get_error_analytics()`
 
 ### Phase 2: Edge Function (2 jours)
+
 - [ ] Créer `track-event` Edge Function
 - [ ] Tester le tracking avec des événements de test
 - [ ] Vérifier que les événements sont insérés correctement
 
 ### Phase 3: Intégration App (3 jours)
+
 - [ ] Créer `analytics.ts` service
 - [ ] Intégrer le tracking dans `new-session.tsx`
 - [ ] Intégrer le tracking dans `active-session.tsx`
@@ -685,6 +694,7 @@ export default function NewSessionScreen() {
 - [ ] Tester le tracking end-to-end
 
 ### Phase 4: Dashboard (5 jours)
+
 - [ ] Créer page React pour le dashboard
 - [ ] Afficher DAU/MAU/Retention
 - [ ] Afficher le funnel
@@ -697,18 +707,19 @@ export default function NewSessionScreen() {
 
 ## 8. Coûts Estimés
 
-| Service | Coût | Notes |
-|---------|------|-------|
-| Supabase (DB + RPC) | Inclus | Déjà utilisé |
-| Storage (analytics_events) | ~$0.10/GB | ~1GB/mois = $0.10 |
-| Dashboard hosting | Gratuit | Sur Vercel/Netlify |
-| **Total** | **~$0.10/mois** | Minimal |
+| Service                    | Coût            | Notes              |
+| -------------------------- | --------------- | ------------------ |
+| Supabase (DB + RPC)        | Inclus          | Déjà utilisé       |
+| Storage (analytics_events) | ~$0.10/GB       | ~1GB/mois = $0.10  |
+| Dashboard hosting          | Gratuit         | Sur Vercel/Netlify |
+| **Total**                  | **~$0.10/mois** | Minimal            |
 
 ---
 
 ## 9. Bonnes Pratiques
 
 ### ✅ À faire
+
 - Tracker les événements importants seulement
 - Utiliser des noms d'événement cohérents
 - Inclure les IDs pertinents (user_id, session_id)
@@ -716,6 +727,7 @@ export default function NewSessionScreen() {
 - Nettoyer les données anciennes (> 1 an)
 
 ### ❌ À ne pas faire
+
 - Tracker trop d'événements (spam)
 - Envoyer les événements de manière synchrone
 - Stocker des données sensibles (mots de passe, tokens)

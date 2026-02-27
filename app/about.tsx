@@ -1,4 +1,4 @@
-import { logger } from "@/lib/utils/logger";
+import { logger } from '@/lib/utils/logger';
 import { ScrollView, Text, View, TouchableOpacity, Linking, Platform, Alert } from 'react-native';
 import { router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
@@ -40,19 +40,18 @@ export default function AboutScreen() {
     Alert.alert(
       'Contact Support',
       'Pour nous contacter, envoyez un email à votre adresse de support.',
-      [{ text: 'OK' }]
+      [{ text: 'OK' }],
     );
   };
 
   return (
     <ScreenContainer className="bg-background">
       {/* Header avec bouton retour */}
-      <View className="flex-row items-center px-6 py-4 border-b" style={{ borderBottomColor: colors.border }}>
-        <TouchableOpacity
-          onPress={() => router.back()}
-          className="mr-4"
-          activeOpacity={0.6}
-        >
+      <View
+        className="flex-row items-center px-6 py-4 border-b"
+        style={{ borderBottomColor: colors.border }}
+      >
+        <TouchableOpacity onPress={() => router.back()} className="mr-4" activeOpacity={0.6}>
           <IconSymbol name="chevron.left" size={24} color={colors.foreground} />
         </TouchableOpacity>
         <Text className="text-2xl font-bold text-foreground">À propos</Text>
@@ -78,17 +77,19 @@ export default function AboutScreen() {
 
           {/* Privacy Policy */}
           <TouchableOpacity
-            onPress={() => Alert.alert('Privacy Policy', 'Voir le fichier PRIVACY_POLICY.md dans le projet.')}
+            onPress={() =>
+              Alert.alert('Privacy Policy', 'Voir le fichier PRIVACY_POLICY.md dans le projet.')
+            }
             className="flex-row items-center justify-between py-4 border-b"
             style={{ borderBottomColor: colors.border }}
           >
             <View className="flex-row items-center flex-1">
               <Text className="text-2xl mr-3">🔒</Text>
               <View className="flex-1">
-                <Text className="text-base font-medium text-foreground">Politique de Confidentialité</Text>
-                <Text className="text-sm text-muted mt-1">
-                  Comment nous protégeons vos données
+                <Text className="text-base font-medium text-foreground">
+                  Politique de Confidentialité
                 </Text>
+                <Text className="text-sm text-muted mt-1">Comment nous protégeons vos données</Text>
               </View>
             </View>
             <IconSymbol name="chevron.right" size={20} color={colors.muted} />
@@ -96,17 +97,19 @@ export default function AboutScreen() {
 
           {/* Terms of Service */}
           <TouchableOpacity
-            onPress={() => Alert.alert('Terms of Service', 'Voir le fichier TERMS_OF_SERVICE.md dans le projet.')}
+            onPress={() =>
+              Alert.alert('Terms of Service', 'Voir le fichier TERMS_OF_SERVICE.md dans le projet.')
+            }
             className="flex-row items-center justify-between py-4 border-b"
             style={{ borderBottomColor: colors.border }}
           >
             <View className="flex-row items-center flex-1">
               <Text className="text-2xl mr-3">📄</Text>
               <View className="flex-1">
-                <Text className="text-base font-medium text-foreground">Conditions d'Utilisation</Text>
-                <Text className="text-sm text-muted mt-1">
-                  Règles et responsabilités
+                <Text className="text-base font-medium text-foreground">
+                  Conditions d'Utilisation
                 </Text>
+                <Text className="text-sm text-muted mt-1">Règles et responsabilités</Text>
               </View>
             </View>
             <IconSymbol name="chevron.right" size={20} color={colors.muted} />
@@ -156,8 +159,9 @@ export default function AboutScreen() {
 
           <View className="rounded-2xl p-4" style={{ backgroundColor: colors.surface }}>
             <Text className="text-sm text-muted leading-relaxed">
-              <Text className="font-semibold text-foreground">SafeWalk</Text> est une application de sécurité
-              personnelle qui vous permet de partager votre position avec vos contacts d'urgence en cas de besoin.
+              <Text className="font-semibold text-foreground">SafeWalk</Text> est une application de
+              sécurité personnelle qui vous permet de partager votre position avec vos contacts
+              d'urgence en cas de besoin.
             </Text>
             <Text className="text-sm text-muted leading-relaxed mt-3">
               🔒 Toutes vos données restent sur votre téléphone{'\n'}
@@ -174,8 +178,8 @@ export default function AboutScreen() {
               ⚠️ Important
             </Text>
             <Text className="text-sm mt-2" style={{ color: '#856404' }}>
-              SafeWalk n'est pas un service d'urgence officiel. En cas d'urgence réelle, appelez immédiatement les
-              services d'urgence (112 en Europe, 911 en Amérique du Nord).
+              SafeWalk n'est pas un service d'urgence officiel. En cas d'urgence réelle, appelez
+              immédiatement les services d'urgence (112 en Europe, 911 en Amérique du Nord).
             </Text>
           </View>
         </View>

@@ -41,7 +41,7 @@ export async function initializePushNotifications() {
     await Notifications.setNotificationHandler({
       handleNotification: async (notification) => {
         logger.debug('📬 Notification reçue:', notification);
-        
+
         // Afficher la notification même quand l'app est au premier plan
         return {
           shouldShowAlert: true,
@@ -86,7 +86,7 @@ export async function initializePushNotifications() {
 
     logger.info('✅ Notifications push initialisées');
   } catch (error) {
-    logger.error('❌ Erreur lors de l\'initialisation des notifications:', error);
+    logger.error("❌ Erreur lors de l'initialisation des notifications:", error);
   }
 }
 
@@ -135,7 +135,7 @@ export async function getPushNotificationToken(): Promise<PushNotificationToken 
       device: Device.modelName || 'unknown',
     };
   } catch (error) {
-    logger.error('❌ Erreur lors de l\'obtention du token push:', error);
+    logger.error("❌ Erreur lors de l'obtention du token push:", error);
     return null;
   }
 }
@@ -161,7 +161,7 @@ export async function sendLocalNotification(payload: PushNotificationPayload) {
 
     logger.info('✅ Notification locale envoyée');
   } catch (error) {
-    logger.error('❌ Erreur lors de l\'envoi de la notification locale:', error);
+    logger.error("❌ Erreur lors de l'envoi de la notification locale:", error);
   }
 }
 
@@ -169,7 +169,7 @@ export async function sendLocalNotification(payload: PushNotificationPayload) {
  * Listener pour les notifications reçues
  */
 export function onNotificationReceived(
-  callback: (notification: Notifications.Notification) => void
+  callback: (notification: Notifications.Notification) => void,
 ) {
   const subscription = Notifications.addNotificationReceivedListener(callback);
   return subscription;
@@ -179,7 +179,7 @@ export function onNotificationReceived(
  * Listener pour les réponses aux notifications (tap sur notification)
  */
 export function onNotificationResponse(
-  callback: (response: Notifications.NotificationResponse) => void
+  callback: (response: Notifications.NotificationResponse) => void,
 ) {
   const subscription = Notifications.addNotificationResponseReceivedListener(callback);
   return subscription;
@@ -229,7 +229,7 @@ export enum SOSNotificationType {
 export function createSOSNotification(
   type: SOSNotificationType,
   userName: string,
-  additionalInfo?: string
+  additionalInfo?: string,
 ): PushNotificationPayload {
   const baseNotification = {
     data: {

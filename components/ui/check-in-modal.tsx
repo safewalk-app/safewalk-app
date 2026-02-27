@@ -9,24 +9,11 @@ interface CheckInModalProps {
   onClose: () => void;
 }
 
-export function CheckInModal({
-  visible,
-  onConfirmCheckIn,
-  onAddTime,
-  onClose,
-}: CheckInModalProps) {
+export function CheckInModal({ visible, onConfirmCheckIn, onAddTime, onClose }: CheckInModalProps) {
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={onClose}
-    >
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       {/* Overlay */}
-      <Pressable
-        className="flex-1 bg-black/50"
-        onPress={onClose}
-      />
+      <Pressable className="flex-1 bg-black/50" onPress={onClose} />
 
       {/* Bottom Sheet */}
       <View className="bg-background rounded-t-3xl p-6 gap-4">
@@ -34,9 +21,7 @@ export function CheckInModal({
         <View className="gap-2 mb-2">
           <View className="flex-row items-center gap-2">
             <MaterialIcons name="check-circle" size={24} color="#2DE2A6" />
-            <Text className="text-2xl font-bold text-foreground">
-              Tout va bien ?
-            </Text>
+            <Text className="text-2xl font-bold text-foreground">Tout va bien ?</Text>
           </View>
           <Text className="text-base text-muted">
             Confirme que tu vas bien ou ajoute 15 minutes
@@ -54,23 +39,13 @@ export function CheckInModal({
           />
 
           {/* Add Time Button */}
-          <CushionPillButton
-            label="+ 15 min"
-            onPress={onAddTime}
-            variant="secondary"
-            size="lg"
-          />
+          <CushionPillButton label="+ 15 min" onPress={onAddTime} variant="secondary" size="lg" />
 
           {/* Close Button */}
           <Pressable onPress={onClose}>
             {({ pressed }) => (
-              <View
-                className="py-3 items-center"
-                style={{ opacity: pressed ? 0.6 : 1 }}
-              >
-                <Text className="text-base font-semibold text-muted">
-                  Fermer
-                </Text>
+              <View className="py-3 items-center" style={{ opacity: pressed ? 0.6 : 1 }}>
+                <Text className="text-base font-semibold text-muted">Fermer</Text>
               </View>
             )}
           </Pressable>

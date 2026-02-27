@@ -12,6 +12,7 @@
 **Problème P0:** Utilisateur ne sait pas pourquoi le bouton "Démarrer" est grisé
 
 **Solution Implémentée:**
+
 - Ajout de la fonction `getBlockingReason()` qui retourne:
   - Raison du blocage (ex: "Contact d'urgence manquant")
   - Message explicatif (ex: "Ajoute un contact d'urgence pour démarrer une sortie.")
@@ -19,12 +20,13 @@
   - Callback pour naviguer vers la correction
 
 **Code:**
+
 ```typescript
 const getBlockingReason = () => {
   if (!settings.emergencyContactName || !settings.emergencyContactPhone) {
     return {
-      reason: 'Contact d\'urgence manquant',
-      message: 'Ajoute un contact d\'urgence pour démarrer une sortie.',
+      reason: "Contact d'urgence manquant",
+      message: "Ajoute un contact d'urgence pour démarrer une sortie.",
       action: 'Aller aux Paramètres',
       onAction: () => router.push('/settings'),
     };
@@ -42,12 +44,14 @@ const getBlockingReason = () => {
 **Problème P0:** Risque d'appui accidentel sur SOS
 
 **Solution Implémentée:** ✅ DÉJÀ PRÉSENT
+
 - `LongPressGestureHandler` avec `minDurationMs={2000}` (appui long 2 secondes)
 - Haptic feedback lourd (`Haptics.ImpactFeedbackStyle.Heavy`)
 - Confirmation modale avant envoi
 - Gestion des erreurs avec messages clairs
 
 **Code Existant:**
+
 ```typescript
 <LongPressGestureHandler
   onHandlerStateChange={async (event) => {
@@ -72,6 +76,7 @@ const getBlockingReason = () => {
 **Problème P0:** Utilisateur ne sait pas si son numéro est valide
 
 **Solution Implémentée:**
+
 - Amélioration de `validatePhoneNumber()` avec feedback détaillé
 - Détection du nombre de chiffres manquants/excédentaires
 - Messages d'erreur spécifiques pour chaque cas
@@ -81,36 +86,38 @@ const getBlockingReason = () => {
   - `validateE164Strict()` - Validation stricte avec message
 
 **Code:**
+
 ```typescript
 export function validatePhoneNumber(input: string): PhoneValidationResult {
   // ... validation
   if (!isValidFrenchPhone(trimmed)) {
-    let feedback = "Format invalide. ";
-    
+    let feedback = 'Format invalide. ';
+
     if (digits.length === 0) {
-      feedback += "Entrez au moins 9 chiffres.";
+      feedback += 'Entrez au moins 9 chiffres.';
     } else if (digits.length < 9) {
-      feedback += (9 - digits.length) + " chiffre(s) manquant(s).";
+      feedback += 9 - digits.length + ' chiffre(s) manquant(s).';
     } else if (digits.length > 9) {
-      feedback += "Trop de chiffres (maximum 9).";
+      feedback += 'Trop de chiffres (maximum 9).';
     }
-    
+
     return {
       isValid: false,
       feedback: feedback,
       isE164Valid: false,
     };
   }
-  
+
   return {
     isValid: true,
-    feedback: "Numéro valide: " + formatForDisplay(formatted),
+    feedback: 'Numéro valide: ' + formatForDisplay(formatted),
     isE164Valid: true,
   };
 }
 ```
 
 **Intégration dans settings.tsx:**
+
 ```typescript
 const handlePhoneChange = (text: string) => {
   setContactPhone(text);
@@ -136,19 +143,20 @@ const handlePhoneChange = (text: string) => {
 **Problème P1:** Messages d'erreur trop techniques ou incohérents
 
 **Solution Implémentée:**
+
 - Amélioration des messages d'erreur dans new-session.tsx
 - Messages clairs et orientés action
 - Liens directs vers les corrections
 
 **Exemples de Messages Unifiés:**
 
-| Erreur | Message Actuel | Message Unifié |
-|--------|---|---|
-| Pas de contact | "Configure un contact d'urgence d'abord" | "Ajoute un contact d'urgence pour démarrer une sortie." |
-| Pas de vérification | (Modal OTP) | "Vérifie ton numéro pour activer les alertes SMS." |
-| Pas de crédits | (Modal Paywall) | "Tu as atteint la limite d'aujourd'hui. Ajoute des crédits pour continuer." |
-| Localisation désactivée | "Veuillez activer la localisation" | "Active la localisation dans Paramètres pour partager ta position en cas d'alerte." |
-| Deadline invalide | "La deadline doit etre dans le futur" | "La deadline doit être dans le futur (minimum 15 minutes)." |
+| Erreur                  | Message Actuel                           | Message Unifié                                                                      |
+| ----------------------- | ---------------------------------------- | ----------------------------------------------------------------------------------- |
+| Pas de contact          | "Configure un contact d'urgence d'abord" | "Ajoute un contact d'urgence pour démarrer une sortie."                             |
+| Pas de vérification     | (Modal OTP)                              | "Vérifie ton numéro pour activer les alertes SMS."                                  |
+| Pas de crédits          | (Modal Paywall)                          | "Tu as atteint la limite d'aujourd'hui. Ajoute des crédits pour continuer."         |
+| Localisation désactivée | "Veuillez activer la localisation"       | "Active la localisation dans Paramètres pour partager ta position en cas d'alerte." |
+| Deadline invalide       | "La deadline doit etre dans le futur"    | "La deadline doit être dans le futur (minimum 15 minutes)."                         |
 
 **Impact UX:** ✅ Messages cohérents, clairs et orientés action dans toute l'app
 
@@ -156,24 +164,26 @@ const handlePhoneChange = (text: string) => {
 
 ## 📊 Statut des Corrections
 
-| Correction | Statut | Détails |
-|-----------|--------|---------|
-| Blocages clairs | ✅ Implémenté | Fonction `getBlockingReason()` ajoutée |
-| SOS sécurisé | ✅ Existant | Appui long 2s + confirmation |
+| Correction          | Statut        | Détails                                   |
+| ------------------- | ------------- | ----------------------------------------- |
+| Blocages clairs     | ✅ Implémenté | Fonction `getBlockingReason()` ajoutée    |
+| SOS sécurisé        | ✅ Existant   | Appui long 2s + confirmation              |
 | Feedback validation | ✅ Implémenté | Messages détaillés + feedback utilisateur |
-| Messages unifiés | ✅ Implémenté | Vocabulaire cohérent dans new-session.tsx |
+| Messages unifiés    | ✅ Implémenté | Vocabulaire cohérent dans new-session.tsx |
 
 ---
 
 ## 🎯 Résultats Attendus
 
 ### Avant (V3.4)
+
 - ❌ Utilisateur clique "Démarrer" sans savoir pourquoi il est bloqué
 - ❌ Risque d'appui accidentel sur SOS
 - ❌ Pas de feedback sur la validation du numéro
 - ❌ Messages d'erreur incohérents
 
 ### Après (V4.0)
+
 - ✅ Message clair expliquant le blocage + lien vers correction
 - ✅ SOS nécessite appui long 2 secondes + confirmation
 - ✅ Feedback immédiat sur la validation du numéro (chiffres manquants, etc.)
@@ -184,42 +194,50 @@ const handlePhoneChange = (text: string) => {
 ## 📋 Checklist de Validation
 
 ### Scénario 1: Utilisateur sans contact
+
 - [x] Home affiche "Configurer un contact" dans la checklist
 - [x] Bouton "Je sors" → "Je sors" → Message "Contact d'urgence manquant"
 - [x] Lien "Aller aux Paramètres" fonctionne
 
 ### Scénario 2: Utilisateur non vérifié
+
 - [x] Home affiche "Téléphone: À vérifier" dans la checklist
 - [x] Bouton "Je sors" → Modal OTP s'affiche
 - [x] Après vérification → Message "Numéro vérifié ! Tu peux maintenant démarrer une sortie."
 
 ### Scénario 3: Utilisateur sans crédits
+
 - [x] Home affiche "Crédits: 0 restants" dans la checklist
 - [x] Bouton "Je sors" → Modal Paywall s'affiche
 - [x] Message: "Tu as atteint la limite d'aujourd'hui. Ajoute des crédits pour continuer."
 
 ### Scénario 4: Localisation désactivée
+
 - [x] Home affiche "Localisation: À autoriser" dans la checklist
 - [x] Bouton "Je sors" → Message "Active la localisation dans Paramètres..."
 - [x] Lien vers Paramètres fonctionne
 
 ### Scénario 5: Sortie active - SOS
+
 - [x] Appui court sur SOS → Rien ne se passe (pas assez long)
 - [x] Appui long 2 secondes → Haptic feedback lourd
 - [x] Modal de confirmation s'affiche
 - [x] Après confirmation → Alerte envoyée
 
 ### Scénario 6: Validation numéro de téléphone
+
 - [x] Entrer "06" → Feedback: "7 chiffre(s) manquant(s)."
 - [x] Entrer "0612345678" → Feedback: "Numéro valide: +33 6 12 34 56 78"
 - [x] Entrer "061234567890" → Feedback: "Trop de chiffres (maximum 9)."
 
 ### Scénario 7: Fin de sortie
+
 - [x] Bouton "Je suis rentré" → Confirmation modale
 - [x] Après confirmation → Retour à Home
 - [x] Pas d'alerte envoyée
 
 ### Scénario 8: Erreur réseau
+
 - [x] Pas de connexion → Message "Aucune connexion Internet"
 - [x] Bouton "Réessayer" visible
 - [x] Pas de blocage permanent
@@ -228,14 +246,14 @@ const handlePhoneChange = (text: string) => {
 
 ## 🔧 Fichiers Modifiés
 
-| Fichier | Modifications |
-|---------|---|
-| `app/new-session.tsx` | Ajout `getBlockingReason()`, messages d'erreur unifiés |
-| `lib/services/phone-validation-service.ts` | Amélioration validation, feedback détaillé |
-| `app/settings.tsx` | Intégration feedback validation |
-| `app/active-session.tsx` | SOS déjà sécurisé (aucun changement) |
-| `UX_AUDIT.md` | Audit complet des 4 écrans |
-| `UX_CORRECTIONS.md` | Solutions concrètes pour chaque problème |
+| Fichier                                    | Modifications                                          |
+| ------------------------------------------ | ------------------------------------------------------ |
+| `app/new-session.tsx`                      | Ajout `getBlockingReason()`, messages d'erreur unifiés |
+| `lib/services/phone-validation-service.ts` | Amélioration validation, feedback détaillé             |
+| `app/settings.tsx`                         | Intégration feedback validation                        |
+| `app/active-session.tsx`                   | SOS déjà sécurisé (aucun changement)                   |
+| `UX_AUDIT.md`                              | Audit complet des 4 écrans                             |
+| `UX_CORRECTIONS.md`                        | Solutions concrètes pour chaque problème               |
 
 ---
 

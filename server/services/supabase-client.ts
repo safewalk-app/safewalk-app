@@ -15,16 +15,12 @@ if (!supabaseUrl || !supabaseServiceRoleKey) {
   log.error(`SUPABASE_SERVICE_ROLE_KEY: ${supabaseServiceRoleKey ? '✅' : '❌'}`);
 }
 
-export const supabase = createClient(
-  supabaseUrl || '',
-  supabaseServiceRoleKey || '',
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
-  }
-);
+export const supabase = createClient(supabaseUrl || '', supabaseServiceRoleKey || '', {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false,
+  },
+});
 
 export async function getOrCreateUser(firstName: string, phoneNumber?: string) {
   try {
@@ -77,7 +73,7 @@ export async function createSession(
   startTime: Date,
   deadline: Date,
   latitude?: number,
-  longitude?: number
+  longitude?: number,
 ) {
   try {
     const { data, error } = await supabase
@@ -112,7 +108,7 @@ export async function logSMS(
   contactId: string,
   messageSid: string,
   status: 'sent' | 'failed' | 'pending',
-  errorMessage?: string
+  errorMessage?: string,
 ) {
   try {
     const { data, error } = await supabase

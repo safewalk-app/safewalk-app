@@ -1,4 +1,4 @@
-import { logger } from "@/lib/utils/logger";
+import { logger } from '@/lib/utils/logger';
 import { View, Text, Pressable, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -21,28 +21,32 @@ const SLIDES: OnboardingSlide[] = [
   {
     id: 1,
     title: 'Bienvenue sur SafeWalk',
-    description: 'Reste en sécurité lors de tes sorties en partageant ton heure de retour avec un proche.',
+    description:
+      'Reste en sécurité lors de tes sorties en partageant ton heure de retour avec un proche.',
     icon: 'security',
     color: '#6C63FF',
   },
   {
     id: 2,
     title: 'Définis une heure de retour',
-    description: 'Indique à quelle heure tu penses rentrer. Un proche sera notifié si tu ne confirmes pas.',
+    description:
+      'Indique à quelle heure tu penses rentrer. Un proche sera notifié si tu ne confirmes pas.',
     icon: 'schedule',
     color: '#3A86FF',
   },
   {
     id: 3,
     title: 'Partage ta position',
-    description: 'Optionnel : partage ta position en temps réel en cas d\'alerte pour plus de sécurité.',
+    description:
+      "Optionnel : partage ta position en temps réel en cas d'alerte pour plus de sécurité.",
     icon: 'location-on',
     color: '#2DE2A6',
   },
   {
     id: 4,
     title: 'Tu es prêt !',
-    description: 'Configure ton contact d\'urgence et commence à utiliser SafeWalk pour tes sorties.',
+    description:
+      "Configure ton contact d'urgence et commence à utiliser SafeWalk pour tes sorties.",
     icon: 'check-circle',
     color: '#22C55E',
   },
@@ -120,18 +124,12 @@ export default function OnboardingScreen() {
                 backgroundColor: `${slide.color}15`,
               }}
             >
-              <MaterialIcons
-                name={slide.icon as any}
-                size={64}
-                color={slide.color}
-              />
+              <MaterialIcons name={slide.icon as any} size={64} color={slide.color} />
             </View>
 
             {/* Title */}
             <View className="gap-3 items-center">
-              <Text className="text-4xl font-bold text-foreground text-center">
-                {slide.title}
-              </Text>
+              <Text className="text-4xl font-bold text-foreground text-center">{slide.title}</Text>
               <Text className="text-base text-muted text-center leading-relaxed">
                 {slide.description}
               </Text>
@@ -149,8 +147,7 @@ export default function OnboardingScreen() {
                 style={{
                   width: index === currentSlide ? 24 : 8,
                   height: 8,
-                  backgroundColor:
-                    index === currentSlide ? slide.color : '#E5E7EB',
+                  backgroundColor: index === currentSlide ? slide.color : '#E5E7EB',
                 }}
               />
             ))}
@@ -162,11 +159,7 @@ export default function OnboardingScreen() {
           <View className="gap-3">
             {/* Next/Continue Button */}
             <CushionPillButton
-              label={
-                currentSlide === SLIDES.length - 1
-                  ? 'Commencer'
-                  : 'Suivant'
-              }
+              label={currentSlide === SLIDES.length - 1 ? 'Commencer' : 'Suivant'}
               onPress={handleNext}
               variant="success"
               size="lg"
@@ -176,13 +169,8 @@ export default function OnboardingScreen() {
             {currentSlide > 0 && (
               <Pressable onPress={handlePrevious}>
                 {({ pressed }) => (
-                  <View
-                    className="py-3 items-center"
-                    style={{ opacity: pressed ? 0.6 : 1 }}
-                  >
-                    <Text className="text-base font-semibold text-muted">
-                      Précédent
-                    </Text>
+                  <View className="py-3 items-center" style={{ opacity: pressed ? 0.6 : 1 }}>
+                    <Text className="text-base font-semibold text-muted">Précédent</Text>
                   </View>
                 )}
               </Pressable>

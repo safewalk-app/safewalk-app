@@ -1,6 +1,6 @@
 /**
  * Hook: useLoadingIndicator
- * 
+ *
  * Hook pour afficher un indicateur de chargement lors du chargement
  * des services et hooks lazy loading
  */
@@ -25,14 +25,14 @@ interface LoadingIndicatorOptions {
 
 /**
  * Hook pour tracker et afficher le chargement d'un service/hook
- * 
+ *
  * @example
  * ```tsx
  * const { startLoading, finishLoading } = useLoadingIndicator({
  *   name: 'Trip Service',
  *   type: 'service',
  * });
- * 
+ *
  * useEffect(() => {
  *   startLoading();
  *   // ... do async work
@@ -93,13 +93,13 @@ export function useLoadingIndicator(options: LoadingIndicatorOptions) {
 
 /**
  * Hook pour créer une fonction async wrapper qui affiche le chargement
- * 
+ *
  * @example
  * ```tsx
  * const withLoading = useLoadingWrapper({
  *   name: 'Trip Service',
  * });
- * 
+ *
  * const result = await withLoading(async () => {
  *   return await getTripService();
  * });
@@ -109,7 +109,7 @@ export function useLoadingWrapper(options: LoadingIndicatorOptions) {
   const { start, finish } = useLoadingIndicator(options);
 
   return useCallback(
-    async <T,>(fn: () => Promise<T>): Promise<T> => {
+    async <T>(fn: () => Promise<T>): Promise<T> => {
       start();
       try {
         const result = await fn();
@@ -118,6 +118,6 @@ export function useLoadingWrapper(options: LoadingIndicatorOptions) {
         finish();
       }
     },
-    [start, finish]
+    [start, finish],
   );
 }

@@ -28,9 +28,7 @@ describe('E2E SMS Flow', () => {
 
   it.skip('should send friendly alert SMS (requires production server)', async () => {
     const params = {
-      contacts: [
-        { name: 'Marie', phone: '+33763458273' },
-      ],
+      contacts: [{ name: 'Marie', phone: '+33763458273' }],
       userName: 'Ben',
       limitTimeStr: '02:30',
       location: { latitude: 48.8566, longitude: 2.3522 },
@@ -52,9 +50,7 @@ describe('E2E SMS Flow', () => {
 
   it.skip('should send follow-up SMS (requires production server)', async () => {
     const params = {
-      contacts: [
-        { name: 'Marie', phone: '+33763458273' },
-      ],
+      contacts: [{ name: 'Marie', phone: '+33763458273' }],
       userName: 'Ben',
       location: { latitude: 48.8566, longitude: 2.3522 },
     };
@@ -75,9 +71,7 @@ describe('E2E SMS Flow', () => {
 
   it.skip('should send confirmation SMS (requires production server)', async () => {
     const params = {
-      contacts: [
-        { name: 'Marie', phone: '+33763458273' },
-      ],
+      contacts: [{ name: 'Marie', phone: '+33763458273' }],
       userName: 'Ben',
     };
 

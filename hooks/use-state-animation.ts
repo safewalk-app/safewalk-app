@@ -22,16 +22,9 @@ interface UseStateAnimationOptions {
  * Respecte les préférences d'accessibilité (reduceMotionEnabled)
  * Fournit des valeurs animées pour opacity, scale et translateY
  */
-export function useStateAnimation(
-  state: AnimationState,
-  options: UseStateAnimationOptions = {}
-) {
+export function useStateAnimation(state: AnimationState, options: UseStateAnimationOptions = {}) {
   const reduceMotion = useReduceMotion();
-  const {
-    duration = 300,
-    successDuration = 500,
-    errorDuration = 600,
-  } = options;
+  const { duration = 300, successDuration = 500, errorDuration = 600 } = options;
 
   // Adapter les durées selon les préférences d'accessibilité
   const animationDuration = reduceMotion ? 0 : duration;
@@ -46,10 +39,7 @@ export function useStateAnimation(
   // Styles animés
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
-    transform: [
-      { scale: scale.value },
-      { translateY: translateY.value },
-    ],
+    transform: [{ scale: scale.value }, { translateY: translateY.value }],
   }));
 
   // Animer selon l'état
@@ -77,7 +67,7 @@ export function useStateAnimation(
           withTiming(1, {
             duration: animationSuccessDuration / 2,
             easing: Easing.in(Easing.ease),
-          })
+          }),
         );
         opacity.value = withTiming(1, {
           duration: animationSuccessDuration,
@@ -103,7 +93,7 @@ export function useStateAnimation(
           withTiming(0, {
             duration: animationErrorDuration / 4,
             easing: Easing.inOut(Easing.ease),
-          })
+          }),
         );
         break;
 
@@ -124,7 +114,16 @@ export function useStateAnimation(
         });
         break;
     }
-  }, [state, opacity, scale, translateY, animationDuration, animationSuccessDuration, animationErrorDuration, reduceMotion]);
+  }, [
+    state,
+    opacity,
+    scale,
+    translateY,
+    animationDuration,
+    animationSuccessDuration,
+    animationErrorDuration,
+    reduceMotion,
+  ]);
 
   return {
     animatedStyle,

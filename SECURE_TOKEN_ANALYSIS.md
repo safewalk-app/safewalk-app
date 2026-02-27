@@ -21,7 +21,7 @@ SafeWalk **utilise déjà expo-secure-store** pour le stockage sécurisé des to
 
 ```typescript
 // ✅ SÉCURISÉ: Utilise expo-secure-store
-import * as SecureStore from "expo-secure-store";
+import * as SecureStore from 'expo-secure-store';
 
 // Stockage sécurisé des tokens
 await SecureStore.setItemAsync(SESSION_TOKEN_KEY, token);
@@ -35,11 +35,11 @@ await SecureStore.deleteItemAsync(SESSION_TOKEN_KEY);
 
 #### Plateforme par Plateforme
 
-| Plateforme | Stockage | Sécurité | Statut |
-|-----------|----------|----------|--------|
-| **iOS** | Keychain | ✅ Excellent | Chiffré au repos |
-| **Android** | Keystore | ✅ Excellent | Chiffré au repos |
-| **Web** | localStorage | ⚠️ Acceptable | Pas de chiffrement |
+| Plateforme  | Stockage     | Sécurité      | Statut             |
+| ----------- | ------------ | ------------- | ------------------ |
+| **iOS**     | Keychain     | ✅ Excellent  | Chiffré au repos   |
+| **Android** | Keystore     | ✅ Excellent  | Chiffré au repos   |
+| **Web**     | localStorage | ⚠️ Acceptable | Pas de chiffrement |
 
 ### 2. Clés Stockées Sécurisement
 
@@ -83,21 +83,25 @@ await SecureStore.setItemAsync(USER_INFO_KEY, JSON.stringify(user));
 ### 4. Protection Contre les Attaques
 
 #### ✅ CSRF Protection
+
 - Tokens stockés sécurisement (pas accessibles via JavaScript)
 - Requêtes HTTPS obligatoires
 - Validation côté serveur
 
 #### ✅ XSS Protection
+
 - Tokens **non accessibles** via JavaScript (SecureStore)
 - Pas de localStorage pour les tokens
 - Validation des inputs
 
 #### ✅ Man-in-the-Middle
+
 - Tous les tokens transmis en HTTPS
 - Certificats SSL/TLS validés
 - Pas de HTTP non chiffré
 
 #### ✅ Session Hijacking
+
 - Tokens expirables
 - Refresh token séparé (optionnel)
 - Validation côté serveur
@@ -119,7 +123,7 @@ await secureTokenService.saveTokens({
   accessToken: 'jwt_token',
   refreshToken: 'refresh_token',
   expiresAt: Date.now() + 3600000,
-  userId: '123'
+  userId: '123',
 });
 
 // Récupérer les tokens
@@ -136,6 +140,7 @@ await secureTokenService.initialize();
 ```
 
 #### Fonctionnalités
+
 - ✅ Stockage sécurisé (Keychain/Keystore)
 - ✅ Gestion de l'expiration
 - ✅ Migration automatique depuis AsyncStorage
@@ -143,6 +148,7 @@ await secureTokenService.initialize();
 - ✅ Gestion des erreurs
 
 #### Quand l'utiliser?
+
 - Si vous avez besoin de **gestion granulaire** des tokens
 - Si vous avez des **refresh tokens** complexes
 - Si vous voulez un **logging détaillé** des tokens
@@ -152,6 +158,7 @@ await secureTokenService.initialize();
 ## 📊 Comparaison: Avant vs Après
 
 ### Avant (AsyncStorage - ❌ NON SÉCURISÉ)
+
 ```typescript
 // ❌ DANGEREUX: Stockage non chiffré
 await AsyncStorage.setItem('jwt_token', token);
@@ -159,12 +166,14 @@ const token = await AsyncStorage.getItem('jwt_token');
 ```
 
 **Risques:**
+
 - ❌ Tokens visibles en clair
 - ❌ Accessibles via JavaScript
 - ❌ Vulnérable aux attaques XSS
 - ❌ Pas de chiffrement au repos
 
 ### Après (SecureStore - ✅ SÉCURISÉ)
+
 ```typescript
 // ✅ SÉCURISÉ: Stockage chiffré
 await SecureStore.setItemAsync('jwt_token', token);
@@ -172,6 +181,7 @@ const token = await SecureStore.getItemAsync('jwt_token');
 ```
 
 **Avantages:**
+
 - ✅ Tokens chiffrés au repos
 - ✅ Non accessibles via JavaScript
 - ✅ Protégé contre XSS
@@ -181,30 +191,33 @@ const token = await SecureStore.getItemAsync('jwt_token');
 
 ## ✅ Checklist de Sécurité
 
-| Aspect | Statut | Détails |
-|--------|--------|---------|
-| **Stockage des tokens** | ✅ Sécurisé | SecureStore (Keychain/Keystore) |
-| **Chiffrement au repos** | ✅ Oui | Chiffrement OS |
-| **Transmission HTTPS** | ✅ Oui | Tous les tokens en HTTPS |
-| **Expiration des tokens** | ✅ Implémenté | Vérification côté serveur |
-| **Refresh tokens** | ✅ Supporté | Optionnel |
-| **Logout** | ✅ Sécurisé | Suppression complète |
-| **Migration AsyncStorage** | ✅ Automatique | Service optionnel |
-| **Logging** | ✅ Détaillé | Logs sécurisés |
+| Aspect                     | Statut         | Détails                         |
+| -------------------------- | -------------- | ------------------------------- |
+| **Stockage des tokens**    | ✅ Sécurisé    | SecureStore (Keychain/Keystore) |
+| **Chiffrement au repos**   | ✅ Oui         | Chiffrement OS                  |
+| **Transmission HTTPS**     | ✅ Oui         | Tous les tokens en HTTPS        |
+| **Expiration des tokens**  | ✅ Implémenté  | Vérification côté serveur       |
+| **Refresh tokens**         | ✅ Supporté    | Optionnel                       |
+| **Logout**                 | ✅ Sécurisé    | Suppression complète            |
+| **Migration AsyncStorage** | ✅ Automatique | Service optionnel               |
+| **Logging**                | ✅ Détaillé    | Logs sécurisés                  |
 
 ---
 
 ## 🎯 Recommandations
 
 ### P0 (Critique) - À faire immédiatement
+
 1. ✅ **Tokens sécurisés** - Déjà implémenté avec SecureStore
 
 ### P1 (Important) - À faire dans 1 mois
+
 1. **Ajouter refresh token rotation** - Implémenter la rotation automatique des refresh tokens
 2. **Ajouter token pinning** - Valider les certificats SSL/TLS
 3. **Ajouter audit logging** - Logger les accès aux tokens
 
 ### P2 (Nice to Have) - À faire dans 3 mois
+
 1. **Ajouter biometric auth** - Utiliser Face ID / Touch ID pour déverrouiller
 2. **Ajouter device binding** - Lier les tokens à l'appareil
 3. **Ajouter rate limiting** - Limiter les tentatives de connexion
@@ -214,11 +227,13 @@ const token = await SecureStore.getItemAsync('jwt_token');
 ## 📚 Ressources
 
 ### Expo Secure Store
+
 - [Documentation officielle](https://docs.expo.dev/modules/expo-secure-store/)
 - [Sécurité iOS Keychain](https://developer.apple.com/documentation/security/keychain_services)
 - [Sécurité Android Keystore](https://developer.android.com/training/articles/keystore)
 
 ### Meilleures Pratiques
+
 - [OWASP Mobile Security](https://owasp.org/www-project-mobile-security/)
 - [JWT Best Practices](https://tools.ietf.org/html/rfc8949)
 - [OAuth 2.0 for Mobile](https://tools.ietf.org/html/draft-ietf-oauth-mobile-app-bp)

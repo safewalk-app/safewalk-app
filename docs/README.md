@@ -39,6 +39,7 @@ git push -u origin main
 5. Cliquer sur **Save**
 
 GitHub Pages va automatiquement déployer le site. L'URL sera :
+
 ```
 https://VOTRE_USERNAME.github.io/safewalk-app/
 ```
@@ -75,9 +76,9 @@ const config: ExpoConfig = {
   },
   // URLs pour les stores
   extra: {
-    privacyPolicyUrl: "https://VOTRE_USERNAME.github.io/safewalk-app/privacy.html",
-    termsOfServiceUrl: "https://VOTRE_USERNAME.github.io/safewalk-app/terms.html",
-    supportUrl: "https://VOTRE_USERNAME.github.io/safewalk-app/support.html",
+    privacyPolicyUrl: 'https://VOTRE_USERNAME.github.io/safewalk-app/privacy.html',
+    termsOfServiceUrl: 'https://VOTRE_USERNAME.github.io/safewalk-app/terms.html',
+    supportUrl: 'https://VOTRE_USERNAME.github.io/safewalk-app/support.html',
   },
 };
 ```

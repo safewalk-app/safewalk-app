@@ -11,16 +11,12 @@ describe('Supabase Connection', () => {
     expect(supabaseUrl).toBeDefined();
     expect(supabaseServiceRoleKey).toBeDefined();
 
-    supabase = createClient(
-      supabaseUrl || '',
-      supabaseServiceRoleKey || '',
-      {
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false,
-        },
-      }
-    );
+    supabase = createClient(supabaseUrl || '', supabaseServiceRoleKey || '', {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    });
   });
 
   it('should have SUPABASE_URL configured', () => {
@@ -34,10 +30,7 @@ describe('Supabase Connection', () => {
   });
 
   it('should be able to query users table', async () => {
-    const { data, error } = await supabase
-      .from('users')
-      .select('id')
-      .limit(1);
+    const { data, error } = await supabase.from('users').select('id').limit(1);
 
     // We just want to verify the connection works
     // It's OK if there are no users yet
@@ -46,30 +39,21 @@ describe('Supabase Connection', () => {
   });
 
   it('should be able to query emergency_contacts table', async () => {
-    const { data, error } = await supabase
-      .from('emergency_contacts')
-      .select('id')
-      .limit(1);
+    const { data, error } = await supabase.from('emergency_contacts').select('id').limit(1);
 
     expect(error).toBeNull();
     expect(Array.isArray(data)).toBe(true);
   });
 
   it('should be able to query sessions table', async () => {
-    const { data, error } = await supabase
-      .from('sessions')
-      .select('id')
-      .limit(1);
+    const { data, error } = await supabase.from('sessions').select('id').limit(1);
 
     expect(error).toBeNull();
     expect(Array.isArray(data)).toBe(true);
   });
 
   it('should be able to query sms_logs table', async () => {
-    const { data, error } = await supabase
-      .from('sms_logs')
-      .select('id')
-      .limit(1);
+    const { data, error } = await supabase.from('sms_logs').select('id').limit(1);
 
     expect(error).toBeNull();
     expect(Array.isArray(data)).toBe(true);

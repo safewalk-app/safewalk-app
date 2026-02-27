@@ -21,13 +21,13 @@ node_modules/
 
 ### Opportunités d'Optimisation
 
-| Stratégie | Impact | Effort | Priorité |
-|-----------|--------|--------|----------|
-| Tree-shaking | -0.3 MB | Faible | P0 |
-| Lazy loading | -0.4 MB | Moyen | P0 |
-| Code splitting | -0.3 MB | Moyen | P1 |
-| Minification | -0.2 MB | Faible | P0 |
-| Dépendances non utilisées | -0.2 MB | Faible | P1 |
+| Stratégie                 | Impact  | Effort | Priorité |
+| ------------------------- | ------- | ------ | -------- |
+| Tree-shaking              | -0.3 MB | Faible | P0       |
+| Lazy loading              | -0.4 MB | Moyen  | P0       |
+| Code splitting            | -0.3 MB | Moyen  | P1       |
+| Minification              | -0.2 MB | Faible | P0       |
+| Dépendances non utilisées | -0.2 MB | Faible | P1       |
 
 **Total possible:** -1.4 MB (43.75% réduction)
 
@@ -102,9 +102,9 @@ import { ReanimatedView } from 'react-native-reanimated';
 
 // ✅ Après: Charger uniquement si nécessaire
 const GestureHandlerRootView = lazy(() =>
-  import('react-native-gesture-handler').then(m => ({
-    default: m.GestureHandlerRootView
-  }))
+  import('react-native-gesture-handler').then((m) => ({
+    default: m.GestureHandlerRootView,
+  })),
 );
 ```
 
@@ -171,11 +171,7 @@ module.exports = config;
 ```javascript
 // tailwind.config.js
 module.exports = {
-  content: [
-    './app/**/*.{js,ts,tsx}',
-    './components/**/*.{js,ts,tsx}',
-    './lib/**/*.{js,ts,tsx}',
-  ],
+  content: ['./app/**/*.{js,ts,tsx}', './components/**/*.{js,ts,tsx}', './lib/**/*.{js,ts,tsx}'],
   // Purge unused styles
   safelist: [],
   theme: {
@@ -203,10 +199,10 @@ npx depcheck
 ```json
 {
   "dependencies": {
-    "axios": "^1.13.2",        // ✅ Utilisé pour API
+    "axios": "^1.13.2", // ✅ Utilisé pour API
     "react-native-svg": "15.12.1", // ✅ Utilisé pour icônes
-    "expo-audio": "~1.1.0",    // ✅ Utilisé pour audio
-    "expo-video": "~3.0.15",   // ⚠️ À vérifier
+    "expo-audio": "~1.1.0", // ✅ Utilisé pour audio
+    "expo-video": "~3.0.15", // ⚠️ À vérifier
     "expo-notifications": "~0.32.15" // ✅ Utilisé pour notifications
   }
 }
@@ -278,6 +274,7 @@ npx terser app/home.tsx -o app/home.min.tsx
 ## 📈 Résultats Attendus
 
 ### Avant Optimisation
+
 ```
 Total: 3.2 MB
 ├── React Native: 1.2 MB (37.5%)
@@ -287,6 +284,7 @@ Total: 3.2 MB
 ```
 
 ### Après Optimisation
+
 ```
 Total: 1.8 MB (-43.75%)
 ├── React Native: 0.9 MB (50%)

@@ -53,11 +53,7 @@ export function AppShellNested() {
           }}
           initialRouteName="index"
         >
-          <Stack.Screen
-            name="index"
-            component={IndexScreen}
-            options={{ title: 'Home' }}
-          />
+          <Stack.Screen name="index" component={IndexScreen} options={{ title: 'Home' }} />
           <Stack.Screen
             name="settings"
             component={SettingsScreen}
@@ -78,11 +74,7 @@ export function AppShellNested() {
             component={AlertSentScreen}
             options={{ title: 'Alert Sent' }}
           />
-          <Stack.Screen
-            name="history"
-            component={HistoryScreen}
-            options={{ title: 'History' }}
-          />
+          <Stack.Screen name="history" component={HistoryScreen} options={{ title: 'History' }} />
         </Stack.Navigator>
       </NavigationContainer>
 

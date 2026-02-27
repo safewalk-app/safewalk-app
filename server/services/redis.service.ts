@@ -1,6 +1,6 @@
 /**
  * Redis Service
- * 
+ *
  * Gère la connexion et l'initialisation de Redis
  * Utilisé pour le caching côté serveur
  */
@@ -22,7 +22,7 @@ export async function initRedis(): Promise<RedisClientType> {
     // Attendre que la connexion précédente se termine
     let attempts = 0;
     while (!redisClient?.isOpen && attempts < 50) {
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
       attempts++;
     }
     if (redisClient?.isOpen) {
@@ -67,7 +67,7 @@ export async function initRedis(): Promise<RedisClientType> {
 
     await redisClient.connect();
     console.log('[Redis] Successfully initialized');
-    
+
     return redisClient;
   } catch (error) {
     console.error('[Redis] Failed to initialize:', error);

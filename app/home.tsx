@@ -44,7 +44,9 @@ export default function HomeScreen() {
         setChecklistItems([
           {
             id: 'contact',
-            label: hasContact ? `Contact: ${settings.emergencyContactName}` : 'Configurer un contact',
+            label: hasContact
+              ? `Contact: ${settings.emergencyContactName}`
+              : 'Configurer un contact',
             status: hasContact ? 'ok' : 'pending',
             onPress: () => router.push('/settings'),
           },
@@ -52,15 +54,23 @@ export default function HomeScreen() {
             id: 'phone',
             label: profileData.phone_verified ? 'Téléphone: Vérifié' : 'Téléphone: À vérifier',
             status: profileData.phone_verified ? 'ok' : 'pending',
-            onPress: !profileData.phone_verified ? () => router.push('/otp-verification') : undefined,
+            onPress: !profileData.phone_verified
+              ? () => router.push('/otp-verification')
+              : undefined,
           },
           {
             id: 'credits',
-            label: profileData.subscription_active 
-              ? 'Abonnement: Actif' 
+            label: profileData.subscription_active
+              ? 'Abonnement: Actif'
               : `Crédits: ${profileData.free_alerts_remaining} restants`,
-            status: profileData.subscription_active || profileData.free_alerts_remaining > 0 ? 'ok' : 'pending',
-            onPress: profileData.subscription_active || profileData.free_alerts_remaining > 0 ? undefined : () => router.push('/home'),
+            status:
+              profileData.subscription_active || profileData.free_alerts_remaining > 0
+                ? 'ok'
+                : 'pending',
+            onPress:
+              profileData.subscription_active || profileData.free_alerts_remaining > 0
+                ? undefined
+                : () => router.push('/home'),
           },
           {
             id: 'notifications',
@@ -154,12 +164,8 @@ export default function HomeScreen() {
         {/* Header - Ton Safety */}
         <ScreenTransition delay={0} duration={350}>
           <View className="gap-1 mb-6">
-            <Text className="text-4xl font-bold text-foreground">
-              SafeWalk
-            </Text>
-            <Text className="text-base text-muted">
-              Reste en sécurité, partout.
-            </Text>
+            <Text className="text-4xl font-bold text-foreground">SafeWalk</Text>
+            <Text className="text-base text-muted">Reste en sécurité, partout.</Text>
           </View>
         </ScreenTransition>
 
@@ -179,7 +185,12 @@ export default function HomeScreen() {
 
         {/* Checklist d'État */}
         <ScreenTransition delay={200} duration={350}>
-          <View className="mb-6" accessible={true} accessibilityRole="text" accessibilityLabel="État du système">
+          <View
+            className="mb-6"
+            accessible={true}
+            accessibilityRole="text"
+            accessibilityLabel="État du système"
+          >
             <Text className="text-xs font-semibold text-muted uppercase tracking-wide mb-3">
               État du système
             </Text>
@@ -190,19 +201,13 @@ export default function HomeScreen() {
         {/* Raccourcis Durée */}
         <ScreenTransition delay={300} duration={350}>
           <View className="mb-6">
-            <DurationQuickSelect
-              options={durationOptions}
-              onSelect={handleDurationSelect}
-            />
+            <DurationQuickSelect options={durationOptions} onSelect={handleDurationSelect} />
           </View>
         </ScreenTransition>
 
         {/* Micro-texte Contrat */}
         <ScreenTransition delay={400} duration={350}>
-          <View
-            className="p-4 rounded-lg"
-            style={{ backgroundColor: `${colors.primary}15` }}
-          >
+          <View className="p-4 rounded-lg" style={{ backgroundColor: `${colors.primary}15` }}>
             <View className="flex-row gap-2">
               <MaterialIcons
                 name="info"
@@ -211,7 +216,8 @@ export default function HomeScreen() {
                 style={{ marginTop: 2 }}
               />
               <Text className="flex-1 text-xs text-foreground leading-relaxed">
-                Si tu ne confirmes pas à l'heure limite, un SMS est envoyé automatiquement à ton contact d'urgence.
+                Si tu ne confirmes pas à l'heure limite, un SMS est envoyé automatiquement à ton
+                contact d'urgence.
               </Text>
             </View>
           </View>
@@ -220,10 +226,7 @@ export default function HomeScreen() {
         {/* Current Session Info (if active) */}
         {currentSession && (
           <ScreenTransition delay={500} duration={350}>
-            <Pressable
-              onPress={() => router.push('/active-session')}
-              className="mt-6"
-            >
+            <Pressable onPress={() => router.push('/active-session')} className="mt-6">
               {({ pressed }) => (
                 <View
                   className="p-4 rounded-2xl"
@@ -236,13 +239,9 @@ export default function HomeScreen() {
                 >
                   <View className="flex-row items-center gap-2 mb-1">
                     <MaterialIcons name="location-on" size={16} color="#2DE2A6" />
-                    <Text className="text-sm font-semibold text-foreground">
-                      Sortie en cours
-                    </Text>
+                    <Text className="text-sm font-semibold text-foreground">Sortie en cours</Text>
                   </View>
-                  <Text className="text-xs text-muted">
-                    Appuie pour voir les détails
-                  </Text>
+                  <Text className="text-xs text-muted">Appuie pour voir les détails</Text>
                 </View>
               )}
             </Pressable>

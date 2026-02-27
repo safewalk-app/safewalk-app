@@ -3,6 +3,7 @@
 ## 1. Configuration Préalable
 
 ### 1.1 Clés Stripe
+
 - ✅ **Clé Publique** (EXPO_PUBLIC_STRIPE_PUBLIC_KEY) - Déjà configurée dans Manus
 - ⏳ **Clé Secrète** (STRIPE_SECRET_KEY) - À ajouter dans Supabase Edge Functions
 
@@ -40,21 +41,21 @@
 
 ### 2.1 Cartes Valides (Paiement Réussi)
 
-| Numéro | CVC | Date | Résultat |
-|--------|-----|------|----------|
+| Numéro              | CVC  | Date  | Résultat  |
+| ------------------- | ---- | ----- | --------- |
 | 4242 4242 4242 4242 | Tout | Futur | ✅ Succès |
 | 4000 0000 0000 0002 | Tout | Futur | ✅ Succès |
 | 5555 5555 5555 4444 | Tout | Futur | ✅ Succès |
 
 ### 2.2 Cartes d'Erreur (Tester les Cas d'Erreur)
 
-| Numéro | CVC | Date | Erreur |
-|--------|-----|------|--------|
-| 4000 0000 0000 0002 | Tout | Futur | ❌ Carte déclinée |
-| 4000 0025 0000 3155 | Tout | Futur | ❌ Adresse invalide |
-| 4000 0000 0000 9995 | Tout | Futur | ❌ CVC invalide |
+| Numéro              | CVC  | Date  | Erreur                      |
+| ------------------- | ---- | ----- | --------------------------- |
+| 4000 0000 0000 0002 | Tout | Futur | ❌ Carte déclinée           |
+| 4000 0025 0000 3155 | Tout | Futur | ❌ Adresse invalide         |
+| 4000 0000 0000 9995 | Tout | Futur | ❌ CVC invalide             |
 | 4000 0000 0000 9987 | Tout | Futur | ❌ Authentification requise |
-| 4000 0000 0000 0069 | Tout | Futur | ❌ Expiration invalide |
+| 4000 0000 0000 0069 | Tout | Futur | ❌ Expiration invalide      |
 
 ### 2.3 Données de Test
 
@@ -74,6 +75,7 @@ Pays: United States
 ### 3.1 Test 1: Achat d'Abonnement Premium (Succès)
 
 **Étapes:**
+
 1. Ouvrir SafeWalk app
 2. Aller à Settings → Paywall
 3. Cliquer "Premium Monthly" ($4.99/mois)
@@ -86,6 +88,7 @@ Pays: United States
 6. Cliquer "Pay"
 
 **Vérifications:**
+
 - ✅ Paiement confirmé dans Stripe Dashboard
 - ✅ Webhook reçu (check Supabase logs)
 - ✅ Crédits/Subscription mis à jour dans DB
@@ -93,6 +96,7 @@ Pays: United States
 - ✅ Paywall se ferme automatiquement
 
 **Vérifier dans Supabase:**
+
 ```sql
 SELECT * FROM subscriptions WHERE user_id = '[user_id]' ORDER BY created_at DESC LIMIT 1;
 -- Doit montrer: plan='premium_monthly', status='active', stripe_customer_id rempli
@@ -103,6 +107,7 @@ SELECT * FROM subscriptions WHERE user_id = '[user_id]' ORDER BY created_at DESC
 ### 3.2 Test 2: Achat de Crédits (Succès)
 
 **Étapes:**
+
 1. Ouvrir SafeWalk app
 2. Aller à Settings → Paywall → Onglet "Crédits"
 3. Cliquer "10 Crédits" ($0.99)
@@ -111,11 +116,13 @@ SELECT * FROM subscriptions WHERE user_id = '[user_id]' ORDER BY created_at DESC
 6. Cliquer "Pay"
 
 **Vérifications:**
+
 - ✅ Paiement confirmé
 - ✅ Crédits ajoutés au compte
 - ✅ Historique visible dans `user_credits` table
 
 **Vérifier dans Supabase:**
+
 ```sql
 SELECT * FROM user_credits WHERE user_id = '[user_id]' ORDER BY created_at DESC LIMIT 1;
 -- Doit montrer: amount=10, type='purchased', status='completed'
@@ -126,6 +133,7 @@ SELECT * FROM user_credits WHERE user_id = '[user_id]' ORDER BY created_at DESC 
 ### 3.3 Test 3: Paiement Échoué (Carte Déclinée)
 
 **Étapes:**
+
 1. Ouvrir SafeWalk app
 2. Aller à Settings → Paywall
 3. Cliquer "Premium Monthly"
@@ -137,6 +145,7 @@ SELECT * FROM user_credits WHERE user_id = '[user_id]' ORDER BY created_at DESC 
 6. Cliquer "Pay"
 
 **Vérifications:**
+
 - ✅ Erreur affichée: "Carte déclinée"
 - ✅ WebView reste ouvert (utilisateur peut réessayer)
 - ✅ Aucun crédit/abonnement ajouté
@@ -147,6 +156,7 @@ SELECT * FROM user_credits WHERE user_id = '[user_id]' ORDER BY created_at DESC 
 ### 3.4 Test 4: Annulation du Paiement
 
 **Étapes:**
+
 1. Ouvrir SafeWalk app
 2. Aller à Settings → Paywall
 3. Cliquer "Premium Monthly"
@@ -154,6 +164,7 @@ SELECT * FROM user_credits WHERE user_id = '[user_id]' ORDER BY created_at DESC 
 5. Cliquer le bouton "X" (Fermer)
 
 **Vérifications:**
+
 - ✅ WebView se ferme
 - ✅ Paywall reste visible
 - ✅ Aucun paiement traité
@@ -189,18 +200,18 @@ SELECT * FROM user_credits WHERE user_id = '[user_id]' ORDER BY created_at DESC 
 
 ```sql
 -- Vérifier les transactions
-SELECT * FROM stripe_transactions 
-WHERE user_id = '[user_id]' 
+SELECT * FROM stripe_transactions
+WHERE user_id = '[user_id]'
 ORDER BY created_at DESC LIMIT 5;
 
 -- Vérifier les abonnements
-SELECT * FROM subscriptions 
-WHERE user_id = '[user_id]' 
+SELECT * FROM subscriptions
+WHERE user_id = '[user_id]'
 ORDER BY created_at DESC LIMIT 5;
 
 -- Vérifier les crédits
-SELECT * FROM user_credits 
-WHERE user_id = '[user_id]' 
+SELECT * FROM user_credits
+WHERE user_id = '[user_id]'
 ORDER BY created_at DESC LIMIT 5;
 ```
 
@@ -226,11 +237,13 @@ ORDER BY created_at DESC LIMIT 5;
 ### Problème: "Impossible de créer la session de paiement"
 
 **Causes possibles:**
+
 1. Clé publique Stripe invalide
 2. Produits Stripe non créés
 3. Erreur dans `createCheckoutSession`
 
 **Solution:**
+
 ```bash
 # Vérifier les clés dans Manus
 echo $EXPO_PUBLIC_STRIPE_PUBLIC_KEY
@@ -244,11 +257,13 @@ echo $EXPO_PUBLIC_STRIPE_PUBLIC_KEY
 ### Problème: "Webhook non reçu"
 
 **Causes possibles:**
+
 1. URL webhook incorrecte
 2. Signing secret invalide
 3. Edge Function down
 
 **Solution:**
+
 ```bash
 # Vérifier l'URL dans Stripe Dashboard
 # Aller à: Developers → Webhooks → Endpoint
@@ -262,11 +277,13 @@ echo $EXPO_PUBLIC_STRIPE_PUBLIC_KEY
 ### Problème: "Crédits non ajoutés après paiement"
 
 **Causes possibles:**
+
 1. Webhook non reçu
 2. Erreur dans `handle-stripe-webhook`
 3. DB transaction échouée
 
 **Solution:**
+
 ```sql
 -- Vérifier les transactions
 SELECT * FROM stripe_transactions WHERE status = 'failed';
@@ -280,12 +297,14 @@ SELECT * FROM stripe_webhook_logs ORDER BY created_at DESC LIMIT 10;
 ## 7. Mode Production vs Test
 
 ### Mode Test (Actuellement)
+
 - ✅ Utilise les clés `pk_live_` et `sk_live_` (clés de test)
 - ✅ Cartes de test disponibles
 - ✅ Pas d'argent réel débité
 - ✅ Webhooks testables
 
 ### Mode Production (Futur)
+
 - ⏳ Utiliser les vraies clés Stripe
 - ⏳ Vrai paiement
 - ⏳ Vrai argent débité

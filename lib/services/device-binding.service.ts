@@ -1,9 +1,9 @@
 /**
  * Device Binding Service
- * 
+ *
  * Lie les tokens au device ID pour prévenir les vols de tokens
  * et les utilisations non autorisées sur d'autres devices
- * 
+ *
  * Fonctionnalités:
  * - Génération d'un ID device unique
  * - Stockage sécurisé de l'ID device
@@ -74,7 +74,7 @@ class DeviceBindingService {
 
       this.isInitialized = true;
     } catch (error) {
-      logger.error('❌ [Device Binding] Erreur lors de l\'initialisation:', error);
+      logger.error("❌ [Device Binding] Erreur lors de l'initialisation:", error);
     }
   }
 
@@ -97,7 +97,7 @@ class DeviceBindingService {
 
       this.deviceId = deviceId;
     } catch (error) {
-      logger.error('❌ [Device Binding] Erreur lors de l\'initialisation de l\'ID device:', error);
+      logger.error("❌ [Device Binding] Erreur lors de l'initialisation de l'ID device:", error);
       throw error;
     }
   }
@@ -112,12 +112,12 @@ class DeviceBindingService {
       const timestamp = Date.now();
       const random = Math.random().toString(36).substring(7);
       const uniqueId = `${platform}_${timestamp}_${random}`;
-      
+
       // Créer un hash simple pour la sécurité
       const hash = Buffer.from(uniqueId).toString('base64').substring(0, 32);
       return `device_${hash}`;
     } catch (error) {
-      logger.error('❌ [Device Binding] Erreur lors de la génération de l\'ID device:', error);
+      logger.error("❌ [Device Binding] Erreur lors de la génération de l'ID device:", error);
       throw error;
     }
   }
@@ -210,17 +210,12 @@ class DeviceBindingService {
   public async hasDeviceChanged(): Promise<boolean> {
     try {
       const currentFingerprint = this.deviceFingerprint;
-      const storedFingerprint = await AsyncStorage.getItem(
-        STORAGE_KEYS.DEVICE_FINGERPRINT
-      );
+      const storedFingerprint = await AsyncStorage.getItem(STORAGE_KEYS.DEVICE_FINGERPRINT);
 
       if (!storedFingerprint) {
         // Première fois, stocker le fingerprint
         if (currentFingerprint) {
-          await AsyncStorage.setItem(
-            STORAGE_KEYS.DEVICE_FINGERPRINT,
-            currentFingerprint
-          );
+          await AsyncStorage.setItem(STORAGE_KEYS.DEVICE_FINGERPRINT, currentFingerprint);
         }
         return false;
       }
@@ -235,10 +230,7 @@ class DeviceBindingService {
 
         // Mettre à jour le fingerprint
         if (currentFingerprint) {
-          await AsyncStorage.setItem(
-            STORAGE_KEYS.DEVICE_FINGERPRINT,
-            currentFingerprint
-          );
+          await AsyncStorage.setItem(STORAGE_KEYS.DEVICE_FINGERPRINT, currentFingerprint);
         }
       }
 

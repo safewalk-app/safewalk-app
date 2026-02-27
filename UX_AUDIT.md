@@ -10,6 +10,7 @@
 ## 1) AUDIT ÉCRAN HOME
 
 ### État Actuel
+
 - Affiche "Je sors" (bouton principal)
 - Affiche "Sécurité inactive" si pas de contact
 - Affiche "Conseil du jour"
@@ -17,6 +18,7 @@
 ### Problèmes Identifiés
 
 #### P0 - Bloquant
+
 - [ ] **Pas clair si l'utilisateur peut démarrer immédiatement**
   - Problème: Le bouton "Je sors" est toujours visible, même si des conditions critiques manquent
   - Impact: Utilisateur clique, puis se retrouve bloqué avec message d'erreur confus
@@ -33,6 +35,7 @@
   - Fix: Afficher "X alertes gratuites restantes" ou "Crédits insuffisants"
 
 #### P1 - Important
+
 - [ ] **Pas d'indication sur les permissions (localisation, notifications)**
   - Problème: Utilisateur ne sait pas si les alertes fonctionneront
   - Impact: Fausse sécurité
@@ -44,6 +47,7 @@
   - Fix: Réduire la taille ou déplacer en bas
 
 #### P2 - Amélioration
+
 - [ ] **Pas de feedback sur la vérification du numéro de téléphone**
   - Problème: Utilisateur ne sait pas si son numéro est vérifié
   - Impact: Doute sur la fiabilité
@@ -54,6 +58,7 @@
 ## 2) AUDIT ÉCRAN "JE SORS"
 
 ### État Actuel
+
 - Formulaire avec:
   - Heure de retour prévu
   - Toggle "Partager ma position"
@@ -63,6 +68,7 @@
 ### Problèmes Identifiés
 
 #### P0 - Bloquant
+
 - [ ] **Bouton "Démarrer" peut être grisé sans explication claire**
   - Problème: Utilisateur ne sait pas pourquoi il ne peut pas démarrer
   - Impact: Frustration, abandon
@@ -79,6 +85,7 @@
   - Fix: Simplifier en "Retour prévu à [HH:MM]" + "Alerte envoyée si tu ne confirmes pas"
 
 #### P1 - Important
+
 - [ ] **Toggle "Partager ma position" manque de contexte**
   - Problème: Utilisateur ne sait pas pourquoi partager sa position
   - Impact: Peut refuser par défaut par peur
@@ -90,6 +97,7 @@
   - Fix: Afficher "Résumé: Alerte SMS à [Contact] si pas de confirmation avant [HH:MM]"
 
 #### P2 - Amélioration
+
 - [ ] **Pas de validation du formulaire en temps réel**
   - Problème: Utilisateur peut soumettre un formulaire invalide
   - Impact: Erreur serveur confuse
@@ -100,6 +108,7 @@
 ## 3) AUDIT ÉCRAN "SORTIE EN COURS"
 
 ### État Actuel
+
 - Affiche le countdown (HH:MM:SS)
 - Affiche les heures (limite, alerte)
 - Boutons: Je suis rentré, Prolonger, SOS, Arrêter
@@ -108,6 +117,7 @@
 ### Problèmes Identifiés
 
 #### P0 - Bloquant
+
 - [ ] **Bouton "SOS" n'est pas sécurisé**
   - Problème: Risque d'appui accidentel
   - Impact: Fausse alerte coûteuse
@@ -124,6 +134,7 @@
   - Fix: Simplifier en "Alerte envoyée à [HH:MM] si pas de confirmation"
 
 #### P1 - Important
+
 - [ ] **Bouton "Prolonger" n'offre pas de choix clair**
   - Problème: Utilisateur ne sait pas de combien prolonger
   - Impact: Hésitation, mauvaise durée
@@ -140,6 +151,7 @@
   - Fix: Afficher "⚠️ Batterie faible (15%)" en haut
 
 #### P2 - Amélioration
+
 - [ ] **Hiérarchie des boutons n'est pas claire**
   - Problème: "Je suis rentré" et "Arrêter" peuvent être confus
   - Impact: Utilisateur clique sur le mauvais
@@ -155,6 +167,7 @@
 ## 4) AUDIT ÉCRAN "PARAMÈTRES"
 
 ### État Actuel
+
 - Prénom
 - Contact d'urgence (nom + numéro)
 - Toggle localisation
@@ -165,6 +178,7 @@
 ### Problèmes Identifiés
 
 #### P0 - Bloquant
+
 - [ ] **Pas de feedback clair sur la validation du numéro de téléphone**
   - Problème: Utilisateur ne sait pas si le numéro est valide
   - Impact: Alerte ne peut pas être envoyée
@@ -176,6 +190,7 @@
   - Fix: Afficher "✅ SMS envoyé à [Numéro]" ou "❌ Erreur d'envoi"
 
 #### P1 - Important
+
 - [ ] **Pas de confirmation avant "Supprimer données"**
   - Problème: Risque de suppression accidentelle
   - Impact: Perte de données
@@ -192,6 +207,7 @@
   - Fix: Afficher "🟢 Actif" ou "🔴 Désactivé" à côté de chaque toggle
 
 #### P2 - Amélioration
+
 - [ ] **Pas de feedback sur l'autosave**
   - Problème: Utilisateur ne sait pas si les changements sont sauvegardés
   - Impact: Doute
@@ -202,6 +218,7 @@
 ## 5) PROBLÈMES TRANSVERSAUX
 
 ### P0 - Bloquant
+
 - [ ] **Pas de "contrat utilisateur" clair au démarrage**
   - Problème: Utilisateur ne comprend pas le fonctionnement
   - Impact: Mauvaise utilisation
@@ -218,6 +235,7 @@
   - Fix: Ajouter des liens directs vers Paramètres/OTP/Paywall depuis les messages d'erreur
 
 ### P1 - Important
+
 - [ ] **Pas de cohérence dans les libellés**
   - Problème: Vocabulaire change entre écrans
   - Impact: Confusion
@@ -229,6 +247,7 @@
   - Fix: Afficher loading/spinner pendant les appels API
 
 ### P2 - Amélioration
+
 - [ ] **Pas de feedback positif après succès**
   - Problème: Utilisateur ne sait pas si l'action a réussi
   - Impact: Doute
@@ -239,33 +258,39 @@
 ## 6) RÈGLES MÉTIER UX À CLARIFIER
 
 ### Quand on peut démarrer une sortie
+
 - ✅ Contact d'urgence configuré
 - ✅ Numéro de téléphone vérifié
 - ✅ Crédits disponibles (ou gratuit)
 - ✅ Permissions actives (localisation, notifications)
 
 ### Quand on bloque le démarrage
+
 - ❌ Pas de contact d'urgence → Afficher "Ajouter un contact dans Paramètres"
 - ❌ Numéro non vérifié → Afficher "Vérifier ton numéro via OTP"
 - ❌ Pas de crédits → Afficher paywall
 - ❌ Permissions refusées → Afficher "Activer les permissions dans Paramètres"
 
 ### Quand on affiche un paywall
+
 - Utilisateur a 0 crédits gratuits
 - Utilisateur a atteint le quota quotidien
 - Message: "Tu as atteint la limite d'aujourd'hui. Ajoute des crédits pour continuer."
 
 ### Quand on demande OTP
+
 - Utilisateur n'a jamais vérifié son numéro
 - Utilisateur a changé son numéro
 - Message: "Vérifie ton numéro pour activer les alertes"
 
 ### Quand on affiche une erreur
+
 - Erreur réseau → "Impossible de se connecter. Vérifiez votre connexion."
 - Erreur SMS → "Impossible d'envoyer l'alerte pour le moment. Réessayera automatiquement."
 - Erreur serveur → "Une erreur est survenue. Réessayez."
 
 ### Quand on confirme une action sensible
+
 - SOS → Appui long 2 secondes
 - Arrêter sans alerter → Confirmation modale
 - Supprimer données → Confirmation modale avec avertissement
@@ -275,30 +300,35 @@
 ## 7) CHECKLIST DE VALIDATION UX
 
 ### Scénario 1: Utilisateur sans contact
+
 - [ ] Home affiche "Contact d'urgence manquant"
 - [ ] Bouton "Je sors" est visible mais affiche message d'erreur clair
 - [ ] Message propose d'aller ajouter un contact
 - [ ] Lien vers Paramètres fonctionne
 
 ### Scénario 2: Utilisateur non vérifié
+
 - [ ] Home affiche "Numéro non vérifié"
 - [ ] Bouton "Je sors" affiche message d'erreur clair
 - [ ] Message propose de vérifier le numéro
 - [ ] Lien vers OTP fonctionne
 
 ### Scénario 3: Utilisateur sans crédits
+
 - [ ] Home affiche "Crédits insuffisants"
 - [ ] Bouton "Je sors" affiche message d'erreur clair
 - [ ] Message propose d'ajouter des crédits
 - [ ] Lien vers paywall fonctionne
 
 ### Scénario 4: Permission refusée
+
 - [ ] Home affiche "Localisation désactivée"
 - [ ] Bouton "Je sors" affiche message d'erreur clair
 - [ ] Message propose d'activer la permission
 - [ ] Lien vers Paramètres fonctionne
 
 ### Scénario 5: Sortie active
+
 - [ ] Countdown affiche le temps restant
 - [ ] Bouton "Je suis rentré" est visible et clair
 - [ ] Bouton "SOS" est sécurisé (appui long)
@@ -306,18 +336,21 @@
 - [ ] Bouton "Arrêter" affiche une confirmation
 
 ### Scénario 6: SOS
+
 - [ ] Appui long 2 secondes déclenche l'alerte
 - [ ] Feedback visuel pendant l'appui
 - [ ] Confirmation après envoi
 - [ ] Message de succès ou d'erreur clair
 
 ### Scénario 7: Fin de sortie
+
 - [ ] "Je suis rentré" termine la sortie
 - [ ] Message de confirmation
 - [ ] Retour à Home
 - [ ] Pas d'alerte envoyée
 
 ### Scénario 8: Erreur réseau
+
 - [ ] Message d'erreur clair
 - [ ] Bouton "Réessayer" visible
 - [ ] Pas de blocage permanent

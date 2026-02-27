@@ -1,5 +1,5 @@
-import Constants from "expo-constants";
-import { logger } from "../logger";
+import Constants from 'expo-constants';
+import { logger } from '../logger';
 
 interface SendOtpResponse {
   success: boolean;
@@ -22,9 +22,9 @@ class OtpService {
   private supabaseUrl: string;
 
   constructor() {
-    this.supabaseUrl = Constants.expoConfig?.extra?.supabaseUrl || "";
+    this.supabaseUrl = Constants.expoConfig?.extra?.supabaseUrl || '';
     if (!this.supabaseUrl) {
-      logger.warn("[OTP] Supabase URL not configured");
+      logger.warn('[OTP] Supabase URL not configured');
     }
   }
 
@@ -35,60 +35,57 @@ class OtpService {
    */
   async sendOtp(phoneNumber: string): Promise<SendOtpResponse> {
     try {
-      if (!phoneNumber || !phoneNumber.startsWith("+")) {
+      if (!phoneNumber || !phoneNumber.startsWith('+')) {
         return {
           success: false,
-          message: "Phone number must be in E.164 format (e.g., +33...)",
-          error: "Phone number must be in E.164 format (e.g., +33...)",
+          message: 'Phone number must be in E.164 format (e.g., +33...)',
+          error: 'Phone number must be in E.164 format (e.g., +33...)',
         };
       }
 
-      logger.info("[OTP] Sending OTP to", phoneNumber);
+      logger.info('[OTP] Sending OTP to', phoneNumber);
 
-      const response = await fetch(
-        `${this.supabaseUrl}/functions/v1/send-otp`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            phoneNumber,
-          }),
-        }
-      );
+      const response = await fetch(`${this.supabaseUrl}/functions/v1/send-otp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          phoneNumber,
+        }),
+      });
 
       if (!response.ok) {
         // Handle rate limit error (429)
         if (response.status === 429) {
           const errorData = await response.json().catch(() => ({}));
-          logger.warn("[OTP] Rate limit exceeded");
+          logger.warn('[OTP] Rate limit exceeded');
           return {
             success: false,
-            message: errorData.message || "Trop de requêtes. Veuillez réessayer plus tard.",
-            error: errorData.message || "Trop de requêtes. Veuillez réessayer plus tard.",
-            errorCode: "rate_limit_exceeded",
+            message: errorData.message || 'Trop de requêtes. Veuillez réessayer plus tard.',
+            error: errorData.message || 'Trop de requêtes. Veuillez réessayer plus tard.',
+            errorCode: 'rate_limit_exceeded',
           };
         }
 
         const error = await response.text();
-        logger.error("[OTP] Send failed:", error);
+        logger.error('[OTP] Send failed:', error);
         return {
           success: false,
-          message: "Failed to send OTP. Please try again.",
-          error: "Failed to send OTP. Please try again.",
+          message: 'Failed to send OTP. Please try again.',
+          error: 'Failed to send OTP. Please try again.',
         };
       }
 
       const data: SendOtpResponse = await response.json();
-      logger.info("[OTP] Send successful");
+      logger.info('[OTP] Send successful');
       return data;
     } catch (error) {
-      logger.error("[OTP] Send exception:", error);
+      logger.error('[OTP] Send exception:', error);
       return {
         success: false,
-        message: "Network error. Please check your connection.",
-        error: "Network error. Please check your connection.",
+        message: 'Network error. Please check your connection.',
+        error: 'Network error. Please check your connection.',
       };
     }
   }
@@ -101,64 +98,61 @@ class OtpService {
    */
   async verifyOtp(phoneNumber: string, otpCode: string): Promise<VerifyOtpResponse> {
     try {
-      if (!phoneNumber || !phoneNumber.startsWith("+")) {
+      if (!phoneNumber || !phoneNumber.startsWith('+')) {
         return {
           success: false,
-          message: "Phone number must be in E.164 format",
-          error: "Phone number must be in E.164 format",
+          message: 'Phone number must be in E.164 format',
+          error: 'Phone number must be in E.164 format',
         };
       }
 
       if (!otpCode || !/^\d{6}$/.test(otpCode)) {
         return {
           success: false,
-          message: "OTP code must be 6 digits",
-          error: "OTP code must be 6 digits",
+          message: 'OTP code must be 6 digits',
+          error: 'OTP code must be 6 digits',
         };
       }
 
-      logger.info("[OTP] Verifying OTP for", phoneNumber);
+      logger.info('[OTP] Verifying OTP for', phoneNumber);
 
-      const response = await fetch(
-        `${this.supabaseUrl}/functions/v1/verify-otp`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            phoneNumber,
-            otpCode,
-          }),
-        }
-      );
+      const response = await fetch(`${this.supabaseUrl}/functions/v1/verify-otp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          phoneNumber,
+          otpCode,
+        }),
+      });
 
       const data: VerifyOtpResponse = await response.json();
 
       if (!response.ok) {
         // Handle rate limit error (429)
         if (response.status === 429) {
-          logger.warn("[OTP] Rate limit exceeded");
+          logger.warn('[OTP] Rate limit exceeded');
           return {
             success: false,
-            message: data.message || "Trop de requêtes. Veuillez réessayer plus tard.",
-            error: data.message || "Trop de requêtes. Veuillez réessayer plus tard.",
-            errorCode: "rate_limit_exceeded",
+            message: data.message || 'Trop de requêtes. Veuillez réessayer plus tard.',
+            error: data.message || 'Trop de requêtes. Veuillez réessayer plus tard.',
+            errorCode: 'rate_limit_exceeded',
           };
         }
 
-        logger.warn("[OTP] Verification failed:", data.error);
+        logger.warn('[OTP] Verification failed:', data.error);
         return data;
       }
 
-      logger.info("[OTP] Verification successful");
+      logger.info('[OTP] Verification successful');
       return data;
     } catch (error) {
-      logger.error("[OTP] Verify exception:", error);
+      logger.error('[OTP] Verify exception:', error);
       return {
         success: false,
-        message: "Network error. Please check your connection.",
-        error: "Network error. Please check your connection.",
+        message: 'Network error. Please check your connection.',
+        error: 'Network error. Please check your connection.',
       };
     }
   }

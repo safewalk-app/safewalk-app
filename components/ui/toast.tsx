@@ -107,21 +107,12 @@ export function Toast({ toast, onDismiss }: ToastProps) {
         ]}
       >
         <View style={styles.content}>
-          <Text
-            style={[
-              styles.title,
-              { color: toastStyle.textColor },
-            ]}
-            numberOfLines={1}
-          >
+          <Text style={[styles.title, { color: toastStyle.textColor }]} numberOfLines={1}>
             {toast.title}
           </Text>
           {toast.message && (
             <Text
-              style={[
-                styles.message,
-                { color: toastStyle.textColor, opacity: 0.9 },
-              ]}
+              style={[styles.message, { color: toastStyle.textColor, opacity: 0.9 }]}
               numberOfLines={2}
             >
               {toast.message}
@@ -135,17 +126,9 @@ export function Toast({ toast, onDismiss }: ToastProps) {
               toast.action?.onPress();
               onDismiss();
             }}
-            style={({ pressed }) => [
-              styles.actionButton,
-              pressed && { opacity: 0.7 },
-            ]}
+            style={({ pressed }) => [styles.actionButton, pressed && { opacity: 0.7 }]}
           >
-            <Text
-              style={[
-                styles.actionText,
-                { color: toastStyle.textColor },
-              ]}
-            >
+            <Text style={[styles.actionText, { color: toastStyle.textColor }]}>
               {toast.action.label}
             </Text>
           </Pressable>
@@ -153,14 +136,9 @@ export function Toast({ toast, onDismiss }: ToastProps) {
 
         <Pressable
           onPress={onDismiss}
-          style={({ pressed }) => [
-            styles.closeButton,
-            pressed && { opacity: 0.6 },
-          ]}
+          style={({ pressed }) => [styles.closeButton, pressed && { opacity: 0.6 }]}
         >
-          <Text style={[styles.closeIcon, { color: toastStyle.textColor }]}>
-            ✕
-          </Text>
+          <Text style={[styles.closeIcon, { color: toastStyle.textColor }]}>✕</Text>
         </Pressable>
       </Pressable>
     </Animated.View>
@@ -179,11 +157,7 @@ export function ToastContainer({ toasts, onDismiss }: ToastContainerProps) {
   return (
     <View style={styles.toastContainer} pointerEvents="box-none">
       {toasts.map((toast) => (
-        <Toast
-          key={toast.id}
-          toast={toast}
-          onDismiss={() => onDismiss(toast.id)}
-        />
+        <Toast key={toast.id} toast={toast} onDismiss={() => onDismiss(toast.id)} />
       ))}
     </View>
   );

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   checkRateLimit,
   recordOtpAttempt,
@@ -7,11 +7,11 @@ import {
   getFormattedResetTime,
   clearAllRateLimits,
   getRateLimitStats,
-} from "../lib/services/otp-rate-limiter";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+} from '../lib/services/otp-rate-limiter';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Mock AsyncStorage
-vi.mock("@react-native-async-storage/async-storage", () => ({
+vi.mock('@react-native-async-storage/async-storage', () => ({
   default: {
     getItem: vi.fn(),
     setItem: vi.fn(),
@@ -19,8 +19,8 @@ vi.mock("@react-native-async-storage/async-storage", () => ({
   },
 }));
 
-describe("OTP Rate Limiter", () => {
-  const testPhone = "+33612345678";
+describe('OTP Rate Limiter', () => {
+  const testPhone = '+33612345678';
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -30,8 +30,8 @@ describe("OTP Rate Limiter", () => {
     vi.clearAllMocks();
   });
 
-  describe("checkRateLimit", () => {
-    it("should allow request when no previous attempts", async () => {
+  describe('checkRateLimit', () => {
+    it('should allow request when no previous attempts', async () => {
       (AsyncStorage.getItem as any).mockResolvedValue(null);
 
       const status = await checkRateLimit(testPhone);
@@ -40,7 +40,7 @@ describe("OTP Rate Limiter", () => {
       expect(status.attemptsRemaining).toBe(5);
     });
 
-    it("should allow request when under limit", async () => {
+    it('should allow request when under limit', async () => {
       const records = [
         { phoneNumber: testPhone, timestamp: Date.now() - 1000 },
         { phoneNumber: testPhone, timestamp: Date.now() - 2000 },
@@ -54,7 +54,7 @@ describe("OTP Rate Limiter", () => {
       expect(status.attemptsRemaining).toBe(3); // 5 - 2
     });
 
-    it("should block request when at limit", async () => {
+    it('should block request when at limit', async () => {
       const now = Date.now();
       const records = Array(5)
         .fill(null)
@@ -69,10 +69,10 @@ describe("OTP Rate Limiter", () => {
 
       expect(status.isAllowed).toBe(false);
       expect(status.attemptsRemaining).toBe(0);
-      expect(status.errorCode).toBe("RATE_LIMIT");
+      expect(status.errorCode).toBe('RATE_LIMIT');
     });
 
-    it("should ignore old records outside time window", async () => {
+    it('should ignore old records outside time window', async () => {
       const now = Date.now();
       const oneHourAgo = now - 60 * 60 * 1000;
       const records = [
@@ -88,10 +88,10 @@ describe("OTP Rate Limiter", () => {
       expect(status.attemptsRemaining).toBe(4); // Only 1 recent attempt
     });
 
-    it("should ignore records for different phone numbers", async () => {
+    it('should ignore records for different phone numbers', async () => {
       const records = [
-        { phoneNumber: "+33712345678", timestamp: Date.now() - 1000 },
-        { phoneNumber: "+33812345678", timestamp: Date.now() - 2000 },
+        { phoneNumber: '+33712345678', timestamp: Date.now() - 1000 },
+        { phoneNumber: '+33812345678', timestamp: Date.now() - 2000 },
       ];
 
       (AsyncStorage.getItem as any).mockResolvedValue(JSON.stringify(records));
@@ -102,8 +102,8 @@ describe("OTP Rate Limiter", () => {
       expect(status.attemptsRemaining).toBe(5); // Different numbers don't count
     });
 
-    it("should handle storage errors gracefully", async () => {
-      (AsyncStorage.getItem as any).mockRejectedValue(new Error("Storage error"));
+    it('should handle storage errors gracefully', async () => {
+      (AsyncStorage.getItem as any).mockRejectedValue(new Error('Storage error'));
 
       const status = await checkRateLimit(testPhone);
 
@@ -112,8 +112,8 @@ describe("OTP Rate Limiter", () => {
     });
   });
 
-  describe("recordOtpAttempt", () => {
-    it("should record new attempt", async () => {
+  describe('recordOtpAttempt', () => {
+    it('should record new attempt', async () => {
       (AsyncStorage.getItem as any).mockResolvedValue(null);
 
       await recordOtpAttempt(testPhone);
@@ -124,17 +124,13 @@ describe("OTP Rate Limiter", () => {
 
       expect(stored).toHaveLength(1);
       expect(stored[0].phoneNumber).toBe(testPhone);
-      expect(typeof stored[0].timestamp).toBe("number");
+      expect(typeof stored[0].timestamp).toBe('number');
     });
 
-    it("should append to existing records", async () => {
-      const existing = [
-        { phoneNumber: testPhone, timestamp: Date.now() - 1000 },
-      ];
+    it('should append to existing records', async () => {
+      const existing = [{ phoneNumber: testPhone, timestamp: Date.now() - 1000 }];
 
-      (AsyncStorage.getItem as any).mockResolvedValue(
-        JSON.stringify(existing)
-      );
+      (AsyncStorage.getItem as any).mockResolvedValue(JSON.stringify(existing));
 
       await recordOtpAttempt(testPhone);
 
@@ -145,7 +141,7 @@ describe("OTP Rate Limiter", () => {
       expect(stored).toHaveLength(2);
     });
 
-    it("should clean old records when recording", async () => {
+    it('should clean old records when recording', async () => {
       const now = Date.now();
       const oneHourAgo = now - 60 * 60 * 1000;
       const records = [
@@ -165,11 +161,11 @@ describe("OTP Rate Limiter", () => {
     });
   });
 
-  describe("resetRateLimit", () => {
-    it("should remove all records for phone number", async () => {
+  describe('resetRateLimit', () => {
+    it('should remove all records for phone number', async () => {
       const records = [
         { phoneNumber: testPhone, timestamp: Date.now() - 1000 },
-        { phoneNumber: "+33712345678", timestamp: Date.now() - 2000 },
+        { phoneNumber: '+33712345678', timestamp: Date.now() - 2000 },
       ];
 
       (AsyncStorage.getItem as any).mockResolvedValue(JSON.stringify(records));
@@ -180,10 +176,10 @@ describe("OTP Rate Limiter", () => {
       const stored = JSON.parse(callArgs[1]);
 
       expect(stored).toHaveLength(1);
-      expect(stored[0].phoneNumber).toBe("+33712345678");
+      expect(stored[0].phoneNumber).toBe('+33712345678');
     });
 
-    it("should handle non-existent phone number", async () => {
+    it('should handle non-existent phone number', async () => {
       (AsyncStorage.getItem as any).mockResolvedValue(null);
 
       await resetRateLimit(testPhone);
@@ -196,11 +192,9 @@ describe("OTP Rate Limiter", () => {
     });
   });
 
-  describe("getAttemptsRemaining", () => {
-    it("should return correct number of attempts", async () => {
-      const records = [
-        { phoneNumber: testPhone, timestamp: Date.now() - 1000 },
-      ];
+  describe('getAttemptsRemaining', () => {
+    it('should return correct number of attempts', async () => {
+      const records = [{ phoneNumber: testPhone, timestamp: Date.now() - 1000 }];
 
       (AsyncStorage.getItem as any).mockResolvedValue(JSON.stringify(records));
 
@@ -210,47 +204,47 @@ describe("OTP Rate Limiter", () => {
     });
   });
 
-  describe("getFormattedResetTime", () => {
-    it("should format time remaining correctly", () => {
+  describe('getFormattedResetTime', () => {
+    it('should format time remaining correctly', () => {
       const now = Date.now();
       const future = now + 30 * 1000; // 30 seconds
 
       const formatted = getFormattedResetTime(future);
 
-      expect(formatted).toContain("30");
-      expect(formatted).toContain("sec");
+      expect(formatted).toContain('30');
+      expect(formatted).toContain('sec');
     });
 
-    it("should format minutes correctly", () => {
+    it('should format minutes correctly', () => {
       const now = Date.now();
       const future = now + 5 * 60 * 1000; // 5 minutes
 
       const formatted = getFormattedResetTime(future);
 
-      expect(formatted).toContain("5");
-      expect(formatted).toContain("min");
+      expect(formatted).toContain('5');
+      expect(formatted).toContain('min');
     });
 
-    it("should handle past time", () => {
+    it('should handle past time', () => {
       const now = Date.now();
       const past = now - 1000;
 
       const formatted = getFormattedResetTime(past);
 
-      expect(formatted).toBe("0 sec");
+      expect(formatted).toBe('0 sec');
     });
   });
 
-  describe("clearAllRateLimits", () => {
-    it("should remove all rate limit data", async () => {
+  describe('clearAllRateLimits', () => {
+    it('should remove all rate limit data', async () => {
       await clearAllRateLimits();
 
-      expect(AsyncStorage.removeItem).toHaveBeenCalledWith("otp_rate_limit");
+      expect(AsyncStorage.removeItem).toHaveBeenCalledWith('otp_rate_limit');
     });
   });
 
-  describe("getRateLimitStats", () => {
-    it("should return detailed statistics", async () => {
+  describe('getRateLimitStats', () => {
+    it('should return detailed statistics', async () => {
       const records = [
         { phoneNumber: testPhone, timestamp: Date.now() - 1000 },
         { phoneNumber: testPhone, timestamp: Date.now() - 2000 },
@@ -265,7 +259,7 @@ describe("OTP Rate Limiter", () => {
       expect(stats.isBlocked).toBe(false);
     });
 
-    it("should indicate blocked status when at limit", async () => {
+    it('should indicate blocked status when at limit', async () => {
       const now = Date.now();
       const records = Array(5)
         .fill(null)
@@ -284,8 +278,8 @@ describe("OTP Rate Limiter", () => {
     });
   });
 
-  describe("Integration tests", () => {
-    it("should handle complete rate limit flow", async () => {
+  describe('Integration tests', () => {
+    it('should handle complete rate limit flow', async () => {
       // Check initial state
       (AsyncStorage.getItem as any).mockResolvedValue(null);
       let status = await checkRateLimit(testPhone);

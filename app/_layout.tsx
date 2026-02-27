@@ -1,42 +1,48 @@
-import "@/global.css";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Stack } from "expo-router";
-import { StatusBar } from "expo-status-bar";
-import { useEffect, useMemo, useState, Suspense } from "react";
-import { ActivityIndicator, View } from "react-native";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-import "react-native-reanimated";
-import { Platform } from "react-native";
-import "@/lib/_core/nativewind-pressable";
-import { ThemeProvider } from "@/lib/theme-provider";
+import '@/global.css';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Stack } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+import { useEffect, useMemo, useState, Suspense } from 'react';
+import { ActivityIndicator, View } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import 'react-native-reanimated';
+import { Platform } from 'react-native';
+import '@/lib/_core/nativewind-pressable';
+import { ThemeProvider } from '@/lib/theme-provider';
 import {
   SafeAreaFrameContext,
   SafeAreaInsetsContext,
   SafeAreaProvider,
   initialWindowMetrics,
-} from "react-native-safe-area-context";
-import type { EdgeInsets, Metrics, Rect } from "react-native-safe-area-context";
+} from 'react-native-safe-area-context';
+import type { EdgeInsets, Metrics, Rect } from 'react-native-safe-area-context';
 
-import { initManusRuntime, subscribeSafeAreaInsets } from "@/lib/_core/manus-runtime";
-import { AppProvider } from "@/lib/context/app-context";
-import { ToastProvider } from "@/lib/context/toast-context";
-import { LoadingProvider } from "@/lib/context/loading-context";
-import { PermissionsCheck } from "@/components/permissions-check";
-import { ToastContainer } from "@/components/ui/toast";
-import { LoadingBar } from "@/components/ui/loading-indicator";
-import { useToast } from "@/lib/context/toast-context";
-import { usePushNotifications } from "@/hooks/use-push-notifications";
-import { initializeCertificatePinning, certificatePinningService } from "@/lib/services/certificate-pinning.service";
-import { initializeBiometricAuth } from "@/lib/services/biometric-auth.service";
-import { initializeDeviceBinding } from "@/lib/services/device-binding.service";
-import { initializeTokenRotation, tokenRotationService } from "@/lib/services/token-rotation.service";
-import { logger } from "@/lib/logger";
+import { initManusRuntime, subscribeSafeAreaInsets } from '@/lib/_core/manus-runtime';
+import { AppProvider } from '@/lib/context/app-context';
+import { ToastProvider } from '@/lib/context/toast-context';
+import { LoadingProvider } from '@/lib/context/loading-context';
+import { PermissionsCheck } from '@/components/permissions-check';
+import { ToastContainer } from '@/components/ui/toast';
+import { LoadingBar } from '@/components/ui/loading-indicator';
+import { useToast } from '@/lib/context/toast-context';
+import { usePushNotifications } from '@/hooks/use-push-notifications';
+import {
+  initializeCertificatePinning,
+  certificatePinningService,
+} from '@/lib/services/certificate-pinning.service';
+import { initializeBiometricAuth } from '@/lib/services/biometric-auth.service';
+import { initializeDeviceBinding } from '@/lib/services/device-binding.service';
+import {
+  initializeTokenRotation,
+  tokenRotationService,
+} from '@/lib/services/token-rotation.service';
+import { logger } from '@/lib/logger';
 
 const DEFAULT_WEB_INSETS: EdgeInsets = { top: 0, right: 0, bottom: 0, left: 0 };
 const DEFAULT_WEB_FRAME: Rect = { x: 0, y: 0, width: 0, height: 0 };
 
 export const unstable_settings = {
-  initialRouteName: "index",
+  initialRouteName: 'index',
 };
 
 function ToastContainerWrapper() {
@@ -88,7 +94,14 @@ function SecurityServicesSetup() {
  */
 function ScreenLoadingFallback() {
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#ffffff' }}>
+    <View
+      style={{
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#ffffff',
+      }}
+    >
       <ActivityIndicator size="large" color="#0a7ea4" />
     </View>
   );
@@ -107,7 +120,7 @@ export default function RootLayout() {
   }, []);
 
   useEffect(() => {
-    if (Platform.OS !== "web") return;
+    if (Platform.OS !== 'web') return;
     const handleSafeAreaUpdate = (metrics: Metrics) => {
       setInsets(metrics.insets);
       setFrame(metrics.frame);
@@ -166,17 +179,17 @@ export default function RootLayout() {
                 >
                   {/* Onboarding */}
                   <Stack.Screen name="onboarding" />
-                  
+
                   {/* Main screens with nav */}
                   <Stack.Screen name="index" />
                   <Stack.Screen name="settings" />
-                  
+
                   {/* Flow screens without nav */}
                   <Stack.Screen name="new-session" />
                   <Stack.Screen name="active-session" />
                   <Stack.Screen name="alert-sent" />
                   <Stack.Screen name="history" />
-                  
+
                   <Stack.Screen name="oauth/callback" />
                 </Stack>
                 <StatusBar style="auto" />
@@ -190,7 +203,7 @@ export default function RootLayout() {
     </GestureHandlerRootView>
   );
 
-  const shouldOverrideSafeArea = Platform.OS === "web";
+  const shouldOverrideSafeArea = Platform.OS === 'web';
 
   if (shouldOverrideSafeArea) {
     return (

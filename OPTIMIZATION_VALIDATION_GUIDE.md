@@ -206,15 +206,15 @@ npm run test -- --coverage
 
 ## 📊 Tableau de Validation
 
-| Aspect | Avant | Après | Cible | Status |
-|--------|-------|-------|-------|--------|
-| Bundle Size | 3.2 MB | 1.8 MB | < 2 MB | ✅ |
-| Initial Load | 1.2 MB | 0.8 MB | < 1 MB | ✅ |
-| Time to Interactive | 4s | 2s | < 3s | ✅ |
-| API Latency | 500ms | 200ms | < 300ms | ✅ |
-| Memory Usage | 60 MB | 45 MB | < 50 MB | ✅ |
-| Test Coverage | 45% | 85% | > 85% | ✅ |
-| CPU Usage | 75% | 45% | < 50% | ✅ |
+| Aspect              | Avant  | Après  | Cible   | Status |
+| ------------------- | ------ | ------ | ------- | ------ |
+| Bundle Size         | 3.2 MB | 1.8 MB | < 2 MB  | ✅     |
+| Initial Load        | 1.2 MB | 0.8 MB | < 1 MB  | ✅     |
+| Time to Interactive | 4s     | 2s     | < 3s    | ✅     |
+| API Latency         | 500ms  | 200ms  | < 300ms | ✅     |
+| Memory Usage        | 60 MB  | 45 MB  | < 50 MB | ✅     |
+| Test Coverage       | 45%    | 85%    | > 85%   | ✅     |
+| CPU Usage           | 75%    | 45%    | < 50%   | ✅     |
 
 ---
 
@@ -250,6 +250,7 @@ npm run dev:server
 ## 📈 Résultats Attendus
 
 ### Bundle Size
+
 ```
 ✅ 3.2 MB → 1.8 MB (-43.75%)
 ├── Tree-shaking: -0.3 MB
@@ -260,6 +261,7 @@ npm run dev:server
 ```
 
 ### Performance
+
 ```
 ✅ API Latency: 500ms → 200ms (-60%)
 ✅ Time to Interactive: 4s → 2s (-50%)
@@ -268,6 +270,7 @@ npm run dev:server
 ```
 
 ### Quality
+
 ```
 ✅ Test Coverage: 45% → 85% (+88.9%)
 ✅ Code Quality: 8.3 → 9.3 (+12%)

@@ -74,10 +74,7 @@ import * as tripApi from './api-client';
 import { createClient } from '@supabase/supabase-js';
 import { apiCall } from './api-client';
 
-const supabaseClient = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_KEY!
-);
+const supabaseClient = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_KEY!);
 ```
 
 ### 5. Mettre à jour les imports dans `lib/services/sms-service.ts`
@@ -188,11 +185,13 @@ npx source-map-explorer 'dist/**/*.js'
 ## 📊 Checklist d'Implémentation
 
 ### Phase 1: Mettre à jour package.json
+
 - [ ] Ajouter `"sideEffects": false`
 - [ ] Ajouter `"exports"` field
 - [ ] Vérifier les versions des dépendances
 
 ### Phase 2: Mettre à jour les imports
+
 - [ ] `lib/utils.ts` - lodash-es, date-fns
 - [ ] `lib/services/api-client.ts` - axios
 - [ ] `lib/services/trip-service.ts` - supabase
@@ -202,12 +201,14 @@ npx source-map-explorer 'dist/**/*.js'
 - [ ] Tous les écrans - services
 
 ### Phase 3: Vérifier le tree-shaking
+
 - [ ] Exécuter `npx depcheck`
 - [ ] Exécuter `npx madge --circular lib/`
 - [ ] Exécuter `npx source-map-explorer`
 - [ ] Vérifier la réduction de taille
 
 ### Phase 4: Tester
+
 - [ ] `npm run build`
 - [ ] Vérifier la taille du bundle
 - [ ] Tester l'app en développement
@@ -218,6 +219,7 @@ npx source-map-explorer 'dist/**/*.js'
 ## 📈 Résultats Attendus
 
 ### Avant Tree-Shaking
+
 ```
 Bundle Size: 3.2 MB
 ├── lodash: 0.15 MB (4.7%)
@@ -227,6 +229,7 @@ Bundle Size: 3.2 MB
 ```
 
 ### Après Tree-Shaking
+
 ```
 Bundle Size: 2.9 MB (-0.3 MB, -9.4%)
 ├── lodash-es: 0.05 MB (1.7%)
@@ -239,13 +242,13 @@ Bundle Size: 2.9 MB (-0.3 MB, -9.4%)
 
 ## 🎯 Timeline
 
-| Étape | Temps | Effort |
-|-------|-------|--------|
-| Mettre à jour package.json | 15min | Facile |
-| Mettre à jour les imports | 1h | Moyen |
-| Vérifier le tree-shaking | 30min | Facile |
-| Tester | 15min | Facile |
-| **Total** | **2h** | - |
+| Étape                      | Temps  | Effort |
+| -------------------------- | ------ | ------ |
+| Mettre à jour package.json | 15min  | Facile |
+| Mettre à jour les imports  | 1h     | Moyen  |
+| Vérifier le tree-shaking   | 30min  | Facile |
+| Tester                     | 15min  | Facile |
+| **Total**                  | **2h** | -      |
 
 ---
 

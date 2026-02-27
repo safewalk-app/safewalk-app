@@ -52,12 +52,12 @@ export function FeedbackAnimation({
   ...props
 }: FeedbackAnimationProps) {
   const reduceMotion = useReduceMotion();
-  
+
   // Adapter les durées selon les préférences d'accessibilité
   const animationDuration = reduceMotion ? 0 : duration;
   const animationSuccessDuration = reduceMotion ? 0 : successDuration;
   const animationErrorDuration = reduceMotion ? 0 : errorDuration;
-  
+
   const { animatedStyle } = useStateAnimation(state, {
     duration: animationDuration,
     successDuration: animationSuccessDuration,
@@ -65,10 +65,7 @@ export function FeedbackAnimation({
   });
 
   return (
-    <Animated.View
-      style={[animatedStyle, style]}
-      {...props}
-    >
+    <Animated.View style={[animatedStyle, style]} {...props}>
       {children}
     </Animated.View>
   );

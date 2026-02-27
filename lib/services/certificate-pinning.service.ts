@@ -1,8 +1,8 @@
 /**
  * Certificate Pinning Service
- * 
+ *
  * Implémente le Certificate Pinning pour prévenir les attaques MITM
- * 
+ *
  * Fonctionnalités:
  * - Validation des certificats SSL/TLS
  * - Pinning des certificats publics (public key pinning)
@@ -81,7 +81,9 @@ class CertificatePinningService {
 
         // Notifier si trop de violations
         if (this.violationCount > 3) {
-          logger.error('🚨 [Certificate Pinning] ALERTE: Trop de violations, possible attaque MITM!');
+          logger.error(
+            '🚨 [Certificate Pinning] ALERTE: Trop de violations, possible attaque MITM!',
+          );
         }
 
         return false;
@@ -118,9 +120,7 @@ class CertificatePinningService {
    */
   public removePinnedCertificate(host: string, publicKeyPin: string): void {
     if (PINNED_CERTIFICATES[host]) {
-      PINNED_CERTIFICATES[host] = PINNED_CERTIFICATES[host].filter(
-        (pin) => pin !== publicKeyPin
-      );
+      PINNED_CERTIFICATES[host] = PINNED_CERTIFICATES[host].filter((pin) => pin !== publicKeyPin);
       logger.info(`✅ [Certificate Pinning] Certificat supprimé pour ${host}`);
     }
   }

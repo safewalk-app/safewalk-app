@@ -39,14 +39,10 @@ describe('Loading Indicator System', () => {
     });
 
     it('should calculate total progress', () => {
-      const items = [
-        { progress: 50 },
-        { progress: 75 },
-        { progress: 100 },
-      ];
+      const items = [{ progress: 50 }, { progress: 75 }, { progress: 100 }];
 
       const totalProgress = Math.round(
-        items.reduce((sum, item) => sum + item.progress, 0) / items.length
+        items.reduce((sum, item) => sum + item.progress, 0) / items.length,
       );
 
       expect(totalProgress).toBe(75);
@@ -89,7 +85,7 @@ describe('Loading Indicator System', () => {
       const startTime = Date.now();
 
       // Simuler le délai
-      await new Promise(resolve => setTimeout(resolve, minDuration + 50));
+      await new Promise((resolve) => setTimeout(resolve, minDuration + 50));
 
       const elapsed = Date.now() - startTime;
       expect(elapsed).toBeGreaterThanOrEqual(minDuration);
@@ -168,10 +164,7 @@ describe('Loading Indicator System', () => {
         { id: '2', name: 'OTP Service', type: 'service' as const },
       ];
 
-      expect(loadingItems.map(item => item.name)).toEqual([
-        'Trip Service',
-        'OTP Service',
-      ]);
+      expect(loadingItems.map((item) => item.name)).toEqual(['Trip Service', 'OTP Service']);
     });
   });
 
@@ -184,7 +177,7 @@ describe('Loading Indicator System', () => {
       ];
 
       const totalProgress = Math.round(
-        items.reduce((sum, item) => sum + item.progress, 0) / items.length
+        items.reduce((sum, item) => sum + item.progress, 0) / items.length,
       );
 
       expect(items).toHaveLength(3);
@@ -198,7 +191,7 @@ describe('Loading Indicator System', () => {
       ];
 
       // Simuler la suppression d'un item complété
-      items = items.filter(item => item.progress < 100);
+      items = items.filter((item) => item.progress < 100);
 
       expect(items).toHaveLength(1);
       expect(items[0].name).toBe('Service 2');
@@ -223,7 +216,7 @@ describe('Loading Indicator System', () => {
 
       for (let i = 0; i < iterations; i++) {
         items.push({ id: `item-${i}`, progress: 0 });
-        items = items.filter(item => Math.random() > 0.5);
+        items = items.filter((item) => Math.random() > 0.5);
       }
 
       expect(items.length).toBeLessThanOrEqual(iterations);

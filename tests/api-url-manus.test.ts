@@ -9,7 +9,7 @@ describe('API URL Manus Configuration', () => {
   it('should have EXPO_PUBLIC_API_URL format valid if configured', () => {
     const apiUrl = process.env.EXPO_PUBLIC_API_URL;
     console.log('🔗 EXPO_PUBLIC_API_URL:', apiUrl || '(non définie)');
-    
+
     // L'URL peut être définie ou non selon l'environnement
     if (apiUrl) {
       expect(apiUrl).toMatch(/^https?:\/\//);

@@ -20,9 +20,11 @@ SafeWalk utilise une architecture **serverless** avec Supabase pour gérer les t
 **Objectif** : Récupérer les trips en retard de manière atomique avec `FOR UPDATE SKIP LOCKED`.
 
 **Paramètres**
+
 - `p_limit` : Nombre maximum de trips à traiter (défaut: 50)
 
 **Retour**
+
 ```typescript
 {
   trip_id: uuid;
@@ -35,10 +37,12 @@ SafeWalk utilise une architecture **serverless** avec Supabase pour gérer les t
   location_latitude: numeric;
   location_longitude: numeric;
   last_seen_at: timestamp;
-}[]
+}
+[];
 ```
 
 **Logique**
+
 1. Sélectionne les trips avec `status='active' AND deadline<=now AND alert_sent_at IS NULL`
 2. Utilise `FOR UPDATE SKIP LOCKED` pour éviter les race conditions
 3. Met à jour `status='alerted'` et `alert_sent_at=now()`
@@ -53,10 +57,12 @@ SafeWalk utilise une architecture **serverless** avec Supabase pour gérer les t
 **Objectif** : Consommer les crédits de manière atomique avec validation des quotas.
 
 **Paramètres**
+
 - `p_user_id` : UUID de l'utilisateur
 - `p_type` : Type de crédit (`'late'`, `'test'`, `'sos'`)
 
 **Retour**
+
 ```typescript
 {
   allowed: boolean;
@@ -66,6 +72,7 @@ SafeWalk utilise une architecture **serverless** avec Supabase pour gérer les t
 ```
 
 **Raisons possibles**
+
 - `'subscription_active'` - Utilisateur abonné (quotas uniquement)
 - `'credit_consumed'` - Crédit consommé avec succès
 - `'sos_allowed'` - SOS autorisé (quota OK)
@@ -78,23 +85,27 @@ SafeWalk utilise une architecture **serverless** avec Supabase pour gérer les t
 **Logique par type**
 
 #### Type = `'late'` (alerte retard)
+
 - Si `subscription_active=true` : Vérifier quota journalier `sms_daily_limit`
 - Sinon : Vérifier `free_alerts_remaining > 0` ET quota journalier
 - Si OK : Décrémenter `free_alerts_remaining` et retourner `allowed=true`
 - Sinon : Retourner `allowed=false` avec raison
 
 #### Type = `'test'` (SMS de test)
+
 - Si `subscription_active=true` : Vérifier quota journalier
 - Sinon : Vérifier `free_test_sms_remaining > 0` ET quota journalier
 - Si OK : Décrémenter `free_test_sms_remaining` et retourner `allowed=true`
 - Sinon : Retourner `allowed=false` avec raison
 
 #### Type = `'sos'` (alerte SOS)
+
 - Vérifier quota SOS journalier `sms_sos_daily_limit`
 - Si OK : Retourner `allowed=true` (pas de déduction de crédit en MVP)
 - Sinon : Retourner `allowed=false`
 
 **Quotas journaliers** (réinitialisés à minuit)
+
 - `sms_daily_limit` : 10 SMS/jour (late + test)
 - `sms_sos_daily_limit` : 3 SOS/jour
 
@@ -107,12 +118,14 @@ SafeWalk utilise une architecture **serverless** avec Supabase pour gérer les t
 **Objectif** : Compter les SMS envoyés dans les dernières 24h.
 
 **Paramètres**
+
 - `p_user_id` : UUID de l'utilisateur
 - `p_type` : Type de SMS optionnel (null = tous les types)
 
 **Retour**
+
 ```typescript
-int // Nombre de SMS envoyés
+int; // Nombre de SMS envoyés
 ```
 
 ---
@@ -130,6 +143,7 @@ Toutes les fonctions client-auth utilisent le JWT de l'utilisateur pour l'authen
 **Auth** : JWT user (Authorization header)
 
 **Payload**
+
 ```typescript
 {
   deadlineISO: string;        // ISO 8601 timestamp (future)
@@ -139,6 +153,7 @@ Toutes les fonctions client-auth utilisent le JWT de l'utilisateur pour l'authen
 ```
 
 **Réponse**
+
 ```typescript
 {
   success: boolean;
@@ -152,6 +167,7 @@ Toutes les fonctions client-auth utilisent le JWT de l'utilisateur pour l'authen
 ```
 
 **Codes d'erreur**
+
 - `UNAUTHORIZED` - Token invalide/expiré
 - `CONFIG_ERROR` - Configuration Supabase manquante
 - `INVALID_INPUT` - deadlineISO manquant
@@ -168,6 +184,7 @@ Toutes les fonctions client-auth utilisent le JWT de l'utilisateur pour l'authen
 **Auth** : JWT user
 
 **Payload**
+
 ```typescript
 {
   tripId: string;
@@ -175,6 +192,7 @@ Toutes les fonctions client-auth utilisent le JWT de l'utilisateur pour l'authen
 ```
 
 **Réponse**
+
 ```typescript
 {
   success: boolean;
@@ -187,6 +205,7 @@ Toutes les fonctions client-auth utilisent le JWT de l'utilisateur pour l'authen
 ```
 
 **Codes d'erreur**
+
 - `UNAUTHORIZED` - Token invalide
 - `INVALID_INPUT` - tripId manquant
 - `NOT_FOUND` - Trip non trouvé ou non autorisé
@@ -202,14 +221,16 @@ Toutes les fonctions client-auth utilisent le JWT de l'utilisateur pour l'authen
 **Auth** : JWT user
 
 **Payload**
+
 ```typescript
 {
   tripId: string;
-  addMinutes: number;         // 1-1440 minutes
+  addMinutes: number; // 1-1440 minutes
 }
 ```
 
 **Réponse**
+
 ```typescript
 {
   success: boolean;
@@ -222,6 +243,7 @@ Toutes les fonctions client-auth utilisent le JWT de l'utilisateur pour l'authen
 ```
 
 **Codes d'erreur**
+
 - `UNAUTHORIZED` - Token invalide
 - `INVALID_INPUT` - tripId ou addMinutes manquant/invalide
 - `EXTENSION_TOO_LONG` - Extension > 24h
@@ -238,15 +260,17 @@ Toutes les fonctions client-auth utilisent le JWT de l'utilisateur pour l'authen
 **Auth** : JWT user
 
 **Payload**
+
 ```typescript
 {
   tripId: string;
-  lat: number;                // -90 à 90
-  lng: number;                // -180 à 180
+  lat: number; // -90 à 90
+  lng: number; // -180 à 180
 }
 ```
 
 **Réponse**
+
 ```typescript
 {
   success: boolean;
@@ -258,6 +282,7 @@ Toutes les fonctions client-auth utilisent le JWT de l'utilisateur pour l'authen
 ```
 
 **Codes d'erreur**
+
 - `UNAUTHORIZED` - Token invalide
 - `INVALID_INPUT` - Paramètres manquants
 - `INVALID_COORDINATES` - Format ou plage invalide
@@ -274,11 +299,14 @@ Toutes les fonctions client-auth utilisent le JWT de l'utilisateur pour l'authen
 **Auth** : JWT user
 
 **Payload**
+
 ```typescript
-{}
+{
+}
 ```
 
 **Réponse**
+
 ```typescript
 {
   success: boolean;
@@ -290,6 +318,7 @@ Toutes les fonctions client-auth utilisent le JWT de l'utilisateur pour l'authen
 ```
 
 **Logique**
+
 1. Appelle `consume_credit(user_id, 'test')`
 2. Si `allowed=false` : Retourne erreur avec raison
 3. Récupère le contact d'urgence principal (priority=1, opted_out=false)
@@ -297,6 +326,7 @@ Toutes les fonctions client-auth utilisent le JWT de l'utilisateur pour l'authen
 5. Enregistre dans `sms_logs`
 
 **Codes d'erreur**
+
 - `UNAUTHORIZED` - Token invalide
 - `CONFIG_ERROR` - Configuration manquante
 - `CREDIT_CHECK_FAILED` - Erreur lors de la vérification des crédits
@@ -315,6 +345,7 @@ Toutes les fonctions client-auth utilisent le JWT de l'utilisateur pour l'authen
 **Auth** : JWT user
 
 **Payload**
+
 ```typescript
 {
   tripId?: string;            // Optionnel, pour inclure la position
@@ -322,6 +353,7 @@ Toutes les fonctions client-auth utilisent le JWT de l'utilisateur pour l'authen
 ```
 
 **Réponse**
+
 ```typescript
 {
   success: boolean;
@@ -333,6 +365,7 @@ Toutes les fonctions client-auth utilisent le JWT de l'utilisateur pour l'authen
 ```
 
 **Logique**
+
 1. Appelle `consume_credit(user_id, 'sos')`
 2. Si `allowed=false` : Retourne erreur avec raison
 3. Récupère le trip (si fourni) pour la position
@@ -342,6 +375,7 @@ Toutes les fonctions client-auth utilisent le JWT de l'utilisateur pour l'authen
 7. Met à jour trip status à `'sos_triggered'`
 
 **Codes d'erreur**
+
 - Identiques à `test-sms` + `quota_reached` pour SOS
 
 ---
@@ -355,11 +389,14 @@ Toutes les fonctions client-auth utilisent le JWT de l'utilisateur pour l'authen
 **Auth** : Header `x-cron-secret` (doit correspondre à `CRON_SECRET` env var)
 
 **Payload**
+
 ```typescript
-{}
+{
+}
 ```
 
 **Réponse**
+
 ```typescript
 {
   success: boolean;
@@ -373,6 +410,7 @@ Toutes les fonctions client-auth utilisent le JWT de l'utilisateur pour l'authen
 ```
 
 **Logique**
+
 1. Vérifie le header `x-cron-secret`
 2. Appelle `claim_overdue_trips(50)`
 3. Pour chaque trip :
@@ -385,6 +423,7 @@ Toutes les fonctions client-auth utilisent le JWT de l'utilisateur pour l'authen
 **Appel recommandé** : Toutes les 1-2 minutes via Supabase Cron
 
 **Exemple cron** :
+
 ```
 0 */1 * * * *  # Toutes les 1 minute
 ```
@@ -396,9 +435,10 @@ Toutes les fonctions client-auth utilisent le JWT de l'utilisateur pour l'authen
 ### `sendSms(options: SendSmsOptions)`
 
 **Signature**
+
 ```typescript
 interface SendSmsOptions {
-  to: string;                 // Numéro E.164 (+33612345678)
+  to: string; // Numéro E.164 (+33612345678)
   message: string;
   config: TwilioConfig;
 }
@@ -412,6 +452,7 @@ interface SendSmsResponse {
 ```
 
 **Logique**
+
 1. Valide les paramètres
 2. Crée Basic Auth header (Base64)
 3. POST vers `https://api.twilio.com/2010-04-01/Accounts/{SID}/Messages.json`
@@ -425,10 +466,11 @@ interface SendSmsResponse {
 Formate un numéro au format E.164.
 
 **Exemple**
+
 ```typescript
-formatPhoneNumber("0612345678")      // "+33612345678"
-formatPhoneNumber("612345678")       // "+33612345678"
-formatPhoneNumber("+33612345678")    // "+33612345678"
+formatPhoneNumber('0612345678'); // "+33612345678"
+formatPhoneNumber('612345678'); // "+33612345678"
+formatPhoneNumber('+33612345678'); // "+33612345678"
 ```
 
 ---
@@ -444,6 +486,7 @@ Valide le format E.164 : `^\+[1-9]\d{1,14}$`
 #### `createOverdueAlertMessage(userName, deadline, shareLocation, lat?, lng?)`
 
 Exemple :
+
 ```
 🚨 Alerte SafeWalk: Alice n'a pas confirmé son retour avant 14:30.
 Dernière position: https://maps.google.com/?q=48.8566,2.3522
@@ -454,6 +497,7 @@ Vérifiez son état ou contactez les autorités si nécessaire.
 #### `createTestSmsMessage()`
 
 Exemple :
+
 ```
 ✅ SafeWalk: Ceci est un SMS de test. Votre contact d'urgence a bien été configuré.
 ```
@@ -461,6 +505,7 @@ Exemple :
 #### `createSosAlertMessage(userName, shareLocation, lat?, lng?)`
 
 Exemple :
+
 ```
 🆘 Alerte SOS SafeWalk: Alice a déclenché une alerte d'urgence immédiate.
 Position: https://maps.google.com/?q=48.8566,2.3522
@@ -477,6 +522,7 @@ Contactez immédiatement les autorités si nécessaire.
 Client pour toutes les Edge Functions.
 
 **Fonctions**
+
 - `startTrip(input: StartTripInput)` → `StartTripOutput`
 - `checkin(input: CheckinInput)` → `CheckinOutput`
 - `extendTrip(input: ExtendInput)` → `ExtendOutput`
@@ -485,6 +531,7 @@ Client pour toutes les Edge Functions.
 - `triggerSos(input: SosInput)` → `SosOutput`
 
 **Logging**
+
 - Tous les appels sont loggés via `logger.ts`
 - Erreurs incluent le code d'erreur pour le monitoring
 
@@ -539,7 +586,6 @@ Frontend: Affiche Alert Sent ou Home
 
 - **RPC `claim_overdue_trips`** : Utilise `FOR UPDATE SKIP LOCKED` + `alert_sent_at IS NULL`
   - Appels multiples = même résultat (trips déjà claimés ignorés)
-  
 - **RPC `consume_credit`** : Décrément atomique
   - Appels multiples = crédits décrémentés à chaque fois (OK pour MVP)
 
@@ -612,6 +658,7 @@ supabase secrets set CRON_SECRET=...
 ### 4. Cron Job
 
 Configurer dans Supabase Dashboard :
+
 ```
 POST /functions/v1/cron-check-deadlines
 Header: x-cron-secret: {CRON_SECRET}
@@ -627,12 +674,14 @@ Interval: */1 * * * *  (toutes les 1 minute)
 **Symptôme** : Alertes non envoyées après deadline
 
 **Causes possibles**
+
 1. Cron job ne s'exécute pas → Vérifier Supabase Cron
 2. RPC `claim_overdue_trips` échoue → Vérifier logs Edge Function
 3. Crédit insuffisant → Vérifier `free_alerts_remaining`
 4. Twilio error → Vérifier `sms_logs` status='failed'
 
 **Debug**
+
 ```sql
 SELECT * FROM sessions WHERE status='active' AND deadline < now();
 SELECT * FROM sms_logs WHERE created_at > now() - interval '1h' ORDER BY created_at DESC;
@@ -643,12 +692,14 @@ SELECT * FROM sms_logs WHERE created_at > now() - interval '1h' ORDER BY created
 **Symptôme** : `sms_logs` status='failed'
 
 **Causes possibles**
+
 1. Numéro invalide → Vérifier `emergency_contacts.phone_number`
 2. Twilio error → Vérifier `sms_logs.error_message`
 3. Quota dépassé → Vérifier `consume_credit` reason='quota_reached'
 4. Crédit insuffisant → Vérifier `consume_credit` reason='no_credits'
 
 **Debug**
+
 ```sql
 SELECT * FROM sms_logs WHERE status='failed' ORDER BY created_at DESC LIMIT 10;
 SELECT * FROM emergency_contacts WHERE user_id = '...' AND priority = 1;

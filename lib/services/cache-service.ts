@@ -2,12 +2,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 /**
  * Cache Service - Gestion du cache local et serveur
- * 
+ *
  * Architecture:
  * 1. Cache local (AsyncStorage) - Rapide, persistant
  * 2. Cache serveur (Redis) - Partagé, centralisé
  * 3. API - Source de vérité
- * 
+ *
  * Flow: Local → Server → API
  */
 
@@ -28,11 +28,11 @@ export const CACHE_KEYS = {
   USER_INFO: 'user_info',
   USER_CREDITS: 'user_credits',
   USER_CONTACTS: 'user_contacts',
-  
+
   // Trip
   ACTIVE_TRIP: 'active_trip',
   TRIP_HISTORY: 'trip_history',
-  
+
   // System
   SYSTEM_CONFIG: 'system_config',
   TARIFFS: 'tariffs',
@@ -60,19 +60,19 @@ export async function getCached<T>(key: string): Promise<T | null> {
   try {
     const cacheKey = `${CACHE_PREFIX}${key}`;
     const cached = await AsyncStorage.getItem(cacheKey);
-    
+
     if (!cached) return null;
-    
+
     const entry: CacheEntry<T> = JSON.parse(cached);
     const now = Date.now();
     const age = (now - entry.timestamp) / 1000; // en secondes
-    
+
     // Vérifier si le cache a expiré
     if (age > entry.ttl) {
       await AsyncStorage.removeItem(cacheKey);
       return null;
     }
-    
+
     return entry.data;
   } catch (error) {
     console.error(`[CacheService] Error getting cache for ${key}:`, error);
@@ -83,21 +83,17 @@ export async function getCached<T>(key: string): Promise<T | null> {
 /**
  * Stocker une valeur dans le cache
  */
-export async function setCached<T>(
-  key: string,
-  data: T,
-  ttl?: number
-): Promise<void> {
+export async function setCached<T>(key: string, data: T, ttl?: number): Promise<void> {
   try {
     const cacheKey = `${CACHE_PREFIX}${key}`;
     const cacheTtl = ttl ?? TTL_CONFIG[key] ?? DEFAULT_TTL;
-    
+
     const entry: CacheEntry<T> = {
       data,
       timestamp: Date.now(),
       ttl: cacheTtl,
     };
-    
+
     await AsyncStorage.setItem(cacheKey, JSON.stringify(entry));
   } catch (error) {
     console.error(`[CacheService] Error setting cache for ${key}:`, error);
@@ -122,7 +118,7 @@ export async function clearCache(key: string): Promise<void> {
 export async function clearAllCache(): Promise<void> {
   try {
     const keys = await AsyncStorage.getAllKeys();
-    const cacheKeys = keys.filter(k => k.startsWith(CACHE_PREFIX));
+    const cacheKeys = keys.filter((k) => k.startsWith(CACHE_PREFIX));
     await AsyncStorage.multiRemove(cacheKeys);
   } catch (error) {
     console.error('[CacheService] Error clearing all cache:', error);
@@ -131,7 +127,7 @@ export async function clearAllCache(): Promise<void> {
 
 /**
  * Obtenir une valeur avec fallback API
- * 
+ *
  * Flow:
  * 1. Vérifier le cache local
  * 2. Si expiré, appeler l'API
@@ -141,20 +137,20 @@ export async function clearAllCache(): Promise<void> {
 export async function getCachedOrFetch<T>(
   key: string,
   fetchFn: () => Promise<T>,
-  ttl?: number
+  ttl?: number,
 ): Promise<T> {
   // 1. Vérifier le cache
   const cached = await getCached<T>(key);
   if (cached !== null) {
     return cached;
   }
-  
+
   // 2. Appeler l'API
   const data = await fetchFn();
-  
+
   // 3. Mettre à jour le cache
   await setCached(key, data, ttl);
-  
+
   // 4. Retourner
   return data;
 }
@@ -170,7 +166,7 @@ export async function invalidateCache(key: string): Promise<void> {
  * Invalider plusieurs clés de cache
  */
 export async function invalidateCaches(keys: string[]): Promise<void> {
-  await Promise.all(keys.map(key => clearCache(key)));
+  await Promise.all(keys.map((key) => clearCache(key)));
 }
 
 /**
@@ -179,7 +175,7 @@ export async function invalidateCaches(keys: string[]): Promise<void> {
 export async function preloadCache<T>(
   key: string,
   fetchFn: () => Promise<T>,
-  ttl?: number
+  ttl?: number,
 ): Promise<void> {
   try {
     const data = await fetchFn();
@@ -199,17 +195,17 @@ export async function getCacheStats(): Promise<{
 }> {
   try {
     const keys = await AsyncStorage.getAllKeys();
-    const cacheKeys = keys.filter(k => k.startsWith(CACHE_PREFIX));
-    
+    const cacheKeys = keys.filter((k) => k.startsWith(CACHE_PREFIX));
+
     let totalSize = 0;
     let expired = 0;
     const now = Date.now();
-    
+
     for (const key of cacheKeys) {
       const cached = await AsyncStorage.getItem(key);
       if (cached) {
         totalSize += cached.length;
-        
+
         try {
           const entry: CacheEntry<any> = JSON.parse(cached);
           const age = (now - entry.timestamp) / 1000;
@@ -221,7 +217,7 @@ export async function getCacheStats(): Promise<{
         }
       }
     }
-    
+
     return {
       totalSize,
       entries: cacheKeys.length,
@@ -239,11 +235,11 @@ export async function getCacheStats(): Promise<{
 export async function cleanupExpiredCache(): Promise<number> {
   try {
     const keys = await AsyncStorage.getAllKeys();
-    const cacheKeys = keys.filter(k => k.startsWith(CACHE_PREFIX));
-    
+    const cacheKeys = keys.filter((k) => k.startsWith(CACHE_PREFIX));
+
     let cleaned = 0;
     const now = Date.now();
-    
+
     for (const key of cacheKeys) {
       const cached = await AsyncStorage.getItem(key);
       if (cached) {
@@ -259,7 +255,7 @@ export async function cleanupExpiredCache(): Promise<number> {
         }
       }
     }
-    
+
     return cleaned;
   } catch (error) {
     console.error('[CacheService] Error cleaning up cache:', error);

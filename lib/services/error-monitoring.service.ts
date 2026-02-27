@@ -1,6 +1,6 @@
 /**
  * Error Monitoring Service - Suivi des erreurs en temps réel
- * 
+ *
  * Fonctionnalités:
  * - Capture des erreurs non gérées
  * - Suivi des performances
@@ -85,7 +85,7 @@ class ErrorMonitoringService {
       this.isInitialized = true;
       logger.info('✅ [Error Monitoring] Service initialisé');
     } catch (error) {
-      logger.error('❌ [Error Monitoring] Erreur d\'initialisation:', error);
+      logger.error("❌ [Error Monitoring] Erreur d'initialisation:", error);
     }
   }
 
@@ -172,7 +172,7 @@ class ErrorMonitoringService {
   public captureNetworkError(
     message: string,
     statusCode?: number,
-    context?: Record<string, any>
+    context?: Record<string, any>,
   ): ErrorReport {
     return this.captureError({
       message,
@@ -186,11 +186,7 @@ class ErrorMonitoringService {
   /**
    * Capturer une erreur API
    */
-  public captureApiError(
-    endpoint: string,
-    statusCode: number,
-    error: any
-  ): ErrorReport {
+  public captureApiError(endpoint: string, statusCode: number, error: any): ErrorReport {
     return this.captureError({
       message: `API Error: ${endpoint} (${statusCode})`,
       category: ErrorCategory.API,
@@ -231,7 +227,7 @@ class ErrorMonitoringService {
    * Marquer une erreur comme résolue
    */
   public resolveError(errorId: string): void {
-    const error = this.errorQueue.find(e => e.id === errorId);
+    const error = this.errorQueue.find((e) => e.id === errorId);
     if (error) {
       error.resolved = true;
       logger.info(`✅ [Error Monitoring] Erreur ${errorId} marquée comme résolue`);
@@ -262,15 +258,12 @@ class ErrorMonitoringService {
     };
 
     const emoji = severityEmoji[error.severity];
-    logger.error(
-      `${emoji} [${error.category.toUpperCase()}] ${error.message}`,
-      {
-        errorId: error.id,
-        severity: error.severity,
-        stack: error.stack,
-        context: error.context,
-      }
-    );
+    logger.error(`${emoji} [${error.category.toUpperCase()}] ${error.message}`, {
+      errorId: error.id,
+      severity: error.severity,
+      stack: error.stack,
+      context: error.context,
+    });
   }
 
   /**
@@ -289,7 +282,7 @@ class ErrorMonitoringService {
     if (this.errorQueue.length === 0) return;
 
     try {
-      const errorsToSend = this.errorQueue.filter(e => !e.resolved);
+      const errorsToSend = this.errorQueue.filter((e) => !e.resolved);
 
       if (errorsToSend.length === 0) return;
 
@@ -306,7 +299,7 @@ class ErrorMonitoringService {
 
       logger.info('✅ [Error Monitoring] Erreurs envoyées avec succès');
     } catch (error) {
-      logger.error('❌ [Error Monitoring] Erreur lors de l\'envoi:', error);
+      logger.error("❌ [Error Monitoring] Erreur lors de l'envoi:", error);
     }
   }
 
@@ -327,7 +320,7 @@ class ErrorMonitoringService {
         body: JSON.stringify({
           version: APP_VERSION,
           environment: ENVIRONMENT,
-          errors: errors.map(e => ({
+          errors: errors.map((e) => ({
             type: e.category,
             value: e.message,
             stacktrace: e.stack,
@@ -339,7 +332,7 @@ class ErrorMonitoringService {
       });
 
       if (!response.ok) {
-        logger.error('❌ [Sentry] Erreur d\'envoi:', response.statusText);
+        logger.error("❌ [Sentry] Erreur d'envoi:", response.statusText);
       }
     } catch (error) {
       logger.error('❌ [Sentry] Exception:', error);
@@ -364,7 +357,7 @@ class ErrorMonitoringService {
       });
 
       if (!response.ok) {
-        logger.error('❌ [Logs Service] Erreur d\'envoi:', response.statusText);
+        logger.error("❌ [Logs Service] Erreur d'envoi:", response.statusText);
       }
     } catch (error) {
       logger.error('❌ [Logs Service] Exception:', error);
@@ -380,13 +373,11 @@ class ErrorMonitoringService {
     criticalErrors: number;
     errorsByCategory: Record<string, number>;
   } {
-    const unresolvedErrors = this.errorQueue.filter(e => !e.resolved);
-    const criticalErrors = unresolvedErrors.filter(
-      e => e.severity === ErrorSeverity.CRITICAL
-    );
+    const unresolvedErrors = this.errorQueue.filter((e) => !e.resolved);
+    const criticalErrors = unresolvedErrors.filter((e) => e.severity === ErrorSeverity.CRITICAL);
 
     const errorsByCategory: Record<string, number> = {};
-    unresolvedErrors.forEach(e => {
+    unresolvedErrors.forEach((e) => {
       errorsByCategory[e.category] = (errorsByCategory[e.category] || 0) + 1;
     });
 

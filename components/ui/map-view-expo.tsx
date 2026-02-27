@@ -1,4 +1,4 @@
-import { logger } from "@/lib/utils/logger";
+import { logger } from '@/lib/utils/logger';
 import React from 'react';
 import { View, Text, Pressable, Linking, Share } from 'react-native';
 import { useColors } from '@/hooks/use-colors';
@@ -33,7 +33,7 @@ export function MapViewComponent({ latitude, longitude, accuracy, className }: M
       try {
         await Linking.openURL(googleMapsUrl);
       } catch (err) {
-        logger.error('Impossible d\'ouvrir Google Maps:', err);
+        logger.error("Impossible d'ouvrir Google Maps:", err);
       }
     }
   };
@@ -46,7 +46,7 @@ export function MapViewComponent({ latitude, longitude, accuracy, className }: M
       try {
         await Linking.openURL(googleMapsUrl);
       } catch (err) {
-        logger.error('Impossible d\'ouvrir Apple Maps:', err);
+        logger.error("Impossible d'ouvrir Apple Maps:", err);
       }
     }
   };
@@ -82,9 +82,7 @@ export function MapViewComponent({ latitude, longitude, accuracy, className }: M
         <Text className="text-lg font-bold text-foreground text-center">
           {latitude}, {longitude}
         </Text>
-        <Text className="text-xs text-muted mt-2">
-          Précision: ±{accuracyValue}m
-        </Text>
+        <Text className="text-xs text-muted mt-2">Précision: ±{accuracyValue}m</Text>
       </View>
 
       {/* Boutons d'action */}

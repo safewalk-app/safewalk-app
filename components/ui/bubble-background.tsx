@@ -19,7 +19,7 @@ export function BubbleBackground() {
           opacity: 0.06,
         }}
       />
-      
+
       {/* Bulle 2 - Haut droit */}
       <View
         className="absolute rounded-full bg-secondary"
@@ -31,7 +31,7 @@ export function BubbleBackground() {
           opacity: 0.05,
         }}
       />
-      
+
       {/* Bulle 3 - Bas gauche */}
       <View
         className="absolute rounded-full bg-mint"
@@ -43,7 +43,7 @@ export function BubbleBackground() {
           opacity: 0.04,
         }}
       />
-      
+
       {/* Bulle 4 - Bas droit */}
       <View
         className="absolute rounded-full bg-primary"
@@ -55,7 +55,7 @@ export function BubbleBackground() {
           opacity: 0.07,
         }}
       />
-      
+
       {/* Bulle 5 - Centre */}
       <View
         className="absolute rounded-full bg-secondary"

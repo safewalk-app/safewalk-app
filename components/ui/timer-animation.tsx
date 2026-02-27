@@ -23,7 +23,7 @@ export function TimerAnimation({ timeStr, className = '' }: TimerAnimationProps)
         easing: Easing.inOut(Easing.ease),
       }),
       -1,
-      true
+      true,
     );
   }, [scale]);
 
@@ -33,9 +33,7 @@ export function TimerAnimation({ timeStr, className = '' }: TimerAnimationProps)
 
   return (
     <Animated.View style={animatedStyle}>
-      <Text className={`text-6xl font-bold text-primary ${className}`}>
-        {timeStr}
-      </Text>
+      <Text className={`text-6xl font-bold text-primary ${className}`}>{timeStr}</Text>
     </Animated.View>
   );
 }

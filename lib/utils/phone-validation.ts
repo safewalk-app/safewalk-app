@@ -11,9 +11,9 @@ export function validatePhoneNumber(phone: string): { valid: boolean; error?: st
 
   // Doit commencer par +
   if (!trimmed.startsWith('+')) {
-    return { 
-      valid: false, 
-      error: 'Le numéro doit commencer par + suivi de l\'indicatif pays (ex: +33 pour la France)' 
+    return {
+      valid: false,
+      error: "Le numéro doit commencer par + suivi de l'indicatif pays (ex: +33 pour la France)",
     };
   }
 
@@ -23,26 +23,27 @@ export function validatePhoneNumber(phone: string): { valid: boolean; error?: st
   // Doit avoir au moins 10 chiffres (+ indicatif pays + numéro)
   // Format minimum : +33612345678 (12 caractères)
   if (digitsOnly.length < 10) {
-    return { 
-      valid: false, 
-      error: 'Le numéro est trop court. Format attendu : +33612345678' 
+    return {
+      valid: false,
+      error: 'Le numéro est trop court. Format attendu : +33612345678',
     };
   }
 
   // Doit avoir au maximum 15 chiffres (norme E.164)
-  if (digitsOnly.length > 16) { // +1 pour le +
-    return { 
-      valid: false, 
-      error: 'Le numéro est trop long' 
+  if (digitsOnly.length > 16) {
+    // +1 pour le +
+    return {
+      valid: false,
+      error: 'Le numéro est trop long',
     };
   }
 
   // Vérifier que c'est bien un format international valide
   const internationalRegex = /^\+\d{1,3}[\s\-]?(\d[\s\-]?){8,14}$/;
   if (!internationalRegex.test(trimmed)) {
-    return { 
-      valid: false, 
-      error: 'Format invalide. Utilisez le format international : +33612345678' 
+    return {
+      valid: false,
+      error: 'Format invalide. Utilisez le format international : +33612345678',
     };
   }
 
@@ -57,7 +58,7 @@ export function formatPhoneNumber(phone: string): string {
   if (!phone) return '';
 
   const trimmed = phone.trim();
-  
+
   // Si c'est un numéro français (+33)
   if (trimmed.startsWith('+33')) {
     const digits = trimmed.replace(/[^\d]/g, '').substring(2); // Retirer 33

@@ -1,15 +1,15 @@
-import React from "react";
-import { View, Text, TouchableOpacity, Pressable } from "react-native";
-import { MaterialIcons } from "@expo/vector-icons";
-import { useColors } from "@/hooks/use-colors";
-import { cn } from "@/lib/utils";
-import type { OtpErrorType } from "@/lib/types/otp-errors";
+import React from 'react';
+import { View, Text, TouchableOpacity, Pressable } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
+import { useColors } from '@/hooks/use-colors';
+import { cn } from '@/lib/utils';
+import type { OtpErrorType } from '@/lib/types/otp-errors';
 
 interface ErrorAlertProps {
   title: string;
   message: string;
   type?: OtpErrorType;
-  icon?: "alert-circle" | "alert-triangle" | "info" | "none";
+  icon?: 'alert-circle' | 'alert-triangle' | 'info' | 'none';
   action?: {
     label: string;
     onPress: () => void;
@@ -43,8 +43,8 @@ interface ErrorAlertProps {
 export function ErrorAlert({
   title,
   message,
-  type = "error",
-  icon = "alert-circle",
+  type = 'error',
+  icon = 'alert-circle',
   action,
   onDismiss,
   dismissible = true,
@@ -54,33 +54,33 @@ export function ErrorAlert({
   // Déterminer les couleurs selon le type
   const getColors = () => {
     switch (type) {
-      case "error":
+      case 'error':
         return {
-          bg: "#FEE2E2", // red-100
-          border: "#FECACA", // red-200
-          text: "#991B1B", // red-900
-          icon: "#DC2626", // red-600
+          bg: '#FEE2E2', // red-100
+          border: '#FECACA', // red-200
+          text: '#991B1B', // red-900
+          icon: '#DC2626', // red-600
         };
-      case "warning":
+      case 'warning':
         return {
-          bg: "#FEF3C7", // amber-100
-          border: "#FCD34D", // amber-300
-          text: "#92400E", // amber-900
-          icon: "#D97706", // amber-500
+          bg: '#FEF3C7', // amber-100
+          border: '#FCD34D', // amber-300
+          text: '#92400E', // amber-900
+          icon: '#D97706', // amber-500
         };
-      case "info":
+      case 'info':
         return {
-          bg: "#DBEAFE", // blue-100
-          border: "#BFDBFE", // blue-200
-          text: "#1E40AF", // blue-900
-          icon: "#2563EB", // blue-600
+          bg: '#DBEAFE', // blue-100
+          border: '#BFDBFE', // blue-200
+          text: '#1E40AF', // blue-900
+          icon: '#2563EB', // blue-600
         };
       default:
         return {
-          bg: "#FEE2E2",
-          border: "#FECACA",
-          text: "#991B1B",
-          icon: "#DC2626",
+          bg: '#FEE2E2',
+          border: '#FECACA',
+          text: '#991B1B',
+          icon: '#DC2626',
         };
     }
   };
@@ -95,13 +95,13 @@ export function ErrorAlert({
     };
 
     switch (icon) {
-      case "alert-circle":
+      case 'alert-circle':
         return <MaterialIcons name="error" {...iconProps} />;
-      case "alert-triangle":
+      case 'alert-triangle':
         return <MaterialIcons name="warning" {...iconProps} />;
-      case "info":
+      case 'info':
         return <MaterialIcons name="info" {...iconProps} />;
-      case "none":
+      case 'none':
         return null;
       default:
         return <MaterialIcons name="error" {...iconProps} />;
@@ -120,7 +120,7 @@ export function ErrorAlert({
       {/* Header avec icône et titre */}
       <View className="flex-row items-center justify-between mb-2">
         <View className="flex-row items-center flex-1">
-          {icon !== "none" && <View className="mr-3">{renderIcon()}</View>}
+          {icon !== 'none' && <View className="mr-3">{renderIcon()}</View>}
           <Text
             className="text-base font-semibold flex-1"
             style={{ color: typeColors.text }}
@@ -145,11 +145,7 @@ export function ErrorAlert({
       </View>
 
       {/* Message */}
-      <Text
-        className="text-sm mb-3"
-        style={{ color: typeColors.text }}
-        numberOfLines={3}
-      >
+      <Text className="text-sm mb-3" style={{ color: typeColors.text }} numberOfLines={3}>
         {message}
       </Text>
 
@@ -164,11 +160,8 @@ export function ErrorAlert({
             opacity: action.loading ? 0.6 : 1,
           }}
         >
-          <Text
-            className="text-center font-semibold text-sm"
-            style={{ color: typeColors.icon }}
-          >
-            {action.loading ? "Chargement..." : action.label}
+          <Text className="text-center font-semibold text-sm" style={{ color: typeColors.icon }}>
+            {action.loading ? 'Chargement...' : action.label}
           </Text>
         </TouchableOpacity>
       )}
@@ -179,32 +172,22 @@ export function ErrorAlert({
 /**
  * Composant de message d'erreur simple (sans alerte)
  */
-export function ErrorMessage({
-  text,
-  type = "error",
-}: {
-  text: string;
-  type?: OtpErrorType;
-}) {
+export function ErrorMessage({ text, type = 'error' }: { text: string; type?: OtpErrorType }) {
   const getColor = () => {
     switch (type) {
-      case "error":
-        return "#DC2626"; // red-600
-      case "warning":
-        return "#D97706"; // amber-500
-      case "info":
-        return "#2563EB"; // blue-600
+      case 'error':
+        return '#DC2626'; // red-600
+      case 'warning':
+        return '#D97706'; // amber-500
+      case 'info':
+        return '#2563EB'; // blue-600
       default:
-        return "#DC2626";
+        return '#DC2626';
     }
   };
 
   return (
-    <Text
-      className="text-sm mb-2"
-      style={{ color: getColor() }}
-      numberOfLines={2}
-    >
+    <Text className="text-sm mb-2" style={{ color: getColor() }} numberOfLines={2}>
       {text}
     </Text>
   );
@@ -236,20 +219,14 @@ export function ErrorState({
       </View>
 
       {/* Titre */}
-      <Text className="text-2xl font-bold text-foreground mb-2 text-center">
-        {title}
-      </Text>
+      <Text className="text-2xl font-bold text-foreground mb-2 text-center">{title}</Text>
 
       {/* Description */}
-      <Text className="text-base text-muted text-center mb-6">
-        {description}
-      </Text>
+      <Text className="text-base text-muted text-center mb-6">{description}</Text>
 
       {/* Compteur de tentatives */}
       {retryCount !== undefined && (
-        <Text className="text-sm text-muted mb-6">
-          Tentative {retryCount + 1}
-        </Text>
+        <Text className="text-sm text-muted mb-6">Tentative {retryCount + 1}</Text>
       )}
 
       {/* Action */}
@@ -261,7 +238,7 @@ export function ErrorState({
           style={{ opacity: action.loading ? 0.6 : 1 }}
         >
           <Text className="text-center font-semibold text-white">
-            {action.loading ? "Chargement..." : action.label}
+            {action.loading ? 'Chargement...' : action.label}
           </Text>
         </TouchableOpacity>
       )}

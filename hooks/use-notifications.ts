@@ -28,7 +28,7 @@ if (Platform.OS !== 'web') {
         opensAppToForeground: true,
       },
     },
-  ]).catch(err => logger.error('⚠️ Erreur config catégories:', err));
+  ]).catch((err) => logger.error('⚠️ Erreur config catégories:', err));
 }
 
 // Configurer le gestionnaire de notifications
@@ -67,14 +67,14 @@ export function useNotifications() {
     notificationListenerRef.current = (Notifications.addNotificationReceivedListener as any)(
       (notification: any) => {
         logger.info('📬 Notification reçue:', notification);
-      }
+      },
     );
 
     // Écouter les réponses aux notifications (tap)
     responseListenerRef.current = (Notifications.addNotificationResponseReceivedListener as any)(
       (response: any) => {
         logger.info('👆 Notification tapée:', response.notification.request.content);
-      }
+      },
     );
 
     return () => {
@@ -108,72 +108,77 @@ export function useNotifications() {
   /**
    * Envoyer une notification locale immédiate
    */
-  const sendNotification = useCallback(async (options: NotificationOptions): Promise<string | null> => {
-    try {
-      const notificationId = await Notifications.scheduleNotificationAsync({
-        content: {
-          title: options.title,
-          body: options.body,
-          data: options.data || {},
-          sound: 'default',
-          badge: 1,
-          categoryIdentifier: options.categoryIdentifier,
-        },
-        trigger: null, // null = immédiate
-      });
+  const sendNotification = useCallback(
+    async (options: NotificationOptions): Promise<string | null> => {
+      try {
+        const notificationId = await Notifications.scheduleNotificationAsync({
+          content: {
+            title: options.title,
+            body: options.body,
+            data: options.data || {},
+            sound: 'default',
+            badge: 1,
+            categoryIdentifier: options.categoryIdentifier,
+          },
+          trigger: null, // null = immédiate
+        });
 
-      logger.info('📤 Notification envoyée:', options.title);
-      
-      // Retour haptique subtil (uniquement sur mobile)
-      if (Platform.OS !== 'web') {
-        try {
-          await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        } catch (hapticError) {
-          // Ignorer les erreurs haptiques (simulateur, appareil sans support)
+        logger.info('📤 Notification envoyée:', options.title);
+
+        // Retour haptique subtil (uniquement sur mobile)
+        if (Platform.OS !== 'web') {
+          try {
+            await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          } catch (hapticError) {
+            // Ignorer les erreurs haptiques (simulateur, appareil sans support)
+          }
         }
+
+        return notificationId;
+      } catch (error) {
+        logger.error("Erreur lors de l'envoi de la notification:", error);
+        return null;
       }
-      
-      return notificationId;
-    } catch (error) {
-      logger.error('Erreur lors de l\'envoi de la notification:', error);
-      return null;
-    }
-  }, []);
+    },
+    [],
+  );
 
   /**
    * Programmer une notification pour plus tard
    */
-  const scheduleNotification = useCallback(async (
-    options: NotificationOptions,
-    triggerDate: Date | number
-  ): Promise<string | null> => {
-    try {
-      const trigger = triggerDate instanceof Date 
-        ? { type: 'date' as const, date: triggerDate } 
-        : { type: 'timeInterval' as const, seconds: triggerDate, repeats: false };
+  const scheduleNotification = useCallback(
+    async (options: NotificationOptions, triggerDate: Date | number): Promise<string | null> => {
+      try {
+        const trigger =
+          triggerDate instanceof Date
+            ? { type: 'date' as const, date: triggerDate }
+            : { type: 'timeInterval' as const, seconds: triggerDate, repeats: false };
 
-      const notificationId = await Notifications.scheduleNotificationAsync({
-        content: {
-          title: options.title,
-          body: options.body,
-          data: options.data || {},
-          sound: 'default',
-          badge: 1,
-          categoryIdentifier: options.categoryIdentifier,
-        },
-        trigger: trigger as any,
-      });
+        const notificationId = await Notifications.scheduleNotificationAsync({
+          content: {
+            title: options.title,
+            body: options.body,
+            data: options.data || {},
+            sound: 'default',
+            badge: 1,
+            categoryIdentifier: options.categoryIdentifier,
+          },
+          trigger: trigger as any,
+        });
 
-      const delayInfo = triggerDate instanceof Date 
-        ? `à ${triggerDate.toLocaleTimeString()}`
-        : `dans ${triggerDate}s`;
-      logger.info(`📅 Notification programmée ${delayInfo}:`, options.title);
-      return notificationId;
-    } catch (error) {
-      logger.error('Erreur lors de la programmation de la notification:', error);
-      return null;
-    }
-  }, []);
+        const delayInfo =
+          triggerDate instanceof Date
+            ? `à ${triggerDate.toLocaleTimeString()}`
+            : `dans ${triggerDate}s`;
+        logger.info(`📅 Notification programmée ${delayInfo}:`, options.title);
+        return notificationId;
+      } catch (error) {
+        logger.error('Erreur lors de la programmation de la notification:', error);
+        return null;
+      }
+    },
+    [],
+  );
 
   /**
    * Annuler une notification programmée
@@ -183,7 +188,7 @@ export function useNotifications() {
       await Notifications.cancelScheduledNotificationAsync(notificationId);
       logger.info('❌ Notification annulée:', notificationId);
     } catch (error) {
-      logger.error('Erreur lors de l\'annulation de la notification:', error);
+      logger.error("Erreur lors de l'annulation de la notification:", error);
     }
   }, []);
 
@@ -195,7 +200,7 @@ export function useNotifications() {
       await Notifications.cancelAllScheduledNotificationsAsync();
       logger.info('❌ Toutes les notifications annulées');
     } catch (error) {
-      logger.error('Erreur lors de l\'annulation des notifications:', error);
+      logger.error("Erreur lors de l'annulation des notifications:", error);
     }
   }, []);
 
@@ -224,16 +229,14 @@ export function useNotifications() {
   /**
    * Programmer une notification d'alerte
    */
-  const scheduleAlertNotification = async (
-    secondsUntilAlert: number
-  ): Promise<string | null> => {
+  const scheduleAlertNotification = async (secondsUntilAlert: number): Promise<string | null> => {
     return scheduleNotification(
       {
         title: '🚨 Alerte envoyée',
-        body: 'Ton contact d\'urgence a été notifié. Tout va bien ?',
+        body: "Ton contact d'urgence a été notifié. Tout va bien ?",
         data: { type: 'alert_triggered' },
       },
-      secondsUntilAlert
+      secondsUntilAlert,
     );
   };
 

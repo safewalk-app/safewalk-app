@@ -1,6 +1,10 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
-import { checkRateLimit, logRequest, createRateLimitHttpResponse } from "../_shared/rate-limiter.ts";
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
+import {
+  checkRateLimit,
+  logRequest,
+  createRateLimitHttpResponse,
+} from '../_shared/rate-limiter.ts';
 
 interface StripeProduct {
   id: string;
@@ -8,22 +12,22 @@ interface StripeProduct {
   description: string;
   price: number;
   currency: string;
-  type: "subscription" | "credits";
+  type: 'subscription' | 'credits';
   metadata?: Record<string, string>;
   stripeProductId?: string;
   stripePriceId?: string;
 }
 
 async function getStripeProducts(): Promise<StripeProduct[]> {
-  const stripeSecretKey = Deno.env.get("STRIPE_SECRET_KEY");
+  const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY');
   if (!stripeSecretKey) {
-    throw new Error("STRIPE_SECRET_KEY not configured");
+    throw new Error('STRIPE_SECRET_KEY not configured');
   }
 
   try {
     // Fetch all prices from Stripe
-    const response = await fetch("https://api.stripe.com/v1/prices?limit=100&active=true", {
-      method: "GET",
+    const response = await fetch('https://api.stripe.com/v1/prices?limit=100&active=true', {
+      method: 'GET',
       headers: {
         Authorization: `Bearer ${stripeSecretKey}`,
       },
@@ -31,7 +35,7 @@ async function getStripeProducts(): Promise<StripeProduct[]> {
 
     if (!response.ok) {
       const error = await response.text();
-      console.error("Stripe API error:", error);
+      console.error('Stripe API error:', error);
       throw new Error(`Stripe API error: ${response.status}`);
     }
 
@@ -46,32 +50,29 @@ async function getStripeProducts(): Promise<StripeProduct[]> {
       if (!price.product) continue;
 
       // Fetch product details
-      const productResponse = await fetch(
-        `https://api.stripe.com/v1/products/${price.product}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${stripeSecretKey}`,
-          },
-        }
-      );
+      const productResponse = await fetch(`https://api.stripe.com/v1/products/${price.product}`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${stripeSecretKey}`,
+        },
+      });
 
       if (!productResponse.ok) continue;
 
       const product = await productResponse.json();
 
       // Determine type from metadata
-      const type = product.metadata?.type || "subscription";
+      const type = product.metadata?.type || 'subscription';
       const amount = price.unit_amount ? price.unit_amount / 100 : 0; // Convert cents to dollars
-      const currency = (price.currency || "usd").toUpperCase();
+      const currency = (price.currency || 'usd').toUpperCase();
 
       products.push({
         id: price.id,
         name: product.name,
-        description: product.description || "",
+        description: product.description || '',
         price: amount,
         currency,
-        type: type as "subscription" | "credits",
+        type: type as 'subscription' | 'credits',
         metadata: product.metadata,
         stripeProductId: product.id,
         stripePriceId: price.id,
@@ -81,53 +82,58 @@ async function getStripeProducts(): Promise<StripeProduct[]> {
     // Sort: subscriptions first, then credits
     products.sort((a, b) => {
       if (a.type !== b.type) {
-        return a.type === "subscription" ? -1 : 1;
+        return a.type === 'subscription' ? -1 : 1;
       }
       return a.price - b.price;
     });
 
     return products;
   } catch (error) {
-    console.error("Error fetching Stripe products:", error);
+    console.error('Error fetching Stripe products:', error);
     throw error;
   }
 }
 
 serve(async (req: Request) => {
   // Enable CORS
-  if (req.method === "OPTIONS") {
-    return new Response("ok", {
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', {
       headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization",
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
       },
     });
   }
 
-  if (req.method !== "GET") {
-    return new Response(JSON.stringify({ error: "Method not allowed" }), {
+  if (req.method !== 'GET') {
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
       status: 405,
-      headers: { "Content-Type": "application/json" },
+      headers: { 'Content-Type': 'application/json' },
     });
   }
 
   try {
     // RATE LIMITING: Check if request has exceeded rate limit
-    const supabaseUrl = Deno.env.get("SUPABASE_URL");
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
     if (supabaseUrl && supabaseServiceKey) {
       const supabase = createClient(supabaseUrl, supabaseServiceKey);
-      const ipAddress = req.headers.get("x-forwarded-for") || "unknown";
-      const rateLimitResult = await checkRateLimit(supabase, null, "get-stripe-products", ipAddress);
+      const ipAddress = req.headers.get('x-forwarded-for') || 'unknown';
+      const rateLimitResult = await checkRateLimit(
+        supabase,
+        null,
+        'get-stripe-products',
+        ipAddress,
+      );
 
       if (!rateLimitResult.isAllowed) {
-        await logRequest(supabase, null, "get-stripe-products", ipAddress);
+        await logRequest(supabase, null, 'get-stripe-products', ipAddress);
         return createRateLimitHttpResponse(rateLimitResult.resetAt);
       }
 
-      await logRequest(supabase, null, "get-stripe-products", ipAddress);
+      await logRequest(supabase, null, 'get-stripe-products', ipAddress);
     }
 
     const products = await getStripeProducts();
@@ -135,21 +141,18 @@ serve(async (req: Request) => {
     return new Response(JSON.stringify({ products }), {
       status: 200,
       headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
       },
     });
   } catch (error) {
-    console.error("Error:", error);
-    return new Response(
-      JSON.stringify({ error: "Failed to fetch products" }),
-      {
-        status: 500,
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-        },
-      }
-    );
+    console.error('Error:', error);
+    return new Response(JSON.stringify({ error: 'Failed to fetch products' }), {
+      status: 500,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+      },
+    });
   }
 });

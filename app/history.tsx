@@ -59,9 +59,7 @@ export default function HistoryScreen() {
         {/* Header */}
         <ScreenTransition delay={0} duration={350}>
           <View className="gap-1 mb-4">
-            <Text className="text-4xl font-bold text-foreground">
-              Historique
-            </Text>
+            <Text className="text-4xl font-bold text-foreground">Historique</Text>
             <Text className="text-base text-muted">
               {history.length} sortie{history.length !== 1 ? 's' : ''}
             </Text>
@@ -83,11 +81,7 @@ export default function HistoryScreen() {
             {history.map((session, index) => {
               const status = getStatusIcon(session.status);
               return (
-                <ScreenTransition
-                  key={session.id}
-                  delay={100 + index * 50}
-                  duration={350}
-                >
+                <ScreenTransition key={session.id} delay={100 + index * 50} duration={350}>
                   <GlassCard className="gap-3">
                     {/* Header */}
                     <View className="flex-row items-center justify-between">
@@ -96,11 +90,7 @@ export default function HistoryScreen() {
                           {formatDate(session.startTime)}
                         </Text>
                       </View>
-                      <MaterialIcons
-                        name={status.icon as any}
-                        size={24}
-                        color={status.color}
-                      />
+                      <MaterialIcons name={status.icon as any} size={24} color={status.color} />
                     </View>
 
                     {/* Details */}

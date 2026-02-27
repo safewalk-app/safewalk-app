@@ -12,7 +12,7 @@ describe('Logger - Désactivation en production', () => {
     const devMode = false;
 
     const isDevelopment = devMode || nodeEnv !== 'production';
-    
+
     expect(isDevelopment).toBe(false);
   });
 
@@ -22,7 +22,7 @@ describe('Logger - Désactivation en production', () => {
     const devMode = true;
 
     const isDevelopment = devMode || nodeEnv !== 'production';
-    
+
     expect(isDevelopment).toBe(true);
   });
 
@@ -31,7 +31,7 @@ describe('Logger - Désactivation en production', () => {
     const devMode = true;
 
     const isDevelopment = devMode || nodeEnv !== 'production';
-    
+
     expect(isDevelopment).toBe(true);
   });
 });
@@ -39,7 +39,7 @@ describe('Logger - Désactivation en production', () => {
 describe('Logger - Niveaux de log', () => {
   it('devrait avoir 4 niveaux de log', () => {
     const logLevels = ['debug', 'info', 'warn', 'error'];
-    
+
     expect(logLevels).toHaveLength(4);
     expect(logLevels).toContain('debug');
     expect(logLevels).toContain('info');
@@ -51,7 +51,7 @@ describe('Logger - Niveaux de log', () => {
     // Même en production, warn et error doivent être loggés
     const shouldLogWarn = true;
     const shouldLogError = true;
-    
+
     expect(shouldLogWarn).toBe(true);
     expect(shouldLogError).toBe(true);
   });
@@ -62,7 +62,7 @@ describe('Logger - Préfixes', () => {
     const prefix = '[SafeWalk]';
     const level = '[DEBUG]';
     const formatted = `${prefix} ${level}`;
-    
+
     expect(formatted).toBe('[SafeWalk] [DEBUG]');
   });
 
@@ -70,7 +70,7 @@ describe('Logger - Préfixes', () => {
     const prefix = '[SafeWalk]';
     const level = '[INFO]';
     const formatted = `${prefix} ${level}`;
-    
+
     expect(formatted).toBe('[SafeWalk] [INFO]');
   });
 
@@ -78,7 +78,7 @@ describe('Logger - Préfixes', () => {
     const prefix = '[SafeWalk]';
     const level = '[WARN]';
     const formatted = `${prefix} ${level}`;
-    
+
     expect(formatted).toBe('[SafeWalk] [WARN]');
   });
 
@@ -86,7 +86,7 @@ describe('Logger - Préfixes', () => {
     const prefix = '[SafeWalk]';
     const level = '[ERROR]';
     const formatted = `${prefix} ${level}`;
-    
+
     expect(formatted).toBe('[SafeWalk] [ERROR]');
   });
 });
@@ -96,11 +96,11 @@ describe('Logger - Logique de filtrage', () => {
     const isDevelopment = false;
     type LogLevel = 'debug' | 'info' | 'warn' | 'error';
     const level: LogLevel = 'debug';
-    
+
     const checkShouldLog = (l: LogLevel, isDev: boolean): boolean => {
       return l === 'warn' || l === 'error' || isDev;
     };
-    
+
     expect(checkShouldLog(level, isDevelopment)).toBe(false);
   });
 
@@ -108,11 +108,11 @@ describe('Logger - Logique de filtrage', () => {
     const isDevelopment = false;
     type LogLevel = 'debug' | 'info' | 'warn' | 'error';
     const level: LogLevel = 'info';
-    
+
     const checkShouldLog = (l: LogLevel, isDev: boolean): boolean => {
       return l === 'warn' || l === 'error' || isDev;
     };
-    
+
     expect(checkShouldLog(level, isDevelopment)).toBe(false);
   });
 
@@ -120,11 +120,11 @@ describe('Logger - Logique de filtrage', () => {
     const isDevelopment = false;
     type LogLevel = 'debug' | 'info' | 'warn' | 'error';
     const level: LogLevel = 'warn';
-    
+
     const checkShouldLog = (l: LogLevel, isDev: boolean): boolean => {
       return l === 'warn' || l === 'error' || isDev;
     };
-    
+
     expect(checkShouldLog(level, isDevelopment)).toBe(true);
   });
 
@@ -132,27 +132,27 @@ describe('Logger - Logique de filtrage', () => {
     const isDevelopment = false;
     type LogLevel = 'debug' | 'info' | 'warn' | 'error';
     const level: LogLevel = 'error';
-    
+
     const checkShouldLog = (l: LogLevel, isDev: boolean): boolean => {
       return l === 'warn' || l === 'error' || isDev;
     };
-    
+
     expect(checkShouldLog(level, isDevelopment)).toBe(true);
   });
 
   it('devrait logger tous les niveaux en développement', () => {
     const isDevelopment = true;
-    
+
     type LogLevel = 'debug' | 'info' | 'warn' | 'error';
     const checkShouldLog = (level: LogLevel, isDev: boolean): boolean => {
       return level === 'warn' || level === 'error' || isDev;
     };
-    
+
     const shouldLogDebug = checkShouldLog('debug', isDevelopment);
     const shouldLogInfo = checkShouldLog('info', isDevelopment);
     const shouldLogWarn = checkShouldLog('warn', isDevelopment);
     const shouldLogError = checkShouldLog('error', isDevelopment);
-    
+
     expect(shouldLogDebug).toBe(true);
     expect(shouldLogInfo).toBe(true);
     expect(shouldLogWarn).toBe(true);

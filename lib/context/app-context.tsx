@@ -1,15 +1,26 @@
 import React, { createContext, useContext, useReducer, useEffect, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
-import { sendFriendlyAlertSMS, sendFollowUpAlertSMS, sendConfirmationSMS } from '../services/sms-service';
+import {
+  sendFriendlyAlertSMS,
+  sendFollowUpAlertSMS,
+  sendConfirmationSMS,
+} from '../services/sms-service';
 import { useNotifications } from '@/hooks/use-notifications';
 import { logger } from '@/lib/logger';
 import { checkNetworkForSMS } from '@/lib/utils/network-checker';
-import { checkSessionOtpRequirement, resetSessionOtpVerification } from '@/lib/services/otp-session-guard';
+import {
+  checkSessionOtpRequirement,
+  resetSessionOtpVerification,
+} from '@/lib/services/otp-session-guard';
 import { useRouter } from 'expo-router';
 import { sendSOSPushNotification } from '@/hooks/use-push-notifications';
 import { getQuotaStatus, canSendSosAlert, logSms } from '@/lib/services/quota-service';
-import { getLocationSnapshot, formatLocationForSms, saveLocationToTrip } from '@/lib/services/privacy-service';
+import {
+  getLocationSnapshot,
+  formatLocationForSms,
+  saveLocationToTrip,
+} from '@/lib/services/privacy-service';
 import * as tripService from '@/lib/services/trip-service';
 import { supabase } from '@/lib/supabase';
 
@@ -33,15 +44,15 @@ export interface Session {
   status: SessionState; // CORRECTION: utiliser SessionState au lieu de string
   endTime?: number;
   lastLocation?: { latitude: number; longitude: number };
-  
+
   // CORRECTION BUG #4: Gérer les extensions séparément de la tolérance
   extensionsCount: number; // nombre de fois que +15 min a été utilisé (max 3)
   maxExtensions: number; // limite d'extensions (3 x 15 min = 45 min max)
-  
+
   // CORRECTION BUG #3: Tracker si check-in confirmé
   checkInConfirmed: boolean; // true si l'utilisateur a confirmé "Je vais bien"
   checkInConfirmedAt?: number; // timestamp de la confirmation
-  
+
   alertTriggeredAt?: number; // timestamp quand l'alerte a été déclenchée
   checkInOk?: boolean; // true si l'utilisateur a confirmé au check-in
   checkInNotifTime?: number; // timestamp du check-in notification (midTime)
@@ -53,7 +64,10 @@ export interface AppContextType {
   currentSession: Session | null;
   history: Session[];
   updateSettings: (settings: Partial<UserSettings>) => Promise<void>;
-  startSession: (limitTime: number, note?: string) => Promise<{ success: boolean; error?: string; errorCode?: string } | void>;
+  startSession: (
+    limitTime: number,
+    note?: string,
+  ) => Promise<{ success: boolean; error?: string; errorCode?: string } | void>;
   endSession: () => Promise<void>;
   addTimeToSession: (minutes: number) => Promise<void>;
   cancelSession: () => Promise<void>;
@@ -147,25 +161,26 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-
   const initializeAuth = async () => {
     try {
-      const { supabase } = require("@/lib/supabase");
-      const { data: { session } } = await supabase.auth.getSession();
-      
+      const { supabase } = require('@/lib/supabase');
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
       if (!session) {
-        logger.info("[AppContext] No session found, signing in anonymously...");
+        logger.info('[AppContext] No session found, signing in anonymously...');
         const { data, error } = await supabase.auth.signInAnonymously();
         if (error) {
-          logger.error("[AppContext] Anonymous sign-in failed:", error);
+          logger.error('[AppContext] Anonymous sign-in failed:', error);
         } else {
-          logger.info("[AppContext] Anonymous sign-in successful:", data.user?.id);
+          logger.info('[AppContext] Anonymous sign-in successful:', data.user?.id);
         }
       } else {
-        logger.info("[AppContext] Session already exists:", session.user.id);
+        logger.info('[AppContext] Session already exists:', session.user.id);
       }
     } catch (error) {
-      logger.error("[AppContext] Auth initialization error:", error);
+      logger.error('[AppContext] Auth initialization error:', error);
     }
   };
   const updateSettings = async (newSettings: Partial<UserSettings>) => {
@@ -177,7 +192,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const startSession = async (limitTime: number, note?: string) => {
     // VERIFICATION OTP: Verifier que l'utilisateur est authentifie OTP
     const otpCheck = await checkSessionOtpRequirement();
-    
+
     if (!otpCheck.canCreateSession) {
       logger.info('[AppContext] OTP requis avant de creer une session');
       // Rediriger vers la verification OTP
@@ -217,7 +232,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     dispatch({ type: 'SET_SESSION', payload: session });
     await AsyncStorage.setItem('safewalk_session', JSON.stringify(session));
-    
+
     // INTEGRATION: Appeler Edge Function start-trip pour synchroniser avec Supabase
     try {
       const deadlineISO = new Date(deadline).toISOString();
@@ -226,7 +241,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         shareLocation: state.settings.locationEnabled,
         destinationNote: note,
       });
-      
+
       if (result.success && result.tripId) {
         // Mettre à jour la session avec l'ID du serveur
         const updatedSession = { ...session, id: result.tripId };
@@ -237,7 +252,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         logger.warn('[AppContext] Erreur lors de la création de la trip:', result.error);
       }
     } catch (error) {
-      logger.error('[AppContext] Erreur lors de l\'appel à start-trip:', error);
+      logger.error("[AppContext] Erreur lors de l'appel à start-trip:", error);
     }
   };
 
@@ -253,7 +268,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     dispatch({ type: 'SET_HISTORY', payload: newHistory });
     await AsyncStorage.removeItem('safewalk_session');
     await AsyncStorage.setItem('safewalk_history', JSON.stringify(newHistory));
-    
+
     // INTEGRATION: Appeler Edge Function checkin pour synchroniser avec Supabase
     try {
       if (state.currentSession.id) {
@@ -265,7 +280,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         }
       }
     } catch (error) {
-      logger.error('[AppContext] Erreur lors de l\'appel à checkin:', error);
+      logger.error("[AppContext] Erreur lors de l'appel à checkin:", error);
     }
   };
 
@@ -275,7 +290,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     // CORRECTION BUG #4: Gérer les extensions séparément
     // Vérifier si on peut ajouter une extension
     if (state.currentSession.extensionsCount >= state.currentSession.maxExtensions) {
-      logger.warn('Nombre maximum d\'extensions atteint');
+      logger.warn("Nombre maximum d'extensions atteint");
       return;
     }
 
@@ -291,7 +306,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     dispatch({ type: 'SET_SESSION', payload: updatedSession });
     await AsyncStorage.setItem('safewalk_session', JSON.stringify(updatedSession));
-    
+
     // INTEGRATION: Appeler Edge Function extend pour synchroniser avec Supabase
     try {
       if (state.currentSession.id) {
@@ -306,7 +321,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         }
       }
     } catch (error) {
-      logger.error('[AppContext] Erreur lors de l\'appel à extend:', error);
+      logger.error("[AppContext] Erreur lors de l'appel à extend:", error);
     }
   };
 
@@ -324,103 +339,109 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     await AsyncStorage.setItem('safewalk_history', JSON.stringify(newHistory));
   };
 
-  const triggerAlert = useCallback(async (location?: { latitude: number; longitude: number }) => {
-    logger.debug('🚨 [triggerAlert] Début de triggerAlert');
-    logger.debug('📋 [triggerAlert] Settings:', state.settings);
-    logger.debug('📋 [triggerAlert] Session:', state.currentSession);
-    logger.debug('📋 [triggerAlert] Location:', location);
-    
-    if (!state.currentSession) return;
-    
-    // VÉRIFIER LES QUOTAS
-    const userId = 'current-user';
-    const canSend = await canSendSosAlert(userId);
-    if (!canSend) {
-      logger.error('Quotas épuisés');
-      sendNotification({
-        title: 'Quotas épuisés',
-        body: 'Vous avez atteint votre limite. Passez à Premium.',
-        data: { type: 'quota_exceeded' },
-      });
-      return;
-    }
-    
-    // Vérifier la connectivité réseau avant d'envoyer les SMS
-    const networkCheck = await checkNetworkForSMS();
-    if (!networkCheck.canSendSMS) {
-      logger.warn('⚠️ [triggerAlert] Impossible d\'envoyer SMS:', networkCheck.errorMessage);
-      sendNotification({
-        title: '⚠️ Problème de connexion',
-        body: networkCheck.errorMessage || 'Impossible d\'envoyer l\'alerte SMS. Vérifiez votre connexion.',
-        data: { type: 'network_error' },
-      });
-      // Continuer quand même pour marquer la session comme overdue
-    }
-    
-    // Marquer la session comme overdue
-    const alertedSession: Session = {
-      ...state.currentSession,
-      status: 'overdue',
-      alertTriggeredAt: Date.now(),
-      lastLocation: location,
-    };
-    dispatch({ type: 'SET_SESSION', payload: alertedSession });
-    await AsyncStorage.setItem('safewalk_session', JSON.stringify(alertedSession));
+  const triggerAlert = useCallback(
+    async (location?: { latitude: number; longitude: number }) => {
+      logger.debug('🚨 [triggerAlert] Début de triggerAlert');
+      logger.debug('📋 [triggerAlert] Settings:', state.settings);
+      logger.debug('📋 [triggerAlert] Session:', state.currentSession);
+      logger.debug('📋 [triggerAlert] Location:', location);
 
-    // Notification locale
-    sendNotification({
-      title: '🚨 Oups... on a prévenu ton contact',
-      body: 'Tu n\'as pas confirmé ton retour à temps. Rassure-les vite !',
-      data: { type: 'alert_triggered' },
-    });
-    
-    // Vérifier qu'il y a au moins un contact
-    if (!state.settings.emergencyContactPhone) {
-      logger.error('❌ [triggerAlert] AUCUN CONTACT CONFIGURÉ ! Les SMS ne seront pas envoyés.');
-      return;
-    }
+      if (!state.currentSession) return;
 
-    // Préparer les contacts d'urgence
-    const emergencyContacts: Array<{ name: string; phone: string }> = [];
-    if (state.settings.emergencyContactPhone) {
-      emergencyContacts.push({
-        name: state.settings.emergencyContactName || 'Contact',
-        phone: state.settings.emergencyContactPhone,
-      });
-    }
-
-    // Envoyer SMS via /api/sos/trigger
-    try {
-      const limitTimeStr = new Date(state.currentSession.limitTime).toLocaleTimeString('fr-FR', {
-        hour: '2-digit',
-        minute: '2-digit',
-      });
-
-      logger.debug('📤 [triggerAlert] Envoi requête Supabase Edge Function...');
-      // Utiliser Supabase Edge Function au lieu du serveur Manus
-      const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || 'https://your-project.supabase.co';
-      const response = await fetch(`${supabaseUrl}/functions/v1/trigger-sos`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          firstName: state.settings.firstName,
-          emergencyContacts,
-          latitude: location?.latitude,
-          longitude: location?.longitude,
-          limitTime: limitTimeStr,
-        }),
-      });
-
-      const result = await response.json();
-      if (result.success) {
-        logger.debug('✅ [triggerAlert] SMS envoyés avec succès:', result.smsResults);
-      } else {
-        logger.error('❌ [triggerAlert] Échec envoi SMS:', result.error);
+      // VÉRIFIER LES QUOTAS
+      const userId = 'current-user';
+      const canSend = await canSendSosAlert(userId);
+      if (!canSend) {
+        logger.error('Quotas épuisés');
+        sendNotification({
+          title: 'Quotas épuisés',
+          body: 'Vous avez atteint votre limite. Passez à Premium.',
+          data: { type: 'quota_exceeded' },
+        });
+        return;
       }
-    } catch (error) {
-      logger.error('❌ [triggerAlert] Exception lors de l\'envoi des SMS:', error);
-    }
-  }, [state.currentSession, state.settings, sendNotification]);
+
+      // Vérifier la connectivité réseau avant d'envoyer les SMS
+      const networkCheck = await checkNetworkForSMS();
+      if (!networkCheck.canSendSMS) {
+        logger.warn("⚠️ [triggerAlert] Impossible d'envoyer SMS:", networkCheck.errorMessage);
+        sendNotification({
+          title: '⚠️ Problème de connexion',
+          body:
+            networkCheck.errorMessage ||
+            "Impossible d'envoyer l'alerte SMS. Vérifiez votre connexion.",
+          data: { type: 'network_error' },
+        });
+        // Continuer quand même pour marquer la session comme overdue
+      }
+
+      // Marquer la session comme overdue
+      const alertedSession: Session = {
+        ...state.currentSession,
+        status: 'overdue',
+        alertTriggeredAt: Date.now(),
+        lastLocation: location,
+      };
+      dispatch({ type: 'SET_SESSION', payload: alertedSession });
+      await AsyncStorage.setItem('safewalk_session', JSON.stringify(alertedSession));
+
+      // Notification locale
+      sendNotification({
+        title: '🚨 Oups... on a prévenu ton contact',
+        body: "Tu n'as pas confirmé ton retour à temps. Rassure-les vite !",
+        data: { type: 'alert_triggered' },
+      });
+
+      // Vérifier qu'il y a au moins un contact
+      if (!state.settings.emergencyContactPhone) {
+        logger.error('❌ [triggerAlert] AUCUN CONTACT CONFIGURÉ ! Les SMS ne seront pas envoyés.');
+        return;
+      }
+
+      // Préparer les contacts d'urgence
+      const emergencyContacts: Array<{ name: string; phone: string }> = [];
+      if (state.settings.emergencyContactPhone) {
+        emergencyContacts.push({
+          name: state.settings.emergencyContactName || 'Contact',
+          phone: state.settings.emergencyContactPhone,
+        });
+      }
+
+      // Envoyer SMS via /api/sos/trigger
+      try {
+        const limitTimeStr = new Date(state.currentSession.limitTime).toLocaleTimeString('fr-FR', {
+          hour: '2-digit',
+          minute: '2-digit',
+        });
+
+        logger.debug('📤 [triggerAlert] Envoi requête Supabase Edge Function...');
+        // Utiliser Supabase Edge Function au lieu du serveur Manus
+        const supabaseUrl =
+          process.env.EXPO_PUBLIC_SUPABASE_URL || 'https://your-project.supabase.co';
+        const response = await fetch(`${supabaseUrl}/functions/v1/trigger-sos`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            firstName: state.settings.firstName,
+            emergencyContacts,
+            latitude: location?.latitude,
+            longitude: location?.longitude,
+            limitTime: limitTimeStr,
+          }),
+        });
+
+        const result = await response.json();
+        if (result.success) {
+          logger.debug('✅ [triggerAlert] SMS envoyés avec succès:', result.smsResults);
+        } else {
+          logger.error('❌ [triggerAlert] Échec envoi SMS:', result.error);
+        }
+      } catch (error) {
+        logger.error("❌ [triggerAlert] Exception lors de l'envoi des SMS:", error);
+      }
+    },
+    [state.currentSession, state.settings, sendNotification],
+  );
 
   const checkAndTriggerAlert = async () => {
     if (!state.currentSession) return;
@@ -429,7 +450,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     // CORRECTION BUG #3: Ne pas déclencher l'alerte si check-in confirmé
     if (state.currentSession.checkInConfirmed) {
-      logger.debug('Check-in confirmé, pas d\'alerte');
+      logger.debug("Check-in confirmé, pas d'alerte");
       return;
     }
 
@@ -474,7 +495,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           });
         }
 
-
         if (contacts.length > 0) {
           await sendConfirmationSMS({
             contacts,
@@ -482,7 +502,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           });
         }
       } catch (error) {
-        logger.error('Erreur lors de l\'envoi du SMS de confirmation:', error);
+        logger.error("Erreur lors de l'envoi du SMS de confirmation:", error);
       }
     }
   };

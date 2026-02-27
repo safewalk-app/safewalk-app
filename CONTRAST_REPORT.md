@@ -16,20 +16,20 @@ SafeWalk utilise une palette de couleurs moderne avec des contrastes généralem
 
 ## 🎨 Palette de Couleurs
 
-| Nom | Clair | Sombre | Utilisation |
-|-----|-------|--------|-------------|
-| Primary | #6C63FF | #6C63FF | Boutons, accents |
-| Secondary | #3A86FF | #3A86FF | Liens, accents secondaires |
-| Mint | #2DE2A6 | #2DE2A6 | Succès, validation |
-| Danger | #FF4D4D | #FF4D4D | Erreurs, alertes |
-| Foreground | #0B1220 | #0B1220 | Texte principal |
-| Muted | #6B7280 | #6B7280 | Texte secondaire |
-| Background | #F6F7FF | #F6F7FF | Fond |
-| Surface | #FFFFFF | #FFFFFF | Cartes |
-| Border | #E5E7EB | #E5E7EB | Bordures |
-| Success | #2DE2A6 | #2DE2A6 | Succès |
-| Warning | #F59E0B | #F59E0B | Avertissements |
-| Error | #FF4D4D | #FF4D4D | Erreurs |
+| Nom        | Clair   | Sombre  | Utilisation                |
+| ---------- | ------- | ------- | -------------------------- |
+| Primary    | #6C63FF | #6C63FF | Boutons, accents           |
+| Secondary  | #3A86FF | #3A86FF | Liens, accents secondaires |
+| Mint       | #2DE2A6 | #2DE2A6 | Succès, validation         |
+| Danger     | #FF4D4D | #FF4D4D | Erreurs, alertes           |
+| Foreground | #0B1220 | #0B1220 | Texte principal            |
+| Muted      | #6B7280 | #6B7280 | Texte secondaire           |
+| Background | #F6F7FF | #F6F7FF | Fond                       |
+| Surface    | #FFFFFF | #FFFFFF | Cartes                     |
+| Border     | #E5E7EB | #E5E7EB | Bordures                   |
+| Success    | #2DE2A6 | #2DE2A6 | Succès                     |
+| Warning    | #F59E0B | #F59E0B | Avertissements             |
+| Error      | #FF4D4D | #FF4D4D | Erreurs                    |
 
 ---
 
@@ -38,24 +38,28 @@ SafeWalk utilise une palette de couleurs moderne avec des contrastes généralem
 ### 1. Texte Principal (Foreground #0B1220)
 
 #### Fond Blanc (#FFFFFF)
+
 ```
 Contraste: 17.5:1
 Statut: ✅ WCAG AAA (Normal + Large)
 ```
 
 #### Fond Gris Clair (#F6F7FF)
+
 ```
 Contraste: 17.2:1
 Statut: ✅ WCAG AAA (Normal + Large)
 ```
 
 #### Fond Bleu Primaire (#6C63FF)
+
 ```
 Contraste: 6.8:1
 Statut: ✅ WCAG AA (Normal + Large)
 ```
 
 #### Fond Bleu Secondaire (#3A86FF)
+
 ```
 Contraste: 9.2:1
 Statut: ✅ WCAG AAA (Normal + Large)
@@ -66,6 +70,7 @@ Statut: ✅ WCAG AAA (Normal + Large)
 ### 2. Texte Secondaire (Muted #6B7280)
 
 #### Fond Blanc (#FFFFFF)
+
 ```
 Contraste: 4.8:1
 Statut: ✅ WCAG AA (Normal)
@@ -73,6 +78,7 @@ Statut: ✅ WCAG AAA (Large)
 ```
 
 #### Fond Gris Clair (#F6F7FF)
+
 ```
 Contraste: 4.5:1
 Statut: ✅ WCAG AA (Normal)
@@ -80,6 +86,7 @@ Statut: ✅ WCAG AAA (Large)
 ```
 
 #### Fond Bleu Primaire (#6C63FF)
+
 ```
 Contraste: 1.8:1
 Statut: ❌ WCAG AA (ÉCHOUE)
@@ -91,6 +98,7 @@ Recommandation: Utiliser du texte blanc ou un fond plus clair
 ### 3. Boutons Primaires (Fond #6C63FF, Texte Blanc)
 
 #### Texte Blanc (#FFFFFF)
+
 ```
 Contraste: 6.8:1
 Statut: ✅ WCAG AAA (Normal + Large)
@@ -101,6 +109,7 @@ Statut: ✅ WCAG AAA (Normal + Large)
 ### 4. Boutons de Succès (Fond #2DE2A6, Texte Blanc)
 
 #### Texte Blanc (#FFFFFF)
+
 ```
 Contraste: 5.2:1
 Statut: ✅ WCAG AA (Normal)
@@ -112,6 +121,7 @@ Statut: ✅ WCAG AAA (Large)
 ### 5. Boutons d'Erreur (Fond #FF4D4D, Texte Blanc)
 
 #### Texte Blanc (#FFFFFF)
+
 ```
 Contraste: 3.9:1
 Statut: ❌ WCAG AA (Normal) - ÉCHOUE
@@ -124,6 +134,7 @@ Recommandation: Augmenter le contraste ou utiliser un texte plus sombre
 ### 6. Avertissements (Fond #F59E0B, Texte Blanc)
 
 #### Texte Blanc (#FFFFFF)
+
 ```
 Contraste: 4.2:1
 Statut: ❌ WCAG AA (Normal) - ÉCHOUE
@@ -136,6 +147,7 @@ Recommandation: Utiliser un texte plus sombre ou un fond plus foncé
 ### 7. Liens et Accents Secondaires (Fond #3A86FF, Texte Blanc)
 
 #### Texte Blanc (#FFFFFF)
+
 ```
 Contraste: 9.2:1
 Statut: ✅ WCAG AAA (Normal + Large)
@@ -146,31 +158,37 @@ Statut: ✅ WCAG AAA (Normal + Large)
 ## ⚠️ Problèmes Identifiés
 
 ### Problème 1: Texte Secondaire sur Fond Primaire
+
 **Sévérité:** Moyenne
 **Localisation:** Cartes avec fond bleu primaire
 **Contraste Actuel:** 1.8:1
 **Contraste Requis:** 4.5:1
-**Solution:** 
+**Solution:**
+
 - Option A: Utiliser du texte blanc au lieu de gris
 - Option B: Utiliser un fond plus clair
 - Option C: Ajouter un fond semi-transparent blanc derrière le texte
 
 ### Problème 2: Boutons d'Erreur
+
 **Sévérité:** Moyenne
 **Localisation:** Boutons "Annuler", "Supprimer"
 **Contraste Actuel:** 3.9:1 (normal), 5.2:1 (large)
 **Contraste Requis:** 4.5:1 (normal)
 **Solution:**
+
 - Option A: Utiliser un texte plus sombre (#000000 ou #1F2937)
 - Option B: Utiliser un fond plus foncé (#E63946 ou #C1121F)
 - Option C: Ajouter une bordure contrastée
 
 ### Problème 3: Avertissements
+
 **Sévérité:** Moyenne
 **Localisation:** Alertes, messages d'avertissement
 **Contraste Actuel:** 4.2:1 (normal), 6.1:1 (large)
 **Contraste Requis:** 4.5:1 (normal)
 **Solution:**
+
 - Option A: Utiliser un texte plus sombre (#78350F ou #92400E)
 - Option B: Utiliser un fond plus foncé (#D97706 ou #B45309)
 - Option C: Ajouter une bordure contrastée
@@ -179,18 +197,18 @@ Statut: ✅ WCAG AAA (Normal + Large)
 
 ## ✅ Combinaisons Conformes
 
-| Texte | Fond | Contraste | Statut |
-|-------|------|-----------|--------|
-| Foreground (#0B1220) | Blanc (#FFFFFF) | 17.5:1 | ✅ AAA |
-| Foreground (#0B1220) | Gris (#F6F7FF) | 17.2:1 | ✅ AAA |
-| Foreground (#0B1220) | Primaire (#6C63FF) | 6.8:1 | ✅ AA |
-| Foreground (#0B1220) | Secondaire (#3A86FF) | 9.2:1 | ✅ AAA |
-| Muted (#6B7280) | Blanc (#FFFFFF) | 4.8:1 | ✅ AA |
-| Muted (#6B7280) | Gris (#F6F7FF) | 4.5:1 | ✅ AA |
-| Blanc (#FFFFFF) | Primaire (#6C63FF) | 6.8:1 | ✅ AAA |
-| Blanc (#FFFFFF) | Secondaire (#3A86FF) | 9.2:1 | ✅ AAA |
-| Blanc (#FFFFFF) | Succès (#2DE2A6) | 5.2:1 | ✅ AA |
-| Blanc (#FFFFFF) | Secondaire (#3A86FF) | 9.2:1 | ✅ AAA |
+| Texte                | Fond                 | Contraste | Statut |
+| -------------------- | -------------------- | --------- | ------ |
+| Foreground (#0B1220) | Blanc (#FFFFFF)      | 17.5:1    | ✅ AAA |
+| Foreground (#0B1220) | Gris (#F6F7FF)       | 17.2:1    | ✅ AAA |
+| Foreground (#0B1220) | Primaire (#6C63FF)   | 6.8:1     | ✅ AA  |
+| Foreground (#0B1220) | Secondaire (#3A86FF) | 9.2:1     | ✅ AAA |
+| Muted (#6B7280)      | Blanc (#FFFFFF)      | 4.8:1     | ✅ AA  |
+| Muted (#6B7280)      | Gris (#F6F7FF)       | 4.5:1     | ✅ AA  |
+| Blanc (#FFFFFF)      | Primaire (#6C63FF)   | 6.8:1     | ✅ AAA |
+| Blanc (#FFFFFF)      | Secondaire (#3A86FF) | 9.2:1     | ✅ AAA |
+| Blanc (#FFFFFF)      | Succès (#2DE2A6)     | 5.2:1     | ✅ AA  |
+| Blanc (#FFFFFF)      | Secondaire (#3A86FF) | 9.2:1     | ✅ AAA |
 
 ---
 
@@ -199,41 +217,44 @@ Statut: ✅ WCAG AAA (Normal + Large)
 ### Priorité Haute
 
 1. **Corriger les boutons d'erreur:**
+
    ```css
    /* Actuel */
-   background-color: #FF4D4D;
-   color: #FFFFFF;
+   background-color: #ff4d4d;
+   color: #ffffff;
    /* Contraste: 3.9:1 ❌ */
-   
+
    /* Proposé */
-   background-color: #FF4D4D;
+   background-color: #ff4d4d;
    color: #000000; /* ou #1F2937 */
    /* Contraste: 5.5:1 ✅ */
    ```
 
 2. **Corriger les avertissements:**
+
    ```css
    /* Actuel */
-   background-color: #F59E0B;
-   color: #FFFFFF;
+   background-color: #f59e0b;
+   color: #ffffff;
    /* Contraste: 4.2:1 ❌ */
-   
+
    /* Proposé */
-   background-color: #F59E0B;
-   color: #78350F; /* Texte plus sombre */
+   background-color: #f59e0b;
+   color: #78350f; /* Texte plus sombre */
    /* Contraste: 6.8:1 ✅ */
    ```
 
 3. **Améliorer le texte secondaire sur fond primaire:**
+
    ```css
    /* Actuel */
-   background-color: #6C63FF;
-   color: #6B7280;
+   background-color: #6c63ff;
+   color: #6b7280;
    /* Contraste: 1.8:1 ❌ */
-   
+
    /* Proposé */
-   background-color: #6C63FF;
-   color: #FFFFFF; /* Texte blanc */
+   background-color: #6c63ff;
+   color: #ffffff; /* Texte blanc */
    /* Contraste: 6.8:1 ✅ */
    ```
 

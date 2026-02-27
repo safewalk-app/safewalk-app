@@ -1,9 +1,9 @@
-import React, { useEffect } from "react";
-import { View, Text, TouchableOpacity, Animated } from "react-native";
-import { MaterialIcons } from "@expo/vector-icons";
-import { ScreenContainer } from "@/components/screen-container";
-import { useColors } from "@/hooks/use-colors";
-import * as Haptics from "expo-haptics";
+import React, { useEffect } from 'react';
+import { View, Text, TouchableOpacity, Animated } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
+import { ScreenContainer } from '@/components/screen-container';
+import { useColors } from '@/hooks/use-colors';
+import * as Haptics from 'expo-haptics';
 
 interface PaymentSuccessScreenProps {
   productName: string;
@@ -61,9 +61,7 @@ export function PaymentSuccessScreen({
       </Animated.View>
 
       {/* Success Message */}
-      <Text className="text-3xl font-bold text-foreground text-center mb-2">
-        Paiement réussi!
-      </Text>
+      <Text className="text-3xl font-bold text-foreground text-center mb-2">Paiement réussi!</Text>
 
       {/* Product Details */}
       <View className="bg-surface p-6 rounded-2xl w-full mb-6 border border-border">
@@ -75,9 +73,7 @@ export function PaymentSuccessScreen({
         <View className="border-t border-border pt-4">
           <View className="flex-row justify-between items-center">
             <Text className="text-sm text-muted">Montant payé</Text>
-            <Text className="text-lg font-bold text-primary">
-              ${amount.toFixed(2)}
-            </Text>
+            <Text className="text-lg font-bold text-primary">${amount.toFixed(2)}</Text>
           </View>
 
           {creditsAdded && (
@@ -86,9 +82,7 @@ export function PaymentSuccessScreen({
                 <MaterialIcons name="star" size={16} color={colors.primary} />
                 <Text className="text-sm text-muted">Crédits ajoutés</Text>
               </View>
-              <Text className="text-lg font-bold text-primary">
-                +{creditsAdded}
-              </Text>
+              <Text className="text-lg font-bold text-primary">+{creditsAdded}</Text>
             </View>
           )}
         </View>
@@ -96,9 +90,7 @@ export function PaymentSuccessScreen({
 
       {/* Benefits */}
       <View className="w-full mb-8">
-        <Text className="text-sm font-semibold text-foreground mb-3">
-          Vous pouvez maintenant:
-        </Text>
+        <Text className="text-sm font-semibold text-foreground mb-3">Vous pouvez maintenant:</Text>
 
         <View className="gap-2">
           <View className="flex-row items-center gap-3 bg-surface p-3 rounded-lg border border-border">
@@ -132,9 +124,7 @@ export function PaymentSuccessScreen({
             >
               <MaterialIcons name="check" size={16} color={colors.background} />
             </View>
-            <Text className="text-sm text-foreground flex-1">
-              Partager votre localisation GPS
-            </Text>
+            <Text className="text-sm text-foreground flex-1">Partager votre localisation GPS</Text>
           </View>
         </View>
       </View>
@@ -145,14 +135,12 @@ export function PaymentSuccessScreen({
         className="w-full py-4 rounded-lg items-center"
         style={{ backgroundColor: colors.primary }}
       >
-        <Text className="text-lg font-bold text-background">
-          Continuer
-        </Text>
+        <Text className="text-lg font-bold text-background">Continuer</Text>
       </TouchableOpacity>
 
       {/* Receipt Info */}
       <Text className="text-xs text-muted text-center mt-6">
-        Un reçu a été envoyé à votre email.{"\n"}
+        Un reçu a été envoyé à votre email.{'\n'}
         Vous pouvez gérer votre abonnement dans les paramètres.
       </Text>
     </ScreenContainer>

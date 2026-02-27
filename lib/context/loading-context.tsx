@@ -1,6 +1,6 @@
 /**
  * Loading Context
- * 
+ *
  * Contexte global pour tracker le chargement des composants lazy loading
  * Permet d'afficher un indicateur de chargement visible à l'utilisateur
  */
@@ -30,39 +30,41 @@ const LoadingContext = createContext<LoadingContextType | undefined>(undefined);
 export function LoadingProvider({ children }: { children: ReactNode }) {
   const [loadingItems, setLoadingItems] = useState<LoadingItem[]>([]);
 
-  const startLoading = useCallback((id: string, name: string, type: 'service' | 'hook' | 'component') => {
-    setLoadingItems(prev => {
-      // Éviter les doublons
-      if (prev.some(item => item.id === id)) {
-        return prev;
-      }
-      return [...prev, {
-        id,
-        name,
-        type,
-        startTime: Date.now(),
-        progress: 0,
-      }];
-    });
-  }, []);
+  const startLoading = useCallback(
+    (id: string, name: string, type: 'service' | 'hook' | 'component') => {
+      setLoadingItems((prev) => {
+        // Éviter les doublons
+        if (prev.some((item) => item.id === id)) {
+          return prev;
+        }
+        return [
+          ...prev,
+          {
+            id,
+            name,
+            type,
+            startTime: Date.now(),
+            progress: 0,
+          },
+        ];
+      });
+    },
+    [],
+  );
 
   const updateProgress = useCallback((id: string, progress: number) => {
-    setLoadingItems(prev =>
-      prev.map(item =>
-        item.id === id ? { ...item, progress: Math.min(progress, 99) } : item
-      )
+    setLoadingItems((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, progress: Math.min(progress, 99) } : item)),
     );
   }, []);
 
   const finishLoading = useCallback((id: string) => {
-    setLoadingItems(prev =>
-      prev.map(item =>
-        item.id === id ? { ...item, progress: 100 } : item
-      )
+    setLoadingItems((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, progress: 100 } : item)),
     );
     // Retirer après 300ms pour une transition fluide
     setTimeout(() => {
-      setLoadingItems(prev => prev.filter(item => item.id !== id));
+      setLoadingItems((prev) => prev.filter((item) => item.id !== id));
     }, 300);
   }, []);
 
@@ -71,9 +73,10 @@ export function LoadingProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const isLoading = loadingItems.length > 0;
-  const totalProgress = loadingItems.length > 0
-    ? Math.round(loadingItems.reduce((sum, item) => sum + item.progress, 0) / loadingItems.length)
-    : 0;
+  const totalProgress =
+    loadingItems.length > 0
+      ? Math.round(loadingItems.reduce((sum, item) => sum + item.progress, 0) / loadingItems.length)
+      : 0;
 
   return (
     <LoadingContext.Provider

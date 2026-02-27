@@ -35,7 +35,7 @@ export default function IndexScreen() {
         const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
         setRemainingTime(
-          `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+          `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`,
         );
       } else {
         setRemainingTime('En retard');
@@ -52,7 +52,9 @@ export default function IndexScreen() {
 
   const checkPhoneVerification = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) {
         setLoading(false);
         return;
@@ -82,7 +84,7 @@ export default function IndexScreen() {
       return {
         status: 'inactive',
         title: 'Sécurité inactive',
-        subtitle: 'Ajoute un contact d\'urgence pour activer les alertes.',
+        subtitle: "Ajoute un contact d'urgence pour activer les alertes.",
         isReady: false,
       };
     }
@@ -121,48 +123,40 @@ export default function IndexScreen() {
 
     // Cas 1: Contact manquant
     if (!hasContact) {
-      Alert.alert(
-        'Contact d\'urgence manquant',
-        'Ajoute un contact d\'urgence pour continuer.',
-        [
-          { text: 'Annuler', style: 'cancel' },
-          {
-            text: 'Aller aux Paramètres',
-            onPress: () => router.push('/settings'),
-          },
-        ]
-      );
+      Alert.alert("Contact d'urgence manquant", "Ajoute un contact d'urgence pour continuer.", [
+        { text: 'Annuler', style: 'cancel' },
+        {
+          text: 'Aller aux Paramètres',
+          onPress: () => router.push('/settings'),
+        },
+      ]);
       return;
     }
 
     // Cas 2: Téléphone non vérifié
     if (!phoneVerified) {
-      Alert.alert(
-        'Téléphone non vérifié',
-        'Vérifie ton numéro pour activer les alertes.',
-        [
-          { text: 'Annuler', style: 'cancel' },
-          {
-            text: 'Vérifier maintenant',
-            onPress: () => router.push('/verify-otp'),
-          },
-        ]
-      );
+      Alert.alert('Téléphone non vérifié', 'Vérifie ton numéro pour activer les alertes.', [
+        { text: 'Annuler', style: 'cancel' },
+        {
+          text: 'Vérifier maintenant',
+          onPress: () => router.push('/verify-otp'),
+        },
+      ]);
       return;
     }
 
     // Cas 3: Crédits épuisés
     if (!hasCredits) {
       Alert.alert(
-        'Pas d\'alertes disponibles',
-        'Tu n\'as plus d\'alertes disponibles. Ajoute des crédits pour continuer.',
+        "Pas d'alertes disponibles",
+        "Tu n'as plus d'alertes disponibles. Ajoute des crédits pour continuer.",
         [
           { text: 'Annuler', style: 'cancel' },
           {
             text: 'Ajouter des crédits',
             onPress: () => router.push('/paywall'),
           },
-        ]
+        ],
       );
       return;
     }
@@ -188,12 +182,8 @@ export default function IndexScreen() {
         {/* Header */}
         <ScreenTransition delay={0} duration={350}>
           <View className="gap-1 mb-3">
-            <Text className="text-5xl font-bold text-foreground">
-              SafeWalk
-            </Text>
-            <Text className="text-base text-muted">
-              Reste en sécurité, où que tu sois.
-            </Text>
+            <Text className="text-5xl font-bold text-foreground">SafeWalk</Text>
+            <Text className="text-base text-muted">Reste en sécurité, où que tu sois.</Text>
           </View>
         </ScreenTransition>
 
@@ -242,12 +232,8 @@ export default function IndexScreen() {
               <View className="flex-row items-center gap-3">
                 <MaterialIcons name="location-on" size={20} color="#6C63FF" />
                 <View className="flex-1">
-                  <Text className="text-base font-semibold text-foreground">
-                    Sortie en cours
-                  </Text>
-                  <Text className="text-sm text-muted">
-                    Temps restant: {remainingTime}
-                  </Text>
+                  <Text className="text-base font-semibold text-foreground">Sortie en cours</Text>
+                  <Text className="text-sm text-muted">Temps restant: {remainingTime}</Text>
                 </View>
                 <MaterialIcons name="chevron-right" size={24} color="#6C63FF" />
               </View>
@@ -260,9 +246,7 @@ export default function IndexScreen() {
           <ScreenTransition delay={300} duration={350}>
             <View className="mt-3">
               <GlassCard className="gap-2">
-                <Text className="text-sm font-semibold text-foreground">
-                  Conseil du jour
-                </Text>
+                <Text className="text-sm font-semibold text-foreground">Conseil du jour</Text>
                 <Text className="text-xs text-muted leading-relaxed">
                   Un petit réflexe utile : fixe toujours une heure de retour.
                 </Text>

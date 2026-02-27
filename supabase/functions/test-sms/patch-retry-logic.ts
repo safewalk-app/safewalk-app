@@ -1,11 +1,11 @@
 /**
  * PATCH for test-sms Edge Function
  * Adds retry logic, exponential backoff, and proper error handling
- * 
+ *
  * Apply this patch to test-sms/index.ts
  */
 
-import { ERROR_CODES } from "../_shared/error-codes.ts";
+import { ERROR_CODES } from '../_shared/error-codes.ts';
 
 // Add this interface
 interface SmsRetryConfig {
@@ -30,7 +30,7 @@ async function sendSmsWithRetry(
   message: string,
   twilioConfig: any,
   retryCount: number = 0,
-  config: SmsRetryConfig = DEFAULT_RETRY_CONFIG
+  config: SmsRetryConfig = DEFAULT_RETRY_CONFIG,
 ): Promise<{ success: boolean; messageSid?: string; error?: string }> {
   try {
     // Validate phone number format (E.164)
@@ -42,46 +42,52 @@ async function sendSmsWithRetry(
     }
 
     // Send SMS via Twilio
-    const response = await fetch("https://api.twilio.com/2010-04-01/Accounts/" + twilioConfig.accountSid + "/Messages.json", {
-      method: "POST",
-      headers: {
-        Authorization: "Basic " + btoa(twilioConfig.accountSid + ":" + twilioConfig.authToken),
-        "Content-Type": "application/x-www-form-urlencoded",
+    const response = await fetch(
+      'https://api.twilio.com/2010-04-01/Accounts/' + twilioConfig.accountSid + '/Messages.json',
+      {
+        method: 'POST',
+        headers: {
+          Authorization: 'Basic ' + btoa(twilioConfig.accountSid + ':' + twilioConfig.authToken),
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          From: twilioConfig.fromNumber,
+          To: phoneNumber,
+          Body: message,
+        }).toString(),
       },
-      body: new URLSearchParams({
-        From: twilioConfig.fromNumber,
-        To: phoneNumber,
-        Body: message,
-      }).toString(),
-    });
+    );
 
     const data = await response.json();
 
     if (!response.ok) {
-      const errorMessage = data.message || "Unknown Twilio error";
-      
+      const errorMessage = data.message || 'Unknown Twilio error';
+
       // Check if error is retryable
-      const isRetryable = 
+      const isRetryable =
         response.status >= 500 || // Server errors
         response.status === 429 || // Rate limit
-        errorMessage.includes("temporarily unavailable");
+        errorMessage.includes('temporarily unavailable');
 
       if (isRetryable && retryCount < config.maxRetries) {
         // Calculate exponential backoff delay
         const delay = Math.min(
           config.initialDelayMs * Math.pow(config.backoffMultiplier, retryCount),
-          config.maxDelayMs
+          config.maxDelayMs,
         );
 
         // Log retry attempt
-        await supabase.from("sms_logs").update({
-          retry_count: retryCount + 1,
-          retry_at: new Date(Date.now() + delay).toISOString(),
-          status: "queued",
-        }).eq("id", smsLogId);
+        await supabase
+          .from('sms_logs')
+          .update({
+            retry_count: retryCount + 1,
+            retry_at: new Date(Date.now() + delay).toISOString(),
+            status: 'queued',
+          })
+          .eq('id', smsLogId);
 
         // Wait and retry
-        await new Promise(resolve => setTimeout(resolve, delay));
+        await new Promise((resolve) => setTimeout(resolve, delay));
         return sendSmsWithRetry(
           supabase,
           smsLogId,
@@ -89,7 +95,7 @@ async function sendSmsWithRetry(
           message,
           twilioConfig,
           retryCount + 1,
-          config
+          config,
         );
       }
 
@@ -106,22 +112,25 @@ async function sendSmsWithRetry(
       messageSid: data.sid,
     };
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
     // Retry on network errors
     if (retryCount < config.maxRetries) {
       const delay = Math.min(
         config.initialDelayMs * Math.pow(config.backoffMultiplier, retryCount),
-        config.maxDelayMs
+        config.maxDelayMs,
       );
 
-      await supabase.from("sms_logs").update({
-        retry_count: retryCount + 1,
-        retry_at: new Date(Date.now() + delay).toISOString(),
-        status: "queued",
-      }).eq("id", smsLogId);
+      await supabase
+        .from('sms_logs')
+        .update({
+          retry_count: retryCount + 1,
+          retry_at: new Date(Date.now() + delay).toISOString(),
+          status: 'queued',
+        })
+        .eq('id', smsLogId);
 
-      await new Promise(resolve => setTimeout(resolve, delay));
+      await new Promise((resolve) => setTimeout(resolve, delay));
       return sendSmsWithRetry(
         supabase,
         smsLogId,
@@ -129,7 +138,7 @@ async function sendSmsWithRetry(
         message,
         twilioConfig,
         retryCount + 1,
-        config
+        config,
       );
     }
 
@@ -143,19 +152,19 @@ async function sendSmsWithRetry(
 // Add this validation function
 async function validateUserCanSendTestSms(
   supabase: any,
-  userId: string
+  userId: string,
 ): Promise<{ allowed: boolean; error?: string; errorCode?: string }> {
   // 1. Check if user profile exists
   const { data: profile, error: profileError } = await supabase
-    .from("profiles")
-    .select("phone_verified, subscription_active, free_alerts_remaining")
-    .eq("id", userId)
+    .from('profiles')
+    .select('phone_verified, subscription_active, free_alerts_remaining')
+    .eq('id', userId)
     .single();
 
   if (profileError || !profile) {
     return {
       allowed: false,
-      error: "User profile not found",
+      error: 'User profile not found',
       errorCode: ERROR_CODES.CONFIG_ERROR,
     };
   }
@@ -164,7 +173,7 @@ async function validateUserCanSendTestSms(
   if (!profile.phone_verified) {
     return {
       allowed: false,
-      error: "Téléphone non vérifié",
+      error: 'Téléphone non vérifié',
       errorCode: ERROR_CODES.PHONE_NOT_VERIFIED,
     };
   }
@@ -173,7 +182,7 @@ async function validateUserCanSendTestSms(
   if (!profile.subscription_active && profile.free_alerts_remaining <= 0) {
     return {
       allowed: false,
-      error: "Crédits insuffisants",
+      error: 'Crédits insuffisants',
       errorCode: ERROR_CODES.NO_CREDITS,
     };
   }

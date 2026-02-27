@@ -1,16 +1,16 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert } from "react-native";
-import { MaterialIcons } from "@expo/vector-icons";
-import { stripeService, StripeProduct } from "@/lib/services/stripe-service";
-import { ScreenContainer } from "@/components/screen-container";
-import { StripeCheckoutWebView } from "@/components/stripe-checkout-webview";
-import { PaymentSuccessScreen } from "@/components/payment-success-screen";
-import { useColors } from "@/hooks/use-colors";
-import { cn } from "@/lib/utils";
+import React, { useEffect, useState } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
+import { stripeService, StripeProduct } from '@/lib/services/stripe-service';
+import { ScreenContainer } from '@/components/screen-container';
+import { StripeCheckoutWebView } from '@/components/stripe-checkout-webview';
+import { PaymentSuccessScreen } from '@/components/payment-success-screen';
+import { useColors } from '@/hooks/use-colors';
+import { cn } from '@/lib/utils';
 
 interface PaywallProps {
   onClose?: () => void;
-  initialTab?: "subscription" | "credits";
+  initialTab?: 'subscription' | 'credits';
 }
 
 interface SuccessState {
@@ -19,9 +19,9 @@ interface SuccessState {
   creditsAdded?: number;
 }
 
-export function Paywall({ onClose, initialTab = "subscription" }: PaywallProps) {
+export function Paywall({ onClose, initialTab = 'subscription' }: PaywallProps) {
   const colors = useColors();
-  const [tab, setTab] = useState<"subscription" | "credits">(initialTab);
+  const [tab, setTab] = useState<'subscription' | 'credits'>(initialTab);
   const [products, setProducts] = useState<StripeProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [purchasing, setPurchasing] = useState<string | null>(null);
@@ -49,12 +49,12 @@ export function Paywall({ onClose, initialTab = "subscription" }: PaywallProps) 
       if (session?.url) {
         setCheckoutUrl(session.url);
       } else {
-        Alert.alert("Erreur", "Impossible de créer la session de paiement");
+        Alert.alert('Erreur', 'Impossible de créer la session de paiement');
         setPurchasing(null);
       }
     } catch (error) {
-      Alert.alert("Erreur", "Une erreur est survenue lors du paiement");
-      console.error("Purchase error:", error);
+      Alert.alert('Erreur', 'Une erreur est survenue lors du paiement');
+      console.error('Purchase error:', error);
       setPurchasing(null);
     }
   };
@@ -64,7 +64,8 @@ export function Paywall({ onClose, initialTab = "subscription" }: PaywallProps) 
     setSuccessState({
       productName: product.name,
       amount: product.price,
-      creditsAdded: product.type === "credits" ? parseInt(product.metadata?.credits || "0") : undefined,
+      creditsAdded:
+        product.type === 'credits' ? parseInt(product.metadata?.credits || '0') : undefined,
     });
     setCheckoutUrl(null);
     setPurchasing(null);
@@ -81,8 +82,8 @@ export function Paywall({ onClose, initialTab = "subscription" }: PaywallProps) 
     onClose?.();
   };
 
-  const subscriptionProducts = products.filter((p) => p.type === "subscription");
-  const creditProducts = products.filter((p) => p.type === "credits");
+  const subscriptionProducts = products.filter((p) => p.type === 'subscription');
+  const creditProducts = products.filter((p) => p.type === 'credits');
 
   // Show success screen if payment succeeded
   if (successState) {
@@ -105,7 +106,7 @@ export function Paywall({ onClose, initialTab = "subscription" }: PaywallProps) 
         onSuccess={() => currentProduct && handleCheckoutSuccess(currentProduct)}
         onCancel={handleCheckoutCancel}
         onError={(error) => {
-          Alert.alert("Erreur de paiement", error);
+          Alert.alert('Erreur de paiement', error);
           handleCheckoutCancel();
         }}
       />
@@ -178,18 +179,16 @@ export function Paywall({ onClose, initialTab = "subscription" }: PaywallProps) 
         {/* Tabs */}
         <View className="flex-row px-6 gap-2 mb-6">
           <TouchableOpacity
-            onPress={() => setTab("subscription")}
+            onPress={() => setTab('subscription')}
             className={cn(
-              "flex-1 py-3 px-4 rounded-lg border",
-              tab === "subscription"
-                ? "bg-primary border-primary"
-                : "bg-surface border-border"
+              'flex-1 py-3 px-4 rounded-lg border',
+              tab === 'subscription' ? 'bg-primary border-primary' : 'bg-surface border-border',
             )}
           >
             <Text
               className={cn(
-                "text-center font-semibold",
-                tab === "subscription" ? "text-background" : "text-foreground"
+                'text-center font-semibold',
+                tab === 'subscription' ? 'text-background' : 'text-foreground',
               )}
             >
               Abonnement
@@ -197,18 +196,16 @@ export function Paywall({ onClose, initialTab = "subscription" }: PaywallProps) 
           </TouchableOpacity>
 
           <TouchableOpacity
-            onPress={() => setTab("credits")}
+            onPress={() => setTab('credits')}
             className={cn(
-              "flex-1 py-3 px-4 rounded-lg border",
-              tab === "credits"
-                ? "bg-primary border-primary"
-                : "bg-surface border-border"
+              'flex-1 py-3 px-4 rounded-lg border',
+              tab === 'credits' ? 'bg-primary border-primary' : 'bg-surface border-border',
             )}
           >
             <Text
               className={cn(
-                "text-center font-semibold",
-                tab === "credits" ? "text-background" : "text-foreground"
+                'text-center font-semibold',
+                tab === 'credits' ? 'text-background' : 'text-foreground',
               )}
             >
               Crédits
@@ -217,7 +214,7 @@ export function Paywall({ onClose, initialTab = "subscription" }: PaywallProps) 
         </View>
 
         {/* Subscription Plans */}
-        {tab === "subscription" && (
+        {tab === 'subscription' && (
           <View className="px-6 gap-4 mb-6">
             {subscriptionProducts.map((product) => (
               <TouchableOpacity
@@ -228,18 +225,12 @@ export function Paywall({ onClose, initialTab = "subscription" }: PaywallProps) 
               >
                 <View className="flex-row justify-between items-start mb-2">
                   <View className="flex-1">
-                    <Text className="text-lg font-semibold text-foreground">
-                      {product.name}
-                    </Text>
-                    <Text className="text-sm text-muted mt-1">
-                      {product.description}
-                    </Text>
+                    <Text className="text-lg font-semibold text-foreground">{product.name}</Text>
+                    <Text className="text-sm text-muted mt-1">{product.description}</Text>
                   </View>
-                  {product.metadata?.interval === "year" && (
+                  {product.metadata?.interval === 'year' && (
                     <View className="bg-primary px-2 py-1 rounded">
-                      <Text className="text-xs font-semibold text-background">
-                        -20%
-                      </Text>
+                      <Text className="text-xs font-semibold text-background">-20%</Text>
                     </View>
                   )}
                 </View>
@@ -250,15 +241,13 @@ export function Paywall({ onClose, initialTab = "subscription" }: PaywallProps) 
                       ${product.price.toFixed(2)}
                     </Text>
                     <Text className="text-xs text-muted">
-                      {product.metadata?.interval === "year" ? "/an" : "/mois"}
+                      {product.metadata?.interval === 'year' ? '/an' : '/mois'}
                     </Text>
                   </View>
                   {purchasing === product.id ? (
                     <ActivityIndicator size="small" color={colors.primary} />
                   ) : (
-                    <Text className="text-sm text-muted font-semibold">
-                      Payer
-                    </Text>
+                    <Text className="text-sm text-muted font-semibold">Payer</Text>
                   )}
                 </View>
               </TouchableOpacity>
@@ -267,7 +256,7 @@ export function Paywall({ onClose, initialTab = "subscription" }: PaywallProps) 
         )}
 
         {/* Credit Packages */}
-        {tab === "credits" && (
+        {tab === 'credits' && (
           <View className="px-6 gap-3 mb-6">
             {creditProducts.map((product) => (
               <TouchableOpacity
@@ -277,12 +266,8 @@ export function Paywall({ onClose, initialTab = "subscription" }: PaywallProps) 
                 className="bg-surface p-3 rounded-lg border border-border flex-row justify-between items-center active:opacity-80"
               >
                 <View className="flex-1">
-                  <Text className="font-semibold text-foreground">
-                    {product.name}
-                  </Text>
-                  <Text className="text-xs text-muted mt-1">
-                    {product.description}
-                  </Text>
+                  <Text className="font-semibold text-foreground">{product.name}</Text>
+                  <Text className="text-xs text-muted mt-1">{product.description}</Text>
                 </View>
 
                 <View className="items-end">
@@ -304,13 +289,11 @@ export function Paywall({ onClose, initialTab = "subscription" }: PaywallProps) 
           <View className="flex-row items-start gap-2">
             <MaterialIcons name="info" size={16} color={colors.primary} />
             <View className="flex-1">
-              <Text className="text-sm font-semibold text-foreground mb-1">
-                Comment ça marche?
-              </Text>
+              <Text className="text-sm font-semibold text-foreground mb-1">Comment ça marche?</Text>
               <Text className="text-xs text-muted leading-relaxed">
-                {tab === "subscription"
-                  ? "Avec un abonnement, vous recevez des alertes SMS illimitées. Vous pouvez annuler à tout moment."
-                  : "Achetez des crédits pour envoyer des alertes SMS. Chaque alerte coûte 1 crédit."}
+                {tab === 'subscription'
+                  ? 'Avec un abonnement, vous recevez des alertes SMS illimitées. Vous pouvez annuler à tout moment.'
+                  : 'Achetez des crédits pour envoyer des alertes SMS. Chaque alerte coûte 1 crédit.'}
               </Text>
             </View>
           </View>
@@ -322,9 +305,7 @@ export function Paywall({ onClose, initialTab = "subscription" }: PaywallProps) 
             onPress={onClose}
             className="px-6 py-3 mx-6 border border-border rounded-lg mb-6"
           >
-            <Text className="text-center text-foreground font-semibold">
-              Fermer
-            </Text>
+            <Text className="text-center text-foreground font-semibold">Fermer</Text>
           </TouchableOpacity>
         )}
       </ScrollView>

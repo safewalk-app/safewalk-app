@@ -1,5 +1,5 @@
-import { View, Text, TouchableOpacity } from "react-native";
-import { cn } from "@/lib/utils";
+import { View, Text, TouchableOpacity } from 'react-native';
+import { cn } from '@/lib/utils';
 
 interface RateLimitErrorAlertProps {
   visible: boolean;
@@ -25,9 +25,7 @@ export function RateLimitErrorAlert({
       <View className="flex-row items-start justify-between">
         <View className="flex-1">
           <Text className="text-error font-semibold mb-1">Trop de requêtes</Text>
-          <Text className="text-error text-sm">
-            {message || "Veuillez réessayer plus tard."}
-          </Text>
+          <Text className="text-error text-sm">{message || 'Veuillez réessayer plus tard.'}</Text>
           {retryAfter && (
             <Text className="text-error text-xs mt-2">
               Réessayez dans {Math.ceil(retryAfter / 1000)} secondes

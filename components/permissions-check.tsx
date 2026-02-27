@@ -1,4 +1,4 @@
-import { logger } from "@/lib/utils/logger";
+import { logger } from '@/lib/utils/logger';
 import { useEffect, useState } from 'react';
 import { Alert, Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
@@ -20,7 +20,7 @@ export function PermissionsCheck() {
     try {
       // Vérifier si on a déjà demandé les permissions
       const alreadyRequested = await AsyncStorage.getItem(PERMISSIONS_KEY);
-      
+
       if (alreadyRequested) {
         setChecked(true);
         return;
@@ -28,7 +28,7 @@ export function PermissionsCheck() {
 
       // Vérifier le statut actuel des permissions
       const { status: existingStatus } = await Notifications.getPermissionsAsync();
-      
+
       if (existingStatus === 'granted') {
         logger.debug('✅ Permissions notifications déjà accordées');
         await AsyncStorage.setItem(PERMISSIONS_KEY, 'true');
@@ -44,17 +44,17 @@ export function PermissionsCheck() {
 
       // Demander les permissions
       const { status } = await Notifications.requestPermissionsAsync();
-      
+
       if (status === 'granted') {
         logger.debug('✅ Permissions notifications accordées');
         await AsyncStorage.setItem(PERMISSIONS_KEY, 'true');
       } else {
         logger.warn('⚠️ Permissions notifications refusées');
-        
+
         // Afficher une alerte pour expliquer l'importance
         Alert.alert(
           '🔔 Notifications importantes',
-          'SafeWalk a besoin des notifications pour t\'alerter en cas de danger. Sans notifications, l\'app ne pourra pas te prévenir si tu ne confirmes pas ton retour.',
+          "SafeWalk a besoin des notifications pour t'alerter en cas de danger. Sans notifications, l'app ne pourra pas te prévenir si tu ne confirmes pas ton retour.",
           [
             {
               text: 'Paramètres',
@@ -69,12 +69,12 @@ export function PermissionsCheck() {
               text: 'Plus tard',
               style: 'cancel',
             },
-          ]
+          ],
         );
-        
+
         await AsyncStorage.setItem(PERMISSIONS_KEY, 'denied');
       }
-      
+
       setChecked(true);
     } catch (error) {
       logger.error('❌ Erreur vérification permissions:', error);

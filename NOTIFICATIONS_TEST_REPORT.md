@@ -9,6 +9,7 @@
 ## 🎯 Objectif
 
 Valider que les 40+ notifications du système centralisé s'affichent correctement avec:
+
 - ✅ Messages corrects
 - ✅ Variables remplacées correctement
 - ✅ Fallbacks fonctionnels
@@ -20,6 +21,7 @@ Valider que les 40+ notifications du système centralisé s'affichent correcteme
 ## 📋 Résumé des Intégrations
 
 ### Services Refactorisés
+
 - ✅ **home.tsx** - Blocages clairs avec notify()
 - ✅ **new-session.tsx** - Notifications de démarrage
 - ✅ **trip-service.ts** - 10 appels notify() (startTrip, checkin, extendTrip)
@@ -27,6 +29,7 @@ Valider que les 40+ notifications du système centralisé s'affichent correcteme
 - ✅ **api-client.ts** - 5 appels notify() (rate limit, erreurs réseau)
 
 ### Registre Central
+
 - ✅ **notifications.config.ts** - 40+ notifications définies
 - ✅ **notification.service.ts** - Service d'affichage unique
 - ✅ Variables dynamiques supportées
@@ -39,6 +42,7 @@ Valider que les 40+ notifications du système centralisé s'affichent correcteme
 ### Phase 1: Tests Fonctionnels Rapides (15 min)
 
 #### 1. Démarrer une Sortie (new-session.tsx)
+
 ```
 Étapes:
 1. Ouvrir l'app
@@ -53,6 +57,7 @@ Vérifier:
 ```
 
 #### 2. Prolonger une Sortie (active-session.tsx)
+
 ```
 Étapes:
 1. Pendant une sortie active
@@ -66,6 +71,7 @@ Vérifier:
 ```
 
 #### 3. Confirmer le Retour (active-session.tsx)
+
 ```
 Étapes:
 1. Pendant une sortie active
@@ -78,6 +84,7 @@ Vérifier:
 ```
 
 #### 4. Ajouter un Contact (settings.tsx)
+
 ```
 Étapes:
 1. Aller aux Paramètres
@@ -91,6 +98,7 @@ Vérifier:
 ```
 
 #### 5. Tester SMS (settings.tsx)
+
 ```
 Étapes:
 1. Aller aux Paramètres
@@ -108,6 +116,7 @@ Vérifier:
 ### Phase 2: Tests d'Erreurs (10 min)
 
 #### 6. Erreur Réseau (Simulé)
+
 ```
 Étapes:
 1. Désactiver internet
@@ -120,6 +129,7 @@ Vérifier:
 ```
 
 #### 7. Erreur SMS (Simulé)
+
 ```
 Étapes:
 1. Configurer un numéro invalide
@@ -132,6 +142,7 @@ Vérifier:
 ```
 
 #### 8. Contact Invalide (settings.tsx)
+
 ```
 Étapes:
 1. Aller aux Paramètres
@@ -149,6 +160,7 @@ Vérifier:
 ### Phase 3: Tests de Variables (10 min)
 
 #### 9. Variable "minutes" (trip.extended)
+
 ```
 Étapes:
 1. Pendant une sortie
@@ -161,6 +173,7 @@ Vérifier:
 ```
 
 #### 10. Variable "phone" (sms.test_sent)
+
 ```
 Étapes:
 1. Paramètres avec numéro "+33612345678"
@@ -173,6 +186,7 @@ Vérifier:
 ```
 
 #### 11. Variable "contactName" (alert.sent)
+
 ```
 Étapes:
 1. Pendant alerte avec contact "Marie"
@@ -189,6 +203,7 @@ Vérifier:
 ### Phase 4: Tests de Modes d'Affichage (5 min)
 
 #### 12. Toast (trip.started, contact.saved)
+
 ```
 Vérifier:
 - ✅ Notification en bas de l'écran
@@ -197,6 +212,7 @@ Vérifier:
 ```
 
 #### 13. Banner (error.network, alert.warning)
+
 ```
 Vérifier:
 - ✅ Notification en haut de l'écran
@@ -205,6 +221,7 @@ Vérifier:
 ```
 
 #### 14. Modal (contact.missing, sos.sent)
+
 ```
 Vérifier:
 - ✅ Notification au centre de l'écran
@@ -216,13 +233,13 @@ Vérifier:
 
 ## 📊 Résumé du Test
 
-| Phase | Tests | Durée | Statut |
-|-------|-------|-------|--------|
-| Phase 1: Fonctionnel | 5 tests | 15 min | ⏳ À Tester |
-| Phase 2: Erreurs | 3 tests | 10 min | ⏳ À Tester |
-| Phase 3: Variables | 3 tests | 10 min | ⏳ À Tester |
-| Phase 4: Modes | 3 tests | 5 min | ⏳ À Tester |
-| **TOTAL** | **14 tests** | **40 min** | ⏳ À Tester |
+| Phase                | Tests        | Durée      | Statut      |
+| -------------------- | ------------ | ---------- | ----------- |
+| Phase 1: Fonctionnel | 5 tests      | 15 min     | ⏳ À Tester |
+| Phase 2: Erreurs     | 3 tests      | 10 min     | ⏳ À Tester |
+| Phase 3: Variables   | 3 tests      | 10 min     | ⏳ À Tester |
+| Phase 4: Modes       | 3 tests      | 5 min      | ⏳ À Tester |
+| **TOTAL**            | **14 tests** | **40 min** | ⏳ À Tester |
 
 ---
 

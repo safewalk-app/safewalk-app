@@ -1,5 +1,12 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { checkSessionOtpRequirement, resetSessionOtpVerification, markSessionOtpVerified, getVerifiedPhoneNumber, isOtpVerificationExpired, getOtpVerificationTimeRemaining } from '../lib/services/otp-session-guard';
+import {
+  checkSessionOtpRequirement,
+  resetSessionOtpVerification,
+  markSessionOtpVerified,
+  getVerifiedPhoneNumber,
+  isOtpVerificationExpired,
+  getOtpVerificationTimeRemaining,
+} from '../lib/services/otp-session-guard';
 
 describe('OTP Session Integration', () => {
   beforeEach(() => {
@@ -49,11 +56,7 @@ describe('OTP Session Integration', () => {
     });
 
     it('should accept valid phone numbers', async () => {
-      const validPhoneNumbers = [
-        '+33612345678',
-        '+33712345678',
-        '+33812345678',
-      ];
+      const validPhoneNumbers = ['+33612345678', '+33712345678', '+33812345678'];
 
       for (const phone of validPhoneNumbers) {
         await expect(markSessionOtpVerified(phone)).resolves.toBeUndefined();

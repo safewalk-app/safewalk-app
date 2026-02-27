@@ -97,7 +97,7 @@ export async function getVerifiedPhoneNumber(): Promise<string | undefined> {
 export async function isOtpVerificationExpired(): Promise<boolean> {
   try {
     const state = otpGuard.getState();
-    
+
     // Si pas vérifié, considérer comme expiré
     if (!state.isVerified) {
       return true;
@@ -111,7 +111,7 @@ export async function isOtpVerificationExpired(): Promise<boolean> {
 
     return true;
   } catch (error) {
-    logger.error('[OTP Session Guard] Erreur lors de la vérification d\'expiration:', error);
+    logger.error("[OTP Session Guard] Erreur lors de la vérification d'expiration:", error);
     return true;
   }
 }
@@ -123,14 +123,14 @@ export async function isOtpVerificationExpired(): Promise<boolean> {
 export async function getOtpVerificationTimeRemaining(): Promise<number> {
   try {
     const state = otpGuard.getState();
-    
+
     // Si pas vérifié, retourner 0
     if (!state.isVerified || !state.verifiedAt) {
       return 0;
     }
 
     // Calculer le temps restant (24h = 86400000ms)
-    const expirationTime = state.verifiedAt + (24 * 60 * 60 * 1000);
+    const expirationTime = state.verifiedAt + 24 * 60 * 60 * 1000;
     const timeRemaining = expirationTime - Date.now();
 
     return timeRemaining > 0 ? timeRemaining : 0;

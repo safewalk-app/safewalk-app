@@ -116,7 +116,7 @@ describe('SafeWalk End-to-End Flow', () => {
         extensionsCount++;
         console.log(`✅ Extension ${extensionsCount}/3 appliquée`);
       } else {
-        console.log('❌ Nombre maximum d\'extensions atteint');
+        console.log("❌ Nombre maximum d'extensions atteint");
       }
     }
 

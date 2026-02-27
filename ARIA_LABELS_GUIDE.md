@@ -18,16 +18,15 @@ Ce guide fournit des instructions pour ajouter des labels ARIA (Accessible Rich 
 Fournit une description textuelle pour un élément. Utilisé par les lecteurs d'écran pour annoncer l'élément.
 
 **Syntaxe React Native:**
+
 ```tsx
-<TouchableOpacity
-  accessibilityLabel="Bouton Démarrer la sortie"
-  onPress={handleStart}
->
+<TouchableOpacity accessibilityLabel="Bouton Démarrer la sortie" onPress={handleStart}>
   <Text>Commencer</Text>
 </TouchableOpacity>
 ```
 
 **Bonnes pratiques:**
+
 - Être concis et descriptif (< 50 caractères)
 - Inclure le type d'élément (Bouton, Champ, etc.)
 - Utiliser le français clair et accessible
@@ -38,6 +37,7 @@ Fournit une description textuelle pour un élément. Utilisé par les lecteurs d
 Fournit une indication supplémentaire sur comment utiliser un élément.
 
 **Syntaxe React Native:**
+
 ```tsx
 <TouchableOpacity
   accessibilityLabel="Bouton SOS"
@@ -49,6 +49,7 @@ Fournit une indication supplémentaire sur comment utiliser un élément.
 ```
 
 **Bonnes pratiques:**
+
 - Fournir des instructions d'utilisation
 - Expliquer les gestes spéciaux
 - Être concis (< 100 caractères)
@@ -58,17 +59,15 @@ Fournit une indication supplémentaire sur comment utiliser un élément.
 Définit le rôle sémantique d'un élément (button, checkbox, radio, etc.).
 
 **Syntaxe React Native:**
+
 ```tsx
-<View
-  accessible={true}
-  accessibilityRole="button"
-  accessibilityLabel="Bouton Démarrer"
->
+<View accessible={true} accessibilityRole="button" accessibilityLabel="Bouton Démarrer">
   <Text>Commencer</Text>
 </View>
 ```
 
 **Rôles disponibles:**
+
 - `button` - Bouton
 - `checkbox` - Case à cocher
 - `radio` - Bouton radio
@@ -83,6 +82,7 @@ Définit le rôle sémantique d'un élément (button, checkbox, radio, etc.).
 Indique si un élément est accessible aux lecteurs d'écran.
 
 **Syntaxe React Native:**
+
 ```tsx
 <View accessible={true}>
   <Text>Contenu accessible</Text>
@@ -90,6 +90,7 @@ Indique si un élément est accessible aux lecteurs d'écran.
 ```
 
 **Valeurs:**
+
 - `true` - Élément accessible
 - `false` - Élément non accessible (par défaut)
 
@@ -98,6 +99,7 @@ Indique si un élément est accessible aux lecteurs d'écran.
 Décrit l'état actuel d'un élément (disabled, selected, checked, etc.).
 
 **Syntaxe React Native:**
+
 ```tsx
 <TouchableOpacity
   accessible={true}
@@ -110,6 +112,7 @@ Décrit l'état actuel d'un élément (disabled, selected, checked, etc.).
 ```
 
 **États disponibles:**
+
 - `disabled` - Élément désactivé
 - `selected` - Élément sélectionné
 - `checked` - Case cochée
@@ -121,6 +124,7 @@ Décrit l'état actuel d'un élément (disabled, selected, checked, etc.).
 ## 🏠 Écran Home - Labels ARIA
 
 ### Bouton "Je sors"
+
 ```tsx
 <TouchableOpacity
   accessible={true}
@@ -134,6 +138,7 @@ Décrit l'état actuel d'un élément (disabled, selected, checked, etc.).
 ```
 
 ### Checklist d'État
+
 ```tsx
 <View
   accessible={true}
@@ -162,6 +167,7 @@ Décrit l'état actuel d'un élément (disabled, selected, checked, etc.).
 ```
 
 ### Conseil du Jour
+
 ```tsx
 <View
   accessible={true}
@@ -178,6 +184,7 @@ Décrit l'état actuel d'un élément (disabled, selected, checked, etc.).
 ## 🚀 Écran "Je sors" - Labels ARIA
 
 ### Sélecteur d'Heure
+
 ```tsx
 <View
   accessible={true}
@@ -190,6 +197,7 @@ Décrit l'état actuel d'un élément (disabled, selected, checked, etc.).
 ```
 
 ### Sélecteur de Contact
+
 ```tsx
 <View
   accessible={true}
@@ -202,6 +210,7 @@ Décrit l'état actuel d'un élément (disabled, selected, checked, etc.).
 ```
 
 ### Bouton "Commencer"
+
 ```tsx
 <TouchableOpacity
   accessible={true}
@@ -216,6 +225,7 @@ Décrit l'état actuel d'un élément (disabled, selected, checked, etc.).
 ```
 
 ### Messages d'Erreur
+
 ```tsx
 <View
   accessible={true}
@@ -232,6 +242,7 @@ Décrit l'état actuel d'un élément (disabled, selected, checked, etc.).
 ## 🎯 Écran "Sortie en cours" - Labels ARIA
 
 ### Affichage du Statut
+
 ```tsx
 <View
   accessible={true}
@@ -244,6 +255,7 @@ Décrit l'état actuel d'un élément (disabled, selected, checked, etc.).
 ```
 
 ### Indicateur GPS
+
 ```tsx
 <View
   accessible={true}
@@ -256,6 +268,7 @@ Décrit l'état actuel d'un élément (disabled, selected, checked, etc.).
 ```
 
 ### Bouton "Je suis rentré"
+
 ```tsx
 <TouchableOpacity
   accessible={true}
@@ -270,6 +283,7 @@ Décrit l'état actuel d'un élément (disabled, selected, checked, etc.).
 ```
 
 ### Bouton "+ 15 min"
+
 ```tsx
 <TouchableOpacity
   accessible={true}
@@ -284,6 +298,7 @@ Décrit l'état actuel d'un élément (disabled, selected, checked, etc.).
 ```
 
 ### Bouton SOS
+
 ```tsx
 <TouchableOpacity
   accessible={true}
@@ -298,6 +313,7 @@ Décrit l'état actuel d'un élément (disabled, selected, checked, etc.).
 ```
 
 ### Bouton "Arrêter la sortie"
+
 ```tsx
 <TouchableOpacity
   accessible={true}
@@ -316,6 +332,7 @@ Décrit l'état actuel d'un élément (disabled, selected, checked, etc.).
 ## ⚙️ Écran Paramètres - Labels ARIA
 
 ### Champ Contact
+
 ```tsx
 <TextInput
   accessible={true}
@@ -329,6 +346,7 @@ Décrit l'état actuel d'un élément (disabled, selected, checked, etc.).
 ```
 
 ### Champ Téléphone
+
 ```tsx
 <TextInput
   accessible={true}
@@ -343,6 +361,7 @@ Décrit l'état actuel d'un élément (disabled, selected, checked, etc.).
 ```
 
 ### Commutateur Notifications
+
 ```tsx
 <Switch
   accessible={true}
@@ -356,6 +375,7 @@ Décrit l'état actuel d'un élément (disabled, selected, checked, etc.).
 ```
 
 ### Commutateur Localisation
+
 ```tsx
 <Switch
   accessible={true}
@@ -369,6 +389,7 @@ Décrit l'état actuel d'un élément (disabled, selected, checked, etc.).
 ```
 
 ### Bouton "Test SMS"
+
 ```tsx
 <TouchableOpacity
   accessible={true}
@@ -424,7 +445,7 @@ export function AccessibleButton({
   onPress={handleStart}
 >
   <Text>Commencer</Text>
-</AccessibleButton>
+</AccessibleButton>;
 ```
 
 ---
@@ -432,17 +453,20 @@ export function AccessibleButton({
 ## ✅ Checklist d'Implémentation
 
 ### Écran Home
+
 - [ ] Bouton "Je sors" - accessibilityLabel + accessibilityHint
 - [ ] Checklist d'état - accessibilityLabel pour chaque élément
 - [ ] Conseil du jour - accessibilityLabel + accessibilityHint
 
 ### Écran "Je sors"
+
 - [ ] Sélecteur d'heure - accessibilityLabel + accessibilityHint
 - [ ] Sélecteur de contact - accessibilityLabel + accessibilityHint
 - [ ] Bouton "Commencer" - accessibilityLabel + accessibilityHint + accessibilityState
 - [ ] Messages d'erreur - accessibilityRole="alert"
 
 ### Écran "Sortie en cours"
+
 - [ ] Affichage du statut - accessibilityLabel + accessibilityHint
 - [ ] Indicateur GPS - accessibilityLabel + accessibilityHint
 - [ ] Bouton "Je suis rentré" - accessibilityLabel + accessibilityHint + accessibilityState
@@ -451,6 +475,7 @@ export function AccessibleButton({
 - [ ] Bouton "Arrêter la sortie" - accessibilityLabel + accessibilityHint + accessibilityState
 
 ### Écran Paramètres
+
 - [ ] Champ Contact - accessibilityLabel + accessibilityHint
 - [ ] Champ Téléphone - accessibilityLabel + accessibilityHint
 - [ ] Commutateur Notifications - accessibilityLabel + accessibilityHint + accessibilityState
@@ -486,12 +511,14 @@ export function AccessibleButton({
 ## 📚 Ressources
 
 ### Documentation Officielle
+
 - [React Native Accessibility](https://reactnative.dev/docs/accessibility)
 - [WCAG 2.1 - 4.1.3 Name, Role, Value](https://www.w3.org/WAI/WCAG21/Understanding/name-role-value.html)
 - [Apple Accessibility Guidelines](https://developer.apple.com/design/human-interface-guidelines/accessibility)
 - [Android Accessibility Guidelines](https://developer.android.com/guide/topics/ui/accessibility)
 
 ### Outils de Test
+
 - [Accessibility Scanner (Android)](https://play.google.com/store/apps/details?id=com.google.android.apps.accessibility.auditor)
 - [VoiceOver (iOS)](https://www.apple.com/accessibility/voiceover/)
 - [TalkBack (Android)](https://support.google.com/accessibility/android/answer/6283677)

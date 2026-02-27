@@ -10,14 +10,14 @@ Pour que l'app SafeWalk fonctionne avec les prix dynamiques, vous devez créer *
 
 ### Formulaire Stripe
 
-| Champ | Valeur |
-| --- | --- |
-| **Nom** | Premium Mensuel |
-| **Description** | Alertes SMS illimitées chaque mois |
-| **Type de tarif** | Récurrent |
-| **Montant** | 9.99 |
-| **Devise** | EUR (ou USD selon votre région) |
-| **Période de facturation** | Mensuelle |
+| Champ                      | Valeur                             |
+| -------------------------- | ---------------------------------- |
+| **Nom**                    | Premium Mensuel                    |
+| **Description**            | Alertes SMS illimitées chaque mois |
+| **Type de tarif**          | Récurrent                          |
+| **Montant**                | 9.99                               |
+| **Devise**                 | EUR (ou USD selon votre région)    |
+| **Période de facturation** | Mensuelle                          |
 
 ### Métadonnées (Important!)
 
@@ -25,7 +25,7 @@ Après remplir le formulaire, cliquez sur **"Plus d'options"** et ajoutez:
 
 ```
 Clé: type
-Valeur: 
+Valeur:
 
 Clé: plan_id
 Valeur: premium
@@ -56,14 +56,14 @@ Valeur: month
 
 ## Produit 2: Premium Annuel (Abonnement)
 
-| Champ | Valeur |
-| --- | --- |
-| **Nom** | Premium Annuel |
-| **Description** | Alertes SMS illimitées pendant 1 an (20% de réduction) |
-| **Type de tarif** | Récurrent |
-| **Montant** | 79.99 |
-| **Devise** | EUR (ou USD) |
-| **Période de facturation** | Annuelle |
+| Champ                      | Valeur                                                 |
+| -------------------------- | ------------------------------------------------------ |
+| **Nom**                    | Premium Annuel                                         |
+| **Description**            | Alertes SMS illimitées pendant 1 an (20% de réduction) |
+| **Type de tarif**          | Récurrent                                              |
+| **Montant**                | 79.99                                                  |
+| **Devise**                 | EUR (ou USD)                                           |
+| **Période de facturation** | Annuelle                                               |
 
 ### Métadonnées
 
@@ -82,13 +82,13 @@ Valeur: year
 
 ## Produit 3: 10 Crédits (Paiement unique)
 
-| Champ | Valeur |
-| --- | --- |
-| **Nom** | 10 Crédits |
-| **Description** | 10 alertes SMS (1 crédit = 1 SMS) |
-| **Type de tarif** | Ponctuel |
-| **Montant** | 0.99 |
-| **Devise** | EUR (ou USD) |
+| Champ             | Valeur                            |
+| ----------------- | --------------------------------- |
+| **Nom**           | 10 Crédits                        |
+| **Description**   | 10 alertes SMS (1 crédit = 1 SMS) |
+| **Type de tarif** | Ponctuel                          |
+| **Montant**       | 0.99                              |
+| **Devise**        | EUR (ou USD)                      |
 
 ### Métadonnées
 
@@ -104,13 +104,13 @@ Valeur: 10
 
 ## Produit 4: 50 Crédits (Paiement unique)
 
-| Champ | Valeur |
-| --- | --- |
-| **Nom** | 50 Crédits |
-| **Description** | 50 alertes SMS (meilleure valeur) |
-| **Type de tarif** | Ponctuel |
-| **Montant** | 4.99 |
-| **Devise** | EUR (ou USD) |
+| Champ             | Valeur                            |
+| ----------------- | --------------------------------- |
+| **Nom**           | 50 Crédits                        |
+| **Description**   | 50 alertes SMS (meilleure valeur) |
+| **Type de tarif** | Ponctuel                          |
+| **Montant**       | 4.99                              |
+| **Devise**        | EUR (ou USD)                      |
 
 ### Métadonnées
 
@@ -126,13 +126,13 @@ Valeur: 50
 
 ## Produit 5: 100 Crédits (Paiement unique)
 
-| Champ | Valeur |
-| --- | --- |
-| **Nom** | 100 Crédits |
-| **Description** | 100 alertes SMS |
-| **Type de tarif** | Ponctuel |
-| **Montant** | 9.99 |
-| **Devise** | EUR (ou USD) |
+| Champ             | Valeur          |
+| ----------------- | --------------- |
+| **Nom**           | 100 Crédits     |
+| **Description**   | 100 alertes SMS |
+| **Type de tarif** | Ponctuel        |
+| **Montant**       | 9.99            |
+| **Devise**        | EUR (ou USD)    |
 
 ### Métadonnées
 
@@ -148,13 +148,13 @@ Valeur: 100
 
 ## Produit 6: 500 Crédits (Paiement unique)
 
-| Champ | Valeur |
-| --- | --- |
-| **Nom** | 500 Crédits |
-| **Description** | 500 alertes SMS (meilleure valeur pour les gros utilisateurs) |
-| **Type de tarif** | Ponctuel |
-| **Montant** | 39.99 |
-| **Devise** | EUR (ou USD) |
+| Champ             | Valeur                                                        |
+| ----------------- | ------------------------------------------------------------- |
+| **Nom**           | 500 Crédits                                                   |
+| **Description**   | 500 alertes SMS (meilleure valeur pour les gros utilisateurs) |
+| **Type de tarif** | Ponctuel                                                      |
+| **Montant**       | 39.99                                                         |
+| **Devise**        | EUR (ou USD)                                                  |
 
 ### Métadonnées
 
@@ -183,10 +183,11 @@ Valeur: 500
 1. **Cliquer "More options"** (en bas)
 
 1. **Ajouter les métadonnées:**
-  - Cliquer "+ Add metadata"
-  - Entrer la clé (ex: "type")
-  - Entrer la valeur (ex: "subscription")
-  - Cliquer "+ Add metadata" pour ajouter une autre
+
+- Cliquer "+ Add metadata"
+- Entrer la clé (ex: "type")
+- Entrer la valeur (ex: "subscription")
+- Cliquer "+ Add metadata" pour ajouter une autre
 
 1. **Cliquer "Save"**
 
@@ -199,18 +200,20 @@ Après créer tous les produits, vérifiez:
 1. **Aller à Stripe Dashboard** → Products
 
 1. **Vous devez voir 6 produits:**
-  - ✅ Premium Mensuel (€9.99/month)
-  - ✅ Premium Annuel (€79.99/year)
-  - ✅ 10 Crédits (€0.99)
-  - ✅ 50 Crédits (€4.99)
-  - ✅ 100 Crédits (€9.99)
-  - ✅ 500 Crédits (€39.99)
+
+- ✅ Premium Mensuel (€9.99/month)
+- ✅ Premium Annuel (€79.99/year)
+- ✅ 10 Crédits (€0.99)
+- ✅ 50 Crédits (€4.99)
+- ✅ 100 Crédits (€9.99)
+- ✅ 500 Crédits (€39.99)
 
 1. **Chaque produit doit avoir les métadonnées:**
-  - Cliquer sur le produit
-  - Aller à "Pricing"
-  - Cliquer sur le prix
-  - Vérifier que "type" et "credits" (ou "plan_id") sont présents
+
+- Cliquer sur le produit
+- Aller à "Pricing"
+- Cliquer sur le prix
+- Vérifier que "type" et "credits" (ou "plan_id") sont présents
 
 ---
 
@@ -275,4 +278,3 @@ Après créer les 6 produits avec les métadonnées, l'app SafeWalk sera **compl
 - ✅ L'app se met à jour automatiquement
 
 - ✅ Pas besoin de redéployer l'app
-

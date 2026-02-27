@@ -44,7 +44,7 @@ export function useSOS(options: UseSOSOptions) {
       firstName: settings.firstName,
     });
     logger.info('Location initiale:', initialLocation);
-    
+
     try {
       setIsLoading(true);
       setError(null);
@@ -53,19 +53,20 @@ export function useSOS(options: UseSOSOptions) {
       if (!settings.emergencyContactPhone || !settings.emergencyContactName) {
         const { Alert } = require('react-native');
         Alert.alert(
-          'Contact d\'urgence manquant',
-          'Veuillez configurer un contact d\'urgence avant de declencher SOS.'
+          "Contact d'urgence manquant",
+          "Veuillez configurer un contact d'urgence avant de declencher SOS.",
         );
-        throw new Error('Contact d\'urgence non configure');
+        throw new Error("Contact d'urgence non configure");
       }
 
       // CRITIQUE #7: Verifier que les credits sont disponibles pour SOS
-      const hasCredits = currentSession?.subscription_active || (currentSession?.free_alerts_remaining || 0) > 0;
+      const hasCredits =
+        currentSession?.subscription_active || (currentSession?.free_alerts_remaining || 0) > 0;
       if (!hasCredits) {
         const { Alert } = require('react-native');
         Alert.alert(
           'Credits insuffisants',
-          'Vous n\'avez pas assez de credits pour declencher une alerte SOS.'
+          "Vous n'avez pas assez de credits pour declencher une alerte SOS.",
         );
         throw new Error('Credits insuffisants');
       }
@@ -77,7 +78,7 @@ export function useSOS(options: UseSOSOptions) {
         logger.info('🔔 [Notification] Envoi notification SOS');
         sendNotification({
           title: '🚨 ALERTE SOS DÉCLENCHÉE',
-          body: 'Alerte d\'urgence envoyée à vos contacts. Restez en sécurité.',
+          body: "Alerte d'urgence envoyée à vos contacts. Restez en sécurité.",
           data: { type: 'sos_triggered' },
         });
       } catch (notifErr) {
@@ -86,7 +87,8 @@ export function useSOS(options: UseSOSOptions) {
 
       // Utiliser la position passée en paramètre ou capturer une nouvelle
       logger.info('📍 Capture de la position GPS...');
-      let currentLocation: { latitude: number; longitude: number; accuracy?: number } | undefined = initialLocation;
+      let currentLocation: { latitude: number; longitude: number; accuracy?: number } | undefined =
+        initialLocation;
       if (!currentLocation) {
         const snapshot = await getSnapshot();
         if (snapshot) {
@@ -101,7 +103,7 @@ export function useSOS(options: UseSOSOptions) {
 
       // Vérifier qu'il y a au moins un contact
       if (!settings.emergencyContactPhone) {
-        throw new Error('Aucun contact d\'urgence configuré');
+        throw new Error("Aucun contact d'urgence configuré");
       }
 
       const smsResults: Array<{
@@ -137,12 +139,10 @@ export function useSOS(options: UseSOSOptions) {
         }
       }
 
-
-
       // Vérifier si au moins un SMS a été envoyé
-      const successCount = smsResults.filter(r => r.status === 'sent').length;
+      const successCount = smsResults.filter((r) => r.status === 'sent').length;
       if (successCount === 0) {
-        throw new Error('Échec de l\'envoi de tous les SMS');
+        throw new Error("Échec de l'envoi de tous les SMS");
       }
 
       const result: SOSResult = {
@@ -158,20 +158,27 @@ export function useSOS(options: UseSOSOptions) {
       logger.error('❌ Erreur SOS:', errorMessage);
       logger.error('Stack trace:', err);
       setError(errorMessage);
-      
+
       // Afficher une alerte pour informer l'utilisateur
       const { Alert } = require('react-native');
-      Alert.alert(
-        '❌ Erreur SOS',
-        `Impossible d'envoyer l'alerte: ${errorMessage}`,
-        [{ text: 'OK' }]
-      );
-      
+      Alert.alert('❌ Erreur SOS', `Impossible d'envoyer l'alerte: ${errorMessage}`, [
+        { text: 'OK' },
+      ]);
+
       onError?.(err instanceof Error ? err : new Error(errorMessage));
     } finally {
       setIsLoading(false);
     }
-  }, [sessionId, getSnapshot, sendNotification, settings, currentSession, onSuccess, onError, initialLocation]);
+  }, [
+    sessionId,
+    getSnapshot,
+    sendNotification,
+    settings,
+    currentSession,
+    onSuccess,
+    onError,
+    initialLocation,
+  ]);
 
   return {
     triggerSOS,

@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect } from 'react';
 
 interface UseCooldownOptions {
   duration?: number; // millisecondes
@@ -50,7 +50,7 @@ export function useCooldown(options: UseCooldownOptions = {}): UseCooldownResult
   const trigger = useCallback(
     async (callback: () => Promise<void>) => {
       if (isOnCooldown) {
-        console.warn("Action is on cooldown");
+        console.warn('Action is on cooldown');
         return;
       }
 
@@ -58,7 +58,7 @@ export function useCooldown(options: UseCooldownOptions = {}): UseCooldownResult
         // Exécuter la callback
         await callback();
       } catch (error) {
-        console.error("Error in cooldown callback:", error);
+        console.error('Error in cooldown callback:', error);
       } finally {
         // Démarrer le cooldown
         setIsOnCooldown(true);
@@ -83,7 +83,7 @@ export function useCooldown(options: UseCooldownOptions = {}): UseCooldownResult
         }, 100);
       }
     },
-    [isOnCooldown, duration]
+    [isOnCooldown, duration],
   );
 
   const reset = useCallback(() => {

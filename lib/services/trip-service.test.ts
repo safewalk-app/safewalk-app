@@ -35,7 +35,7 @@ describe('TripService', () => {
         expect.objectContaining({
           method: 'POST',
           endpoint: '/start-trip',
-        })
+        }),
       );
     });
 
@@ -50,12 +50,12 @@ describe('TripService', () => {
           userId: 'user-1',
           duration: 60,
           contactId: 'contact-1',
-        })
+        }),
       ).rejects.toThrow();
 
       expect(notificationService.notify).toHaveBeenCalledWith(
         'insufficient_credits',
-        expect.any(Object)
+        expect.any(Object),
       );
     });
 
@@ -70,12 +70,12 @@ describe('TripService', () => {
           userId: 'user-1',
           duration: 60,
           contactId: 'contact-1',
-        })
+        }),
       ).rejects.toThrow();
 
       expect(notificationService.notify).toHaveBeenCalledWith(
         'phone_not_configured',
-        expect.any(Object)
+        expect.any(Object),
       );
     });
 
@@ -91,14 +91,14 @@ describe('TripService', () => {
           userId: 'user-1',
           duration: 60,
           contactId: 'contact-1',
-        })
+        }),
       ).rejects.toThrow();
 
       expect(notificationService.notify).toHaveBeenCalledWith(
         'rate_limit_exceeded',
         expect.objectContaining({
           retryAfter: 60,
-        })
+        }),
       );
     });
   });
@@ -123,7 +123,7 @@ describe('TripService', () => {
         expect.objectContaining({
           method: 'POST',
           endpoint: '/checkin',
-        })
+        }),
       );
     });
 
@@ -137,13 +137,10 @@ describe('TripService', () => {
         tripService.checkin('invalid-trip', {
           latitude: 48.8566,
           longitude: 2.3522,
-        })
+        }),
       ).rejects.toThrow();
 
-      expect(notificationService.notify).toHaveBeenCalledWith(
-        'checkin_failed',
-        expect.any(Object)
-      );
+      expect(notificationService.notify).toHaveBeenCalledWith('checkin_failed', expect.any(Object));
     });
 
     it('should handle location permission error', async () => {
@@ -156,12 +153,12 @@ describe('TripService', () => {
         tripService.checkin('trip-123', {
           latitude: 48.8566,
           longitude: 2.3522,
-        })
+        }),
       ).rejects.toThrow();
 
       expect(notificationService.notify).toHaveBeenCalledWith(
         'location_permission_denied',
-        expect.any(Object)
+        expect.any(Object),
       );
     });
   });
@@ -183,7 +180,7 @@ describe('TripService', () => {
         expect.objectContaining({
           method: 'POST',
           endpoint: '/extend-trip',
-        })
+        }),
       );
     });
 
@@ -197,7 +194,7 @@ describe('TripService', () => {
 
       expect(notificationService.notify).toHaveBeenCalledWith(
         'insufficient_credits',
-        expect.any(Object)
+        expect.any(Object),
       );
     });
 
@@ -211,7 +208,7 @@ describe('TripService', () => {
 
       expect(notificationService.notify).toHaveBeenCalledWith(
         'max_duration_exceeded',
-        expect.any(Object)
+        expect.any(Object),
       );
     });
   });
@@ -233,7 +230,7 @@ describe('TripService', () => {
         expect.objectContaining({
           method: 'POST',
           endpoint: '/cancel-trip',
-        })
+        }),
       );
     });
 
@@ -245,10 +242,7 @@ describe('TripService', () => {
 
       await expect(tripService.cancelTrip('invalid-trip')).rejects.toThrow();
 
-      expect(notificationService.notify).toHaveBeenCalledWith(
-        'cancel_failed',
-        expect.any(Object)
-      );
+      expect(notificationService.notify).toHaveBeenCalledWith('cancel_failed', expect.any(Object));
     });
   });
 
@@ -271,7 +265,7 @@ describe('TripService', () => {
         expect.objectContaining({
           method: 'GET',
           endpoint: '/active-trip',
-        })
+        }),
       );
     });
 
@@ -284,16 +278,11 @@ describe('TripService', () => {
     });
 
     it('should handle network error', async () => {
-      vi.mocked(apiClient.apiCall).mockRejectedValueOnce(
-        new Error('Network error')
-      );
+      vi.mocked(apiClient.apiCall).mockRejectedValueOnce(new Error('Network error'));
 
       await expect(tripService.getActiveTrip('user-1')).rejects.toThrow();
 
-      expect(notificationService.notify).toHaveBeenCalledWith(
-        'network_error',
-        expect.any(Object)
-      );
+      expect(notificationService.notify).toHaveBeenCalledWith('network_error', expect.any(Object));
     });
   });
 });

@@ -1,7 +1,7 @@
 /**
  * PATCH for cron-check-deadlines Edge Function
  * Adds heartbeat monitoring, idempotence checks, and better error handling
- * 
+ *
  * Apply this patch to cron-check-deadlines/index.ts
  */
 
@@ -13,21 +13,21 @@ async function logCronHeartbeat(
   processed: number,
   sent: number,
   failed: number,
-  errorMessage?: string
+  errorMessage?: string,
 ): Promise<void> {
   try {
     // Check if heartbeat exists for today
     const { data: existing } = await supabase
-      .from("cron_heartbeat")
-      .select("id")
-      .eq("function_name", functionName)
-      .gte("created_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
+      .from('cron_heartbeat')
+      .select('id')
+      .eq('function_name', functionName)
+      .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
       .limit(1);
 
     if (existing && existing.length > 0) {
       // Update existing heartbeat
       await supabase
-        .from("cron_heartbeat")
+        .from('cron_heartbeat')
         .update({
           last_run_at: new Date().toISOString(),
           status,
@@ -37,10 +37,10 @@ async function logCronHeartbeat(
           error_message: errorMessage,
           updated_at: new Date().toISOString(),
         })
-        .eq("id", existing[0].id);
+        .eq('id', existing[0].id);
     } else {
       // Create new heartbeat
-      await supabase.from("cron_heartbeat").insert({
+      await supabase.from('cron_heartbeat').insert({
         function_name: functionName,
         last_run_at: new Date().toISOString(),
         status,
@@ -51,23 +51,26 @@ async function logCronHeartbeat(
       });
     }
   } catch (error) {
-    console.error("Failed to log cron heartbeat:", error);
+    console.error('Failed to log cron heartbeat:', error);
     // Don't throw - heartbeat failure shouldn't block cron
   }
 }
 
 // Add this function to check cron health
-async function checkCronHealth(supabase: any, functionName: string): Promise<{
+async function checkCronHealth(
+  supabase: any,
+  functionName: string,
+): Promise<{
   healthy: boolean;
   lastRun?: Date;
   minutesSinceLastRun?: number;
 }> {
   try {
     const { data: heartbeat } = await supabase
-      .from("cron_heartbeat")
-      .select("last_run_at")
-      .eq("function_name", functionName)
-      .order("last_run_at", { ascending: false })
+      .from('cron_heartbeat')
+      .select('last_run_at')
+      .eq('function_name', functionName)
+      .order('last_run_at', { ascending: false })
       .limit(1);
 
     if (!heartbeat || heartbeat.length === 0) {
@@ -86,7 +89,7 @@ async function checkCronHealth(supabase: any, functionName: string): Promise<{
       minutesSinceLastRun,
     };
   } catch (error) {
-    console.error("Failed to check cron health:", error);
+    console.error('Failed to check cron health:', error);
     return { healthy: false };
   }
 }

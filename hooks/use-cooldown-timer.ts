@@ -9,11 +9,11 @@ export interface CooldownState {
 /**
  * Hook pour gérer les timers de cooldown sur les boutons
  * Affiche un countdown visible pendant le rate limiting
- * 
+ *
  * Utilisation:
  * ```tsx
  * const cooldown = useCooldownTimer('otp', 60); // 60 secondes de cooldown
- * 
+ *
  * <Pressable disabled={cooldown.isOnCooldown}>
  *   <Text>{cooldown.displayText}</Text>
  * </Pressable>
@@ -22,7 +22,7 @@ export interface CooldownState {
 export function useCooldownTimer(
   key: string,
   durationSeconds: number,
-  onCooldownEnd?: () => void
+  onCooldownEnd?: () => void,
 ): CooldownState {
   const [secondsRemaining, setSecondsRemaining] = useState(0);
 
@@ -33,7 +33,7 @@ export function useCooldownTimer(
       const expiresAt = parseInt(storedCooldown, 10);
       const now = Date.now();
       const remaining = Math.max(0, Math.ceil((expiresAt - now) / 1000));
-      
+
       if (remaining > 0) {
         setSecondsRemaining(remaining);
       } else {
@@ -49,13 +49,13 @@ export function useCooldownTimer(
     const interval = setInterval(() => {
       setSecondsRemaining((prev) => {
         const next = prev - 1;
-        
+
         if (next <= 0) {
           localStorage.removeItem(`cooldown_${key}`);
           onCooldownEnd?.();
           return 0;
         }
-        
+
         return next;
       });
     }, 1000);
@@ -77,9 +77,7 @@ export function useCooldownTimer(
   }, [key]);
 
   // Formater le texte d'affichage
-  const displayText = secondsRemaining > 0
-    ? `Réessayer dans ${secondsRemaining}s`
-    : 'Réessayer';
+  const displayText = secondsRemaining > 0 ? `Réessayer dans ${secondsRemaining}s` : 'Réessayer';
 
   return {
     isOnCooldown: secondsRemaining > 0,
@@ -98,7 +96,7 @@ export function useCooldownTimer(
  * Utile pour les écrans avec plusieurs boutons
  */
 export function useMultipleCooldowns(
-  cooldowns: Record<string, number>
+  cooldowns: Record<string, number>,
 ): Record<string, CooldownState & { startCooldown: () => void; resetCooldown: () => void }> {
   const result: Record<string, any> = {};
 

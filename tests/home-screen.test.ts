@@ -5,8 +5,18 @@ describe('Home Screen Refactoring', () => {
     it('should render checklist items with correct status colors', () => {
       const items = [
         { id: 'contact', label: 'Contact: John', status: 'ok' as const, onPress: undefined },
-        { id: 'notifications', label: 'Notifications: À activer', status: 'pending' as const, onPress: vi.fn() },
-        { id: 'location', label: 'Localisation: Autorisée', status: 'ok' as const, onPress: undefined },
+        {
+          id: 'notifications',
+          label: 'Notifications: À activer',
+          status: 'pending' as const,
+          onPress: vi.fn(),
+        },
+        {
+          id: 'location',
+          label: 'Localisation: Autorisée',
+          status: 'ok' as const,
+          onPress: undefined,
+        },
       ];
 
       expect(items).toHaveLength(3);
@@ -86,8 +96,10 @@ describe('Home Screen Refactoring', () => {
         title: 'SafeWalk',
         subtitle: 'Reste en sécurité, partout.',
         heroTitle: 'Je sors',
-        heroDescription: 'Définis une heure de retour. Un SMS est envoyé automatiquement si tu ne confirmes pas.',
-        contractText: 'Si tu ne confirmes pas à l\'heure limite, un SMS est envoyé automatiquement à ton contact d\'urgence.',
+        heroDescription:
+          'Définis une heure de retour. Un SMS est envoyé automatiquement si tu ne confirmes pas.',
+        contractText:
+          "Si tu ne confirmes pas à l'heure limite, un SMS est envoyé automatiquement à ton contact d'urgence.",
       };
 
       expect(messages.title).toBe('SafeWalk');
@@ -139,7 +151,7 @@ describe('Home Screen Refactoring', () => {
   describe('UX Improvements', () => {
     it('should have proper animation delays', () => {
       const animationDelays = [0, 100, 200, 300, 400, 500];
-      
+
       expect(animationDelays).toHaveLength(6);
       expect(animationDelays[0]).toBe(0);
       expect(animationDelays[animationDelays.length - 1]).toBe(500);
@@ -147,7 +159,7 @@ describe('Home Screen Refactoring', () => {
 
     it('should have consistent animation duration', () => {
       const animationDuration = 350;
-      
+
       expect(animationDuration).toBeGreaterThan(0);
       expect(animationDuration).toBeLessThan(500);
     });

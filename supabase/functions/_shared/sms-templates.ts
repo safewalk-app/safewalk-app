@@ -18,23 +18,26 @@ export interface SmsTemplateParams {
  */
 function formatPhoneNumber(phone: string | null | undefined): string | null {
   if (!phone || typeof phone !== 'string') return null;
-  
+
   const cleaned = phone.trim();
   if (!cleaned || cleaned === 'undefined' || cleaned === 'null') return null;
-  
+
   // Basic E.164 validation
   if (!/^\+\d{1,15}$/.test(cleaned)) return null;
-  
+
   return cleaned;
 }
 
 /**
  * Generates Google Maps link from coordinates
  */
-function generateMapLink(lat: number | null | undefined, lng: number | null | undefined): string | null {
+function generateMapLink(
+  lat: number | null | undefined,
+  lng: number | null | undefined,
+): string | null {
   if (lat === null || lat === undefined || lng === null || lng === undefined) return null;
   if (typeof lat !== 'number' || typeof lng !== 'number') return null;
-  
+
   return `https://maps.google.com/maps?q=${lat},${lng}`;
 }
 
@@ -42,24 +45,24 @@ function generateMapLink(lat: number | null | undefined, lng: number | null | un
  * Formats time difference for SMS (e.g., "2h30")
  */
 function formatTimeDifference(deadline: string | null | undefined): string {
-  if (!deadline) return "quelques heures";
-  
+  if (!deadline) return 'quelques heures';
+
   try {
     const now = new Date();
     const deadlineDate = new Date(deadline);
     const diffMs = now.getTime() - deadlineDate.getTime();
-    
-    if (diffMs < 0) return "quelques heures";
-    
+
+    if (diffMs < 0) return 'quelques heures';
+
     const diffMins = Math.floor(diffMs / 60000);
     const hours = Math.floor(diffMins / 60);
     const mins = diffMins % 60;
-    
+
     if (hours === 0) return `${mins}min`;
     if (mins === 0) return `${hours}h`;
     return `${hours}h${mins}`;
   } catch {
-    return "quelques heures";
+    return 'quelques heures';
   }
 }
 
@@ -68,21 +71,15 @@ function formatTimeDifference(deadline: string | null | undefined): string {
  * Supports: firstName, phone, position
  */
 export function buildLateSms(params: SmsTemplateParams): string {
-  const {
-    firstName,
-    deadline,
-    lat,
-    lng,
-    userPhone,
-    shareUserPhoneInAlerts = false,
-  } = params;
+  const { firstName, deadline, lat, lng, userPhone, shareUserPhoneInAlerts = false } = params;
 
-  const hasFirstName = firstName && firstName.trim() && firstName !== 'undefined' && firstName !== 'null';
+  const hasFirstName =
+    firstName && firstName.trim() && firstName !== 'undefined' && firstName !== 'null';
   const hasPhone = shareUserPhoneInAlerts && formatPhoneNumber(userPhone);
   const hasPosition = generateMapLink(lat, lng);
   const timeDiff = formatTimeDifference(deadline);
 
-  const personRef = hasFirstName ? firstName.trim() : "Utilisateur";
+  const personRef = hasFirstName ? firstName.trim() : 'Utilisateur';
   const mapLink = generateMapLink(lat, lng);
 
   // Build the message based on available data
@@ -92,7 +89,7 @@ export function buildLateSms(params: SmsTemplateParams): string {
   if (hasPhone) {
     message += ` immédiatement au ${hasPhone}.`;
   } else {
-    message += " immédiatement.";
+    message += ' immédiatement.';
   }
 
   // Add position if available
@@ -108,15 +105,10 @@ export function buildLateSms(params: SmsTemplateParams): string {
  * Supports: firstName, phone, position
  */
 export function buildSosSms(params: SmsTemplateParams): string {
-  const {
-    firstName,
-    lat,
-    lng,
-    userPhone,
-    shareUserPhoneInAlerts = false,
-  } = params;
+  const { firstName, lat, lng, userPhone, shareUserPhoneInAlerts = false } = params;
 
-  const hasFirstName = firstName && firstName.trim() && firstName !== 'undefined' && firstName !== 'null';
+  const hasFirstName =
+    firstName && firstName.trim() && firstName !== 'undefined' && firstName !== 'null';
   const hasPhone = shareUserPhoneInAlerts && formatPhoneNumber(userPhone);
   const mapLink = generateMapLink(lat, lng);
 
@@ -132,7 +124,7 @@ export function buildSosSms(params: SmsTemplateParams): string {
   if (hasPhone) {
     message += ` au ${hasPhone}.`;
   } else {
-    message += ".";
+    message += '.';
   }
 
   // Add position if available
@@ -150,7 +142,8 @@ export function buildSosSms(params: SmsTemplateParams): string {
 export function buildTestSms(params: SmsTemplateParams): string {
   const { firstName } = params;
 
-  const hasFirstName = firstName && firstName.trim() && firstName !== 'undefined' && firstName !== 'null';
+  const hasFirstName =
+    firstName && firstName.trim() && firstName !== 'undefined' && firstName !== 'null';
 
   if (hasFirstName) {
     return `SafeWalk test : tout est bien configuré. Vous recevrez un SMS comme celui-ci si ${firstName.trim()} ne confirme pas son arrivée.`;

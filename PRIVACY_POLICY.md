@@ -12,7 +12,8 @@ SafeWalk est une application de sécurité personnelle qui vous permet de partag
 
 **Pourquoi** : SafeWalk collecte votre position GPS uniquement pour la partager avec vos contacts d'urgence en cas d'alerte.
 
-**Quand** : 
+**Quand** :
+
 - Lorsque vous démarrez une session de trajet
 - Lorsqu'une alerte est déclenchée (retard ou SOS)
 - Uniquement pendant que l'application est active

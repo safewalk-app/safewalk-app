@@ -60,7 +60,7 @@ describe('Validation - Formatage des numéros', () => {
   const formatPhoneNumber = (phone: string): string => {
     // Supprimer tous les espaces, tirets, parenthèses
     let cleaned = phone.replace(/[\s\-\(\)]/g, '');
-    
+
     // Ajouter + si manquant et commence par un chiffre
     if (!cleaned.startsWith('+') && /^\d/.test(cleaned)) {
       // Si commence par 0, remplacer par +33 (France)
@@ -72,7 +72,7 @@ describe('Validation - Formatage des numéros', () => {
         cleaned = '+' + cleaned;
       }
     }
-    
+
     return cleaned;
   };
 
@@ -101,7 +101,7 @@ describe('Validation - Formatage des numéros', () => {
   });
 });
 
-describe('Validation - Contact d\'urgence', () => {
+describe("Validation - Contact d'urgence", () => {
   interface EmergencyContact {
     name: string;
     phone: string;
@@ -204,7 +204,7 @@ describe('Validation - Coordonnées GPS', () => {
   it('devrait accepter des coordonnées valides (New York)', () => {
     const newYork: Coordinates = {
       latitude: 40.7128,
-      longitude: -74.0060,
+      longitude: -74.006,
     };
     expect(isValidCoordinates(newYork)).toBe(true);
   });
@@ -240,11 +240,12 @@ describe('Validation - Message SMS', () => {
   };
 
   it('devrait accepter un message SMS court', () => {
-    expect(isValidSMSMessage('ALERTE: je n\'ai pas confirmé mon retour.')).toBe(true);
+    expect(isValidSMSMessage("ALERTE: je n'ai pas confirmé mon retour.")).toBe(true);
   });
 
   it('devrait accepter un message SMS avec position', () => {
-    const message = 'ALERTE: je n\'ai pas confirmé mon retour. Heure limite: 22:00, tolérance: 15 min. Position: https://maps.google.com/?q=48.8566,2.3522';
+    const message =
+      "ALERTE: je n'ai pas confirmé mon retour. Heure limite: 22:00, tolérance: 15 min. Position: https://maps.google.com/?q=48.8566,2.3522";
     expect(isValidSMSMessage(message)).toBe(true);
   });
 

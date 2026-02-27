@@ -1,6 +1,6 @@
 /**
  * Service de gestion de la privacy (position snapshot)
- * 
+ *
  * Règles :
  * - Par défaut : "Position incluse uniquement en cas d'alerte"
  * - Pas de tracking continu obligatoire
@@ -25,7 +25,7 @@ export interface LocationSnapshot {
 export async function requestLocationPermission(): Promise<boolean> {
   try {
     const { status } = await Location.requestForegroundPermissionsAsync();
-    
+
     if (status !== 'granted') {
       logger.warn('⚠️ Permission de localisation refusée');
       return false;
@@ -46,7 +46,7 @@ export async function getLocationSnapshot(): Promise<LocationSnapshot | null> {
   try {
     // Vérifier la permission
     const { status } = await Location.getForegroundPermissionsAsync();
-    
+
     if (status !== 'granted') {
       logger.warn('⚠️ Permission de localisation non accordée');
       return null;
@@ -78,7 +78,7 @@ export async function getLocationSnapshot(): Promise<LocationSnapshot | null> {
  */
 export async function saveLocationToTrip(
   tripId: string,
-  location: LocationSnapshot
+  location: LocationSnapshot,
 ): Promise<boolean> {
   try {
     const { error } = await supabase
@@ -110,10 +110,10 @@ export function formatLocationForSms(location: LocationSnapshot): string {
   const lat = location.latitude.toFixed(6);
   const lng = location.longitude.toFixed(6);
   const accuracy = location.accuracy ? `±${Math.round(location.accuracy)}m` : 'précision inconnue';
-  
+
   // Google Maps link
   const mapsUrl = `https://maps.google.com/?q=${lat},${lng}`;
-  
+
   return `📍 Position: ${lat}, ${lng} (${accuracy})\n${mapsUrl}`;
 }
 

@@ -26,10 +26,7 @@ export interface RetryResult<T> {
  * @param options Retry options
  * @returns Delay in milliseconds
  */
-export function calculateBackoffDelay(
-  attempt: number,
-  options: RetryOptions = {}
-): number {
+export function calculateBackoffDelay(attempt: number, options: RetryOptions = {}): number {
   const {
     initialDelayMs = 1000,
     maxDelayMs = 30000,
@@ -39,13 +36,13 @@ export function calculateBackoffDelay(
 
   // Exponential backoff: initialDelay * multiplier^attempt
   const exponentialDelay = initialDelayMs * Math.pow(backoffMultiplier, attempt);
-  
+
   // Cap at maxDelay
   const cappedDelay = Math.min(exponentialDelay, maxDelayMs);
-  
+
   // Add jitter (±jitterFactor) to prevent thundering herd
   const jitter = cappedDelay * jitterFactor * (Math.random() * 2 - 1);
-  
+
   return Math.max(100, cappedDelay + jitter);
 }
 
@@ -64,17 +61,17 @@ export async function sleep(ms: number): Promise<void> {
  */
 export function isTemporaryError(error: Error): boolean {
   const message = error.message.toLowerCase();
-  
+
   // Network errors
   if (message.includes('network') || message.includes('econnrefused')) return true;
   if (message.includes('timeout') || message.includes('etimedout')) return true;
   if (message.includes('econnreset')) return true;
   if (message.includes('fetch failed')) return true;
-  
+
   // Server errors (5xx)
   if (message.includes('500') || message.includes('502') || message.includes('503')) return true;
   if (message.includes('429')) return true; // Rate limited
-  
+
   return false;
 }
 
@@ -86,12 +83,9 @@ export function isTemporaryError(error: Error): boolean {
  */
 export async function retryWithBackoff<T>(
   fn: () => Promise<T>,
-  options: RetryOptions = {}
+  options: RetryOptions = {},
 ): Promise<RetryResult<T>> {
-  const {
-    maxRetries = 3,
-    shouldRetry = isTemporaryError,
-  } = options;
+  const { maxRetries = 3, shouldRetry = isTemporaryError } = options;
 
   let lastError: Error | null = null;
   let totalDurationMs = 0;
@@ -101,7 +95,7 @@ export async function retryWithBackoff<T>(
     try {
       const data = await fn();
       totalDurationMs = Date.now() - startTime;
-      
+
       return {
         success: true,
         data,
@@ -113,7 +107,7 @@ export async function retryWithBackoff<T>(
 
       // Check if we should retry
       const shouldContinue = attempt < maxRetries && shouldRetry(lastError, attempt);
-      
+
       if (!shouldContinue) {
         totalDurationMs = Date.now() - startTime;
         return {
@@ -127,7 +121,7 @@ export async function retryWithBackoff<T>(
       // Calculate delay and retry
       const delayMs = calculateBackoffDelay(attempt, options);
       console.warn(
-        `[Retry] Attempt ${attempt + 1}/${maxRetries + 1} failed, retrying in ${delayMs}ms: ${lastError.message}`
+        `[Retry] Attempt ${attempt + 1}/${maxRetries + 1} failed, retrying in ${delayMs}ms: ${lastError.message}`,
       );
       await sleep(delayMs);
     }
@@ -152,7 +146,7 @@ export async function retryWithBackoff<T>(
 export async function retryWithCustomLogic<T>(
   fn: () => Promise<T>,
   isRetryableError: (error: Error, attempt: number) => boolean,
-  options: RetryOptions = {}
+  options: RetryOptions = {},
 ): Promise<RetryResult<T>> {
   return retryWithBackoff(fn, {
     ...options,
@@ -168,7 +162,7 @@ export async function retryWithCustomLogic<T>(
  */
 export async function retryFetch(
   url: string,
-  options: RequestInit & RetryOptions = {}
+  options: RequestInit & RetryOptions = {},
 ): Promise<Response> {
   const {
     maxRetries,
@@ -189,10 +183,7 @@ export async function retryFetch(
     shouldRetry,
   };
 
-  const result = await retryWithBackoff(
-    () => fetch(url, fetchOptions),
-    retryOptions
-  );
+  const result = await retryWithBackoff(() => fetch(url, fetchOptions), retryOptions);
 
   if (!result.success) {
     throw result.error;
@@ -207,12 +198,9 @@ export async function retryFetch(
  * @param maxRetries Maximum number of retries
  * @returns Data or throws error
  */
-export async function retry<T>(
-  fn: () => Promise<T>,
-  maxRetries: number = 3
-): Promise<T> {
+export async function retry<T>(fn: () => Promise<T>, maxRetries: number = 3): Promise<T> {
   const result = await retryWithBackoff(fn, { maxRetries });
-  
+
   if (!result.success) {
     throw result.error;
   }

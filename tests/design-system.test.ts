@@ -36,9 +36,8 @@ describe('Design System Consistency', () => {
         const content = readScreenFile(file);
         // Check for paddingHorizontal: 16
         expect(
-          content.includes('paddingHorizontal: 16') ||
-          content.includes('paddingHorizontal: 16,'),
-          `${file} should have paddingHorizontal: 16`
+          content.includes('paddingHorizontal: 16') || content.includes('paddingHorizontal: 16,'),
+          `${file} should have paddingHorizontal: 16`,
         ).toBe(true);
       });
     });
@@ -48,9 +47,8 @@ describe('Design System Consistency', () => {
         const content = readScreenFile(file);
         // Check for insets usage
         expect(
-          content.includes('useSafeAreaInsets') ||
-          content.includes('ScreenContainer'),
-          `${file} should use SafeAreaInsets or ScreenContainer`
+          content.includes('useSafeAreaInsets') || content.includes('ScreenContainer'),
+          `${file} should use SafeAreaInsets or ScreenContainer`,
         ).toBe(true);
       });
     });
@@ -62,9 +60,9 @@ describe('Design System Consistency', () => {
         const content = readScreenFile(file);
         // Check for text-4xl or text-5xl in headers
         expect(
-          (content.includes('text-4xl') || content.includes('text-5xl')) && 
-          content.includes('font-bold'),
-          `${file} should have text-4xl/text-5xl and font-bold for headers`
+          (content.includes('text-4xl') || content.includes('text-5xl')) &&
+            content.includes('font-bold'),
+          `${file} should have text-4xl/text-5xl and font-bold for headers`,
         ).toBe(true);
       });
     });
@@ -73,10 +71,9 @@ describe('Design System Consistency', () => {
       SCREEN_FILES.forEach((file) => {
         const content = readScreenFile(file);
         // Check for text-base usage
-        expect(
-          content.includes('text-base'),
-          `${file} should use text-base for body text`
-        ).toBe(true);
+        expect(content.includes('text-base'), `${file} should use text-base for body text`).toBe(
+          true,
+        );
       });
     });
 
@@ -84,10 +81,7 @@ describe('Design System Consistency', () => {
       SCREEN_FILES.forEach((file) => {
         const content = readScreenFile(file);
         // Check for text-sm usage
-        expect(
-          content.includes('text-sm'),
-          `${file} should use text-sm for labels`
-        ).toBe(true);
+        expect(content.includes('text-sm'), `${file} should use text-sm for labels`).toBe(true);
       });
     });
   });
@@ -99,7 +93,7 @@ describe('Design System Consistency', () => {
         // Check for mb-3 or mb-4 usage
         expect(
           content.includes('mb-3') || content.includes('mb-4'),
-          `${file} should use mb-3 or mb-4 for spacing`
+          `${file} should use mb-3 or mb-4 for spacing`,
         ).toBe(true);
       });
     });
@@ -110,7 +104,7 @@ describe('Design System Consistency', () => {
         // Check for gap usage
         expect(
           content.includes('gap-2') || content.includes('gap-3'),
-          `${file} should use gap-2 or gap-3 for spacing`
+          `${file} should use gap-2 or gap-3 for spacing`,
         ).toBe(true);
       });
     });
@@ -123,7 +117,7 @@ describe('Design System Consistency', () => {
         // Check for ScreenTransition import and usage
         expect(
           content.includes('ScreenTransition'),
-          `${file} should use ScreenTransition component`
+          `${file} should use ScreenTransition component`,
         ).toBe(true);
       });
     });
@@ -132,10 +126,9 @@ describe('Design System Consistency', () => {
       SCREEN_FILES.forEach((file) => {
         const content = readScreenFile(file);
         // Check for delay prop in ScreenTransition
-        expect(
-          content.includes('delay='),
-          `${file} should have staggered animation delays`
-        ).toBe(true);
+        expect(content.includes('delay='), `${file} should have staggered animation delays`).toBe(
+          true,
+        );
       });
     });
   });
@@ -147,9 +140,9 @@ describe('Design System Consistency', () => {
         // Check for theme token usage
         expect(
           content.includes('text-foreground') ||
-          content.includes('text-muted') ||
-          content.includes('bg-background'),
-          `${file} should use theme color tokens`
+            content.includes('text-muted') ||
+            content.includes('bg-background'),
+          `${file} should use theme color tokens`,
         ).toBe(true);
       });
     });
@@ -162,7 +155,7 @@ describe('Design System Consistency', () => {
         // Allow some hardcoded colors for Material Icons, but not excessive
         expect(
           colorMatches.length <= 15,
-          `${file} should minimize hardcoded colors (found ${colorMatches.length})`
+          `${file} should minimize hardcoded colors (found ${colorMatches.length})`,
         ).toBe(true);
       });
     });
@@ -176,23 +169,23 @@ describe('Design System Consistency', () => {
         const hasViewWithBg = content.includes('flex-1 bg-background');
         const hasScrollView = content.includes('ScrollView');
         const hasViewLayout = content.includes('View className="flex-1');
-        
+
         expect(
           hasViewWithBg && (hasScrollView || hasViewLayout),
-          `${file} should use proper View layout pattern`
+          `${file} should use proper View layout pattern`,
         ).toBe(true);
       });
     });
 
     it('should include BubbleBackground component', () => {
       // Most screens include BubbleBackground, but not all (e.g., oauth/callback)
-      const screensWithBackground = SCREEN_FILES.filter(f => !f.includes('oauth'));
+      const screensWithBackground = SCREEN_FILES.filter((f) => !f.includes('oauth'));
       screensWithBackground.forEach((file) => {
         const content = readScreenFile(file);
         // Check for BubbleBackground
         expect(
           content.includes('BubbleBackground'),
-          `${file} should include BubbleBackground component`
+          `${file} should include BubbleBackground component`,
         ).toBe(true);
       });
     });

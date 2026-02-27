@@ -1,6 +1,6 @@
 /**
  * Registre Central des Notifications SafeWalk
- * 
+ *
  * Source unique de vérité pour tous les messages de l'app.
  * Chaque notification est définie par:
  * - Une clé unique (ex: trip.started)
@@ -40,14 +40,14 @@ export const NOTIFICATIONS: Record<string, NotificationConfig> = {
   // ============================================
   // VOYAGE (Trip)
   // ============================================
-  
+
   'trip.started': {
     key: 'trip.started',
     type: 'success',
     display: 'toast',
-    message: 'C\'est noté, ta sortie a commencé.',
+    message: "C'est noté, ta sortie a commencé.",
     duration: 2000,
-    description: 'Confirmation du démarrage d\'une sortie',
+    description: "Confirmation du démarrage d'une sortie",
   },
 
   'trip.extended': {
@@ -76,7 +76,7 @@ export const NOTIFICATIONS: Record<string, NotificationConfig> = {
     display: 'toast',
     message: 'Ta sortie a été arrêtée.',
     duration: 2000,
-    description: 'Confirmation de l\'arrêt d\'une sortie',
+    description: "Confirmation de l'arrêt d'une sortie",
   },
 
   'trip.cancelled': {
@@ -85,7 +85,7 @@ export const NOTIFICATIONS: Record<string, NotificationConfig> = {
     display: 'toast',
     message: 'Ta sortie a été annulée.',
     duration: 2000,
-    description: 'Confirmation de l\'annulation d\'une sortie',
+    description: "Confirmation de l'annulation d'une sortie",
   },
 
   // ============================================
@@ -109,7 +109,7 @@ export const NOTIFICATIONS: Record<string, NotificationConfig> = {
     display: 'toast',
     message: '{contactName} a bien été prévenu.',
     duration: 3000,
-    description: 'Confirmation de l\'envoi d\'une alerte',
+    description: "Confirmation de l'envoi d'une alerte",
     variables: ['contactName'],
     fallback: { contactName: 'ton contact' },
   },
@@ -118,18 +118,18 @@ export const NOTIFICATIONS: Record<string, NotificationConfig> = {
     key: 'alert.failed',
     type: 'error',
     display: 'banner',
-    message: 'On n\'a pas réussi à envoyer l\'alerte. Réessaie dès que possible.',
+    message: "On n'a pas réussi à envoyer l'alerte. Réessaie dès que possible.",
     duration: 0, // Persistant
-    description: 'Erreur lors de l\'envoi d\'une alerte',
+    description: "Erreur lors de l'envoi d'une alerte",
   },
 
   'alert.quota_reached': {
     key: 'alert.quota_reached',
     type: 'critical',
     display: 'modal',
-    message: 'Tu as atteint la limite d\'alertes pour aujourd\'hui.',
+    message: "Tu as atteint la limite d'alertes pour aujourd'hui.",
     duration: 0,
-    description: 'Quota d\'alertes dépassé',
+    description: "Quota d'alertes dépassé",
   },
 
   // ============================================
@@ -140,9 +140,9 @@ export const NOTIFICATIONS: Record<string, NotificationConfig> = {
     key: 'sos.sending',
     type: 'critical',
     display: 'modal',
-    message: 'Envoi de l\'alerte SOS...',
+    message: "Envoi de l'alerte SOS...",
     duration: 0,
-    description: 'SOS en cours d\'envoi',
+    description: "SOS en cours d'envoi",
   },
 
   'sos.sent': {
@@ -160,16 +160,16 @@ export const NOTIFICATIONS: Record<string, NotificationConfig> = {
     key: 'sos.failed',
     type: 'error',
     display: 'modal',
-    message: 'On n\'a pas réussi à envoyer le SOS. Réessaie immédiatement.',
+    message: "On n'a pas réussi à envoyer le SOS. Réessaie immédiatement.",
     duration: 0,
-    description: 'Échec de l\'envoi du SOS',
+    description: "Échec de l'envoi du SOS",
   },
 
   'sos.quota_reached': {
     key: 'sos.quota_reached',
     type: 'critical',
     display: 'modal',
-    message: 'Tu as atteint la limite d\'alertes SOS pour aujourd\'hui.',
+    message: "Tu as atteint la limite d'alertes SOS pour aujourd'hui.",
     duration: 0,
     description: 'Quota SOS dépassé',
   },
@@ -184,7 +184,7 @@ export const NOTIFICATIONS: Record<string, NotificationConfig> = {
     display: 'toast',
     message: 'Contact sauvegardé.',
     duration: 2000,
-    description: 'Confirmation de sauvegarde d\'un contact',
+    description: "Confirmation de sauvegarde d'un contact",
   },
 
   'contact.deleted': {
@@ -193,16 +193,16 @@ export const NOTIFICATIONS: Record<string, NotificationConfig> = {
     display: 'toast',
     message: 'Contact supprimé.',
     duration: 2000,
-    description: 'Confirmation de suppression d\'un contact',
+    description: "Confirmation de suppression d'un contact",
   },
 
   'contact.missing': {
     key: 'contact.missing',
     type: 'error',
     display: 'modal',
-    message: 'Ajoute un contact d\'urgence pour démarrer une sortie.',
+    message: "Ajoute un contact d'urgence pour démarrer une sortie.",
     duration: 0,
-    description: 'Blocage: contact d\'urgence manquant',
+    description: "Blocage: contact d'urgence manquant",
   },
 
   'contact.invalid': {
@@ -233,7 +233,7 @@ export const NOTIFICATIONS: Record<string, NotificationConfig> = {
     display: 'toast',
     message: 'Code OTP envoyé par SMS.',
     duration: 2000,
-    description: 'Confirmation de l\'envoi du code OTP',
+    description: "Confirmation de l'envoi du code OTP",
   },
 
   'auth.otp_verified': {
@@ -262,7 +262,7 @@ export const NOTIFICATIONS: Record<string, NotificationConfig> = {
     key: 'credits.empty',
     type: 'error',
     display: 'modal',
-    message: 'Tu as atteint la limite d\'aujourd\'hui. Ajoute des crédits pour continuer.',
+    message: "Tu as atteint la limite d'aujourd'hui. Ajoute des crédits pour continuer.",
     duration: 0,
     description: 'Blocage: crédits épuisés',
   },
@@ -284,7 +284,7 @@ export const NOTIFICATIONS: Record<string, NotificationConfig> = {
     display: 'toast',
     message: 'Crédits ajoutés. Tu peux continuer.',
     duration: 2000,
-    description: 'Confirmation de l\'ajout de crédits',
+    description: "Confirmation de l'ajout de crédits",
   },
 
   // ============================================
@@ -295,7 +295,7 @@ export const NOTIFICATIONS: Record<string, NotificationConfig> = {
     key: 'permission.location_required',
     type: 'error',
     display: 'modal',
-    message: 'Active la localisation dans Paramètres pour partager ta position en cas d\'alerte.',
+    message: "Active la localisation dans Paramètres pour partager ta position en cas d'alerte.",
     duration: 0,
     description: 'Blocage: permission de localisation requise',
   },
@@ -335,9 +335,9 @@ export const NOTIFICATIONS: Record<string, NotificationConfig> = {
     key: 'error.sms_failed',
     type: 'error',
     display: 'banner',
-    message: 'Impossible d\'envoyer le SMS. Réessaiera automatiquement.',
+    message: "Impossible d'envoyer le SMS. Réessaiera automatiquement.",
     duration: 0,
-    description: 'Erreur d\'envoi SMS',
+    description: "Erreur d'envoi SMS",
   },
 
   'error.unknown': {
@@ -359,7 +359,7 @@ export const NOTIFICATIONS: Record<string, NotificationConfig> = {
     display: 'toast',
     message: 'SMS de test envoyé à {phone}.',
     duration: 2000,
-    description: 'Confirmation de l\'envoi du SMS de test',
+    description: "Confirmation de l'envoi du SMS de test",
     variables: ['phone'],
     fallback: { phone: 'ton numéro' },
   },
@@ -368,9 +368,9 @@ export const NOTIFICATIONS: Record<string, NotificationConfig> = {
     key: 'sms.test_failed',
     type: 'error',
     display: 'toast',
-    message: 'Impossible d\'envoyer le SMS de test. Réessaie.',
+    message: "Impossible d'envoyer le SMS de test. Réessaie.",
     duration: 3000,
-    description: 'Erreur d\'envoi du SMS de test',
+    description: "Erreur d'envoi du SMS de test",
   },
 
   // ============================================
@@ -383,7 +383,7 @@ export const NOTIFICATIONS: Record<string, NotificationConfig> = {
     display: 'modal',
     message: 'Êtes-vous sûr de vouloir annuler cette sortie ?',
     duration: 0,
-    description: 'Confirmation d\'annulation de sortie',
+    description: "Confirmation d'annulation de sortie",
   },
 
   'confirm.delete_data': {
@@ -399,7 +399,7 @@ export const NOTIFICATIONS: Record<string, NotificationConfig> = {
     key: 'confirm.trigger_sos',
     type: 'critical',
     display: 'modal',
-    message: 'Êtes-vous en danger ? Cette action alertera vos contacts d\'urgence.',
+    message: "Êtes-vous en danger ? Cette action alertera vos contacts d'urgence.",
     duration: 0,
     description: 'Confirmation de déclenchement du SOS',
   },
@@ -421,8 +421,8 @@ export function getNotificationConfig(key: string): NotificationConfig | undefin
  */
 export function getNotificationsByType(type: NotificationType): string[] {
   return Object.values(NOTIFICATIONS)
-    .filter(n => n.type === type)
-    .map(n => n.key);
+    .filter((n) => n.type === type)
+    .map((n) => n.key);
 }
 
 /**
@@ -432,6 +432,6 @@ export function getNotificationsByType(type: NotificationType): string[] {
  */
 export function getNotificationsByDisplay(display: NotificationDisplay): string[] {
   return Object.values(NOTIFICATIONS)
-    .filter(n => n.display === display)
-    .map(n => n.key);
+    .filter((n) => n.display === display)
+    .map((n) => n.key);
 }

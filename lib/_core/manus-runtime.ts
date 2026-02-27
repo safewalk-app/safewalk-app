@@ -8,9 +8,9 @@
  * User will manually login via the app's login page - no automatic cookie injection.
  */
 
-import { Platform } from "react-native";
-import type { Metrics } from "react-native-safe-area-context";
-import { logger } from "@/lib/logger";
+import { Platform } from 'react-native';
+import type { Metrics } from 'react-native-safe-area-context';
+import { logger } from '@/lib/logger';
 
 // Debug logging with timestamps
 const DEBUG = true;
@@ -20,22 +20,22 @@ const log = (msg: string) => {
   logger.info(`[ManusRuntime ${ts}] ${msg}`);
 };
 
-type MessageType = "appDevServerReady";
+type MessageType = 'appDevServerReady';
 type SafeAreaInsets = { top: number; right: number; bottom: number; left: number };
 type SafeAreaCallback = (metrics: Metrics) => void;
 
 interface SpacePreviewerMessage {
-  type: "SpacePreviewerChannel";
+  type: 'SpacePreviewerChannel';
   payload: {
     type: string;
-    from: "container" | "content";
-    to: "container" | "content";
+    from: 'container' | 'content';
+    to: 'container' | 'content';
     payload: Record<string, unknown>;
   };
 }
 
 function isInIframe(): boolean {
-  if (Platform.OS !== "web") return false;
+  if (Platform.OS !== 'web') return false;
   try {
     return window.self !== window.top;
   } catch {
@@ -44,7 +44,7 @@ function isInIframe(): boolean {
 }
 
 function isWeb(): boolean {
-  return Platform.OS === "web";
+  return Platform.OS === 'web';
 }
 
 function sendToParent(type: MessageType, payload: Record<string, unknown> = {}): void {
@@ -52,10 +52,10 @@ function sendToParent(type: MessageType, payload: Record<string, unknown> = {}):
   if (!isWeb() || !isInIframe()) return;
 
   const message: SpacePreviewerMessage = {
-    type: "SpacePreviewerChannel",
-    payload: { type, from: "content", to: "container", payload },
+    type: 'SpacePreviewerChannel',
+    payload: { type, from: 'content', to: 'container', payload },
   };
-  window.parent.postMessage(message, "*");
+  window.parent.postMessage(message, '*');
   log(`Sent to parent: ${type}`);
 }
 
@@ -64,22 +64,22 @@ let safeAreaCallback: SafeAreaCallback | null = null;
 
 function isValidInsets(payload: Record<string, unknown>): payload is SafeAreaInsets {
   return (
-    typeof payload.top === "number" &&
-    typeof payload.bottom === "number" &&
-    typeof payload.left === "number" &&
-    typeof payload.right === "number"
+    typeof payload.top === 'number' &&
+    typeof payload.bottom === 'number' &&
+    typeof payload.left === 'number' &&
+    typeof payload.right === 'number'
   );
 }
 
 function handleMessage(event: MessageEvent<unknown>): void {
   // NOTE: Validate event.origin if we need to transfer sensitive data
   const data = event.data as SpacePreviewerMessage | undefined;
-  if (!data || data.type !== "SpacePreviewerChannel") return;
+  if (!data || data.type !== 'SpacePreviewerChannel') return;
 
   const { payload } = data;
-  if (!payload || payload.to !== "content") return;
+  if (!payload || payload.to !== 'content') return;
 
-  if (payload.type === "setSafeAreaInsets" && isValidInsets(payload.payload) && safeAreaCallback) {
+  if (payload.type === 'setSafeAreaInsets' && isValidInsets(payload.payload) && safeAreaCallback) {
     const insets = payload.payload;
     const frame = { x: 0, y: 0, width: window.innerWidth, height: window.innerHeight };
     safeAreaCallback({ insets, frame });
@@ -109,9 +109,9 @@ export function initManusRuntime(): void {
   if (initialized) return;
   initialized = true;
 
-  log("initManusRuntime called");
-  window.addEventListener("message", handleMessage);
-  sendToParent("appDevServerReady", {});
+  log('initManusRuntime called');
+  window.addEventListener('message', handleMessage);
+  sendToParent('appDevServerReady', {});
 }
 
 /**

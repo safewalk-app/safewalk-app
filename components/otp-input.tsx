@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState } from 'react';
 import {
   View,
   TextInput,
@@ -6,8 +6,8 @@ import {
   Pressable,
   Platform,
   KeyboardAvoidingView,
-} from "react-native";
-import { cn } from "@/lib/utils";
+} from 'react-native';
+import { cn } from '@/lib/utils';
 
 interface OtpInputProps {
   length?: number;
@@ -36,7 +36,7 @@ export function OtpInput({
 
   const handleChangeText = (text: string, index: number) => {
     // Only allow digits
-    const digit = text.replace(/[^0-9]/g, "");
+    const digit = text.replace(/[^0-9]/g, '');
 
     if (digit.length > 1) {
       // Handle paste
@@ -52,9 +52,9 @@ export function OtpInput({
     }
 
     // Build new code
-    const codeArray = value.split("");
+    const codeArray = value.split('');
     codeArray[index] = digit;
-    const newCode = codeArray.join("");
+    const newCode = codeArray.join('');
 
     onChangeText(newCode);
 
@@ -69,11 +69,8 @@ export function OtpInput({
     }
   };
 
-  const handleKeyPress = (
-    e: any,
-    index: number
-  ) => {
-    if (e.nativeEvent.key === "Backspace" && !value[index] && index > 0) {
+  const handleKeyPress = (e: any, index: number) => {
+    if (e.nativeEvent.key === 'Backspace' && !value[index] && index > 0) {
       // Move to previous field on backspace
       inputRefs.current[index - 1]?.focus();
     }
@@ -81,8 +78,8 @@ export function OtpInput({
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      className={cn("w-full", className)}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      className={cn('w-full', className)}
     >
       <View className="flex-row justify-center gap-3">
         {Array.from({ length }).map((_, index) => (
@@ -91,10 +88,10 @@ export function OtpInput({
             onPress={() => inputRefs.current[index]?.focus()}
             disabled={disabled}
             className={cn(
-              "w-14 h-16 rounded-2xl border-2 items-center justify-center",
-              "bg-surface border-border",
-              focusedIndex === index && "border-primary bg-primary/5",
-              disabled && "opacity-50"
+              'w-14 h-16 rounded-2xl border-2 items-center justify-center',
+              'bg-surface border-border',
+              focusedIndex === index && 'border-primary bg-primary/5',
+              disabled && 'opacity-50',
             )}
           >
             <TextInput
@@ -104,7 +101,7 @@ export function OtpInput({
               style={styles.input}
               maxLength={1}
               keyboardType="number-pad"
-              value={value[index] || ""}
+              value={value[index] || ''}
               onChangeText={(text) => handleChangeText(text, index)}
               onKeyPress={(e) => handleKeyPress(e, index)}
               onFocus={() => setFocusedIndex(index)}
@@ -123,6 +120,6 @@ export function OtpInput({
 const styles = StyleSheet.create({
   input: {
     padding: 0,
-    textAlign: "center",
+    textAlign: 'center',
   },
 });

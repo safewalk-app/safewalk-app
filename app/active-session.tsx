@@ -1,4 +1,4 @@
-import { logger } from "@/lib/utils/logger";
+import { logger } from '@/lib/utils/logger';
 import { View, Text, ScrollView, Alert, Pressable } from 'react-native';
 import { BubbleBackground } from '@/components/ui/bubble-background';
 import { GlassCard } from '@/components/ui/glass-card';
@@ -7,7 +7,10 @@ import { CushionPillButton } from '@/components/ui/cushion-pill-button';
 import { TimerAnimation } from '@/components/ui/timer-animation';
 import { ScreenTransition } from '@/components/ui/screen-transition';
 import { CheckInModal } from '@/components/ui/check-in-modal';
-import { BackgroundWarningModal, shouldShowBackgroundWarning } from '@/components/background-warning-modal';
+import {
+  BackgroundWarningModal,
+  shouldShowBackgroundWarning,
+} from '@/components/background-warning-modal';
 import { useBatteryWarning, BatteryWarningBanner } from '@/components/battery-warning';
 import { GPSStatusIndicator } from '@/components/ui/gps-status-indicator';
 import { FeedbackAnimation } from '@/components/ui/feedback-animation';
@@ -35,33 +38,42 @@ import * as tripService from '@/lib/services/trip-service';
 export default function ActiveSessionScreen() {
   // Empêcher l'écran de s'éteindre pendant la session
   useKeepAwake();
-  
+
   // Wrappers pour afficher les indicateurs de chargement
   const withCompleteLoading = useLoadingWrapper({
     name: 'Fin de la sortie',
     type: 'service',
     minDuration: 300,
   });
-  
+
   const withExtendLoading = useLoadingWrapper({
     name: 'Extension de la sortie',
     type: 'service',
     minDuration: 300,
   });
-  
+
   // Vérifier l'état de la batterie
   const { batteryLevel, isLowBattery, isCriticalBattery } = useBatteryWarning();
-  
+
   // Détecter l'état de la connectivité réseau
   const networkStatus = useNetworkStatus();
-  
+
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { currentSession, endSession, cancelSession, addTimeToSession, confirmCheckIn, settings, triggerAlert } = useApp();
+  const {
+    currentSession,
+    endSession,
+    cancelSession,
+    addTimeToSession,
+    confirmCheckIn,
+    settings,
+    triggerAlert,
+  } = useApp();
   const { confirmCheckIn: confirmCheckInNotif } = useCheckInNotifications();
   const { location } = useRealTimeLocation({ enabled: settings.locationEnabled });
   const locationPermission = useLocationPermission();
-  const { sendNotification, scheduleNotification, cancelNotification, cancelAllNotifications } = useNotifications();
+  const { sendNotification, scheduleNotification, cancelNotification, cancelAllNotifications } =
+    useNotifications();
   const { triggerSOS, isLoading: sosLoading } = useSOS({
     sessionId: currentSession?.id || '',
     location: location || undefined,
@@ -69,8 +81,8 @@ export default function ActiveSessionScreen() {
       logger.debug('✅ SOS envoyé avec succès:', result);
       // Afficher une notification de succès
       sendNotification({
-              title: '✅ SOS envoyé',
-              body: `Alerte envoyée à ${result.smsResults?.filter(r => r.status === 'sent').length} contact(s). Tu es en sécurité ?`,
+        title: '✅ SOS envoyé',
+        body: `Alerte envoyée à ${result.smsResults?.filter((r) => r.status === 'sent').length} contact(s). Tu es en sécurité ?`,
         data: { type: 'sos_success' },
       });
     },
@@ -78,13 +90,13 @@ export default function ActiveSessionScreen() {
       logger.error('❌ Erreur SOS:', error);
       // Afficher une notification d'erreur
       sendNotification({
-              title: '❌ Erreur SOS',
-              body: error.message || 'Échec de l\'envoi de l\'alerte SOS',
+        title: '❌ Erreur SOS',
+        body: error.message || "Échec de l'envoi de l'alerte SOS",
         data: { type: 'sos_error' },
       });
     },
   });
-  
+
   // Tracker la position GPS automatiquement
   const locationTracking = useLocationTracking({
     tripId: currentSession?.id || '',
@@ -94,7 +106,7 @@ export default function ActiveSessionScreen() {
       logger.error('Location tracking error:', error);
     },
   });
-  
+
   // Hook pour afficher le countdown deadline en temps réel
   const deadlineTimer = useDeadlineTimer(
     currentSession?.deadline ? new Date(currentSession.deadline) : null,
@@ -111,14 +123,16 @@ export default function ActiveSessionScreen() {
         body: 'Moins de 5 minutes avant ton retour prévu!',
         data: { type: 'deadline_alert_imminent' },
       });
-    }
+    },
   );
-  
+
   const [remainingTime, setRemainingTime] = useState<string>('00:00:00');
   const [sessionState, setSessionState] = useState<'active' | 'grace' | 'overdue'>('active');
   const [showCheckInModal, setShowCheckInModal] = useState(false);
   const [showWarningModal, setShowWarningModal] = useState(false);
-  const [confirmReturnState, setConfirmReturnState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [confirmReturnState, setConfirmReturnState] = useState<
+    'idle' | 'loading' | 'success' | 'error'
+  >('idle');
   const [extendState, setExtendState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [cancelState, setCancelState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const timerNotificationRef = useRef<string | null>(null);
@@ -126,7 +140,7 @@ export default function ActiveSessionScreen() {
   const alertSMSRef = useRef<string | null>(null); // Track si SMS d'alerte envoyé
   const followUpSMSRef = useRef<string | null>(null); // Track si SMS de relance envoyé
   const locationRef = useRef(location); // Ref pour accéder à la dernière valeur de location
-  
+
   // Afficher le modal d'avertissement au démarrage
   useEffect(() => {
     const checkWarning = async () => {
@@ -185,10 +199,10 @@ export default function ActiveSessionScreen() {
       const now = Date.now();
       const limitTime = currentSession.limitTime;
       const deadline = currentSession.deadline;
-      
+
       // Calculer le temps restant jusqu'à limitTime (heure de retour prévue)
       const remainingUntilLimit = limitTime - now;
-      
+
       // Déterminer l'état de la session
       if (remainingUntilLimit > 0) {
         // Avant l'heure limite : afficher le temps jusqu'à limitTime
@@ -197,51 +211,63 @@ export default function ActiveSessionScreen() {
         const minutes = Math.floor((remainingUntilLimit % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((remainingUntilLimit % (1000 * 60)) / 1000);
         setRemainingTime(
-          `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+          `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`,
         );
         // Programmer toutes les notifications (une seule fois au démarrage)
         if (!timerNotificationRef.current) {
           timerNotificationRef.current = 'scheduled';
-          
+
           // 1. Notification 5 min avant l'heure limite
-          const fiveMinBefore = limitTime - (5 * 60 * 1000);
+          const fiveMinBefore = limitTime - 5 * 60 * 1000;
           if (fiveMinBefore > now) {
-            scheduleNotification({
-              title: '⚠️ Petit check',
-              body: 'Tout va bien ? 😊 Confirme ton retour dans 5 minutes.',
-              data: { type: 'timer_warning', sessionId: currentSession.id },
-            }, new Date(fiveMinBefore));
+            scheduleNotification(
+              {
+                title: '⚠️ Petit check',
+                body: 'Tout va bien ? 😊 Confirme ton retour dans 5 minutes.',
+                data: { type: 'timer_warning', sessionId: currentSession.id },
+              },
+              new Date(fiveMinBefore),
+            );
           }
-          
+
           // 2. Notification à la deadline (heure limite)
           if (limitTime > now) {
-            scheduleNotification({
-              title: '⏰ Heure de retour dépassée',
-              body: 'Confirme que tout va bien ! Sinon tes contacts seront alertés dans 15 min.',
-              data: { type: 'deadline_reached', sessionId: currentSession.id },
-              categoryIdentifier: 'session_alert',
-            }, new Date(limitTime));
+            scheduleNotification(
+              {
+                title: '⏰ Heure de retour dépassée',
+                body: 'Confirme que tout va bien ! Sinon tes contacts seront alertés dans 15 min.',
+                data: { type: 'deadline_reached', sessionId: currentSession.id },
+                categoryIdentifier: 'session_alert',
+              },
+              new Date(limitTime),
+            );
           }
-          
+
           // 3. Notification à la deadline finale (avant alerte)
-          const deadlineWarning = deadline - (2 * 60 * 1000); // 2 min avant alerte
+          const deadlineWarning = deadline - 2 * 60 * 1000; // 2 min avant alerte
           if (deadlineWarning > now) {
-            scheduleNotification({
-              title: '🚨 Dernière chance',
-              body: 'Tes contacts seront alertés dans 2 minutes ! Confirme maintenant.',
-              data: { type: 'final_warning', sessionId: currentSession.id },
-              categoryIdentifier: 'session_alert',
-            }, new Date(deadlineWarning));
+            scheduleNotification(
+              {
+                title: '🚨 Dernière chance',
+                body: 'Tes contacts seront alertés dans 2 minutes ! Confirme maintenant.',
+                data: { type: 'final_warning', sessionId: currentSession.id },
+                categoryIdentifier: 'session_alert',
+              },
+              new Date(deadlineWarning),
+            );
           }
-          
+
           // 4. Notification quand l'alerte est déclenchée
           if (deadline > now) {
-            scheduleNotification({
-              title: '🚨 Alerte déclenchée',
-              body: 'Tes contacts d\'urgence ont été alertés. Confirme que tout va bien.',
-              data: { type: 'alert_triggered', sessionId: currentSession.id },
-              categoryIdentifier: 'session_alert',
-            }, new Date(deadline));
+            scheduleNotification(
+              {
+                title: '🚨 Alerte déclenchée',
+                body: "Tes contacts d'urgence ont été alertés. Confirme que tout va bien.",
+                data: { type: 'alert_triggered', sessionId: currentSession.id },
+                categoryIdentifier: 'session_alert',
+              },
+              new Date(deadline),
+            );
           }
         }
       } else if (now < deadline) {
@@ -252,7 +278,7 @@ export default function ActiveSessionScreen() {
         const minutes = Math.floor((remainingUntilDeadline % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((remainingUntilDeadline % (1000 * 60)) / 1000);
         setRemainingTime(
-          `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+          `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`,
         );
       } else {
         // Après deadline : en retard
@@ -262,62 +288,65 @@ export default function ActiveSessionScreen() {
         const minutes = Math.floor((overdueTime % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((overdueTime % (1000 * 60)) / 1000);
         setRemainingTime(
-          `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+          `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`,
         );
-        
+
         // Envoyer notification d'alerte ET SMS dès que la deadline est dépassée
         if (!alertNotificationRef.current) {
           alertNotificationRef.current = 'triggered';
-          logger.debug('🔔 [Notification] Envoi notification d\'alerte (deadline dépassée)');
+          logger.debug("🔔 [Notification] Envoi notification d'alerte (deadline dépassée)");
           sendNotification({
             title: '🚨 Oups… on a prévenu ton contact',
             body: '😬 Confirme si tout va bien.',
             data: { type: 'alert_triggered' },
           });
-          
+
           // Envoyer les SMS d'alerte (même sans localisation)
           if (!alertSMSRef.current) {
             alertSMSRef.current = 'sent';
             triggerAlert(locationRef.current || undefined);
           }
         }
-        
+
         // Envoyer SMS de relance 10 min après la deadline si pas de confirmation
-        const tenMinAfterDeadline = deadline + (10 * 60 * 1000);
-        if (now >= tenMinAfterDeadline && !followUpSMSRef.current && !currentSession.checkInConfirmed) {
+        const tenMinAfterDeadline = deadline + 10 * 60 * 1000;
+        if (
+          now >= tenMinAfterDeadline &&
+          !followUpSMSRef.current &&
+          !currentSession.checkInConfirmed
+        ) {
           followUpSMSRef.current = 'sent';
           logger.debug('📤 Envoi SMS de relance...');
           // Importer et appeler sendFollowUpAlertSMS avec garde-fou anti-spam
-          Promise.all([
-            import('@/lib/services/sms-service'),
-            import('@/lib/utils')
-          ]).then(([{ sendFollowUpAlertSMS }, { canSendSMS }]) => {
-            if (!canSendSMS('followup', 60)) {
-              logger.warn('🚫 SMS de relance bloqué par anti-spam');
-              return;
-            }
-            const contacts = [];
-            if (settings.emergencyContactPhone) {
-              contacts.push({
-                name: settings.emergencyContactName,
-                phone: settings.emergencyContactPhone,
-              });
-            }
+          Promise.all([import('@/lib/services/sms-service'), import('@/lib/utils')]).then(
+            ([{ sendFollowUpAlertSMS }, { canSendSMS }]) => {
+              if (!canSendSMS('followup', 60)) {
+                logger.warn('🚫 SMS de relance bloqué par anti-spam');
+                return;
+              }
+              const contacts = [];
+              if (settings.emergencyContactPhone) {
+                contacts.push({
+                  name: settings.emergencyContactName,
+                  phone: settings.emergencyContactPhone,
+                });
+              }
 
-            if (contacts.length > 0) {
-              sendFollowUpAlertSMS({
-                contacts,
-                userName: settings.firstName,
-                location: locationRef.current || undefined,
-              }).catch((error) => {
-                Alert.alert(
-                  '⚠️ Erreur SMS de relance',
-                  `Impossible d'envoyer le SMS de relance: ${error.message || 'Erreur inconnue'}`,
-                  [{ text: 'OK' }]
-                );
-              });
-            }
-          });
+              if (contacts.length > 0) {
+                sendFollowUpAlertSMS({
+                  contacts,
+                  userName: settings.firstName,
+                  location: locationRef.current || undefined,
+                }).catch((error) => {
+                  Alert.alert(
+                    '⚠️ Erreur SMS de relance',
+                    `Impossible d'envoyer le SMS de relance: ${error.message || 'Erreur inconnue'}`,
+                    [{ text: 'OK' }],
+                  );
+                });
+              }
+            },
+          );
         }
       }
     }, 1000);
@@ -332,20 +361,16 @@ export default function ActiveSessionScreen() {
 
   const handleCompleteSession = async () => {
     // HAUTE #8: Confirmation avant terminer session
-    Alert.alert(
-      'Terminer la sortie ?',
-      'Etes-vous sur de vouloir terminer cette sortie ?',
-      [
-        { text: 'Annuler', style: 'cancel' },
-        {
-          text: 'Terminer',
-          style: 'destructive',
-          onPress: async () => {
-            await _completeSession();
-          },
+    Alert.alert('Terminer la sortie ?', 'Etes-vous sur de vouloir terminer cette sortie ?', [
+      { text: 'Annuler', style: 'cancel' },
+      {
+        text: 'Terminer',
+        style: 'destructive',
+        onPress: async () => {
+          await _completeSession();
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const _completeSession = async () => {
@@ -368,7 +393,7 @@ export default function ActiveSessionScreen() {
             note: currentSession?.note,
             location: location || undefined,
           });
-          
+
           if (result.ok) {
             logger.debug('✅ SMS de confirmation envoyé:', result.sid);
             sendNotification({
@@ -380,22 +405,27 @@ export default function ActiveSessionScreen() {
             logger.error('❌ Échec envoi SMS confirmation:', result.error);
           }
         } catch (error) {
-          logger.error('❌ Erreur lors de l\'envoi du SMS de confirmation:', error);
+          logger.error("❌ Erreur lors de l'envoi du SMS de confirmation:", error);
         }
       }
 
       await endSession();
       router.push('/');
     });
-  }
+  };
 
   const handleExtendSession = async () => {
     await withExtendLoading(() => addTimeToSession(15));
     // Afficher un toast de confirmation
-    logger.debug('🔔 [Notification] Envoi notification d\'extension (+15 min)');
+    logger.debug("🔔 [Notification] Envoi notification d'extension (+15 min)");
     sendNotification({
-            title: '✅ +15 minutes ajoutées',
-            body: 'Nouveau retour prévu : ' + new Date(currentSession!.deadline + 15 * 60 * 1000).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+      title: '✅ +15 minutes ajoutées',
+      body:
+        'Nouveau retour prévu : ' +
+        new Date(currentSession!.deadline + 15 * 60 * 1000).toLocaleTimeString('fr-FR', {
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
       data: { type: 'extension_confirmed' },
     });
   };
@@ -422,27 +452,23 @@ export default function ActiveSessionScreen() {
   };
 
   const handleCancelSession = () => {
-    Alert.alert(
-      'Annuler la sortie',
-      'Êtes-vous sûr de vouloir annuler cette sortie ?',
-      [
-        { text: 'Non', style: 'cancel' },
-        {
-          text: 'Oui',
-          style: 'destructive',
-          onPress: async () => {
-            // Annuler toutes les notifications programmées
-            await cancelAllNotifications();
-            // Capturer la position GPS si activée
-            if (settings.locationEnabled && location) {
-              logger.debug('Position capturée:', location);
-            }
-            await cancelSession();
-            router.push('/');
-          },
+    Alert.alert('Annuler la sortie', 'Êtes-vous sûr de vouloir annuler cette sortie ?', [
+      { text: 'Non', style: 'cancel' },
+      {
+        text: 'Oui',
+        style: 'destructive',
+        onPress: async () => {
+          // Annuler toutes les notifications programmées
+          await cancelAllNotifications();
+          // Capturer la position GPS si activée
+          if (settings.locationEnabled && location) {
+            logger.debug('Position capturée:', location);
+          }
+          await cancelSession();
+          router.push('/');
         },
-      ]
-    );
+      },
+    ]);
   };
 
   if (!currentSession) {
@@ -461,8 +487,14 @@ export default function ActiveSessionScreen() {
   });
 
   // Déterminer les couleurs en fonction de l'état
-  const timerColor = sessionState === 'active' ? '#6C63FF' : sessionState === 'grace' ? '#F59E0B' : '#FF4D4D';
-  const timerLabel = sessionState === 'active' ? 'Temps avant retour' : sessionState === 'grace' ? 'Période de grâce' : 'En retard depuis';
+  const timerColor =
+    sessionState === 'active' ? '#6C63FF' : sessionState === 'grace' ? '#F59E0B' : '#FF4D4D';
+  const timerLabel =
+    sessionState === 'active'
+      ? 'Temps avant retour'
+      : sessionState === 'grace'
+        ? 'Période de grâce'
+        : 'En retard depuis';
 
   return (
     <View className="flex-1 bg-background">
@@ -491,22 +523,20 @@ export default function ActiveSessionScreen() {
           visible={showWarningModal}
           onClose={() => setShowWarningModal(false)}
         />
-        
+
         {/* Header */}
         <ScreenTransition delay={0} duration={350}>
           <View className="gap-1 mb-3">
             <View className="flex-row items-center justify-between">
-              <Text className="text-4xl font-bold text-foreground">
-                Sortie en cours
-              </Text>
+              <Text className="text-4xl font-bold text-foreground">Sortie en cours</Text>
               {/* Indicateur GPS */}
               <Pressable
                 onPress={() => {
                   Alert.alert(
-                     locationPermission.enabled ? 'Position partagée' : 'Position non partagée',
+                    locationPermission.enabled ? 'Position partagée' : 'Position non partagée',
                     locationPermission.enabled
-                      ? 'Ta position est partagée en cas d\'alerte.'
-                      : 'Active la localisation dans Paramètres pour partager ta position en cas d\'alerte.',
+                      ? "Ta position est partagée en cas d'alerte."
+                      : "Active la localisation dans Paramètres pour partager ta position en cas d'alerte.",
                     [
                       { text: 'OK', style: 'default' },
                       locationPermission.enabled
@@ -515,17 +545,19 @@ export default function ActiveSessionScreen() {
                             text: 'Paramètres',
                             onPress: () => router.push('/settings'),
                           },
-                    ].filter(Boolean) as any
+                    ].filter(Boolean) as any,
                   );
                 }}
-                style={({ pressed }) => ([
+                style={({ pressed }) => [
                   {
                     opacity: pressed ? 0.6 : 1,
                     padding: 8,
                     borderRadius: 12,
-                    backgroundColor: locationPermission.enabled ? 'rgba(45, 226, 166, 0.15)' : 'rgba(255, 77, 77, 0.15)',
+                    backgroundColor: locationPermission.enabled
+                      ? 'rgba(45, 226, 166, 0.15)'
+                      : 'rgba(255, 77, 77, 0.15)',
                   },
-                ])}
+                ]}
               >
                 <Text style={{ fontSize: 24 }}>
                   {locationTracking.isTracking ? '🟢' : locationTracking.error ? '🔴' : '⚪'}
@@ -555,7 +587,8 @@ export default function ActiveSessionScreen() {
                     Aucune connexion Internet
                   </Text>
                   <Text className="text-xs text-muted leading-relaxed">
-                    L'alerte SMS ne pourra pas être envoyée. Vérifie ta connexion WiFi ou cellulaire.
+                    L'alerte SMS ne pourra pas être envoyée. Vérifie ta connexion WiFi ou
+                    cellulaire.
                   </Text>
                 </View>
               </View>
@@ -580,7 +613,11 @@ export default function ActiveSessionScreen() {
             <GlassCard
               className="gap-2 mb-4"
               style={{
-                backgroundColor: locationTracking.isTracking ? 'rgba(45, 226, 166, 0.08)' : locationTracking.error ? 'rgba(255, 77, 77, 0.08)' : 'rgba(200, 200, 200, 0.08)',
+                backgroundColor: locationTracking.isTracking
+                  ? 'rgba(45, 226, 166, 0.08)'
+                  : locationTracking.error
+                    ? 'rgba(255, 77, 77, 0.08)'
+                    : 'rgba(200, 200, 200, 0.08)',
                 paddingHorizontal: 16,
                 paddingVertical: 12,
               }}
@@ -592,11 +629,16 @@ export default function ActiveSessionScreen() {
                   </Text>
                   <View className="flex-1">
                     <Text className="text-sm font-semibold text-foreground">
-                      {locationTracking.isTracking ? 'Position partagée' : locationTracking.error ? 'Erreur GPS' : 'Position non partagée'}
+                      {locationTracking.isTracking
+                        ? 'Position partagée'
+                        : locationTracking.error
+                          ? 'Erreur GPS'
+                          : 'Position non partagée'}
                     </Text>
                     {locationTracking.lastSentAt && (
                       <Text className="text-xs text-muted">
-                        Mise à jour: {new Date(locationTracking.lastSentAt).toLocaleTimeString('fr-FR')}
+                        Mise à jour:{' '}
+                        {new Date(locationTracking.lastSentAt).toLocaleTimeString('fr-FR')}
                       </Text>
                     )}
                   </View>
@@ -611,14 +653,17 @@ export default function ActiveSessionScreen() {
           <GlassCard
             className="gap-2 mb-4"
             style={{
-              backgroundColor: sessionState === 'active' ? 'rgba(108, 99, 255, 0.08)' : sessionState === 'grace' ? 'rgba(245, 158, 11, 0.08)' : 'rgba(255, 77, 77, 0.08)',
+              backgroundColor:
+                sessionState === 'active'
+                  ? 'rgba(108, 99, 255, 0.08)'
+                  : sessionState === 'grace'
+                    ? 'rgba(245, 158, 11, 0.08)'
+                    : 'rgba(255, 77, 77, 0.08)',
               paddingHorizontal: 16,
               paddingVertical: 14,
             }}
           >
-            <Text className="text-sm font-semibold text-muted">
-              {timerLabel}
-            </Text>
+            <Text className="text-sm font-semibold text-muted">{timerLabel}</Text>
             <Text
               className="text-6xl font-bold text-center"
               style={{
@@ -628,7 +673,7 @@ export default function ActiveSessionScreen() {
             >
               {remainingTime}
             </Text>
-            
+
             {/* Barre de progression */}
             <View className="mt-3 h-2 bg-gray-300 rounded-full overflow-hidden">
               <View
@@ -640,22 +685,20 @@ export default function ActiveSessionScreen() {
                 }}
               />
             </View>
-            
+
             {/* Informations détaillées */}
-            <View className="gap-2 mt-3 pt-3 border-t" style={{ borderTopColor: timerColor + '20' }}>
+            <View
+              className="gap-2 mt-3 pt-3 border-t"
+              style={{ borderTopColor: timerColor + '20' }}
+            >
               <View className="flex-row justify-between">
                 <Text className="text-sm text-muted">Retour prévu :</Text>
-                <Text className="text-sm font-semibold text-foreground">
-                  {limitTimeStr}
-                </Text>
+                <Text className="text-sm font-semibold text-foreground">{limitTimeStr}</Text>
               </View>
               <View className="flex-row justify-between">
                 <Text className="text-sm text-muted">Alerte à :</Text>
-                <Text className="text-sm font-semibold text-foreground">
-                  {deadlineStr}
-                </Text>
+                <Text className="text-sm font-semibold text-foreground">{deadlineStr}</Text>
               </View>
-
             </View>
 
             {/* Légende des états */}
@@ -716,32 +759,49 @@ export default function ActiveSessionScreen() {
         <ScreenTransition delay={400} duration={350}>
           <LongPressGestureHandler
             onHandlerStateChange={async (event) => {
-              if (event.nativeEvent.state === 3) { // ACTIVE state
+              if (event.nativeEvent.state === 3) {
+                // ACTIVE state
                 await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
                 const result = await tripService.triggerSos({ tripId: currentSession?.id });
-                
+
                 // Handle error codes from SOS
                 if (!result.success) {
                   const errorCode = result.errorCode;
                   if (errorCode === 'quota_reached') {
-                    Alert.alert('Limite atteinte', 'Tu as atteint la limite d\'alertes SOS pour aujourd\'hui. Essaie demain.');
+                    Alert.alert(
+                      'Limite atteinte',
+                      "Tu as atteint la limite d'alertes SOS pour aujourd'hui. Essaie demain.",
+                    );
                   } else if (errorCode === 'twilio_failed') {
-                    Alert.alert('Erreur d\'envoi', 'Impossible d\'envoyer l\'alerte SOS. Nous réessayerons automatiquement.');
+                    Alert.alert(
+                      "Erreur d'envoi",
+                      "Impossible d'envoyer l'alerte SOS. Nous réessayerons automatiquement.",
+                    );
                   } else {
-                    Alert.alert('Erreur SOS', result.error || 'Erreur lors de l\'envoi de l\'alerte SOS. Réessaie plus tard.');
+                    Alert.alert(
+                      'Erreur SOS',
+                      result.error || "Erreur lors de l'envoi de l'alerte SOS. Réessaie plus tard.",
+                    );
                   }
                 }
               }
             }}
             minDurationMs={2000}
           >
-            <View className="my-4" accessible={true} accessibilityRole="button" accessibilityLabel="Bouton SOS" accessibilityHint="Appui long 2 secondes pour déclencher l'alerte d'urgence" accessibilityState={{ disabled: sosLoading }}>
+            <View
+              className="my-4"
+              accessible={true}
+              accessibilityRole="button"
+              accessibilityLabel="Bouton SOS"
+              accessibilityHint="Appui long 2 secondes pour déclencher l'alerte d'urgence"
+              accessibilityState={{ disabled: sosLoading }}
+            >
               <SOSButton
                 onPress={async () => {
                   // HAUTE #9: Confirmation SOS avec delai
                   Alert.alert(
                     'Déclencher SOS ?',
-                    'Es-tu en danger ? Cette action alertera ton contact d\'urgence.',
+                    "Es-tu en danger ? Cette action alertera ton contact d'urgence.",
                     [
                       { text: 'Annuler', style: 'cancel' },
                       {
@@ -751,7 +811,7 @@ export default function ActiveSessionScreen() {
                           await triggerSOS();
                         },
                       },
-                    ]
+                    ],
                   );
                 }}
                 isLoading={sosLoading}
@@ -764,37 +824,31 @@ export default function ActiveSessionScreen() {
         {/* Annuler la sortie */}
         <ScreenTransition delay={500} duration={350}>
           <FeedbackAnimation state={cancelState}>
-              <Pressable 
+            <Pressable
               onPress={async () => {
-                Alert.alert(
-                  'Annuler la sortie ?',
-                  'Es-tu sûr de vouloir annuler cette sortie ?',
-                  [
-                    { text: 'Non', style: 'cancel' },
-                    {
-                      text: 'Oui, annuler',
-                      style: 'destructive',
-                      onPress: async () => {
-                        setCancelState('loading');
-                        const result = await tripService.cancelTrip(currentSession?.id || '');
-                        if (result.success) {
-                          setCancelState('success');
-                          setTimeout(() => router.push('/home'), 500);
-                        } else {
-                          setCancelState('error');
-                          Alert.alert('Erreur', result.error || 'Impossible d\'annuler la sortie');
-                          setTimeout(() => setCancelState('idle'), 1000);
-                        }
-                      },
+                Alert.alert('Annuler la sortie ?', 'Es-tu sûr de vouloir annuler cette sortie ?', [
+                  { text: 'Non', style: 'cancel' },
+                  {
+                    text: 'Oui, annuler',
+                    style: 'destructive',
+                    onPress: async () => {
+                      setCancelState('loading');
+                      const result = await tripService.cancelTrip(currentSession?.id || '');
+                      if (result.success) {
+                        setCancelState('success');
+                        setTimeout(() => router.push('/home'), 500);
+                      } else {
+                        setCancelState('error');
+                        Alert.alert('Erreur', result.error || "Impossible d'annuler la sortie");
+                        setTimeout(() => setCancelState('idle'), 1000);
+                      }
                     },
-                  ]
-                );
+                  },
+                ]);
               }}
               className="py-4"
             >
-              <Text className="text-center text-base font-bold text-error">
-                Annuler la sortie
-              </Text>
+              <Text className="text-center text-base font-bold text-error">Annuler la sortie</Text>
             </Pressable>
           </FeedbackAnimation>
         </ScreenTransition>

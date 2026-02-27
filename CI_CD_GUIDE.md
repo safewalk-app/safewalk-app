@@ -9,6 +9,7 @@
 ## 📋 Résumé Exécutif
 
 SafeWalk V7.0 inclut un **pipeline CI/CD complet** avec:
+
 - ✅ Linting automatique (ESLint + Prettier)
 - ✅ Type checking (TypeScript)
 - ✅ Tests unitaires (Vitest)
@@ -68,6 +69,7 @@ SafeWalk V7.0 inclut un **pipeline CI/CD complet** avec:
 ### 1. ESLint (.eslintrc.json)
 
 Configuration stricte avec:
+
 - ✅ TypeScript support
 - ✅ React/React Native rules
 - ✅ No `any` types
@@ -75,6 +77,7 @@ Configuration stricte avec:
 - ✅ No console.log in production
 
 **Règles principales:**
+
 ```json
 {
   "@typescript-eslint/no-explicit-any": "error",
@@ -88,6 +91,7 @@ Configuration stricte avec:
 ### 2. Prettier (.prettierrc.json)
 
 Configuration de formatage:
+
 ```json
 {
   "semi": true,
@@ -101,6 +105,7 @@ Configuration de formatage:
 ### 3. Vitest (vitest.config.ts)
 
 Configuration des tests:
+
 ```typescript
 {
   environment: 'jsdom',
@@ -117,6 +122,7 @@ Configuration des tests:
 ### 4. GitHub Actions (.github/workflows/ci.yml)
 
 Pipeline automatique avec 8 jobs:
+
 1. **Lint** - ESLint + Prettier
 2. **Type Check** - TypeScript
 3. **Test** - Vitest + coverage
@@ -247,6 +253,7 @@ git push origin feature/my-feature
 ### Déploiement
 
 **Staging (develop branch):**
+
 ```bash
 git push origin feature/my-feature
 # PR → develop
@@ -255,6 +262,7 @@ git push origin feature/my-feature
 ```
 
 **Production (main branch):**
+
 ```bash
 git push origin develop
 # PR → main
@@ -274,6 +282,7 @@ npm run test:coverage
 ```
 
 Génère:
+
 - `coverage/index.html` - Rapport HTML interactif
 - `coverage/lcov.info` - Format LCOV pour Codecov
 
@@ -284,6 +293,7 @@ npm run lint
 ```
 
 Affiche:
+
 - Erreurs (doivent être fixées)
 - Avertissements (recommandé de fixer)
 
@@ -294,6 +304,7 @@ npm run check
 ```
 
 Affiche:
+
 - Erreurs TypeScript
 - Warnings
 
@@ -323,12 +334,14 @@ Scanning avancé des vulnérabilités.
 ### Secrets Management
 
 **Ne jamais commiter:**
+
 - `.env` files
 - API keys
 - Tokens
 - Credentials
 
 **Utiliser:**
+
 - GitHub Secrets
 - Environment variables
 - `.env.example` (template)
@@ -431,6 +444,7 @@ Closes #123
 ## 📚 Ressources
 
 ### Documentation
+
 - [ESLint](https://eslint.org/)
 - [Prettier](https://prettier.io/)
 - [Vitest](https://vitest.dev/)
@@ -438,6 +452,7 @@ Closes #123
 - [Snyk](https://snyk.io/)
 
 ### Outils
+
 - [Codecov](https://codecov.io/) - Coverage tracking
 - [SonarQube](https://www.sonarqube.org/) - Code quality
 - [Dependabot](https://dependabot.com/) - Dependency updates

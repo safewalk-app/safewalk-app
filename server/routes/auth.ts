@@ -1,6 +1,6 @@
 /**
  * Authentication Routes
- * 
+ *
  * Endpoints pour:
  * - Refresh des tokens
  * - Validation des tokens
@@ -14,14 +14,14 @@ const router = Router();
 
 /**
  * POST /api/auth/refresh
- * 
+ *
  * Rafraîchir les tokens d'authentification
- * 
+ *
  * Body:
  * {
  *   refreshToken: string
  * }
- * 
+ *
  * Response:
  * {
  *   accessToken: string,
@@ -75,12 +75,12 @@ router.post('/auth/refresh', async (req: Request, res: Response) => {
 
 /**
  * POST /api/auth/validate
- * 
+ *
  * Valider un token d'authentification
- * 
+ *
  * Headers:
  * Authorization: Bearer <token>
- * 
+ *
  * Response:
  * {
  *   valid: boolean,
@@ -138,12 +138,12 @@ router.post('/auth/validate', async (req: Request, res: Response) => {
 
 /**
  * POST /api/auth/logout
- * 
+ *
  * Déconnecter l'utilisateur
- * 
+ *
  * Headers:
  * Authorization: Bearer <token>
- * 
+ *
  * Response:
  * {
  *   success: boolean
@@ -186,12 +186,12 @@ router.post('/auth/logout', async (req: Request, res: Response) => {
 
 /**
  * GET /api/auth/me
- * 
+ *
  * Obtenir les informations de l'utilisateur actuel
- * 
+ *
  * Headers:
  * Authorization: Bearer <token>
- * 
+ *
  * Response:
  * {
  *   userId: string,

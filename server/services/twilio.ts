@@ -6,7 +6,10 @@ const authToken = process.env.TWILIO_AUTH_TOKEN;
 const twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER;
 
 console.log('🔑 [Twilio] Chargement des credentials...');
-console.log('   TWILIO_ACCOUNT_SID:', accountSid ? `${accountSid.substring(0, 10)}...` : 'NON DÉFINI');
+console.log(
+  '   TWILIO_ACCOUNT_SID:',
+  accountSid ? `${accountSid.substring(0, 10)}...` : 'NON DÉFINI',
+);
 console.log('   TWILIO_AUTH_TOKEN:', authToken ? `${authToken.substring(0, 8)}...` : 'NON DÉFINI');
 console.log('   TWILIO_PHONE_NUMBER:', twilioPhoneNumber || 'NON DÉFINI');
 
@@ -25,7 +28,7 @@ export async function sendAlertSMS(
   phoneNumber: string,
   limitTimeStr: string,
   tolerance: number,
-  location?: { latitude: number; longitude: number }
+  location?: { latitude: number; longitude: number },
 ): Promise<void> {
   if (!client || !twilioPhoneNumber) {
     console.log('📱 [MOCK SMS] Alerte SMS non envoyé (Twilio non configuré)');
@@ -125,7 +128,7 @@ export async function sendAlertSMSToMultiple(
   phoneNumbers: string[],
   limitTimeStr: string,
   tolerance: number,
-  location?: { latitude: number; longitude: number }
+  location?: { latitude: number; longitude: number },
 ): Promise<void> {
   console.log('🔍 sendAlertSMSToMultiple called with:', { phoneNumbers, limitTimeStr, tolerance });
   const validPhoneNumbers = phoneNumbers.filter((phone) => phone && phone.trim().length > 0);
@@ -135,20 +138,22 @@ export async function sendAlertSMSToMultiple(
     return;
   }
 
-  console.log(`📤 Envoi d'alertes SMS à ${validPhoneNumbers.length} contact(s): ${validPhoneNumbers.join(', ')}`);
+  console.log(
+    `📤 Envoi d'alertes SMS à ${validPhoneNumbers.length} contact(s): ${validPhoneNumbers.join(', ')}`,
+  );
 
   const results = await Promise.allSettled(
     validPhoneNumbers.map((phone) => {
       console.log(`  → Sending to ${phone}...`);
       return sendAlertSMS(phone, limitTimeStr, tolerance, location);
-    })
+    }),
   );
 
   const successful = results.filter((r) => r.status === 'fulfilled').length;
   const failed = results.filter((r) => r.status === 'rejected').length;
 
   console.log(`📊 Results: ${successful} succeeded, ${failed} failed`);
-  
+
   results.forEach((r, idx) => {
     if (r.status === 'rejected') {
       console.error(`  ❌ ${validPhoneNumbers[idx]}: ${r.reason}`);

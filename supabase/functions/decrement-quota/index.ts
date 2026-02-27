@@ -1,9 +1,9 @@
 /**
  * Edge Function: Décrémenter les quotas de manière sécurisée
- * 
+ *
  * Cette fonction est appelée côté serveur (service role) pour décrémenter
  * les quotas d'alertes et de SMS après chaque utilisation.
- * 
+ *
  * Sécurité :
  * - Vérification du user_id
  * - Vérification que le quota n'est pas négatif
@@ -35,17 +35,17 @@ Deno.serve(async (req: Request) => {
 
     // Validation
     if (!user_id || !quota_type) {
-      return new Response(
-        JSON.stringify({ error: 'user_id et quota_type requis' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify({ error: 'user_id et quota_type requis' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
     if (!['alert', 'test_sms'].includes(quota_type)) {
-      return new Response(
-        JSON.stringify({ error: 'quota_type invalide' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify({ error: 'quota_type invalide' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
     // Récupérer le profil
@@ -57,10 +57,10 @@ Deno.serve(async (req: Request) => {
 
     if (fetchError || !profile) {
       console.error('❌ Profil non trouvé:', fetchError);
-      return new Response(
-        JSON.stringify({ error: 'Profil non trouvé' }),
-        { status: 404, headers: { 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify({ error: 'Profil non trouvé' }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
     // Décrémenter le quota approprié
@@ -69,19 +69,19 @@ Deno.serve(async (req: Request) => {
 
     if (quota_type === 'alert') {
       if (profile.free_alerts_remaining <= 0) {
-        return new Response(
-          JSON.stringify({ error: 'Quotas d\'alertes épuisés' }),
-          { status: 403, headers: { 'Content-Type': 'application/json' } }
-        );
+        return new Response(JSON.stringify({ error: "Quotas d'alertes épuisés" }), {
+          status: 403,
+          headers: { 'Content-Type': 'application/json' },
+        });
       }
       updateData.free_alerts_remaining = profile.free_alerts_remaining - 1;
       quotaName = 'alertes';
     } else if (quota_type === 'test_sms') {
       if (profile.free_test_sms_remaining <= 0) {
-        return new Response(
-          JSON.stringify({ error: 'Quotas de SMS de test épuisés' }),
-          { status: 403, headers: { 'Content-Type': 'application/json' } }
-        );
+        return new Response(JSON.stringify({ error: 'Quotas de SMS de test épuisés' }), {
+          status: 403,
+          headers: { 'Content-Type': 'application/json' },
+        });
       }
       updateData.free_test_sms_remaining = profile.free_test_sms_remaining - 1;
       quotaName = 'SMS de test';
@@ -95,10 +95,10 @@ Deno.serve(async (req: Request) => {
 
     if (updateError) {
       console.error('❌ Erreur lors de la mise à jour:', updateError);
-      return new Response(
-        JSON.stringify({ error: 'Erreur lors de la mise à jour du quota' }),
-        { status: 500, headers: { 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify({ error: 'Erreur lors de la mise à jour du quota' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
     // Logging audit
@@ -108,17 +108,18 @@ Deno.serve(async (req: Request) => {
       JSON.stringify({
         success: true,
         message: `Quota ${quotaName} décrémenté`,
-        remaining: quota_type === 'alert' 
-          ? updateData.free_alerts_remaining 
-          : updateData.free_test_sms_remaining,
+        remaining:
+          quota_type === 'alert'
+            ? updateData.free_alerts_remaining
+            : updateData.free_test_sms_remaining,
       }),
-      { status: 200, headers: { 'Content-Type': 'application/json' } }
+      { status: 200, headers: { 'Content-Type': 'application/json' } },
     );
   } catch (error) {
     console.error('❌ Erreur:', error);
-    return new Response(
-      JSON.stringify({ error: 'Erreur serveur' }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
-    );
+    return new Response(JSON.stringify({ error: 'Erreur serveur' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 });

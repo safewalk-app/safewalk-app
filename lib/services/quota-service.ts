@@ -1,6 +1,6 @@
 /**
  * Service de gestion des quotas (alertes gratuites et SMS de test)
- * 
+ *
  * Règles :
  * - 3 alertes "late" gratuites par utilisateur (lifetime)
  * - 1 SMS de test gratuit par utilisateur
@@ -29,7 +29,9 @@ export async function getQuotaStatus(userId: string): Promise<QuotaStatus | null
   try {
     const { data, error } = await supabase
       .from('profiles')
-      .select('free_alerts_remaining, free_test_sms_remaining, subscription_active, sms_daily_limit, sms_sos_daily_limit')
+      .select(
+        'free_alerts_remaining, free_test_sms_remaining, subscription_active, sms_daily_limit, sms_sos_daily_limit',
+      )
       .eq('user_id', userId)
       .single();
 
@@ -59,7 +61,7 @@ export async function getQuotaStatus(userId: string): Promise<QuotaStatus | null
     }
 
     const smsSentCount = smsSent?.length || 0;
-    const sosSentCount = smsSent?.filter(s => s.sms_type === 'sos').length || 0;
+    const sosSentCount = smsSent?.filter((s) => s.sms_type === 'sos').length || 0;
 
     const smsDailyRemaining = Math.max(0, (data.sms_daily_limit || 10) - smsSentCount);
     const smsSosDailyRemaining = Math.max(0, (data.sms_sos_daily_limit || 3) - sosSentCount);
@@ -110,7 +112,9 @@ export async function decrementFreeTestSms(userId: string): Promise<boolean> {
   try {
     const { error } = await supabase
       .from('profiles')
-      .update({ free_test_sms_remaining: supabase.rpc('decrement_free_test_sms', { user_id: userId }) })
+      .update({
+        free_test_sms_remaining: supabase.rpc('decrement_free_test_sms', { user_id: userId }),
+      })
       .eq('user_id', userId);
 
     if (error) {
@@ -159,23 +163,21 @@ export async function logSms(
   smsType: 'late' | 'sos' | 'test',
   tripId?: string,
   twiioSid?: string,
-  error?: string
+  error?: string,
 ): Promise<boolean> {
   try {
-    const { error: logError } = await supabase
-      .from('sms_logs')
-      .insert({
-        user_id: userId,
-        trip_id: tripId || null,
-        to_phone: toPhone,
-        sms_type: smsType,
-        status: error ? 'failed' : 'sent',
-        twilio_sid: twiioSid || null,
-        error: error || null,
-      });
+    const { error: logError } = await supabase.from('sms_logs').insert({
+      user_id: userId,
+      trip_id: tripId || null,
+      to_phone: toPhone,
+      sms_type: smsType,
+      status: error ? 'failed' : 'sent',
+      twilio_sid: twiioSid || null,
+      error: error || null,
+    });
 
     if (logError) {
-      logger.error('❌ Erreur lors de l\'enregistrement du SMS:', logError);
+      logger.error("❌ Erreur lors de l'enregistrement du SMS:", logError);
       return false;
     }
 
@@ -208,7 +210,7 @@ export async function getSmsSentToday(userId: string): Promise<{ total: number; 
     }
 
     const total = data?.length || 0;
-    const sos = data?.filter(s => s.sms_type === 'sos').length || 0;
+    const sos = data?.filter((s) => s.sms_type === 'sos').length || 0;
 
     return { total, sos };
   } catch (error) {

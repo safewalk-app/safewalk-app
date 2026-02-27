@@ -1,6 +1,6 @@
 /**
  * Loading Indicator Integration Example
- * 
+ *
  * Cet exemple montre comment intégrer les indicateurs de chargement
  * dans les écrans avec lazy loading
  */
@@ -44,21 +44,11 @@ export function Example1_NewSessionScreen() {
 
       <ScrollView>
         <View style={{ gap: 16, padding: 16 }}>
-          <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
-            Nouvelle Sortie
-          </Text>
+          <Text style={{ fontSize: 18, fontWeight: 'bold' }}>Nouvelle Sortie</Text>
 
-          <Button
-            title="Commencer la sortie"
-            onPress={handleStartSession}
-            disabled={tripStarted}
-          />
+          <Button title="Commencer la sortie" onPress={handleStartSession} disabled={tripStarted} />
 
-          {tripStarted && (
-            <Text style={{ color: 'green' }}>
-              ✓ Sortie commencée
-            </Text>
-          )}
+          {tripStarted && <Text style={{ color: 'green' }}>✓ Sortie commencée</Text>}
         </View>
       </ScrollView>
     </ScreenContainer>
@@ -82,7 +72,7 @@ export function Example2_ManualLoadingControl() {
     start();
     try {
       // Simuler un appel API
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
       setData({ id: 1, name: 'Example Data' });
     } finally {
       finish();
@@ -95,20 +85,11 @@ export function Example2_ManualLoadingControl() {
 
       <ScrollView>
         <View style={{ gap: 16, padding: 16 }}>
-          <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
-            Chargement Manuel
-          </Text>
+          <Text style={{ fontSize: 18, fontWeight: 'bold' }}>Chargement Manuel</Text>
 
-          <Button
-            title="Charger les données"
-            onPress={handleLoadData}
-          />
+          <Button title="Charger les données" onPress={handleLoadData} />
 
-          {data && (
-            <Text>
-              Données: {JSON.stringify(data)}
-            </Text>
-          )}
+          {data && <Text>Données: {JSON.stringify(data)}</Text>}
         </View>
       </ScrollView>
     </ScreenContainer>
@@ -157,9 +138,7 @@ export function Example3_MultipleServices() {
 
       <ScrollView>
         <View style={{ gap: 16, padding: 16 }}>
-          <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
-            Charger Plusieurs Services
-          </Text>
+          <Text style={{ fontSize: 18, fontWeight: 'bold' }}>Charger Plusieurs Services</Text>
 
           <Button
             title="Charger Trip + OTP"
@@ -167,9 +146,7 @@ export function Example3_MultipleServices() {
             disabled={status === 'loading'}
           />
 
-          <Text>
-            Status: {status}
-          </Text>
+          <Text>Status: {status}</Text>
         </View>
       </ScrollView>
     </ScreenContainer>
@@ -190,7 +167,7 @@ export function Example4_DetailedLoading() {
   const handleComplexOperation = async () => {
     await withLoading(async () => {
       // Simuler une opération complexe
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      await new Promise((resolve) => setTimeout(resolve, 3000));
     });
   };
 
@@ -201,14 +178,9 @@ export function Example4_DetailedLoading() {
 
       <ScrollView>
         <View style={{ gap: 16, padding: 16 }}>
-          <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
-            Chargement Détaillé
-          </Text>
+          <Text style={{ fontSize: 18, fontWeight: 'bold' }}>Chargement Détaillé</Text>
 
-          <Button
-            title="Opération Complexe"
-            onPress={handleComplexOperation}
-          />
+          <Button title="Opération Complexe" onPress={handleComplexOperation} />
 
           <Text style={{ fontSize: 12, color: '#666' }}>
             Les détails de chargement s'affichent en haut
@@ -268,8 +240,8 @@ export function Example6_LazyHooks() {
 
   useEffect(() => {
     withLoading(() => getUseDeadlineTimer())
-      .then(module => setUseDeadlineTimer(() => module.useDeadlineTimer))
-      .catch(error => console.error('Failed to load hook:', error));
+      .then((module) => setUseDeadlineTimer(() => module.useDeadlineTimer))
+      .catch((error) => console.error('Failed to load hook:', error));
   }, []);
 
   if (!useDeadlineTimer) {

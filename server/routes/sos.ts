@@ -1,8 +1,8 @@
-import { Router, Request, Response } from "express";
-import { rateLimit } from "express-rate-limit";
-import { z } from "zod";
-import { sendFriendlyAlertSMSToMultiple } from "../services/friendly-sms";
-import { supabase, createSession, logSMS } from "../services/supabase-client";
+import { Router, Request, Response } from 'express';
+import { rateLimit } from 'express-rate-limit';
+import { z } from 'zod';
+import { sendFriendlyAlertSMSToMultiple } from '../services/friendly-sms';
+import { supabase, createSession, logSMS } from '../services/supabase-client';
 
 // Simple logger
 const logger = {
@@ -19,7 +19,7 @@ const sosLimiter = rateLimit({
   max: 5, // Max 5 requêtes par minute
   message: {
     success: false,
-    error: "Trop de requêtes. Veuillez réessayer dans 1 minute.",
+    error: 'Trop de requêtes. Veuillez réessayer dans 1 minute.',
   },
   standardHeaders: true,
   legacyHeaders: false,
@@ -28,12 +28,15 @@ const sosLimiter = rateLimit({
 // Schéma de validation Zod (SÉCURITÉ)
 const sosRequestSchema = z.object({
   firstName: z.string().min(1).max(100),
-  emergencyContacts: z.array(
-    z.object({
-      name: z.string().min(1).max(100),
-      phone: z.string().regex(/^\+?[1-9]\d{1,14}$/), // Format E.164
-    })
-  ).min(1).max(5),
+  emergencyContacts: z
+    .array(
+      z.object({
+        name: z.string().min(1).max(100),
+        phone: z.string().regex(/^\+?[1-9]\d{1,14}$/), // Format E.164
+      }),
+    )
+    .min(1)
+    .max(5),
   latitude: z.number().min(-90).max(90).optional(),
   longitude: z.number().min(-180).max(180).optional(),
   limitTime: z.string().optional(),
@@ -44,42 +47,36 @@ const sosRequestSchema = z.object({
  * Déclenche une alerte SOS immédiate
  * Envoie SMS friendly à tous les contacts d'urgence avec position GPS
  */
-router.post("/trigger", sosLimiter, async (req: Request, res: Response) => {
+router.post('/trigger', sosLimiter, async (req: Request, res: Response) => {
   try {
     // Validation des données avec Zod (SÉCURITÉ)
     const validation = sosRequestSchema.safeParse(req.body);
-    
+
     if (!validation.success) {
       logger.error('[SOS] Validation échouée:', validation.error.issues);
       return res.status(400).json({
         success: false,
-        error: "Données invalides",
+        error: 'Données invalides',
         details: validation.error.issues.map((e: any) => `${e.path.join('.')}: ${e.message}`),
       });
     }
 
-    const { 
-      firstName, 
-      emergencyContacts, 
-      latitude, 
-      longitude, 
-      limitTime 
-    } = validation.data;
+    const { firstName, emergencyContacts, latitude, longitude, limitTime } = validation.data;
 
     logger.debug('[SOS] Requête reçue:', { firstName, emergencyContacts, latitude, longitude });
 
     // Créer une session dans Supabase
     const now = new Date();
     const deadline = new Date(now.getTime() + 30 * 60000); // 30 min par défaut
-    
+
     const session = await createSession(
       'anonymous-' + Date.now(), // Utilisateur anonyme pour maintenant
       now,
       deadline,
       latitude,
-      longitude
+      longitude,
     );
-    
+
     if (!session) {
       logger.error('[SOS] Impossible de créer la session Supabase');
     } else {
@@ -88,10 +85,12 @@ router.post("/trigger", sosLimiter, async (req: Request, res: Response) => {
 
     // Utiliser le système SMS friendly pour SOS
     const location = latitude && longitude ? { latitude, longitude } : undefined;
-    const limitTimeStr = limitTime || new Date().toLocaleTimeString('fr-FR', {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+    const limitTimeStr =
+      limitTime ||
+      new Date().toLocaleTimeString('fr-FR', {
+        hour: '2-digit',
+        minute: '2-digit',
+      });
 
     logger.debug(`[SOS] Envoi SMS friendly à ${emergencyContacts.length} contact(s)...`);
 
@@ -100,7 +99,7 @@ router.post("/trigger", sosLimiter, async (req: Request, res: Response) => {
       firstName,
       limitTimeStr,
       '🚨 ALERTE SOS IMMÉDIATE',
-      location
+      location,
     );
 
     // Logger les résultats SMS dans Supabase
@@ -111,11 +110,13 @@ router.post("/trigger", sosLimiter, async (req: Request, res: Response) => {
           // Créer un contact d'urgence temporaire
           const { data: contactData } = await supabase
             .from('emergency_contacts')
-            .insert([{
-              user_id: session.user_id,
-              name: contact.name,
-              phone_number: contact.phone,
-            }])
+            .insert([
+              {
+                user_id: session.user_id,
+                name: contact.name,
+                phone_number: contact.phone,
+              },
+            ])
             .select()
             .single();
 
@@ -125,7 +126,7 @@ router.post("/trigger", sosLimiter, async (req: Request, res: Response) => {
               contactData.id,
               result.messageSid || '',
               result.status as 'sent' | 'failed' | 'pending',
-              result.status === 'failed' ? 'SMS failed' : undefined
+              result.status === 'failed' ? 'SMS failed' : undefined,
             );
           }
         }
@@ -134,8 +135,8 @@ router.post("/trigger", sosLimiter, async (req: Request, res: Response) => {
 
     res.json({
       success: true,
-      message: "Alerte SOS déclenchée",
-      smsResults: smsResults.map(r => ({
+      message: 'Alerte SOS déclenchée',
+      smsResults: smsResults.map((r) => ({
         contact: emergencyContacts.find((c: any) => c.phone === r.phone)?.name || 'Unknown',
         phone: r.phone,
         messageSid: r.messageSid,
@@ -144,7 +145,7 @@ router.post("/trigger", sosLimiter, async (req: Request, res: Response) => {
       timestamp: Date.now(),
     });
   } catch (error) {
-    logger.error("[SOS] Erreur:", error);
+    logger.error('[SOS] Erreur:', error);
     res.status(500).json({
       success: false,
       error: "Erreur lors du déclenchement de l'alerte SOS",

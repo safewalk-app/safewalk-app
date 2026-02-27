@@ -1,6 +1,6 @@
 /**
  * Système de logging propre avec niveaux et désactivation automatique en production
- * 
+ *
  * Usage:
  * - logger.debug('Message de debug', data) → affiché uniquement en développement
  * - logger.info('Message d'info', data) → affiché uniquement en développement

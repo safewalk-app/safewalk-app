@@ -3,6 +3,7 @@
 ## 1. Vue d'ensemble
 
 Le rate limiting protège l'application contre:
+
 - **Attaques par force brute** (tentatives OTP, connexions)
 - **Abus d'API** (appels massifs)
 - **DDoS** (surcharge du serveur)
@@ -41,11 +42,11 @@ Le rate limiting protège l'application contre:
 
 ### 2.2 Stratégies de Rate Limiting
 
-| Niveau | Stratégie | Implémentation |
-|--------|-----------|-----------------|
-| Client | Debounce + Cooldown | React hooks |
-| Edge | Token Bucket | Redis (Supabase) |
-| Serveur | Quotas mensuels | Base de données |
+| Niveau  | Stratégie           | Implémentation   |
+| ------- | ------------------- | ---------------- |
+| Client  | Debounce + Cooldown | React hooks      |
+| Edge    | Token Bucket        | Redis (Supabase) |
+| Serveur | Quotas mensuels     | Base de données  |
 
 ---
 
@@ -57,7 +58,7 @@ Le rate limiting protège l'application contre:
 
 ```tsx
 // lib/hooks/use-debounce.ts
-import { useRef, useCallback } from "react";
+import { useRef, useCallback } from 'react';
 
 interface UseDebounceOptions {
   delay?: number;
@@ -67,7 +68,7 @@ interface UseDebounceOptions {
 
 export function useDebounce<T extends (...args: any[]) => any>(
   callback: T,
-  options: UseDebounceOptions = {}
+  options: UseDebounceOptions = {},
 ): T {
   const { delay = 300, leading = false, trailing = true } = options;
   const timeoutRef = useRef<NodeJS.Timeout>();
@@ -88,7 +89,7 @@ export function useDebounce<T extends (...args: any[]) => any>(
         leadingRef.current = true;
       }, delay);
     },
-    [callback, delay, leading, trailing]
+    [callback, delay, leading, trailing],
   ) as T;
 }
 ```
@@ -97,7 +98,7 @@ export function useDebounce<T extends (...args: any[]) => any>(
 
 ```tsx
 // lib/hooks/use-cooldown.ts
-import { useState, useCallback } from "react";
+import { useState, useCallback } from 'react';
 
 interface UseCooldownOptions {
   duration?: number; // millisecondes
@@ -108,36 +109,39 @@ export function useCooldown(options: UseCooldownOptions = {}) {
   const [isOnCooldown, setIsOnCooldown] = useState(false);
   const [remainingTime, setRemainingTime] = useState(0);
 
-  const trigger = useCallback(async (callback: () => Promise<void>) => {
-    if (isOnCooldown) {
-      console.warn("Action is on cooldown");
-      return;
-    }
+  const trigger = useCallback(
+    async (callback: () => Promise<void>) => {
+      if (isOnCooldown) {
+        console.warn('Action is on cooldown');
+        return;
+      }
 
-    try {
-      setIsOnCooldown(true);
-      setRemainingTime(duration);
+      try {
+        setIsOnCooldown(true);
+        setRemainingTime(duration);
 
-      // Décrémenter le temps restant
-      const interval = setInterval(() => {
-        setRemainingTime((prev) => {
-          if (prev <= 100) {
-            clearInterval(interval);
-            return 0;
-          }
-          return prev - 100;
-        });
-      }, 100);
+        // Décrémenter le temps restant
+        const interval = setInterval(() => {
+          setRemainingTime((prev) => {
+            if (prev <= 100) {
+              clearInterval(interval);
+              return 0;
+            }
+            return prev - 100;
+          });
+        }, 100);
 
-      await callback();
-    } finally {
-      // Cooldown reste actif pendant `duration`
-      setTimeout(() => {
-        setIsOnCooldown(false);
-        setRemainingTime(0);
-      }, duration);
-    }
-  }, [isOnCooldown, duration]);
+        await callback();
+      } finally {
+        // Cooldown reste actif pendant `duration`
+        setTimeout(() => {
+          setIsOnCooldown(false);
+          setRemainingTime(0);
+        }, duration);
+      }
+    },
+    [isOnCooldown, duration],
+  );
 
   return { trigger, isOnCooldown, remainingTime };
 }
@@ -147,7 +151,7 @@ export function useCooldown(options: UseCooldownOptions = {}) {
 
 ```tsx
 // app/new-session.tsx
-import { useCooldown } from "@/lib/hooks/use-cooldown";
+import { useCooldown } from '@/lib/hooks/use-cooldown';
 
 export default function NewSessionScreen() {
   const { trigger, isOnCooldown, remainingTime } = useCooldown({ duration: 2000 });
@@ -170,13 +174,10 @@ export default function NewSessionScreen() {
     <TouchableOpacity
       onPress={handleStartSession}
       disabled={isOnCooldown}
-      className={cn(
-        "bg-primary py-3 px-6 rounded-lg",
-        isOnCooldown && "opacity-50"
-      )}
+      className={cn('bg-primary py-3 px-6 rounded-lg', isOnCooldown && 'opacity-50')}
     >
       <Text className="text-white font-bold">
-        {isOnCooldown ? `Attendre ${Math.ceil(remainingTime / 1000)}s` : "Commencer"}
+        {isOnCooldown ? `Attendre ${Math.ceil(remainingTime / 1000)}s` : 'Commencer'}
       </Text>
     </TouchableOpacity>
   );
@@ -198,15 +199,15 @@ CREATE TABLE IF NOT EXISTS rate_limit_logs (
   ip_address TEXT,
   timestamp TIMESTAMPTZ DEFAULT NOW(),
   created_at TIMESTAMPTZ DEFAULT NOW(),
-  
+
   CONSTRAINT rate_limit_logs_endpoint_check CHECK (endpoint ~ '^[a-z0-9_-]+$')
 );
 
 -- Index pour les requêtes rapides
-CREATE INDEX idx_rate_limit_logs_user_endpoint_timestamp 
+CREATE INDEX idx_rate_limit_logs_user_endpoint_timestamp
 ON rate_limit_logs(user_id, endpoint, timestamp DESC);
 
-CREATE INDEX idx_rate_limit_logs_ip_endpoint_timestamp 
+CREATE INDEX idx_rate_limit_logs_ip_endpoint_timestamp
 ON rate_limit_logs(ip_address, endpoint, timestamp DESC);
 
 -- Table pour les limites configurables
@@ -218,7 +219,7 @@ CREATE TABLE IF NOT EXISTS rate_limit_config (
   description TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
-  
+
   CONSTRAINT rate_limit_config_endpoint_check CHECK (endpoint ~ '^[a-z0-9_-]+$'),
   CONSTRAINT rate_limit_config_max_requests_check CHECK (max_requests > 0),
   CONSTRAINT rate_limit_config_window_check CHECK (window_seconds > 0)
@@ -271,7 +272,7 @@ BEGIN
   SELECT COUNT(*)
   INTO v_requests_made
   FROM rate_limit_logs
-  WHERE 
+  WHERE
     (p_user_id IS NOT NULL AND user_id = p_user_id)
     OR (p_ip_address IS NOT NULL AND ip_address = p_ip_address)
     AND endpoint = p_endpoint
@@ -323,7 +324,7 @@ USING (true);
 
 ```ts
 // supabase/functions/_shared/rate-limiter.ts
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
 
 interface RateLimitResult {
   isAllowed: boolean;
@@ -336,17 +337,17 @@ export async function checkRateLimit(
   supabase: ReturnType<typeof createClient>,
   userId: string | null,
   endpoint: string,
-  ipAddress?: string
+  ipAddress?: string,
 ): Promise<RateLimitResult> {
   try {
-    const { data, error } = await supabase.rpc("check_rate_limit", {
+    const { data, error } = await supabase.rpc('check_rate_limit', {
       p_user_id: userId,
       p_endpoint: endpoint,
       p_ip_address: ipAddress,
     });
 
     if (error) {
-      console.error("Rate limit check error:", error);
+      console.error('Rate limit check error:', error);
       // Laisser passer en cas d'erreur (fail-open)
       return {
         isAllowed: true,
@@ -363,7 +364,7 @@ export async function checkRateLimit(
       resetAt: data[0].reset_at,
     };
   } catch (error) {
-    console.error("Rate limit check exception:", error);
+    console.error('Rate limit check exception:', error);
     return {
       isAllowed: true,
       requestsMade: 0,
@@ -377,16 +378,16 @@ export async function logRequest(
   supabase: ReturnType<typeof createClient>,
   userId: string | null,
   endpoint: string,
-  ipAddress?: string
+  ipAddress?: string,
 ): Promise<void> {
   try {
-    await supabase.rpc("log_request", {
+    await supabase.rpc('log_request', {
       p_user_id: userId,
       p_endpoint: endpoint,
       p_ip_address: ipAddress,
     });
   } catch (error) {
-    console.error("Rate limit log error:", error);
+    console.error('Rate limit log error:', error);
     // Continuer même si le logging échoue
   }
 }
@@ -396,88 +397,84 @@ export async function logRequest(
 
 ```ts
 // supabase/functions/start-trip/index.ts
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
-import { checkRateLimit, logRequest } from "../_shared/rate-limiter.ts";
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
+import { checkRateLimit, logRequest } from '../_shared/rate-limiter.ts';
 
 serve(async (req: Request) => {
-  if (req.method !== "POST") {
-    return new Response(JSON.stringify({ error: "Method not allowed" }), {
+  if (req.method !== 'POST') {
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
       status: 405,
-      headers: { "Content-Type": "application/json" },
+      headers: { 'Content-Type': 'application/json' },
     });
   }
 
   try {
     // Récupérer le JWT
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
-        headers: { "Content-Type": "application/json" },
+        headers: { 'Content-Type': 'application/json' },
       });
     }
 
     const token = authHeader.substring(7);
     const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
     );
 
     // Vérifier le JWT
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser(token);
     if (authError || !user) {
-      return new Response(JSON.stringify({ error: "Invalid token" }), {
+      return new Response(JSON.stringify({ error: 'Invalid token' }), {
         status: 401,
-        headers: { "Content-Type": "application/json" },
+        headers: { 'Content-Type': 'application/json' },
       });
     }
 
     // ✅ VÉRIFIER LE RATE LIMIT
-    const ipAddress = req.headers.get("x-forwarded-for") || "unknown";
-    const rateLimitResult = await checkRateLimit(
-      supabase,
-      user.id,
-      "start-trip",
-      ipAddress
-    );
+    const ipAddress = req.headers.get('x-forwarded-for') || 'unknown';
+    const rateLimitResult = await checkRateLimit(supabase, user.id, 'start-trip', ipAddress);
 
     if (!rateLimitResult.isAllowed) {
       // ✅ ENREGISTRER LA TENTATIVE
-      await logRequest(supabase, user.id, "start-trip", ipAddress);
+      await logRequest(supabase, user.id, 'start-trip', ipAddress);
 
       return new Response(
         JSON.stringify({
-          error: "rate_limit_exceeded",
-          message: "Trop de requêtes. Veuillez réessayer plus tard.",
+          error: 'rate_limit_exceeded',
+          message: 'Trop de requêtes. Veuillez réessayer plus tard.',
           resetAt: rateLimitResult.resetAt,
-          retryAfter: Math.ceil(
-            (new Date(rateLimitResult.resetAt).getTime() - Date.now()) / 1000
-          ),
+          retryAfter: Math.ceil((new Date(rateLimitResult.resetAt).getTime() - Date.now()) / 1000),
         }),
         {
           status: 429,
           headers: {
-            "Content-Type": "application/json",
-            "Retry-After": Math.ceil(
-              (new Date(rateLimitResult.resetAt).getTime() - Date.now()) / 1000
+            'Content-Type': 'application/json',
+            'Retry-After': Math.ceil(
+              (new Date(rateLimitResult.resetAt).getTime() - Date.now()) / 1000,
             ).toString(),
           },
-        }
+        },
       );
     }
 
     // ✅ ENREGISTRER LA REQUÊTE AUTORISÉE
-    await logRequest(supabase, user.id, "start-trip", ipAddress);
+    await logRequest(supabase, user.id, 'start-trip', ipAddress);
 
     // Continuer avec la logique de la fonction
     const body = await req.json();
     // ... reste du code
   } catch (error) {
-    console.error("Error:", error);
-    return new Response(JSON.stringify({ error: "Internal server error" }), {
+    console.error('Error:', error);
+    return new Response(JSON.stringify({ error: 'Internal server error' }), {
       status: 500,
-      headers: { "Content-Type": "application/json" },
+      headers: { 'Content-Type': 'application/json' },
     });
   }
 });
@@ -491,7 +488,7 @@ serve(async (req: Request) => {
 // lib/services/trip-service.ts
 export async function startTrip(params: StartTripParams) {
   try {
-    const { data, error } = await supabase.functions.invoke("start-trip", {
+    const { data, error } = await supabase.functions.invoke('start-trip', {
       body: params,
     });
 
@@ -501,8 +498,8 @@ export async function startTrip(params: StartTripParams) {
         const errorData = error.context?.json || {};
         return {
           success: false,
-          errorCode: "rate_limit_exceeded",
-          message: errorData.message || "Trop de requêtes. Veuillez réessayer plus tard.",
+          errorCode: 'rate_limit_exceeded',
+          message: errorData.message || 'Trop de requêtes. Veuillez réessayer plus tard.',
           retryAfter: errorData.retryAfter || 60,
         };
       }
@@ -510,7 +507,7 @@ export async function startTrip(params: StartTripParams) {
       // Autres erreurs
       return {
         success: false,
-        errorCode: error.context?.errorCode || "unknown_error",
+        errorCode: error.context?.errorCode || 'unknown_error',
         message: error.message,
       };
     }
@@ -519,8 +516,8 @@ export async function startTrip(params: StartTripParams) {
   } catch (error) {
     return {
       success: false,
-      errorCode: "network_error",
-      message: "Erreur réseau",
+      errorCode: 'network_error',
+      message: 'Erreur réseau',
     };
   }
 }
@@ -537,11 +534,11 @@ const handleStartSession = async () => {
   });
 
   if (!result.success) {
-    if (result.errorCode === "rate_limit_exceeded") {
+    if (result.errorCode === 'rate_limit_exceeded') {
       // ✅ Afficher un message spécifique
       showToast({
-        type: "error",
-        title: "Trop de requêtes",
+        type: 'error',
+        title: 'Trop de requêtes',
         message: result.message,
         duration: result.retryAfter || 5,
       });
@@ -551,8 +548,8 @@ const handleStartSession = async () => {
       setTimeout(() => setIsDisabled(false), (result.retryAfter || 60) * 1000);
     } else {
       showToast({
-        type: "error",
-        title: "Erreur",
+        type: 'error',
+        title: 'Erreur',
         message: result.message,
       });
     }
@@ -566,15 +563,15 @@ const handleStartSession = async () => {
 
 ### 4.1 Limites Recommandées
 
-| Endpoint | Max Requêtes | Fenêtre | Raison |
-|----------|-------------|---------|--------|
-| send-otp | 5 | 60s | Prévenir les attaques par force brute |
-| verify-otp | 10 | 60s | Permettre les erreurs de saisie |
-| start-trip | 10 | 60s | Éviter les créations accidentelles |
-| test-sms | 5 | 60s | Limiter les coûts Twilio |
-| sos | 20 | 60s | Permettre les urgences réelles |
-| get-stripe-products | 100 | 60s | Cache 5 minutes = peu de requêtes |
-| create-stripe-checkout | 50 | 60s | Limiter les sessions de paiement |
+| Endpoint               | Max Requêtes | Fenêtre | Raison                                |
+| ---------------------- | ------------ | ------- | ------------------------------------- |
+| send-otp               | 5            | 60s     | Prévenir les attaques par force brute |
+| verify-otp             | 10           | 60s     | Permettre les erreurs de saisie       |
+| start-trip             | 10           | 60s     | Éviter les créations accidentelles    |
+| test-sms               | 5            | 60s     | Limiter les coûts Twilio              |
+| sos                    | 20           | 60s     | Permettre les urgences réelles        |
+| get-stripe-products    | 100          | 60s     | Cache 5 minutes = peu de requêtes     |
+| create-stripe-checkout | 50           | 60s     | Limiter les sessions de paiement      |
 
 ### 4.2 Ajuster les Limites
 
@@ -598,7 +595,7 @@ ORDER BY endpoint;
 
 ```sql
 -- Voir les utilisateurs qui dépassent les limites
-SELECT 
+SELECT
   user_id,
   endpoint,
   COUNT(*) as request_count,
@@ -607,14 +604,14 @@ FROM rate_limit_logs
 WHERE timestamp > NOW() - INTERVAL '1 hour'
 GROUP BY user_id, endpoint
 HAVING COUNT(*) > (
-  SELECT max_requests 
-  FROM rate_limit_config 
+  SELECT max_requests
+  FROM rate_limit_config
   WHERE endpoint = rate_limit_logs.endpoint
 )
 ORDER BY request_count DESC;
 
 -- Voir les IPs suspectes
-SELECT 
+SELECT
   ip_address,
   endpoint,
   COUNT(*) as request_count,
@@ -630,24 +627,24 @@ ORDER BY request_count DESC;
 
 ```ts
 // supabase/functions/monitor-rate-limits/index.ts
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
 
 serve(async (req: Request) => {
   const supabase = createClient(
-    Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    Deno.env.get('SUPABASE_URL')!,
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
   );
 
   // Chercher les utilisateurs qui dépassent les limites
   const { data: violators, error } = await supabase
-    .from("rate_limit_logs")
-    .select("user_id, endpoint, COUNT(*) as count")
-    .gt("timestamp", new Date(Date.now() - 3600000).toISOString())
-    .group_by("user_id, endpoint");
+    .from('rate_limit_logs')
+    .select('user_id, endpoint, COUNT(*) as count')
+    .gt('timestamp', new Date(Date.now() - 3600000).toISOString())
+    .group_by('user_id, endpoint');
 
   if (error) {
-    console.error("Error fetching violators:", error);
+    console.error('Error fetching violators:', error);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
     });
@@ -658,7 +655,7 @@ serve(async (req: Request) => {
     if (violator.count > 50) {
       // Alerte Slack, email, etc.
       console.warn(
-        `Rate limit violation: user ${violator.user_id} on ${violator.endpoint} (${violator.count} requests)`
+        `Rate limit violation: user ${violator.user_id} on ${violator.endpoint} (${violator.count} requests)`,
       );
     }
   }
@@ -714,19 +711,19 @@ serve(async (req: Request) => {
 
 ### 7.1 Coûts Supabase
 
-| Ressource | Impact |
-|-----------|--------|
-| Stockage | +100 MB/mois (rate_limit_logs) |
-| Requêtes | +10% (vérifications de rate limit) |
-| Bande passante | Négligeable |
+| Ressource      | Impact                             |
+| -------------- | ---------------------------------- |
+| Stockage       | +100 MB/mois (rate_limit_logs)     |
+| Requêtes       | +10% (vérifications de rate limit) |
+| Bande passante | Négligeable                        |
 
 ### 7.2 Performance
 
-| Métrique | Avant | Après |
-|----------|-------|-------|
-| Latence moyenne | 200ms | 220ms (+10%) |
-| Requêtes bloquées | 0% | <1% |
-| Coûts Twilio | Variable | Stable |
+| Métrique          | Avant    | Après        |
+| ----------------- | -------- | ------------ |
+| Latence moyenne   | 200ms    | 220ms (+10%) |
+| Requêtes bloquées | 0%       | <1%          |
+| Coûts Twilio      | Variable | Stable       |
 
 ---
 
@@ -740,7 +737,7 @@ DELETE FROM rate_limit_logs
 WHERE timestamp < NOW() - INTERVAL '30 days';
 
 -- Analyser les patterns de violation
-SELECT 
+SELECT
   endpoint,
   COUNT(*) as violations,
   AVG(requests_made) as avg_requests

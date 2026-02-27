@@ -9,6 +9,7 @@ Cette procédure permet de tester l'envoi de SMS depuis l'application Expo vers 
 Avant de commencer, assurez-vous que :
 
 1. **Le serveur backend est en cours d'exécution** :
+
    ```bash
    cd /home/ubuntu/safewalk-app
    pnpm dev
@@ -37,19 +38,23 @@ Avant de commencer, assurez-vous que :
 **Action** : Ouvrir les logs de l'app Expo dans le terminal
 
 **Commande** :
+
 ```bash
 # Les logs s'affichent automatiquement dans le terminal où vous avez lancé pnpm dev
 ```
 
 **Résultat attendu** :
+
 ```
 ✅ API URL depuis EXPO_PUBLIC_API_URL: https://3000-i8rqllu1a9mlzen76xc6u-b9cd8fd2.us2.manus.computer
 ```
 
 **Si vous voyez un fallback** :
+
 ```
 ⚠️ EXPO_PUBLIC_API_URL non définie, utilisation du fallback: https://...
 ```
+
 → Cela signifie que la variable d'environnement n'est pas chargée. Redémarrer le serveur avec `pnpm dev`.
 
 ---
@@ -65,6 +70,7 @@ Avant de commencer, assurez-vous que :
 3. Vérifier que l'icône ✓ verte apparaît à côté du numéro
 
 **Résultat attendu** :
+
 - Toast "Contact 1 sauvegardé" s'affiche
 - Icône ✓ verte visible à droite du champ téléphone
 
@@ -75,11 +81,13 @@ Avant de commencer, assurez-vous que :
 **Action** : Cliquer sur le bouton **"Test SMS"** dans les Paramètres
 
 **Ce qui se passe** :
+
 1. L'app vérifie d'abord la santé de l'API (`/api/sms/health`)
 2. Vérifie que Twilio est configuré
 3. Si tout est OK, envoie un SMS de test
 
 **Logs attendus dans le terminal** :
+
 ```
 🔍 [SMS Client] Vérification santé API: https://3000-.../api/sms/health
 ✅ API SMS OK, envoi du SMS de test...
@@ -88,6 +96,7 @@ Avant de commencer, assurez-vous que :
 ```
 
 **Logs côté serveur** :
+
 ```
 📤 [SMS] Envoi SMS à +33612345678...
 📝 [SMS] Message: Test SafeWalk: Ceci est un SMS de test envoyé...
@@ -95,6 +104,7 @@ Avant de commencer, assurez-vous que :
 ```
 
 **Résultat attendu** :
+
 - Toast "✅ SMS envoyé à Contact Test" s'affiche dans l'app
 - SMS reçu sur le téléphone dans les 30 secondes
 
@@ -105,6 +115,7 @@ Avant de commencer, assurez-vous que :
 **Action** : Vérifier votre téléphone
 
 **Contenu attendu du SMS** :
+
 ```
 Test SafeWalk: Ceci est un SMS de test envoyé depuis l'app. Tout fonctionne ! 🚀
 ```
@@ -124,6 +135,7 @@ Test SafeWalk: Ceci est un SMS de test envoyé depuis l'app. Tout fonctionne ! �
 5. Vérifier que le SMS d'alerte est envoyé
 
 **Logs attendus** :
+
 ```
 🚨 [triggerAlert] Début de triggerAlert
 📤 [SMS] Envoi SMS à +33612345678...
@@ -131,6 +143,7 @@ Test SafeWalk: Ceci est un SMS de test envoyé depuis l'app. Tout fonctionne ! �
 ```
 
 **SMS attendu** :
+
 ```
 🚨 Alerte SafeWalk
 
@@ -153,11 +166,13 @@ Merci de vérifier que tout va bien ! 🙏
 **Solutions** :
 
 1. Vérifier que le serveur est en cours d'exécution :
+
    ```bash
    ps aux | grep "tsx.*server" | grep -v grep
    ```
 
 2. Tester l'URL publique manuellement :
+
    ```bash
    curl https://3000-i8rqllu1a9mlzen76xc6u-b9cd8fd2.us2.manus.computer/api/sms/health
    ```
@@ -175,17 +190,20 @@ Merci de vérifier que tout va bien ! 🙏
 **Solutions** :
 
 1. Vérifier les variables d'environnement :
+
    ```bash
    # Depuis le terminal, vérifier que les variables sont définies
    # (les valeurs ne seront pas affichées pour des raisons de sécurité)
    ```
 
 2. Vérifier l'endpoint `/api/sms/health` :
+
    ```bash
    curl https://3000-i8rqllu1a9mlzen76xc6u-b9cd8fd2.us2.manus.computer/api/sms/health
    ```
-   
+
    Résultat attendu :
+
    ```json
    {
      "ok": true,
@@ -203,6 +221,7 @@ Merci de vérifier que tout va bien ! 🙏
 **Solutions** :
 
 1. Vérifier les logs du serveur pour voir l'erreur exacte :
+
    ```
    ❌ [SMS] Erreur Twilio: { message: "...", code: 21211, ... }
    ```
@@ -210,10 +229,8 @@ Merci de vérifier que tout va bien ! 🙏
 2. Erreurs Twilio courantes :
    - **Code 21211** : Numéro de téléphone invalide
      → Vérifier le format du numéro (+33612345678)
-   
    - **Code 21608** : Numéro non vérifié (compte Twilio Trial)
      → Ajouter le numéro dans la liste des numéros vérifiés sur Twilio
-   
    - **Code 20003** : Authentification échouée
      → Vérifier `TWILIO_ACCOUNT_SID` et `TWILIO_AUTH_TOKEN`
 
@@ -233,6 +250,7 @@ Merci de vérifier que tout va bien ! 🙏
 **Solutions** :
 
 1. Vérifier le SID du SMS dans les logs :
+
    ```
    ✅ [SMS] SMS envoyé avec succès (SID: SM...)
    ```
@@ -271,11 +289,13 @@ Merci de vérifier que tout va bien ! 🙏
 ### Logs en cas d'erreur
 
 **App** :
+
 ```
 ❌ [SMS Client] Erreur HTTP 500: {"success":false,"error":"Failed to send SMS","details":{...}}
 ```
 
 **Serveur** :
+
 ```
 ❌ [SMS] Erreur Twilio: { message: "...", code: 21211, moreInfo: "..." }
 ```

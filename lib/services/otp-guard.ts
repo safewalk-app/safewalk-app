@@ -1,4 +1,4 @@
-import { logger } from "../logger";
+import { logger } from '../logger';
 
 /**
  * OTP Guard Service
@@ -25,7 +25,7 @@ class OtpGuardService {
   shouldRequireOtp(): boolean {
     // Always require OTP verification for first alert
     if (!this.state.isVerified) {
-      logger.info("[OTP Guard] OTP verification required");
+      logger.info('[OTP Guard] OTP verification required');
       return true;
     }
 
@@ -33,7 +33,7 @@ class OtpGuardService {
     if (this.state.verifiedAt) {
       const hoursElapsed = (Date.now() - this.state.verifiedAt) / (1000 * 60 * 60);
       if (hoursElapsed > 24) {
-        logger.warn("[OTP Guard] OTP verification expired after 24 hours");
+        logger.warn('[OTP Guard] OTP verification expired after 24 hours');
         this.state.isVerified = false;
         return true;
       }
@@ -51,7 +51,7 @@ class OtpGuardService {
       verifiedPhoneNumber: phoneNumber,
       verifiedAt: Date.now(),
     };
-    logger.info("[OTP Guard] User verified:", phoneNumber);
+    logger.info('[OTP Guard] User verified:', phoneNumber);
   }
 
   /**
@@ -70,7 +70,7 @@ class OtpGuardService {
       verifiedPhoneNumber: null,
       verifiedAt: null,
     };
-    logger.info("[OTP Guard] Verification cleared");
+    logger.info('[OTP Guard] Verification cleared');
   }
 
   /**
@@ -78,7 +78,7 @@ class OtpGuardService {
    */
   restoreState(state: OtpGuardState) {
     this.state = state;
-    logger.info("[OTP Guard] State restored");
+    logger.info('[OTP Guard] State restored');
   }
 }
 

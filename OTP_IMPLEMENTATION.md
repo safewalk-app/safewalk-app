@@ -142,7 +142,7 @@ Client pour les Edge Functions Supabase.
 
 ```typescript
 // Envoyer OTP
-const result = await otpService.sendOtp("+33612345678");
+const result = await otpService.sendOtp('+33612345678');
 // {
 //   success: true,
 //   message: "OTP sent successfully",
@@ -150,7 +150,7 @@ const result = await otpService.sendOtp("+33612345678");
 // }
 
 // Vérifier OTP
-const result = await otpService.verifyOtp("+33612345678", "123456");
+const result = await otpService.verifyOtp('+33612345678', '123456');
 // {
 //   success: true,
 //   message: "OTP verified successfully",
@@ -169,7 +169,7 @@ if (otpGuard.shouldRequireOtp()) {
 }
 
 // Marquer comme vérifié
-otpGuard.markAsVerified("+33612345678");
+otpGuard.markAsVerified('+33612345678');
 
 // Obtenir l'état
 const state = otpGuard.getState();
@@ -197,6 +197,7 @@ Composant pour saisir 6 chiffres.
 ```
 
 **Fonctionnalités :**
+
 - Auto-focus entre champs
 - Support copier-coller (ex: "123456" → 6 champs remplis)
 - Validation en temps réel
@@ -297,16 +298,16 @@ curl -X POST \
 
 ### Bonnes pratiques implémentées
 
-| Aspect | Implémentation |
-|--------|-----------------|
-| **Format numéro** | E.164 validation (+33...) |
-| **Code OTP** | 6 chiffres aléatoires |
-| **Expiration** | 10 minutes |
-| **Tentatives** | Max 3 avant blocage |
-| **Rate limiting** | À implémenter sur Edge Function |
-| **Logging** | Audit trail dans `otp_logs` |
-| **SMS** | Via Twilio (credentials sécurisés) |
-| **Persistance** | AsyncStorage côté client |
+| Aspect            | Implémentation                     |
+| ----------------- | ---------------------------------- |
+| **Format numéro** | E.164 validation (+33...)          |
+| **Code OTP**      | 6 chiffres aléatoires              |
+| **Expiration**    | 10 minutes                         |
+| **Tentatives**    | Max 3 avant blocage                |
+| **Rate limiting** | À implémenter sur Edge Function    |
+| **Logging**       | Audit trail dans `otp_logs`        |
+| **SMS**           | Via Twilio (credentials sécurisés) |
+| **Persistance**   | AsyncStorage côté client           |
 
 ### À améliorer
 
@@ -325,7 +326,7 @@ curl -X POST \
 ```typescript
 // Utilisateur appuie "Je suis rentré en retard"
 const handleAlertTimeout = async () => {
-  await triggerAlert(location);  // Envoie SMS immédiatement
+  await triggerAlert(location); // Envoie SMS immédiatement
 };
 ```
 
@@ -338,8 +339,8 @@ const handleAlertTimeout = async () => {
   if (otpGuard.shouldRequireOtp()) {
     // Rediriger vers vérification
     router.push({
-      pathname: "/phone-verification",
-      params: { returnTo: "/active-session" }
+      pathname: '/phone-verification',
+      params: { returnTo: '/active-session' },
     });
     return;
   }
@@ -361,6 +362,7 @@ npm test -- tests/otp-service.test.ts
 ```
 
 **Couverture :**
+
 - ✅ Validation format numéro (E.164)
 - ✅ Validation format code (6 chiffres)
 - ✅ Gestion tentatives (max 3)
@@ -414,21 +416,21 @@ npm test -- tests/otp-service.test.ts
 
 ## Fichiers créés/modifiés
 
-| Fichier | Type | Statut |
-|---------|------|--------|
-| `supabase/migrations/20260224_create_otp_tables.sql` | Migration | ✅ |
-| `supabase/functions/send-otp/index.ts` | Edge Function | ✅ |
-| `supabase/functions/verify-otp/index.ts` | Edge Function | ✅ |
-| `lib/services/otp-service.ts` | Service | ✅ |
-| `lib/services/otp-guard.ts` | Service | ✅ |
-| `lib/logger.ts` | Utility | ✅ |
-| `hooks/use-otp-verification.ts` | Hook | ✅ |
-| `components/otp-input.tsx` | Component | ✅ |
-| `app/phone-verification.tsx` | Screen | ✅ |
-| `app/otp-verification.tsx` | Screen | ✅ |
-| `tests/otp-guard.test.ts` | Test | ✅ |
-| `tests/otp-service.test.ts` | Test | ✅ |
+| Fichier                                              | Type          | Statut |
+| ---------------------------------------------------- | ------------- | ------ |
+| `supabase/migrations/20260224_create_otp_tables.sql` | Migration     | ✅     |
+| `supabase/functions/send-otp/index.ts`               | Edge Function | ✅     |
+| `supabase/functions/verify-otp/index.ts`             | Edge Function | ✅     |
+| `lib/services/otp-service.ts`                        | Service       | ✅     |
+| `lib/services/otp-guard.ts`                          | Service       | ✅     |
+| `lib/logger.ts`                                      | Utility       | ✅     |
+| `hooks/use-otp-verification.ts`                      | Hook          | ✅     |
+| `components/otp-input.tsx`                           | Component     | ✅     |
+| `app/phone-verification.tsx`                         | Screen        | ✅     |
+| `app/otp-verification.tsx`                           | Screen        | ✅     |
+| `tests/otp-guard.test.ts`                            | Test          | ✅     |
+| `tests/otp-service.test.ts`                          | Test          | ✅     |
 
 ---
 
-*Documentation créée le 24 février 2026*
+_Documentation créée le 24 février 2026_

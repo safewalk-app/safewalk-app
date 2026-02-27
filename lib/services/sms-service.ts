@@ -61,15 +61,15 @@ export interface SmsHealthCheck {
  */
 function normalizePhoneNumber(phone: string): string {
   const cleaned = cleanPhoneNumber(phone);
-  
+
   if (cleaned.startsWith('+')) {
     return cleaned;
   }
-  
+
   if (cleaned.startsWith('06') || cleaned.startsWith('07')) {
     return '+33' + cleaned.substring(1);
   }
-  
+
   return '+' + cleaned;
 }
 
@@ -79,11 +79,11 @@ function normalizePhoneNumber(phone: string): string {
 function buildMessage(options: SendEmergencySMSOptions): string {
   const { reason, contactName, firstName, note, location } = options;
   const userName = firstName || 'Votre contact';
-  
+
   switch (reason) {
     case 'test':
       return `✅ SafeWalk - Test réussi !\n\n${userName} a bien configuré ce numéro comme contact d'urgence.\n\nTu recevras un message si ${userName} ne rentre pas à l'heure prévue. 🙏`;
-    
+
     case 'alert':
       let alertMsg = `🔔 SafeWalk - Alerte\n\nSalut ! ${userName} n'a pas confirmé son retour à l'heure prévue.`;
       if (note) {
@@ -97,7 +97,7 @@ function buildMessage(options: SendEmergencySMSOptions): string {
       }
       alertMsg += `\n\nPeux-tu vérifier que tout va bien ? Merci ! 🙏`;
       return alertMsg;
-    
+
     case 'sos':
       let sosMsg = `🆘 SafeWalk - URGENCE\n\n${userName} a déclenché le bouton SOS !`;
       if (note) {
@@ -111,7 +111,7 @@ function buildMessage(options: SendEmergencySMSOptions): string {
       }
       sosMsg += `\n\nContacte-le MAINTENANT ou appelle les secours si besoin. 🚨`;
       return sosMsg;
-    
+
     case 'followup':
       let followupMsg = `⏰ SafeWalk - Relance\n\n${userName} n'a toujours pas confirmé son retour (10 min après l'heure limite).`;
       if (location) {
@@ -122,13 +122,13 @@ function buildMessage(options: SendEmergencySMSOptions): string {
       }
       followupMsg += `\n\nMerci de le contacter rapidement. 🙏`;
       return followupMsg;
-    
+
     case 'confirmation':
       return `✅ SafeWalk\n\n${userName} est bien rentré ! Tout va bien. 😊\n\nMerci d'être là pour lui. 🙏`;
-    
+
     case 'friendly-alert':
       return `🔔 SafeWalk - Alerte\n\n${userName} n'a pas confirmé son retour à l'heure prévue. Peux-tu vérifier que tout va bien ? Merci ! 🙏`;
-    
+
     default:
       return `SafeWalk: Message d'urgence de ${userName}`;
   }
@@ -139,9 +139,9 @@ function buildMessage(options: SendEmergencySMSOptions): string {
  */
 export async function sendEmergencySMS(options: SendEmergencySMSOptions): Promise<SendSmsResult> {
   const timestamp = Date.now();
-  
+
   logger.info(`📤 [SMS Service] Envoi SMS d'urgence (${options.reason})...`);
-  
+
   try {
     const cleanedPhone = cleanPhoneNumber(options.contactPhone);
     if (!validatePhoneNumber(cleanedPhone)) {
@@ -152,12 +152,12 @@ export async function sendEmergencySMS(options: SendEmergencySMSOptions): Promis
         timestamp,
       };
     }
-    
+
     const normalizedPhone = normalizePhoneNumber(cleanedPhone);
     const message = buildMessage(options);
-    
+
     logger.info(`📞 [SMS Service] Envoi à ${normalizedPhone}`);
-    
+
     const url = `${API_BASE_URL}/api/sms/send`;
     const response = await fetch(url, {
       method: 'POST',
@@ -182,7 +182,7 @@ export async function sendEmergencySMS(options: SendEmergencySMSOptions): Promis
 
     logger.info(`✅ [SMS Service] SMS envoyé (SID: ${data.sid})`);
     notify('sms.sent', {
-      variables: { phone: options.contactPhone }
+      variables: { phone: options.contactPhone },
     });
     return {
       ok: true,
@@ -210,7 +210,7 @@ export async function sendFriendlyAlertSMS(params: SendFriendlyAlertOptions): Pr
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       logger.info(`📤 [SMS Service] Tentative ${attempt}/${maxRetries} - Friendly alert`);
-      
+
       const url = `${API_BASE_URL}/api/friendly-sms/alert`;
       const response = await fetch(url, {
         method: 'POST',
@@ -227,15 +227,15 @@ export async function sendFriendlyAlertSMS(params: SendFriendlyAlertOptions): Pr
       const data = await response.json();
       logger.info('✅ [SMS Service] Friendly alert envoyés:', data);
       notify('sms.sent', {
-        variables: { phone: params.contacts.map(c => c.phone).join(', ') }
+        variables: { phone: params.contacts.map((c) => c.phone).join(', ') },
       });
       return;
     } catch (error) {
       lastError = error as Error;
       logger.error(`❌ [SMS Service] Tentative ${attempt} échouée:`, error);
-      
+
       if (attempt < maxRetries) {
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await new Promise((resolve) => setTimeout(resolve, 2000));
       }
     }
   }
@@ -254,7 +254,7 @@ export async function sendFollowUpAlertSMS(params: SendFollowUpOptions): Promise
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       logger.info(`📤 [SMS Service] Tentative ${attempt}/${maxRetries} - Follow-up`);
-      
+
       const url = `${API_BASE_URL}/api/friendly-sms/follow-up`;
       const response = await fetch(url, {
         method: 'POST',
@@ -271,15 +271,15 @@ export async function sendFollowUpAlertSMS(params: SendFollowUpOptions): Promise
       const data = await response.json();
       logger.info('✅ [SMS Service] Follow-up envoyés:', data);
       notify('sms.sent', {
-        variables: { phone: params.contacts.map(c => c.phone).join(', ') }
+        variables: { phone: params.contacts.map((c) => c.phone).join(', ') },
       });
       return;
     } catch (error) {
       lastError = error as Error;
       logger.error(`❌ [SMS Service] Tentative ${attempt} échouée:`, error);
-      
+
       if (attempt < maxRetries) {
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await new Promise((resolve) => setTimeout(resolve, 2000));
       }
     }
   }
@@ -298,7 +298,7 @@ export async function sendConfirmationSMS(params: SendConfirmationOptions): Prom
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       logger.info(`📤 [SMS Service] Tentative ${attempt}/${maxRetries} - Confirmation`);
-      
+
       const url = `${API_BASE_URL}/api/friendly-sms/confirmation`;
       const response = await fetch(url, {
         method: 'POST',
@@ -318,9 +318,9 @@ export async function sendConfirmationSMS(params: SendConfirmationOptions): Prom
     } catch (error) {
       lastError = error as Error;
       logger.error(`❌ [SMS Service] Tentative ${attempt} échouée:`, error);
-      
+
       if (attempt < maxRetries) {
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await new Promise((resolve) => setTimeout(resolve, 2000));
       }
     }
   }

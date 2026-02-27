@@ -20,12 +20,14 @@ Les animations de feedback subtiles améliorent la sensation de réactivité de 
 **Objectif:** Fournir des valeurs animées pour les changements d'état
 
 **États supportés:**
+
 - `idle` - État normal (retour à 1 pour opacity et scale)
 - `loading` - Chargement (fade out + scale down)
 - `success` - Succès (pulse effect: scale 1 → 1.05 → 1)
 - `error` - Erreur (shake effect: translateY haut-bas)
 
 **Utilisation:**
+
 ```typescript
 const { animatedStyle, opacity, scale, translateY } = useStateAnimation(state, {
   duration: 300,
@@ -43,20 +45,24 @@ return (
 **Animations Détaillées:**
 
 #### Loading (300ms)
+
 - Opacity: 1 → 0.8 (fade out léger)
 - Scale: 1 → 0.98 (scale down subtil)
 - Effet: Utilisateur voit que l'app "pense"
 
 #### Success (500ms)
+
 - Scale: 1 → 1.05 → 1 (pulse effect)
 - Opacity: 1 (reste normal)
 - Effet: Feedback positif subtil
 
 #### Error (600ms)
+
 - TranslateY: 0 → -8 → 8 → -4 → 0 (shake)
 - Effet: Attire l'attention sans être agressif
 
 #### Idle (300ms)
+
 - Retour à l'état normal (opacity 1, scale 1, translateY 0)
 
 ---
@@ -68,6 +74,7 @@ return (
 **Objectif:** Wrapper réutilisable pour animer les changements d'état
 
 **Props:**
+
 ```typescript
 interface FeedbackAnimationProps {
   state: 'idle' | 'loading' | 'success' | 'error';
@@ -80,6 +87,7 @@ interface FeedbackAnimationProps {
 ```
 
 **Utilisation:**
+
 ```typescript
 <FeedbackAnimation state={isLoading ? 'loading' : 'idle'}>
   <Button>Démarrer</Button>
@@ -89,19 +97,25 @@ interface FeedbackAnimationProps {
 **Composants Inclus:**
 
 #### LoadingIndicator
+
 Indicateur de chargement avec animation
+
 ```typescript
 <LoadingIndicator />
 ```
 
 #### SuccessIndicator
+
 Indicateur de succès avec animation
+
 ```typescript
 <SuccessIndicator />
 ```
 
 #### ErrorIndicator
+
 Indicateur d'erreur avec animation
+
 ```typescript
 <ErrorIndicator />
 ```
@@ -115,6 +129,7 @@ Indicateur d'erreur avec animation
 **État:** ✅ Intégré
 
 **Implémentation:**
+
 ```typescript
 const [submitState, setSubmitState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
 
@@ -127,6 +142,7 @@ const [submitState, setSubmitState] = useState<'idle' | 'loading' | 'success' | 
 ```
 
 **Flux d'animation:**
+
 1. Utilisateur clique "Démarrer"
 2. `submitState` → `'loading'` (fade out + scale down)
 3. Appel API en cours
@@ -140,12 +156,12 @@ const [submitState, setSubmitState] = useState<'idle' | 'loading' | 'success' | 
 
 ### Quand Utiliser Chaque Animation
 
-| État | Quand | Durée | Effet |
-|------|-------|-------|-------|
-| `loading` | API en cours | 300ms | Fade out + scale down |
-| `success` | Action réussie | 500ms | Pulse effect |
-| `error` | Action échouée | 600ms | Shake effect |
-| `idle` | État normal | 300ms | Retour à la normale |
+| État      | Quand          | Durée | Effet                 |
+| --------- | -------------- | ----- | --------------------- |
+| `loading` | API en cours   | 300ms | Fade out + scale down |
+| `success` | Action réussie | 500ms | Pulse effect          |
+| `error`   | Action échouée | 600ms | Shake effect          |
+| `idle`    | État normal    | 300ms | Retour à la normale   |
 
 ### Bonnes Pratiques
 
@@ -284,9 +300,9 @@ duration: 500ms
 
 ```typescript
 // Utilisé dans useStateAnimation
-Easing.inOut(Easing.ease) // Smooth in and out
-Easing.out(Easing.ease) // Smooth out
-Easing.in(Easing.ease) // Smooth in
+Easing.inOut(Easing.ease); // Smooth in and out
+Easing.out(Easing.ease); // Smooth out
+Easing.in(Easing.ease); // Smooth in
 ```
 
 ---

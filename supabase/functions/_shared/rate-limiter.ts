@@ -1,4 +1,4 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
 
 export interface RateLimitResult {
   isAllowed: boolean;
@@ -27,17 +27,17 @@ export async function checkRateLimit(
   supabase: ReturnType<typeof createClient>,
   userId: string | null,
   endpoint: string,
-  ipAddress?: string
+  ipAddress?: string,
 ): Promise<RateLimitResult> {
   try {
-    const { data, error } = await supabase.rpc("check_rate_limit", {
+    const { data, error } = await supabase.rpc('check_rate_limit', {
       p_user_id: userId,
       p_endpoint: endpoint,
       p_ip_address: ipAddress,
     });
 
     if (error) {
-      console.error("Rate limit check error:", error);
+      console.error('Rate limit check error:', error);
       // Laisser passer en cas d'erreur (fail-open)
       return {
         isAllowed: true,
@@ -63,7 +63,7 @@ export async function checkRateLimit(
       resetAt: data[0].reset_at,
     };
   } catch (error) {
-    console.error("Rate limit check exception:", error);
+    console.error('Rate limit check exception:', error);
     // Laisser passer en cas d'erreur
     return {
       isAllowed: true,
@@ -86,16 +86,16 @@ export async function logRequest(
   supabase: ReturnType<typeof createClient>,
   userId: string | null,
   endpoint: string,
-  ipAddress?: string
+  ipAddress?: string,
 ): Promise<void> {
   try {
-    await supabase.rpc("log_request", {
+    await supabase.rpc('log_request', {
       p_user_id: userId,
       p_endpoint: endpoint,
       p_ip_address: ipAddress,
     });
   } catch (error) {
-    console.error("Rate limit log error:", error);
+    console.error('Rate limit log error:', error);
     // Continuer même si le logging échoue
   }
 }
@@ -112,8 +112,8 @@ export function createRateLimitResponse(resetAt: string): RateLimitResponse {
   const retryAfter = Math.ceil((resetDate.getTime() - now.getTime()) / 1000);
 
   return {
-    error: "rate_limit_exceeded",
-    message: "Trop de requêtes. Veuillez réessayer plus tard.",
+    error: 'rate_limit_exceeded',
+    message: 'Trop de requêtes. Veuillez réessayer plus tard.',
     resetAt,
     retryAfter: Math.max(1, retryAfter),
   };
@@ -131,8 +131,8 @@ export function createRateLimitHttpResponse(resetAt: string) {
   return new Response(JSON.stringify(errorData), {
     status: 429,
     headers: {
-      "Content-Type": "application/json",
-      "Retry-After": errorData.retryAfter.toString(),
+      'Content-Type': 'application/json',
+      'Retry-After': errorData.retryAfter.toString(),
     },
   });
 }
@@ -149,16 +149,16 @@ export async function logRateLimitError(
   supabase: ReturnType<typeof createClient>,
   userId: string | null,
   endpoint: string,
-  ipAddress?: string
+  ipAddress?: string,
 ): Promise<void> {
   try {
-    await supabase.rpc("log_rate_limit_error", {
+    await supabase.rpc('log_rate_limit_error', {
       p_endpoint: endpoint,
       p_user_id: userId,
       p_ip_address: ipAddress,
     });
   } catch (error) {
-    console.error("Rate limit error logging failed:", error);
+    console.error('Rate limit error logging failed:', error);
     // Continuer même si le logging échoue
   }
 }

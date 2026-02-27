@@ -4,29 +4,29 @@
 
 export enum OtpErrorCode {
   // Validation (400)
-  INVALID_PHONE_FORMAT = "INVALID_PHONE_FORMAT",
-  INVALID_OTP_FORMAT = "INVALID_OTP_FORMAT",
-  EMPTY_PHONE = "EMPTY_PHONE",
-  EMPTY_OTP = "EMPTY_OTP",
+  INVALID_PHONE_FORMAT = 'INVALID_PHONE_FORMAT',
+  INVALID_OTP_FORMAT = 'INVALID_OTP_FORMAT',
+  EMPTY_PHONE = 'EMPTY_PHONE',
+  EMPTY_OTP = 'EMPTY_OTP',
 
   // Logique métier (4xx)
-  OTP_NOT_FOUND = "OTP_NOT_FOUND", // 404
-  OTP_EXPIRED = "OTP_EXPIRED", // 410
-  OTP_INVALID = "OTP_INVALID", // 401
-  MAX_ATTEMPTS_EXCEEDED = "MAX_ATTEMPTS_EXCEEDED", // 429
-  RATE_LIMIT = "RATE_LIMIT", // 429
+  OTP_NOT_FOUND = 'OTP_NOT_FOUND', // 404
+  OTP_EXPIRED = 'OTP_EXPIRED', // 410
+  OTP_INVALID = 'OTP_INVALID', // 401
+  MAX_ATTEMPTS_EXCEEDED = 'MAX_ATTEMPTS_EXCEEDED', // 429
+  RATE_LIMIT = 'RATE_LIMIT', // 429
 
   // Serveur (5xx)
-  SMS_SEND_FAILED = "SMS_SEND_FAILED", // 500
-  DATABASE_ERROR = "DATABASE_ERROR", // 500
-  SERVER_ERROR = "SERVER_ERROR", // 500
+  SMS_SEND_FAILED = 'SMS_SEND_FAILED', // 500
+  DATABASE_ERROR = 'DATABASE_ERROR', // 500
+  SERVER_ERROR = 'SERVER_ERROR', // 500
 
   // Réseau
-  NETWORK_ERROR = "NETWORK_ERROR",
-  TIMEOUT = "TIMEOUT",
+  NETWORK_ERROR = 'NETWORK_ERROR',
+  TIMEOUT = 'TIMEOUT',
 }
 
-export type OtpErrorType = "error" | "warning" | "info";
+export type OtpErrorType = 'error' | 'warning' | 'info';
 
 export interface OtpError {
   code: OtpErrorCode;
@@ -60,23 +60,23 @@ export interface VerifyOtpErrorResponse {
  */
 export function getErrorTitle(code: OtpErrorCode): string {
   const titles: Record<OtpErrorCode, string> = {
-    [OtpErrorCode.INVALID_PHONE_FORMAT]: "Numéro invalide",
-    [OtpErrorCode.INVALID_OTP_FORMAT]: "Code invalide",
-    [OtpErrorCode.EMPTY_PHONE]: "Numéro requis",
-    [OtpErrorCode.EMPTY_OTP]: "Code requis",
-    [OtpErrorCode.OTP_NOT_FOUND]: "Code non trouvé",
-    [OtpErrorCode.OTP_EXPIRED]: "Code expiré",
-    [OtpErrorCode.OTP_INVALID]: "Code incorrect",
-    [OtpErrorCode.MAX_ATTEMPTS_EXCEEDED]: "Trop de tentatives",
-    [OtpErrorCode.RATE_LIMIT]: "Trop de demandes",
-    [OtpErrorCode.SMS_SEND_FAILED]: "SMS non envoyé",
-    [OtpErrorCode.DATABASE_ERROR]: "Erreur base de données",
-    [OtpErrorCode.SERVER_ERROR]: "Erreur serveur",
-    [OtpErrorCode.NETWORK_ERROR]: "Erreur réseau",
-    [OtpErrorCode.TIMEOUT]: "Délai dépassé",
+    [OtpErrorCode.INVALID_PHONE_FORMAT]: 'Numéro invalide',
+    [OtpErrorCode.INVALID_OTP_FORMAT]: 'Code invalide',
+    [OtpErrorCode.EMPTY_PHONE]: 'Numéro requis',
+    [OtpErrorCode.EMPTY_OTP]: 'Code requis',
+    [OtpErrorCode.OTP_NOT_FOUND]: 'Code non trouvé',
+    [OtpErrorCode.OTP_EXPIRED]: 'Code expiré',
+    [OtpErrorCode.OTP_INVALID]: 'Code incorrect',
+    [OtpErrorCode.MAX_ATTEMPTS_EXCEEDED]: 'Trop de tentatives',
+    [OtpErrorCode.RATE_LIMIT]: 'Trop de demandes',
+    [OtpErrorCode.SMS_SEND_FAILED]: 'SMS non envoyé',
+    [OtpErrorCode.DATABASE_ERROR]: 'Erreur base de données',
+    [OtpErrorCode.SERVER_ERROR]: 'Erreur serveur',
+    [OtpErrorCode.NETWORK_ERROR]: 'Erreur réseau',
+    [OtpErrorCode.TIMEOUT]: 'Délai dépassé',
   };
 
-  return titles[code] || "Erreur";
+  return titles[code] || 'Erreur';
 }
 
 /**
@@ -86,7 +86,7 @@ export function getErrorType(code: OtpErrorCode): OtpErrorType {
   switch (code) {
     case OtpErrorCode.OTP_EXPIRED:
     case OtpErrorCode.RATE_LIMIT:
-      return "warning";
+      return 'warning';
 
     case OtpErrorCode.INVALID_PHONE_FORMAT:
     case OtpErrorCode.INVALID_OTP_FORMAT:
@@ -100,10 +100,10 @@ export function getErrorType(code: OtpErrorCode): OtpErrorType {
     case OtpErrorCode.SERVER_ERROR:
     case OtpErrorCode.NETWORK_ERROR:
     case OtpErrorCode.TIMEOUT:
-      return "error";
+      return 'error';
 
     default:
-      return "error";
+      return 'error';
   }
 }
 
@@ -145,10 +145,7 @@ export function canResendOtp(code: OtpErrorCode): boolean {
  * Déterminer si l'utilisateur doit changer de numéro
  */
 export function shouldChangePhone(code: OtpErrorCode): boolean {
-  const changePhoneErrors = [
-    OtpErrorCode.OTP_NOT_FOUND,
-    OtpErrorCode.SMS_SEND_FAILED,
-  ];
+  const changePhoneErrors = [OtpErrorCode.OTP_NOT_FOUND, OtpErrorCode.SMS_SEND_FAILED];
 
   return changePhoneErrors.includes(code);
 }

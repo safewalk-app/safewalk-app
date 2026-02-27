@@ -1,6 +1,6 @@
 /**
  * Hooks Index with Lazy Loading
- * 
+ *
  * Hooks légers: importés directement
  * Hooks lourds: importés à la demande via async functions
  * Chaque hook lazy loaded affiche un indicateur de chargement
@@ -82,21 +82,21 @@ export async function getUseLocationPermission() {
 /**
  * Hook helper pour utiliser les hooks lazy loading avec indicateur de chargement
  * À utiliser dans les composants React
- * 
+ *
  * @example
  * ```tsx
  * import { useHookWithLoading } from '@/hooks';
- * 
+ *
  * const MyComponent = () => {
  *   const [useDeadlineTimer, setUseDeadlineTimer] = useState(null);
- *   
+ *
  *   useEffect(() => {
  *     useHookWithLoading('Deadline Timer', getUseDeadlineTimer)
  *       .then(module => setUseDeadlineTimer(module.useDeadlineTimer));
  *   }, []);
- *   
+ *
  *   if (!useDeadlineTimer) return <LoadingIndicator />;
- *   
+ *
  *   const { timeLeft } = useDeadlineTimer();
  *   return <Text>{timeLeft}</Text>;
  * };
@@ -104,7 +104,7 @@ export async function getUseLocationPermission() {
  */
 export async function useHookWithLoading<T>(
   hookName: string,
-  hookFn: () => Promise<T>
+  hookFn: () => Promise<T>,
 ): Promise<T> {
   // Cette fonction est un wrapper qui peut être utilisé dans les composants
   // Pour afficher un indicateur de chargement, utiliser le hook useLoadingWrapper

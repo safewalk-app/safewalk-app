@@ -11,7 +11,7 @@ Ce guide explique comment monitorer et gérer les erreurs de rate limiting (429)
 ### 1. Erreurs 429 par Endpoint (Dernières 24h)
 
 ```sql
-SELECT 
+SELECT
   endpoint,
   COUNT(*) as error_count,
   COUNT(DISTINCT user_id) as affected_users,
@@ -24,6 +24,7 @@ ORDER BY error_count DESC;
 ```
 
 **Interprétation:**
+
 - `error_count > 100`: Alerte WARNING
 - `error_count > 500`: Alerte CRITICAL
 - `affected_users > 10`: Possible pattern d'abus
@@ -31,7 +32,7 @@ ORDER BY error_count DESC;
 ### 2. Patterns d'Abus Détectés
 
 ```sql
-SELECT 
+SELECT
   endpoint,
   pattern_type,
   pattern_value,
@@ -45,6 +46,7 @@ ORDER BY error_count DESC;
 ```
 
 **Actions recommandées:**
+
 - `severity = 'CRITICAL'`: Bloquer immédiatement
 - `severity = 'HIGH'`: Monitorer et bloquer si nécessaire
 - `severity = 'MEDIUM'`: Surveiller
@@ -52,7 +54,7 @@ ORDER BY error_count DESC;
 ### 3. Alertes Actives
 
 ```sql
-SELECT 
+SELECT
   endpoint,
   severity,
   message,
@@ -69,11 +71,11 @@ ORDER BY severity DESC, triggered_at DESC;
 
 ## 🚨 Seuils d'Alerte
 
-| Seuil | Condition | Action |
-|-------|-----------|--------|
-| **INFO** | 10-20 erreurs/5min | Monitorer |
-| **WARNING** | 20-50 erreurs/5min | Notifier Slack |
-| **CRITICAL** | >50 erreurs/5min | Slack + Email + SMS |
+| Seuil        | Condition          | Action              |
+| ------------ | ------------------ | ------------------- |
+| **INFO**     | 10-20 erreurs/5min | Monitorer           |
+| **WARNING**  | 20-50 erreurs/5min | Notifier Slack      |
+| **CRITICAL** | >50 erreurs/5min   | Slack + Email + SMS |
 
 ---
 
@@ -105,7 +107,7 @@ SMS_ALERT_TO=+33612345678
 ## 📈 Tendances Horaires
 
 ```sql
-SELECT 
+SELECT
   DATE_TRUNC('hour', created_at) as hour,
   endpoint,
   COUNT(*) as error_count,
@@ -117,6 +119,7 @@ ORDER BY hour DESC, error_count DESC;
 ```
 
 **Utilisation:**
+
 - Identifier les heures de pointe
 - Détecter les patterns d'abus récurrents
 - Ajuster les limites si nécessaire
@@ -152,7 +155,7 @@ SELECT block_abuse_pattern('pattern-uuid', FALSE);
 ### Top 10 Utilisateurs par Erreurs 429
 
 ```sql
-SELECT 
+SELECT
   user_id,
   COUNT(*) as error_count,
   COUNT(DISTINCT endpoint) as endpoints_affected,
@@ -168,7 +171,7 @@ LIMIT 10;
 ### Top 10 IPs par Erreurs 429
 
 ```sql
-SELECT 
+SELECT
   ip_address,
   COUNT(*) as error_count,
   COUNT(DISTINCT endpoint) as endpoints_affected,
@@ -184,7 +187,7 @@ LIMIT 10;
 ### Erreurs 429 par Heure (Dernières 24h)
 
 ```sql
-SELECT 
+SELECT
   DATE_TRUNC('hour', created_at) as hour,
   COUNT(*) as error_count,
   COUNT(DISTINCT user_id) as affected_users,
@@ -245,5 +248,6 @@ supabase functions deploy monitor-rate-limit-errors
 ## 📞 Support
 
 Pour des questions sur le monitoring:
+
 - Slack: #safewalk-ops
 - Email: ops@safewalk.app

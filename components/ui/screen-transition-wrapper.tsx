@@ -92,10 +92,7 @@ export function ScreenTransitionWrapper({
   }, [opacity, translateY, animationDuration, delay, type, reduceMotion]);
 
   return (
-    <Animated.View
-      style={[animatedStyle, style]}
-      {...props}
-    >
+    <Animated.View style={[animatedStyle, style]} {...props}>
       {children}
     </Animated.View>
   );
@@ -150,10 +147,7 @@ export function ScreenTransitionExit({
   }, [opacity, translateY, animationDuration, type, reduceMotion]);
 
   return (
-    <Animated.View
-      style={[animatedStyle, style]}
-      {...props}
-    >
+    <Animated.View style={[animatedStyle, style]} {...props}>
       {children}
     </Animated.View>
   );

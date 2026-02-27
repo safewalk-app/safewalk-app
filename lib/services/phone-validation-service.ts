@@ -1,4 +1,4 @@
-import { OtpErrorCode } from "../types/otp-errors";
+import { OtpErrorCode } from '../types/otp-errors';
 
 /**
  * Service de validation et formatage de numéro de téléphone
@@ -42,22 +42,22 @@ export function isValidFrenchPhone(phone: string): boolean {
  * @returns Numéro formaté en E.164 ou string vide si invalide
  */
 export function formatToE164(input: string): string {
-  if (!input) return "";
+  if (!input) return '';
 
   // Supprimer tous les caractères non-numériques
-  const digits = input.replace(/\D/g, "");
+  const digits = input.replace(/\D/g, '');
 
-  if (!digits) return "";
+  if (!digits) return '';
 
   // Cas français: commence par 0
-  if (digits.startsWith("0")) {
-    if (digits.length !== 10) return "";
+  if (digits.startsWith('0')) {
+    if (digits.length !== 10) return '';
     return `+33${digits.slice(1)}`;
   }
 
   // Cas français: commence par 33
-  if (digits.startsWith("33")) {
-    if (digits.length !== 12) return "";
+  if (digits.startsWith('33')) {
+    if (digits.length !== 12) return '';
     return `+${digits}`;
   }
 
@@ -66,7 +66,7 @@ export function formatToE164(input: string): string {
     return `+${digits}`;
   }
 
-  return "";
+  return '';
 }
 
 /**
@@ -78,7 +78,7 @@ export function formatForDisplay(phone: string): string {
   if (!isValidE164(phone)) return phone;
 
   // Numéro français
-  if (phone.startsWith("+33")) {
+  if (phone.startsWith('+33')) {
     const digits = phone.slice(3); // Enlever +33
     return `+33 ${digits[0]} ${digits.slice(1, 3)} ${digits.slice(3, 5)} ${digits.slice(5, 7)} ${digits.slice(7, 9)}`;
   }
@@ -101,12 +101,12 @@ export function formatForDisplay(phone: string): string {
  * @returns Résultat de validation avec code d'erreur si invalide
  */
 export function validatePhoneNumber(input: string): PhoneValidationResult {
-  if (!input || typeof input !== "string") {
+  if (!input || typeof input !== 'string') {
     return {
       isValid: false,
       errorCode: OtpErrorCode.EMPTY_PHONE,
-      message: "Numéro de téléphone requis",
-      feedback: "Veuillez entrer un numéro de téléphone",
+      message: 'Numéro de téléphone requis',
+      feedback: 'Veuillez entrer un numéro de téléphone',
       isE164Valid: false,
     };
   }
@@ -117,35 +117,35 @@ export function validatePhoneNumber(input: string): PhoneValidationResult {
     return {
       isValid: false,
       errorCode: OtpErrorCode.EMPTY_PHONE,
-      message: "Numéro de téléphone requis",
-      feedback: "Veuillez entrer un numéro de téléphone",
+      message: 'Numéro de téléphone requis',
+      feedback: 'Veuillez entrer un numéro de téléphone',
       isE164Valid: false,
     };
   }
 
   // Compter les chiffres
   const digits = extractDigits(trimmed);
-  
+
   // Vérifier si c'est un numéro français
   if (!isValidFrenchPhone(trimmed)) {
-    let feedback = "Format invalide. ";
-    
+    let feedback = 'Format invalide. ';
+
     if (digits.length === 0) {
-      feedback += "Entrez au moins 9 chiffres.";
+      feedback += 'Entrez au moins 9 chiffres.';
     } else if (digits.length < 9) {
-      feedback += (9 - digits.length) + " chiffre(s) manquant(s).";
+      feedback += 9 - digits.length + ' chiffre(s) manquant(s).';
     } else if (digits.length > 9) {
-      feedback += "Trop de chiffres (maximum 9).";
+      feedback += 'Trop de chiffres (maximum 9).';
     } else if (!trimmed.match(/^[0+]/)) {
-      feedback += "Commencez par 0 ou +33.";
+      feedback += 'Commencez par 0 ou +33.';
     } else {
-      feedback += "Utilisez le format: 06 12 34 56 78 ou +33 6 12 34 56 78";
+      feedback += 'Utilisez le format: 06 12 34 56 78 ou +33 6 12 34 56 78';
     }
-    
+
     return {
       isValid: false,
       errorCode: OtpErrorCode.INVALID_PHONE_FORMAT,
-      message: "Format invalide. Utilisez +33... ou 06...",
+      message: 'Format invalide. Utilisez +33... ou 06...',
       feedback: feedback,
       isE164Valid: false,
     };
@@ -158,7 +158,7 @@ export function validatePhoneNumber(input: string): PhoneValidationResult {
     return {
       isValid: false,
       errorCode: OtpErrorCode.INVALID_PHONE_FORMAT,
-      message: "Format invalide. Utilisez +33... ou 06...",
+      message: 'Format invalide. Utilisez +33... ou 06...',
       feedback: "Le numéro n'a pas pu être formaté au format E.164. Vérifiez le format.",
       isE164Valid: false,
     };
@@ -168,7 +168,7 @@ export function validatePhoneNumber(input: string): PhoneValidationResult {
     isValid: true,
     formatted,
     displayFormat: formatForDisplay(formatted),
-    feedback: "Numéro valide: " + formatForDisplay(formatted),
+    feedback: 'Numéro valide: ' + formatForDisplay(formatted),
     isE164Valid: true,
   };
 }
@@ -179,7 +179,7 @@ export function validatePhoneNumber(input: string): PhoneValidationResult {
  * @returns Chaîne de chiffres uniquement
  */
 export function extractDigits(input: string): string {
-  return input.replace(/\D/g, "");
+  return input.replace(/\D/g, '');
 }
 
 /**
@@ -190,7 +190,7 @@ export function extractDigits(input: string): string {
 export function formatFrenchPhoneForInput(input: string): string {
   const digits = extractDigits(input);
 
-  if (digits.length === 0) return "";
+  if (digits.length === 0) return '';
   if (digits.length <= 2) return digits;
 
   // Format: X XX XX XX XX (9 chiffres)
@@ -270,7 +270,7 @@ export function validateE164Strict(phone: string): { isValid: boolean; message?:
 export function formatPhoneForInput(input: string): string {
   const digits = extractDigits(input);
 
-  if (digits.length === 0) return "";
+  if (digits.length === 0) return '';
 
   // Format français: X XX XX XX XX
   // Toujours formatter, même si > 9 chiffres (prendre seulement les 9 premiers)

@@ -65,11 +65,12 @@ export function CushionPillButton({
             'rounded-full items-center justify-center',
             variantStyles[variant],
             sizeStyles[size],
-            className
+            className,
           )}
           style={{
             transform: [{ scale: pressed ? 0.96 : 1 }],
-            shadowColor: variant === 'danger' ? '#FF4D4D' : (variant === 'secondary' ? '#1E40AF' : '#6C63FF'),
+            shadowColor:
+              variant === 'danger' ? '#FF4D4D' : variant === 'secondary' ? '#1E40AF' : '#6C63FF',
             shadowOffset: { width: 0, height: 6 },
             shadowOpacity: pressed ? 0.2 : 0.15,
             shadowRadius: 10,
@@ -83,12 +84,9 @@ export function CushionPillButton({
               backgroundColor: 'rgba(255, 255, 255, 0.4)',
             }}
           />
-          
+
           <Text
-            className={cn(
-              'text-white drop-shadow-lg',
-              textSizeStyles[size]
-            )}
+            className={cn('text-white drop-shadow-lg', textSizeStyles[size])}
             numberOfLines={1}
             adjustsFontSizeToFit
             style={{

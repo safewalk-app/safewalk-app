@@ -21,17 +21,14 @@ describe('SMSService', () => {
 
       vi.mocked(apiClient.apiCall).mockResolvedValueOnce(mockResponse);
 
-      const result = await smsService.sendEmergencySMS(
-        '+33612345678',
-        'Emergency alert'
-      );
+      const result = await smsService.sendEmergencySMS('+33612345678', 'Emergency alert');
 
       expect(result).toEqual(mockResponse);
       expect(apiClient.apiCall).toHaveBeenCalledWith(
         expect.objectContaining({
           method: 'POST',
           endpoint: '/send-emergency-sms',
-        })
+        }),
       );
     });
 
@@ -41,14 +38,9 @@ describe('SMSService', () => {
         message: 'Invalid phone number format',
       });
 
-      await expect(
-        smsService.sendEmergencySMS('invalid', 'Emergency alert')
-      ).rejects.toThrow();
+      await expect(smsService.sendEmergencySMS('invalid', 'Emergency alert')).rejects.toThrow();
 
-      expect(notificationService.notify).toHaveBeenCalledWith(
-        'sms_failed',
-        expect.any(Object)
-      );
+      expect(notificationService.notify).toHaveBeenCalledWith('sms_failed', expect.any(Object));
     });
 
     it('should handle Twilio error', async () => {
@@ -58,13 +50,10 @@ describe('SMSService', () => {
       });
 
       await expect(
-        smsService.sendEmergencySMS('+33612345678', 'Emergency alert')
+        smsService.sendEmergencySMS('+33612345678', 'Emergency alert'),
       ).rejects.toThrow();
 
-      expect(notificationService.notify).toHaveBeenCalledWith(
-        'sms_failed',
-        expect.any(Object)
-      );
+      expect(notificationService.notify).toHaveBeenCalledWith('sms_failed', expect.any(Object));
     });
 
     it('should handle rate limit on SMS', async () => {
@@ -75,13 +64,10 @@ describe('SMSService', () => {
       });
 
       await expect(
-        smsService.sendEmergencySMS('+33612345678', 'Emergency alert')
+        smsService.sendEmergencySMS('+33612345678', 'Emergency alert'),
       ).rejects.toThrow();
 
-      expect(notificationService.notify).toHaveBeenCalledWith(
-        'sms_rate_limit',
-        expect.any(Object)
-      );
+      expect(notificationService.notify).toHaveBeenCalledWith('sms_rate_limit', expect.any(Object));
     });
   });
 
@@ -95,22 +81,17 @@ describe('SMSService', () => {
 
       vi.mocked(apiClient.apiCall).mockResolvedValueOnce(mockResponse);
 
-      const result = await smsService.sendFriendlyAlertSMS(
-        '+33612345678',
-        'Check-in reminder'
-      );
+      const result = await smsService.sendFriendlyAlertSMS('+33612345678', 'Check-in reminder');
 
       expect(result).toEqual(mockResponse);
       expect(apiClient.apiCall).toHaveBeenCalled();
     });
 
     it('should handle SMS service error', async () => {
-      vi.mocked(apiClient.apiCall).mockRejectedValueOnce(
-        new Error('Service unavailable')
-      );
+      vi.mocked(apiClient.apiCall).mockRejectedValueOnce(new Error('Service unavailable'));
 
       await expect(
-        smsService.sendFriendlyAlertSMS('+33612345678', 'Check-in reminder')
+        smsService.sendFriendlyAlertSMS('+33612345678', 'Check-in reminder'),
       ).rejects.toThrow();
 
       expect(notificationService.notify).toHaveBeenCalled();
@@ -127,10 +108,7 @@ describe('SMSService', () => {
 
       vi.mocked(apiClient.apiCall).mockResolvedValueOnce(mockResponse);
 
-      const result = await smsService.sendFollowUpAlertSMS(
-        '+33612345678',
-        'Follow-up message'
-      );
+      const result = await smsService.sendFollowUpAlertSMS('+33612345678', 'Follow-up message');
 
       expect(result).toEqual(mockResponse);
     });
@@ -142,13 +120,10 @@ describe('SMSService', () => {
       });
 
       await expect(
-        smsService.sendFollowUpAlertSMS('+33612345678', 'Follow-up message')
+        smsService.sendFollowUpAlertSMS('+33612345678', 'Follow-up message'),
       ).rejects.toThrow();
 
-      expect(notificationService.notify).toHaveBeenCalledWith(
-        'network_error',
-        expect.any(Object)
-      );
+      expect(notificationService.notify).toHaveBeenCalledWith('network_error', expect.any(Object));
     });
   });
 });

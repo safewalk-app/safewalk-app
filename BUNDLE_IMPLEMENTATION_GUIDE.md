@@ -217,11 +217,7 @@ module.exports = config;
 ```javascript
 // tailwind.config.js
 module.exports = {
-  content: [
-    './app/**/*.{js,ts,tsx}',
-    './components/**/*.{js,ts,tsx}',
-    './lib/**/*.{js,ts,tsx}',
-  ],
+  content: ['./app/**/*.{js,ts,tsx}', './components/**/*.{js,ts,tsx}', './lib/**/*.{js,ts,tsx}'],
   safelist: [],
   theme: {
     extend: {
@@ -283,6 +279,7 @@ import { used } from './utils';
 ## 📊 Checklist d'Implémentation
 
 ### Phase 1: Tree-Shaking
+
 - [ ] Mettre à jour `lib/utils.ts`
 - [ ] Ajouter `"sideEffects": false` dans `package.json`
 - [ ] Vérifier les imports dans les services
@@ -290,6 +287,7 @@ import { used } from './utils';
 - **Résultat attendu:** -0.3 MB
 
 ### Phase 2: Lazy Loading
+
 - [ ] Lazy load les écrans
 - [ ] Lazy load les composants lourds
 - [ ] Lazy load les services lourds
@@ -298,6 +296,7 @@ import { used } from './utils';
 - **Résultat attendu:** -0.4 MB
 
 ### Phase 3: Code Splitting
+
 - [ ] Splitter les services
 - [ ] Splitter les hooks
 - [ ] Vérifier les imports circulaires
@@ -305,12 +304,14 @@ import { used } from './utils';
 - **Résultat attendu:** -0.3 MB
 
 ### Phase 4: Minification
+
 - [ ] Configurer Metro minifier
 - [ ] Configurer Tailwind purge
 - [ ] Tester le build production
 - **Résultat attendu:** -0.2 MB
 
 ### Phase 5: Cleanup
+
 - [ ] Identifier les dépendances non utilisées
 - [ ] Supprimer les imports inutilisés
 - [ ] Nettoyer les fichiers
@@ -321,6 +322,7 @@ import { used } from './utils';
 ## 📈 Résultats Attendus
 
 ### Avant Optimisation
+
 ```
 Bundle Size: 3.2 MB
 ├── React Native: 1.2 MB (37.5%)
@@ -330,6 +332,7 @@ Bundle Size: 3.2 MB
 ```
 
 ### Après Optimisation
+
 ```
 Bundle Size: 1.8 MB (-43.75%)
 ├── React Native: 0.9 MB (50%)
@@ -366,14 +369,14 @@ npm start
 
 ## 🎯 Timeline d'Implémentation
 
-| Phase | Effort | Impact | Priorité | Timeline |
-|-------|--------|--------|----------|----------|
-| 1. Tree-shaking | 1h | -0.3 MB | P0 | Jour 1 |
-| 2. Lazy loading | 3h | -0.4 MB | P0 | Jour 1-2 |
-| 3. Code splitting | 2h | -0.3 MB | P1 | Jour 2 |
-| 4. Minification | 1h | -0.2 MB | P0 | Jour 2 |
-| 5. Cleanup | 1h | -0.2 MB | P1 | Jour 3 |
-| **Total** | **8h** | **-1.4 MB** | - | **3 jours** |
+| Phase             | Effort | Impact      | Priorité | Timeline    |
+| ----------------- | ------ | ----------- | -------- | ----------- |
+| 1. Tree-shaking   | 1h     | -0.3 MB     | P0       | Jour 1      |
+| 2. Lazy loading   | 3h     | -0.4 MB     | P0       | Jour 1-2    |
+| 3. Code splitting | 2h     | -0.3 MB     | P1       | Jour 2      |
+| 4. Minification   | 1h     | -0.2 MB     | P0       | Jour 2      |
+| 5. Cleanup        | 1h     | -0.2 MB     | P1       | Jour 3      |
+| **Total**         | **8h** | **-1.4 MB** | -        | **3 jours** |
 
 ---
 

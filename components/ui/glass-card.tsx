@@ -23,10 +23,7 @@ export function GlassCard({
 }: GlassCardProps) {
   return (
     <View
-      className={cn(
-        'rounded-3xl p-4 bg-white',
-        className
-      )}
+      className={cn('rounded-3xl p-4 bg-white', className)}
       style={[
         {
           backgroundColor: 'rgba(255, 255, 255, 0.94)',

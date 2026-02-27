@@ -19,8 +19,10 @@ export function useBatteryWarning() {
           setIsCriticalBattery(true);
           Alert.alert(
             '🔴 BATTERIE CRITIQUE',
-            'Votre batterie est à ' + Math.round(level * 100) + '%. Votre téléphone va s\'éteindre bientôt.',
-            [{ text: 'OK' }]
+            'Votre batterie est à ' +
+              Math.round(level * 100) +
+              "%. Votre téléphone va s'éteindre bientôt.",
+            [{ text: 'OK' }],
           );
         } else {
           setIsCriticalBattery(false);
@@ -31,8 +33,10 @@ export function useBatteryWarning() {
           setIsLowBattery(true);
           Alert.alert(
             '⚠️ Batterie faible',
-            'Votre batterie est à ' + Math.round(level * 100) + '%. Veuillez charger votre téléphone.',
-            [{ text: 'OK' }]
+            'Votre batterie est à ' +
+              Math.round(level * 100) +
+              '%. Veuillez charger votre téléphone.',
+            [{ text: 'OK' }],
           );
         } else if (level >= 0.2) {
           setIsLowBattery(false);
@@ -54,7 +58,11 @@ export function useBatteryWarning() {
   };
 }
 
-export function BatteryWarningBanner({ batteryLevel, isLowBattery, isCriticalBattery }: {
+export function BatteryWarningBanner({
+  batteryLevel,
+  isLowBattery,
+  isCriticalBattery,
+}: {
   batteryLevel: number;
   isLowBattery: boolean;
   isCriticalBattery: boolean;
@@ -78,9 +86,7 @@ export function BatteryWarningBanner({ batteryLevel, isLowBattery, isCriticalBat
       }}
     >
       <View className="flex-row items-start gap-3">
-        <Text style={{ fontSize: 24, marginTop: -2 }}>
-          {isCritical ? '🔴' : '⚠️'}
-        </Text>
+        <Text style={{ fontSize: 24, marginTop: -2 }}>{isCritical ? '🔴' : '⚠️'}</Text>
         <View className="flex-1">
           <Text className="text-sm font-bold text-foreground mb-1">
             {isCritical ? 'Batterie critique' : 'Batterie faible'}
@@ -88,8 +94,7 @@ export function BatteryWarningBanner({ batteryLevel, isLowBattery, isCriticalBat
           <Text className="text-xs text-muted leading-relaxed">
             {isCritical
               ? `Votre batterie est à ${percentage}%. Votre téléphone va s'éteindre bientôt. Veuillez le charger immédiatement.`
-              : `Votre batterie est à ${percentage}%. Veuillez charger votre téléphone pour éviter une interruption de la session.`
-            }
+              : `Votre batterie est à ${percentage}%. Veuillez charger votre téléphone pour éviter une interruption de la session.`}
           </Text>
         </View>
       </View>

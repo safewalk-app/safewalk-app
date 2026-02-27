@@ -1,11 +1,15 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
-import { checkRateLimit, logRequest, createRateLimitHttpResponse } from "../_shared/rate-limiter.ts";
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
+import {
+  checkRateLimit,
+  logRequest,
+  createRateLimitHttpResponse,
+} from '../_shared/rate-limiter.ts';
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type",
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
 };
 
 interface SendOtpRequest {
@@ -38,54 +42,54 @@ function getErrorResponse(errorCode: string): [number, SendOtpResponse] {
       400,
       {
         success: false,
-        errorCode: "INVALID_PHONE_FORMAT",
-        message: "Format invalide. Utilisez +33...",
-        error: "Invalid phone number format (use E.164: +33...)",
+        errorCode: 'INVALID_PHONE_FORMAT',
+        message: 'Format invalide. Utilisez +33...',
+        error: 'Invalid phone number format (use E.164: +33...)',
       },
     ],
     EMPTY_PHONE: [
       400,
       {
         success: false,
-        errorCode: "EMPTY_PHONE",
-        message: "Numéro de téléphone requis",
-        error: "Phone number is required",
+        errorCode: 'EMPTY_PHONE',
+        message: 'Numéro de téléphone requis',
+        error: 'Phone number is required',
       },
     ],
     RATE_LIMIT: [
       429,
       {
         success: false,
-        errorCode: "RATE_LIMIT",
-        message: "Trop de demandes. Réessayez dans 1 heure.",
-        error: "Too many requests. Try again later.",
+        errorCode: 'RATE_LIMIT',
+        message: 'Trop de demandes. Réessayez dans 1 heure.',
+        error: 'Too many requests. Try again later.',
       },
     ],
     SMS_SEND_FAILED: [
       500,
       {
         success: false,
-        errorCode: "SMS_SEND_FAILED",
+        errorCode: 'SMS_SEND_FAILED',
         message: "Impossible d'envoyer le SMS. Vérifiez le numéro.",
-        error: "Failed to send SMS",
+        error: 'Failed to send SMS',
       },
     ],
     DATABASE_ERROR: [
       500,
       {
         success: false,
-        errorCode: "DATABASE_ERROR",
-        message: "Erreur base de données. Réessayez plus tard.",
-        error: "Database error",
+        errorCode: 'DATABASE_ERROR',
+        message: 'Erreur base de données. Réessayez plus tard.',
+        error: 'Database error',
       },
     ],
     SERVER_ERROR: [
       500,
       {
         success: false,
-        errorCode: "SERVER_ERROR",
-        message: "Erreur serveur. Réessayez plus tard.",
-        error: "Server configuration error",
+        errorCode: 'SERVER_ERROR',
+        message: 'Erreur serveur. Réessayez plus tard.',
+        error: 'Server configuration error',
       },
     ],
   };
@@ -99,56 +103,56 @@ async function sendSmsViaTwilio(
   otpCode: string,
   twilioAccountSid: string,
   twilioAuthToken: string,
-  twilioPhoneNumber: string
+  twilioPhoneNumber: string,
 ): Promise<{ success: boolean; messageSid?: string; error?: string }> {
   const auth = btoa(`${twilioAccountSid}:${twilioAuthToken}`);
   const message = `Votre code de vérification SafeWalk est: ${otpCode}. Valide 10 minutes.`;
 
   const formData = new URLSearchParams();
-  formData.append("To", phoneNumber);
-  formData.append("From", twilioPhoneNumber);
-  formData.append("Body", message);
+  formData.append('To', phoneNumber);
+  formData.append('From', twilioPhoneNumber);
+  formData.append('Body', message);
 
   try {
     const response = await fetch(
       `https://api.twilio.com/2010-04-01/Accounts/${twilioAccountSid}/Messages.json`,
       {
-        method: "POST",
+        method: 'POST',
         headers: {
           Authorization: `Basic ${auth}`,
-          "Content-Type": "application/x-www-form-urlencoded",
+          'Content-Type': 'application/x-www-form-urlencoded',
         },
         body: formData.toString(),
-      }
+      },
     );
 
     if (!response.ok) {
       const error = await response.text();
-      console.error("[SafeWalk][Twilio] SMS send failed:", error);
+      console.error('[SafeWalk][Twilio] SMS send failed:', error);
       return { success: false, error: `Twilio error: ${response.status}` };
     }
 
     const data = await response.json();
-    console.log("[SafeWalk][Twilio] SMS sent successfully:", data.sid);
+    console.log('[SafeWalk][Twilio] SMS sent successfully:', data.sid);
     return { success: true, messageSid: data.sid };
   } catch (error) {
-    console.error("[SafeWalk][Twilio] SMS send exception:", error);
+    console.error('[SafeWalk][Twilio] SMS send exception:', error);
     return { success: false, error: String(error) };
   }
 }
 
 serve(async (req) => {
   // Handle CORS preflight
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders });
   }
 
   // Only allow POST
-  if (req.method !== "POST") {
-    const [status, response] = getErrorResponse("SERVER_ERROR");
+  if (req.method !== 'POST') {
+    const [status, response] = getErrorResponse('SERVER_ERROR');
     return new Response(JSON.stringify(response), {
       status: 405,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
@@ -158,58 +162,58 @@ serve(async (req) => {
     const { phoneNumber } = body;
 
     // Validate inputs
-    if (!phoneNumber || typeof phoneNumber !== "string") {
-      const [status, response] = getErrorResponse("EMPTY_PHONE");
+    if (!phoneNumber || typeof phoneNumber !== 'string') {
+      const [status, response] = getErrorResponse('EMPTY_PHONE');
       return new Response(JSON.stringify(response), {
         status,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
     if (!validatePhoneNumber(phoneNumber)) {
-      const [status, response] = getErrorResponse("INVALID_PHONE_FORMAT");
+      const [status, response] = getErrorResponse('INVALID_PHONE_FORMAT');
       return new Response(JSON.stringify(response), {
         status,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
     // Get environment variables
-    const supabaseUrl = Deno.env.get("SUPABASE_URL");
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    const twilioAccountSid = Deno.env.get("TWILIO_ACCOUNT_SID");
-    const twilioAuthToken = Deno.env.get("TWILIO_AUTH_TOKEN");
-    const twilioPhoneNumber = Deno.env.get("TWILIO_PHONE_NUMBER");
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    const twilioAccountSid = Deno.env.get('TWILIO_ACCOUNT_SID');
+    const twilioAuthToken = Deno.env.get('TWILIO_AUTH_TOKEN');
+    const twilioPhoneNumber = Deno.env.get('TWILIO_PHONE_NUMBER');
 
     if (!supabaseUrl || !supabaseServiceKey) {
-      console.error("[SafeWalk] Supabase credentials not configured");
-      const [status, response] = getErrorResponse("SERVER_ERROR");
+      console.error('[SafeWalk] Supabase credentials not configured');
+      const [status, response] = getErrorResponse('SERVER_ERROR');
       return new Response(JSON.stringify(response), {
         status,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
     // ✅ RATE LIMITING: Check if user has exceeded rate limit
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
-    const ipAddress = req.headers.get("x-forwarded-for") || "unknown";
-    const rateLimitResult = await checkRateLimit(supabase, null, "send-otp", ipAddress);
+    const ipAddress = req.headers.get('x-forwarded-for') || 'unknown';
+    const rateLimitResult = await checkRateLimit(supabase, null, 'send-otp', ipAddress);
 
     if (!rateLimitResult.isAllowed) {
-      await logRequest(supabase, null, "send-otp", ipAddress);
+      await logRequest(supabase, null, 'send-otp', ipAddress);
       return createRateLimitHttpResponse(rateLimitResult.resetAt);
     }
 
-    await logRequest(supabase, null, "send-otp", ipAddress);
+    await logRequest(supabase, null, 'send-otp', ipAddress);
 
     // ✅ Already created supabase client above for rate limiting
 
     if (!twilioAccountSid || !twilioAuthToken || !twilioPhoneNumber) {
-      console.error("[SafeWalk] Twilio credentials not configured");
-      const [status, response] = getErrorResponse("SERVER_ERROR");
+      console.error('[SafeWalk] Twilio credentials not configured');
+      const [status, response] = getErrorResponse('SERVER_ERROR');
       return new Response(JSON.stringify(response), {
         status,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
@@ -219,27 +223,27 @@ serve(async (req) => {
     // Check rate limit (max 5 requests per hour per phone number)
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
     const { data: recentLogs, error: logError } = await supabase
-      .from("otp_logs")
-      .select("*")
-      .eq("phone_number", phoneNumber)
-      .eq("action", "send")
-      .gte("created_at", oneHourAgo);
+      .from('otp_logs')
+      .select('*')
+      .eq('phone_number', phoneNumber)
+      .eq('action', 'send')
+      .gte('created_at', oneHourAgo);
 
     if (logError) {
-      console.error("[SafeWalk] Database error checking rate limit:", logError);
-      const [status, response] = getErrorResponse("DATABASE_ERROR");
+      console.error('[SafeWalk] Database error checking rate limit:', logError);
+      const [status, response] = getErrorResponse('DATABASE_ERROR');
       return new Response(JSON.stringify(response), {
         status,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
     if ((recentLogs?.length || 0) >= 5) {
-      console.warn("[SafeWalk][OTP] Rate limit exceeded for", phoneNumber);
-      const [status, response] = getErrorResponse("RATE_LIMIT");
+      console.warn('[SafeWalk][OTP] Rate limit exceeded for', phoneNumber);
+      const [status, response] = getErrorResponse('RATE_LIMIT');
       return new Response(JSON.stringify(response), {
         status,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
@@ -253,73 +257,71 @@ serve(async (req) => {
       otpCode,
       twilioAccountSid,
       twilioAuthToken,
-      twilioPhoneNumber
+      twilioPhoneNumber,
     );
 
     if (!smsResult.success) {
-      console.error("[SafeWalk][OTP] SMS send failed for", phoneNumber);
+      console.error('[SafeWalk][OTP] SMS send failed for', phoneNumber);
 
       // Log failed send
-      await supabase.from("otp_logs").insert({
+      await supabase.from('otp_logs').insert({
         phone_number: phoneNumber,
-        action: "send_failed",
+        action: 'send_failed',
         error_message: smsResult.error,
       });
 
-      const [status, response] = getErrorResponse("SMS_SEND_FAILED");
+      const [status, response] = getErrorResponse('SMS_SEND_FAILED');
       return new Response(JSON.stringify(response), {
         status,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
     // Store OTP in database
-    const { error: insertError } = await supabase
-      .from("otp_verifications")
-      .upsert({
-        phone_number: phoneNumber,
-        otp_code: otpCode,
-        attempts: 0,
-        created_at: new Date().toISOString(),
-        expires_at: expiresAt,
-        verified_at: null,
-      });
+    const { error: insertError } = await supabase.from('otp_verifications').upsert({
+      phone_number: phoneNumber,
+      otp_code: otpCode,
+      attempts: 0,
+      created_at: new Date().toISOString(),
+      expires_at: expiresAt,
+      verified_at: null,
+    });
 
     if (insertError) {
-      console.error("[SafeWalk][OTP] Database error:", insertError);
-      const [status, response] = getErrorResponse("DATABASE_ERROR");
+      console.error('[SafeWalk][OTP] Database error:', insertError);
+      const [status, response] = getErrorResponse('DATABASE_ERROR');
       return new Response(JSON.stringify(response), {
         status,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
     // Log successful send
-    await supabase.from("otp_logs").insert({
+    await supabase.from('otp_logs').insert({
       phone_number: phoneNumber,
-      action: "send",
+      action: 'send',
       attempt_number: 0,
     });
 
-    console.log("[SafeWalk][OTP] OTP sent successfully for", phoneNumber);
+    console.log('[SafeWalk][OTP] OTP sent successfully for', phoneNumber);
 
     return new Response(
       JSON.stringify({
         success: true,
-        message: "OTP sent successfully",
+        message: 'OTP sent successfully',
         expiresIn: 600, // 10 minutes in seconds
       }),
       {
         status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      },
     );
   } catch (error) {
-    console.error("[SafeWalk][OTP] Unexpected error:", error);
-    const [status, response] = getErrorResponse("SERVER_ERROR");
+    console.error('[SafeWalk][OTP] Unexpected error:', error);
+    const [status, response] = getErrorResponse('SERVER_ERROR');
     return new Response(JSON.stringify(response), {
       status,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 });

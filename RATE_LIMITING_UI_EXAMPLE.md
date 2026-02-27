@@ -3,9 +3,9 @@
 ## 1. Importer les hooks et composants
 
 ```tsx
-import { useCooldown } from "@/lib/hooks/use-cooldown";
-import { RateLimitErrorAlert } from "@/components/rate-limit-error-alert";
-import { tripService } from "@/lib/services/trip-service";
+import { useCooldown } from '@/lib/hooks/use-cooldown';
+import { RateLimitErrorAlert } from '@/components/rate-limit-error-alert';
+import { tripService } from '@/lib/services/trip-service';
 ```
 
 ## 2. Utiliser le hook useCooldown dans un écran
@@ -13,16 +13,16 @@ import { tripService } from "@/lib/services/trip-service";
 ### Exemple: Écran de création de sortie
 
 ```tsx
-import { useState } from "react";
-import { View, Text, TouchableOpacity, ScrollView } from "react-native";
-import { ScreenContainer } from "@/components/screen-container";
-import { useCooldown } from "@/lib/hooks/use-cooldown";
-import { RateLimitErrorAlert } from "@/components/rate-limit-error-alert";
-import { tripService } from "@/lib/services/trip-service";
-import { cn } from "@/lib/utils";
+import { useState } from 'react';
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { ScreenContainer } from '@/components/screen-container';
+import { useCooldown } from '@/lib/hooks/use-cooldown';
+import { RateLimitErrorAlert } from '@/components/rate-limit-error-alert';
+import { tripService } from '@/lib/services/trip-service';
+import { cn } from '@/lib/utils';
 
 export default function NewSessionScreen() {
-  const [destination, setDestination] = useState("");
+  const [destination, setDestination] = useState('');
   const [deadline, setDeadline] = useState<Date>(new Date(Date.now() + 30 * 60000));
   const [rateLimitError, setRateLimitError] = useState<{
     visible: boolean;
@@ -42,12 +42,12 @@ export default function NewSessionScreen() {
       });
 
       if (!result.success) {
-        if (result.errorCode === "rate_limit_exceeded") {
+        if (result.errorCode === 'rate_limit_exceeded') {
           // Afficher l'alerte de rate limit
           setRateLimitError({
             visible: true,
             message: result.error,
-            retryAfter: parseInt(result.message?.match(/\d+/)?.[0] || "60") * 1000,
+            retryAfter: parseInt(result.message?.match(/\d+/)?.[0] || '60') * 1000,
           });
 
           // Masquer l'alerte après 5 secondes
@@ -56,7 +56,7 @@ export default function NewSessionScreen() {
           }, 5000);
         } else {
           // Autres erreurs
-          console.error("Error:", result.error);
+          console.error('Error:', result.error);
         }
       } else {
         // Succès - naviguer vers l'écran de session active
@@ -83,7 +83,7 @@ export default function NewSessionScreen() {
           <View>
             <Text className="text-sm font-semibold text-foreground mb-2">Destination</Text>
             <View className="border border-border rounded-lg p-3 bg-surface">
-              <Text className="text-foreground">{destination || "Non spécifiée"}</Text>
+              <Text className="text-foreground">{destination || 'Non spécifiée'}</Text>
             </View>
           </View>
 
@@ -100,14 +100,14 @@ export default function NewSessionScreen() {
             onPress={handleStartSession}
             disabled={isOnCooldown}
             className={cn(
-              "bg-primary py-3 px-6 rounded-lg items-center",
-              isOnCooldown && "opacity-50"
+              'bg-primary py-3 px-6 rounded-lg items-center',
+              isOnCooldown && 'opacity-50',
             )}
           >
             <Text className="text-white font-bold text-base">
               {isOnCooldown
                 ? `Attendre ${Math.ceil(remainingTime / 1000)}s`
-                : "Commencer la sortie"}
+                : 'Commencer la sortie'}
             </Text>
           </TouchableOpacity>
         </View>
@@ -120,25 +120,29 @@ export default function NewSessionScreen() {
 ## 3. Utiliser le hook useCooldown dans l'écran OTP
 
 ```tsx
-import { useState } from "react";
-import { View, Text, TouchableOpacity, TextInput } from "react-native";
-import { ScreenContainer } from "@/components/screen-container";
-import { useCooldown } from "@/lib/hooks/use-cooldown";
-import { RateLimitErrorAlert } from "@/components/rate-limit-error-alert";
-import { otpService } from "@/lib/services/otp-service";
-import { cn } from "@/lib/utils";
+import { useState } from 'react';
+import { View, Text, TouchableOpacity, TextInput } from 'react-native';
+import { ScreenContainer } from '@/components/screen-container';
+import { useCooldown } from '@/lib/hooks/use-cooldown';
+import { RateLimitErrorAlert } from '@/components/rate-limit-error-alert';
+import { otpService } from '@/lib/services/otp-service';
+import { cn } from '@/lib/utils';
 
 export default function PhoneVerificationScreen() {
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [otpCode, setOtpCode] = useState("");
-  const [step, setStep] = useState<"phone" | "otp">("phone");
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [otpCode, setOtpCode] = useState('');
+  const [step, setStep] = useState<'phone' | 'otp'>('phone');
   const [rateLimitError, setRateLimitError] = useState<{
     visible: boolean;
     message?: string;
   }>({ visible: false });
 
   // Cooldown de 60 secondes entre les envois d'OTP
-  const { trigger: triggerSendOtp, isOnCooldown: isOtpOnCooldown, remainingTime: otpRemainingTime } = useCooldown({
+  const {
+    trigger: triggerSendOtp,
+    isOnCooldown: isOtpOnCooldown,
+    remainingTime: otpRemainingTime,
+  } = useCooldown({
     duration: 60000,
   });
 
@@ -147,7 +151,7 @@ export default function PhoneVerificationScreen() {
       const result = await otpService.sendOtp(phoneNumber);
 
       if (!result.success) {
-        if (result.errorCode === "rate_limit_exceeded") {
+        if (result.errorCode === 'rate_limit_exceeded') {
           setRateLimitError({
             visible: true,
             message: result.message,
@@ -157,11 +161,11 @@ export default function PhoneVerificationScreen() {
             setRateLimitError({ visible: false });
           }, 5000);
         } else {
-          console.error("Error:", result.error);
+          console.error('Error:', result.error);
         }
       } else {
         // OTP envoyé avec succès
-        setStep("otp");
+        setStep('otp');
       }
     });
   };
@@ -170,7 +174,7 @@ export default function PhoneVerificationScreen() {
     const result = await otpService.verifyOtp(phoneNumber, otpCode);
 
     if (!result.success) {
-      if (result.errorCode === "rate_limit_exceeded") {
+      if (result.errorCode === 'rate_limit_exceeded') {
         setRateLimitError({
           visible: true,
           message: result.message,
@@ -180,7 +184,7 @@ export default function PhoneVerificationScreen() {
           setRateLimitError({ visible: false });
         }, 5000);
       } else {
-        console.error("Error:", result.error);
+        console.error('Error:', result.error);
       }
     } else {
       // OTP vérifié avec succès
@@ -197,7 +201,7 @@ export default function PhoneVerificationScreen() {
         onDismiss={() => setRateLimitError({ visible: false })}
       />
 
-      {step === "phone" ? (
+      {step === 'phone' ? (
         <View className="gap-4">
           <Text className="text-2xl font-bold text-foreground">Vérification du numéro</Text>
 
@@ -213,14 +217,12 @@ export default function PhoneVerificationScreen() {
             onPress={handleSendOtp}
             disabled={isOtpOnCooldown}
             className={cn(
-              "bg-primary py-3 px-6 rounded-lg items-center",
-              isOtpOnCooldown && "opacity-50"
+              'bg-primary py-3 px-6 rounded-lg items-center',
+              isOtpOnCooldown && 'opacity-50',
             )}
           >
             <Text className="text-white font-bold">
-              {isOtpOnCooldown
-                ? `Attendre ${Math.ceil(otpRemainingTime / 1000)}s`
-                : "Envoyer OTP"}
+              {isOtpOnCooldown ? `Attendre ${Math.ceil(otpRemainingTime / 1000)}s` : 'Envoyer OTP'}
             </Text>
           </TouchableOpacity>
         </View>
@@ -253,20 +255,20 @@ export default function PhoneVerificationScreen() {
 ## 4. Patterns Clés
 
 ### Pattern 1: Cooldown sur les boutons
+
 ```tsx
 <TouchableOpacity
   disabled={isOnCooldown}
-  className={cn("bg-primary py-3 rounded-lg", isOnCooldown && "opacity-50")}
+  className={cn('bg-primary py-3 rounded-lg', isOnCooldown && 'opacity-50')}
 >
-  <Text>
-    {isOnCooldown ? `Attendre ${Math.ceil(remainingTime / 1000)}s` : "Cliquer"}
-  </Text>
+  <Text>{isOnCooldown ? `Attendre ${Math.ceil(remainingTime / 1000)}s` : 'Cliquer'}</Text>
 </TouchableOpacity>
 ```
 
 ### Pattern 2: Afficher les erreurs de rate limit
+
 ```tsx
-if (result.errorCode === "rate_limit_exceeded") {
+if (result.errorCode === 'rate_limit_exceeded') {
   setRateLimitError({
     visible: true,
     message: result.error,
@@ -279,6 +281,7 @@ if (result.errorCode === "rate_limit_exceeded") {
 ```
 
 ### Pattern 3: Utiliser le hook useCooldown
+
 ```tsx
 const { trigger, isOnCooldown, remainingTime } = useCooldown({ duration: 2000 });
 
@@ -302,15 +305,15 @@ const handleClick = async () => {
 
 ## 6. Endpoints à Protéger avec Cooldown
 
-| Endpoint | Cooldown | Raison |
-|----------|----------|--------|
-| send-otp | 60s | Limiter les SMS |
-| verify-otp | 5s | Permettre les erreurs de saisie |
-| start-trip | 2s | Éviter les clics accidentels |
-| test-sms | 60s | Limiter les SMS de test |
-| sos | 2s | Permettre les urgences réelles |
-| checkin | 2s | Éviter les clics accidentels |
-| extend | 2s | Éviter les clics accidentels |
+| Endpoint   | Cooldown | Raison                          |
+| ---------- | -------- | ------------------------------- |
+| send-otp   | 60s      | Limiter les SMS                 |
+| verify-otp | 5s       | Permettre les erreurs de saisie |
+| start-trip | 2s       | Éviter les clics accidentels    |
+| test-sms   | 60s      | Limiter les SMS de test         |
+| sos        | 2s       | Permettre les urgences réelles  |
+| checkin    | 2s       | Éviter les clics accidentels    |
+| extend     | 2s       | Éviter les clics accidentels    |
 
 ## 7. Tester le Rate Limiting
 

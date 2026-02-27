@@ -9,7 +9,7 @@ import { describe, it, expect } from 'vitest';
 describe('EXPO_PUBLIC_API_URL', () => {
   it('should be defined in environment', () => {
     const apiUrl = process.env.EXPO_PUBLIC_API_URL;
-    
+
     // L'URL peut être définie ou non selon l'environnement
     // En développement local, elle peut être undefined
     if (apiUrl) {
@@ -27,10 +27,10 @@ describe('EXPO_PUBLIC_API_URL', () => {
       console.log('⏭️ EXPO_PUBLIC_API_URL non définie, test skippé');
       return;
     }
-    
+
     const response = await fetch(`${apiUrl}/api/sms/health`);
     const data = await response.json();
-    
+
     expect(response.status).toBe(200);
     expect(data.ok).toBe(true);
     expect(data.service).toBe('SMS API');

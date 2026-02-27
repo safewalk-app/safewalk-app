@@ -2,10 +2,10 @@
 // Purpose: Client for trip management Edge Functions
 // Functions: start-trip, checkin, extend, ping-location, test-sms, sos
 
-import { supabase } from "@/lib/supabase";
-import { logger } from "@/lib/logger";
-import { retryWithBackoff } from "@/lib/services/api-retry-helper";
-import { notify } from "@/lib/services/notification.service";
+import { supabase } from '@/lib/supabase';
+import { logger } from '@/lib/logger';
+import { retryWithBackoff } from '@/lib/services/api-retry-helper';
+import { notify } from '@/lib/services/notification.service';
 
 export interface StartTripInput {
   deadlineISO: string;
@@ -94,113 +94,117 @@ export interface SosOutput {
  */
 export async function startTrip(input: StartTripInput): Promise<StartTripOutput> {
   try {
-    logger.info("Starting trip", { deadline: input.deadlineISO });
+    logger.info('Starting trip', { deadline: input.deadlineISO });
 
     // Check if user phone is verified
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
-      logger.error("Start trip: No authenticated user");
+      logger.error('Start trip: No authenticated user');
       return {
         success: false,
-        error: "Not authenticated",
-        errorCode: "UNAUTHORIZED",
+        error: 'Not authenticated',
+        errorCode: 'UNAUTHORIZED',
       };
     }
 
     const { data: profile } = await supabase
-      .from("profiles")
-      .select("phone_verified")
-      .eq("id", user.id)
+      .from('profiles')
+      .select('phone_verified')
+      .eq('id', user.id)
       .single();
 
     if (!profile?.phone_verified) {
-      logger.warn("Start trip: Phone not verified", { userId: user.id });
+      logger.warn('Start trip: Phone not verified', { userId: user.id });
       notify('auth.otp_required');
       return {
         success: false,
-        error: "Phone number not verified",
-        errorCode: "PHONE_NOT_VERIFIED",
+        error: 'Phone number not verified',
+        errorCode: 'PHONE_NOT_VERIFIED',
       };
     }
 
     // Invoke start-trip with retry logic
     const retryResult = await retryWithBackoff(
-      () => supabase.functions.invoke("start-trip", { body: input }),
-      { maxRetries: 3, initialDelayMs: 500 }
+      () => supabase.functions.invoke('start-trip', { body: input }),
+      { maxRetries: 3, initialDelayMs: 500 },
     );
 
-    const { data, error } = retryResult.success ? retryResult.data! : { data: null, error: retryResult.error };
+    const { data, error } = retryResult.success
+      ? retryResult.data!
+      : { data: null, error: retryResult.error };
 
     if (error) {
       // Handle rate limit error (429)
       if (error.status === 429) {
         const errorData = error.context?.json || {};
-        logger.warn("Start trip: Rate limit exceeded", { retryAfter: errorData.retryAfter });
+        logger.warn('Start trip: Rate limit exceeded', { retryAfter: errorData.retryAfter });
         notify('error.rate_limited', {
-          variables: { seconds: errorData.retryAfter || 60 }
+          variables: { seconds: errorData.retryAfter || 60 },
         });
         return {
           success: false,
-          error: errorData.message || "Trop de requêtes. Veuillez réessayer plus tard.",
-          errorCode: "rate_limit_exceeded",
+          error: errorData.message || 'Trop de requêtes. Veuillez réessayer plus tard.',
+          errorCode: 'rate_limit_exceeded',
           message: `Réessayez dans ${errorData.retryAfter || 60} secondes`,
         };
       }
 
-      logger.error("Start trip error", { error });
+      logger.error('Start trip error', { error });
       return {
         success: false,
         error: error.message,
-        errorCode: "FUNCTION_ERROR",
+        errorCode: 'FUNCTION_ERROR',
       };
     }
 
     // Handle error codes from Edge Function
     if (data && !data.success) {
       const errorCode = data.errorCode;
-      logger.warn("Start trip failed", { errorCode, error: data.error });
-      
+      logger.warn('Start trip failed', { errorCode, error: data.error });
+
       // Map error codes for UI handling
-      if (errorCode === "no_credits") {
+      if (errorCode === 'no_credits') {
         notify('credits.empty');
         return {
           success: false,
-          error: "Crédits insuffisants",
-          errorCode: "no_credits",
+          error: 'Crédits insuffisants',
+          errorCode: 'no_credits',
         };
       }
-      if (errorCode === "quota_reached") {
+      if (errorCode === 'quota_reached') {
         notify('alert.quota_reached');
         return {
           success: false,
           error: "Limite atteinte aujourd'hui",
-          errorCode: "quota_reached",
+          errorCode: 'quota_reached',
         };
       }
-      if (errorCode === "twilio_failed") {
+      if (errorCode === 'twilio_failed') {
         notify('sms.failed_retry');
         return {
           success: false,
           error: "Impossible d'envoyer l'alerte, réessaiera",
-          errorCode: "twilio_failed",
+          errorCode: 'twilio_failed',
         };
       }
-      
+
       return data as StartTripOutput;
     }
 
-    logger.info("Trip started successfully", { tripId: data?.tripId });
+    logger.info('Trip started successfully', { tripId: data?.tripId });
     notify('trip.started', {
-      variables: { deadline: new Date(data?.deadline).toLocaleTimeString('fr-FR') }
+      variables: { deadline: new Date(data?.deadline).toLocaleTimeString('fr-FR') },
     });
     return data as StartTripOutput;
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    logger.error("Start trip exception", { error: errorMessage });
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    logger.error('Start trip exception', { error: errorMessage });
     return {
       success: false,
       error: errorMessage,
-      errorCode: "EXCEPTION",
+      errorCode: 'EXCEPTION',
     };
   }
 }
@@ -210,49 +214,51 @@ export async function startTrip(input: StartTripInput): Promise<StartTripOutput>
  */
 export async function checkin(input: CheckinInput): Promise<CheckinOutput> {
   try {
-    logger.info("Checking in", { tripId: input.tripId });
+    logger.info('Checking in', { tripId: input.tripId });
 
     // Invoke checkin with retry logic
     const retryResult = await retryWithBackoff(
-      () => supabase.functions.invoke("checkin", { body: input }),
-      { maxRetries: 3, initialDelayMs: 500 }
+      () => supabase.functions.invoke('checkin', { body: input }),
+      { maxRetries: 3, initialDelayMs: 500 },
     );
 
-    const { data, error } = retryResult.success ? retryResult.data! : { data: null, error: retryResult.error };
+    const { data, error } = retryResult.success
+      ? retryResult.data!
+      : { data: null, error: retryResult.error };
 
     if (error) {
       // Handle rate limit error (429)
       if (error.status === 429) {
         const errorData = error.context?.json || {};
-        logger.warn("Checkin: Rate limit exceeded");
+        logger.warn('Checkin: Rate limit exceeded');
         notify('error.rate_limited', {
-          variables: { seconds: errorData.retryAfter || 60 }
+          variables: { seconds: errorData.retryAfter || 60 },
         });
         return {
           success: false,
-          error: errorData.message || "Trop de requêtes. Veuillez réessayer plus tard.",
-          errorCode: "rate_limit_exceeded",
+          error: errorData.message || 'Trop de requêtes. Veuillez réessayer plus tard.',
+          errorCode: 'rate_limit_exceeded',
         };
       }
 
-      logger.error("Checkin error", { error });
+      logger.error('Checkin error', { error });
       return {
         success: false,
         error: error.message,
-        errorCode: "FUNCTION_ERROR",
+        errorCode: 'FUNCTION_ERROR',
       };
     }
 
-    logger.info("Checked in successfully", { tripId: data?.tripId });
+    logger.info('Checked in successfully', { tripId: data?.tripId });
     notify('trip.checked_in');
     return data as CheckinOutput;
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    logger.error("Checkin exception", { error: errorMessage });
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    logger.error('Checkin exception', { error: errorMessage });
     return {
       success: false,
       error: errorMessage,
-      errorCode: "EXCEPTION",
+      errorCode: 'EXCEPTION',
     };
   }
 }
@@ -262,51 +268,53 @@ export async function checkin(input: CheckinInput): Promise<CheckinOutput> {
  */
 export async function extendTrip(input: ExtendInput): Promise<ExtendOutput> {
   try {
-    logger.info("Extending trip", { tripId: input.tripId, addMinutes: input.addMinutes });
+    logger.info('Extending trip', { tripId: input.tripId, addMinutes: input.addMinutes });
 
     // Invoke extend with retry logic
     const retryResult = await retryWithBackoff(
-      () => supabase.functions.invoke("extend", { body: input }),
-      { maxRetries: 3, initialDelayMs: 500 }
+      () => supabase.functions.invoke('extend', { body: input }),
+      { maxRetries: 3, initialDelayMs: 500 },
     );
 
-    const { data, error } = retryResult.success ? retryResult.data! : { data: null, error: retryResult.error };
+    const { data, error } = retryResult.success
+      ? retryResult.data!
+      : { data: null, error: retryResult.error };
 
     if (error) {
       // Handle rate limit error (429)
       if (error.status === 429) {
         const errorData = error.context?.json || {};
-        logger.warn("Extend trip: Rate limit exceeded");
+        logger.warn('Extend trip: Rate limit exceeded');
         notify('error.rate_limited', {
-          variables: { seconds: errorData.retryAfter || 60 }
+          variables: { seconds: errorData.retryAfter || 60 },
         });
         return {
           success: false,
-          error: errorData.message || "Trop de requêtes. Veuillez réessayer plus tard.",
-          errorCode: "rate_limit_exceeded",
+          error: errorData.message || 'Trop de requêtes. Veuillez réessayer plus tard.',
+          errorCode: 'rate_limit_exceeded',
         };
       }
 
-      logger.error("Extend trip error", { error });
+      logger.error('Extend trip error', { error });
       return {
         success: false,
         error: error.message,
-        errorCode: "FUNCTION_ERROR",
+        errorCode: 'FUNCTION_ERROR',
       };
     }
 
-    logger.info("Trip extended successfully", { tripId: data?.tripId });
+    logger.info('Trip extended successfully', { tripId: data?.tripId });
     notify('trip.extended', {
-      variables: { minutes: input.addMinutes }
+      variables: { minutes: input.addMinutes },
     });
     return data as ExtendOutput;
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    logger.error("Extend trip exception", { error: errorMessage });
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    logger.error('Extend trip exception', { error: errorMessage });
     return {
       success: false,
       error: errorMessage,
-      errorCode: "EXCEPTION",
+      errorCode: 'EXCEPTION',
     };
   }
 }
@@ -316,9 +324,9 @@ export async function extendTrip(input: ExtendInput): Promise<ExtendOutput> {
  */
 export async function pingLocation(input: PingLocationInput): Promise<PingLocationOutput> {
   try {
-    logger.info("Pinging location", { tripId: input.tripId, lat: input.lat, lng: input.lng });
+    logger.info('Pinging location', { tripId: input.tripId, lat: input.lat, lng: input.lng });
 
-    const { data, error } = await supabase.functions.invoke("ping-location", {
+    const { data, error } = await supabase.functions.invoke('ping-location', {
       body: input,
     });
 
@@ -326,31 +334,31 @@ export async function pingLocation(input: PingLocationInput): Promise<PingLocati
       // Handle rate limit error (429)
       if (error.status === 429) {
         const errorData = error.context?.json || {};
-        logger.warn("Ping location: Rate limit exceeded");
+        logger.warn('Ping location: Rate limit exceeded');
         return {
           success: false,
-          error: errorData.message || "Trop de requêtes. Veuillez réessayer plus tard.",
-          errorCode: "rate_limit_exceeded",
+          error: errorData.message || 'Trop de requêtes. Veuillez réessayer plus tard.',
+          errorCode: 'rate_limit_exceeded',
         };
       }
 
-      logger.error("Ping location error", { error });
+      logger.error('Ping location error', { error });
       return {
         success: false,
         error: error.message,
-        errorCode: "FUNCTION_ERROR",
+        errorCode: 'FUNCTION_ERROR',
       };
     }
 
-    logger.info("Location updated successfully", { tripId: data?.tripId });
+    logger.info('Location updated successfully', { tripId: data?.tripId });
     return data as PingLocationOutput;
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    logger.error("Ping location exception", { error: errorMessage });
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    logger.error('Ping location exception', { error: errorMessage });
     return {
       success: false,
       error: errorMessage,
-      errorCode: "EXCEPTION",
+      errorCode: 'EXCEPTION',
     };
   }
 }
@@ -360,37 +368,39 @@ export async function pingLocation(input: PingLocationInput): Promise<PingLocati
  */
 export async function sendTestSms(): Promise<TestSmsOutput> {
   try {
-    logger.info("Sending test SMS");
+    logger.info('Sending test SMS');
 
     // Check if user phone is verified
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
-      logger.error("Test SMS: No authenticated user");
+      logger.error('Test SMS: No authenticated user');
       return {
         success: false,
-        error: "Not authenticated",
-        errorCode: "UNAUTHORIZED",
+        error: 'Not authenticated',
+        errorCode: 'UNAUTHORIZED',
         smsSent: false,
       };
     }
 
     const { data: profile } = await supabase
-      .from("profiles")
-      .select("phone_verified")
-      .eq("id", user.id)
+      .from('profiles')
+      .select('phone_verified')
+      .eq('id', user.id)
       .single();
 
     if (!profile?.phone_verified) {
-      logger.warn("Test SMS: Phone not verified", { userId: user.id });
+      logger.warn('Test SMS: Phone not verified', { userId: user.id });
       return {
         success: false,
-        error: "Phone number not verified",
-        errorCode: "PHONE_NOT_VERIFIED",
+        error: 'Phone number not verified',
+        errorCode: 'PHONE_NOT_VERIFIED',
         smsSent: false,
       };
     }
 
-    const { data, error } = await supabase.functions.invoke("test-sms", {
+    const { data, error } = await supabase.functions.invoke('test-sms', {
       body: {},
     });
 
@@ -398,20 +408,20 @@ export async function sendTestSms(): Promise<TestSmsOutput> {
       // Handle rate limit error (429)
       if (error.status === 429) {
         const errorData = error.context?.json || {};
-        logger.warn("Test SMS: Rate limit exceeded");
+        logger.warn('Test SMS: Rate limit exceeded');
         return {
           success: false,
-          error: errorData.message || "Trop de requêtes. Veuillez réessayer plus tard.",
-          errorCode: "rate_limit_exceeded",
+          error: errorData.message || 'Trop de requêtes. Veuillez réessayer plus tard.',
+          errorCode: 'rate_limit_exceeded',
           smsSent: false,
         };
       }
 
-      logger.error("Test SMS error", { error });
+      logger.error('Test SMS error', { error });
       return {
         success: false,
         error: error.message,
-        errorCode: "FUNCTION_ERROR",
+        errorCode: 'FUNCTION_ERROR',
         smsSent: false,
       };
     }
@@ -419,45 +429,45 @@ export async function sendTestSms(): Promise<TestSmsOutput> {
     // Handle error codes from Edge Function
     if (data && !data.success) {
       const errorCode = data.errorCode;
-      logger.warn("Test SMS failed", { errorCode, error: data.error });
-      
-      if (errorCode === "no_credits") {
+      logger.warn('Test SMS failed', { errorCode, error: data.error });
+
+      if (errorCode === 'no_credits') {
         return {
           success: false,
-          error: "Crédits insuffisants",
-          errorCode: "no_credits",
+          error: 'Crédits insuffisants',
+          errorCode: 'no_credits',
           smsSent: false,
         };
       }
-      if (errorCode === "quota_reached") {
+      if (errorCode === 'quota_reached') {
         return {
           success: false,
           error: "Limite atteinte aujourd'hui",
-          errorCode: "quota_reached",
+          errorCode: 'quota_reached',
           smsSent: false,
         };
       }
-      if (errorCode === "twilio_failed") {
+      if (errorCode === 'twilio_failed') {
         return {
           success: false,
           error: "Impossible d'envoyer l'alerte, réessaiera",
-          errorCode: "twilio_failed",
+          errorCode: 'twilio_failed',
           smsSent: false,
         };
       }
-      
+
       return data as TestSmsOutput;
     }
 
-    logger.info("Test SMS sent successfully");
+    logger.info('Test SMS sent successfully');
     return data as TestSmsOutput;
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    logger.error("Test SMS exception", { error: errorMessage });
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    logger.error('Test SMS exception', { error: errorMessage });
     return {
       success: false,
       error: errorMessage,
-      errorCode: "EXCEPTION",
+      errorCode: 'EXCEPTION',
       smsSent: false,
     };
   }
@@ -468,37 +478,39 @@ export async function sendTestSms(): Promise<TestSmsOutput> {
  */
 export async function triggerSos(input: SosInput = {}): Promise<SosOutput> {
   try {
-    logger.info("Triggering SOS alert", { tripId: input.tripId });
+    logger.info('Triggering SOS alert', { tripId: input.tripId });
 
     // Check if user phone is verified
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
-      logger.error("SOS: No authenticated user");
+      logger.error('SOS: No authenticated user');
       return {
         success: false,
-        error: "Not authenticated",
-        errorCode: "UNAUTHORIZED",
+        error: 'Not authenticated',
+        errorCode: 'UNAUTHORIZED',
         smsSent: false,
       };
     }
 
     const { data: profile } = await supabase
-      .from("profiles")
-      .select("phone_verified")
-      .eq("id", user.id)
+      .from('profiles')
+      .select('phone_verified')
+      .eq('id', user.id)
       .single();
 
     if (!profile?.phone_verified) {
-      logger.warn("SOS: Phone not verified", { userId: user.id });
+      logger.warn('SOS: Phone not verified', { userId: user.id });
       return {
         success: false,
-        error: "Phone number not verified",
-        errorCode: "PHONE_NOT_VERIFIED",
+        error: 'Phone number not verified',
+        errorCode: 'PHONE_NOT_VERIFIED',
         smsSent: false,
       };
     }
 
-    const { data, error } = await supabase.functions.invoke("sos", {
+    const { data, error } = await supabase.functions.invoke('sos', {
       body: input,
     });
 
@@ -506,20 +518,20 @@ export async function triggerSos(input: SosInput = {}): Promise<SosOutput> {
       // Handle rate limit error (429)
       if (error.status === 429) {
         const errorData = error.context?.json || {};
-        logger.warn("SOS: Rate limit exceeded");
+        logger.warn('SOS: Rate limit exceeded');
         return {
           success: false,
-          error: errorData.message || "Trop de requêtes. Veuillez réessayer plus tard.",
-          errorCode: "rate_limit_exceeded",
+          error: errorData.message || 'Trop de requêtes. Veuillez réessayer plus tard.',
+          errorCode: 'rate_limit_exceeded',
           smsSent: false,
         };
       }
 
-      logger.error("SOS error", { error });
+      logger.error('SOS error', { error });
       return {
         success: false,
         error: error.message,
-        errorCode: "FUNCTION_ERROR",
+        errorCode: 'FUNCTION_ERROR',
         smsSent: false,
       };
     }
@@ -527,93 +539,96 @@ export async function triggerSos(input: SosInput = {}): Promise<SosOutput> {
     // Handle error codes from Edge Function
     if (data && !data.success) {
       const errorCode = data.errorCode;
-      logger.warn("SOS failed", { errorCode, error: data.error });
-      
-      if (errorCode === "no_credits") {
+      logger.warn('SOS failed', { errorCode, error: data.error });
+
+      if (errorCode === 'no_credits') {
         return {
           success: false,
-          error: "Crédits insuffisants",
-          errorCode: "no_credits",
+          error: 'Crédits insuffisants',
+          errorCode: 'no_credits',
           smsSent: false,
         };
       }
-      if (errorCode === "quota_reached") {
+      if (errorCode === 'quota_reached') {
         return {
           success: false,
           error: "Limite atteinte aujourd'hui",
-          errorCode: "quota_reached",
+          errorCode: 'quota_reached',
           smsSent: false,
         };
       }
-      if (errorCode === "twilio_failed") {
+      if (errorCode === 'twilio_failed') {
         return {
           success: false,
           error: "Impossible d'envoyer l'alerte, réessaiera",
-          errorCode: "twilio_failed",
+          errorCode: 'twilio_failed',
           smsSent: false,
         };
       }
-      
+
       return data as SosOutput;
     }
 
-    logger.info("SOS alert sent successfully");
+    logger.info('SOS alert sent successfully');
     return data as SosOutput;
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    logger.error("SOS exception", { error: errorMessage });
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    logger.error('SOS exception', { error: errorMessage });
     return {
       success: false,
       error: errorMessage,
-      errorCode: "EXCEPTION",
+      errorCode: 'EXCEPTION',
       smsSent: false,
     };
   }
 }
 
-
 /**
  * Cancel an active trip
  */
-export async function cancelTrip(tripId: string): Promise<{ success: boolean; error?: string; errorCode?: string }> {
+export async function cancelTrip(
+  tripId: string,
+): Promise<{ success: boolean; error?: string; errorCode?: string }> {
   try {
-    logger.info("Cancelling trip", { tripId });
+    logger.info('Cancelling trip', { tripId });
 
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
-      logger.error("Cancel trip: No authenticated user");
+      logger.error('Cancel trip: No authenticated user');
       return {
         success: false,
-        error: "Not authenticated",
-        errorCode: "UNAUTHORIZED",
+        error: 'Not authenticated',
+        errorCode: 'UNAUTHORIZED',
       };
     }
 
     // Update trip status to 'cancelled'
     const { error } = await supabase
-      .from("sessions")
-      .update({ status: "cancelled" })
-      .eq("id", tripId)
-      .eq("user_id", user.id);
+      .from('sessions')
+      .update({ status: 'cancelled' })
+      .eq('id', tripId)
+      .eq('user_id', user.id);
 
     if (error) {
-      logger.error("Cancel trip error", { error, tripId });
+      logger.error('Cancel trip error', { error, tripId });
       return {
         success: false,
         error: error.message,
-        errorCode: "DB_ERROR",
+        errorCode: 'DB_ERROR',
       };
     }
 
-    logger.info("Trip cancelled successfully", { tripId });
+    logger.info('Trip cancelled successfully', { tripId });
     return { success: true };
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    logger.error("Cancel trip exception", { error: errorMessage });
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    logger.error('Cancel trip exception', { error: errorMessage });
     return {
       success: false,
       error: errorMessage,
-      errorCode: "EXCEPTION",
+      errorCode: 'EXCEPTION',
     };
   }
 }

@@ -1,4 +1,4 @@
-import { logger } from "../utils/logger";
+import { logger } from '../utils/logger';
 import { Router, Request, Response } from 'express';
 import { sendFriendlyAlertSMSToMultiple } from '../services/friendly-sms';
 
@@ -27,7 +27,7 @@ router.post('/alert', async (req: Request, res: Response) => {
       userName,
       limitTimeStr,
       note,
-      location
+      location,
     );
 
     return res.status(200).json({ success: true, results });
@@ -56,11 +56,7 @@ router.post('/follow-up', async (req: Request, res: Response) => {
     logger.debug(`📤 Envoi de relances SMS friendly à ${contacts.length} contact(s)...`);
 
     const { sendFollowUpAlertSMSToMultiple } = await import('../services/friendly-sms');
-    const results = await sendFollowUpAlertSMSToMultiple(
-      contacts,
-      userName,
-      location
-    );
+    const results = await sendFollowUpAlertSMSToMultiple(contacts, userName, location);
 
     return res.status(200).json({ success: true, results });
   } catch (error) {
@@ -88,10 +84,7 @@ router.post('/confirmation', async (req: Request, res: Response) => {
     logger.debug(`📤 Envoi de confirmations SMS à ${contacts.length} contact(s)...`);
 
     const { sendConfirmationSMSToMultiple } = await import('../services/friendly-sms');
-    const results = await sendConfirmationSMSToMultiple(
-      contacts,
-      userName
-    );
+    const results = await sendConfirmationSMSToMultiple(contacts, userName);
 
     return res.status(200).json({ success: true, results });
   } catch (error) {

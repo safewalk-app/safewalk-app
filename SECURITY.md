@@ -12,9 +12,9 @@ SafeWalk suit les meilleures pratiques de sécurité pour protéger les données
 
 ```typescript
 // ❌ JAMAIS faire cela
-const TWILIO_ACCOUNT_SID = "ACb64f2e874590389edb14a4878f356d4b";
-const TWILIO_AUTH_TOKEN = "f50761d9f66c2196508efef4dba2e1d9";
-const SUPABASE_URL = "https://kycuteffcbqizyqlhczc.supabase.co";
+const TWILIO_ACCOUNT_SID = 'ACb64f2e874590389edb14a4878f356d4b';
+const TWILIO_AUTH_TOKEN = 'f50761d9f66c2196508efef4dba2e1d9';
+const SUPABASE_URL = 'https://kycuteffcbqizyqlhczc.supabase.co';
 ```
 
 ### ✅ À FAIRE
@@ -29,6 +29,7 @@ const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL;
 ### Configuration des Variables d'Environnement
 
 **Supabase (Backend) :**
+
 ```bash
 supabase secrets set TWILIO_ACCOUNT_SID=ACb64f2e874590389edb14a4878f356d4b
 supabase secrets set TWILIO_AUTH_TOKEN=f50761d9f66c2196508efef4dba2e1d9
@@ -36,6 +37,7 @@ supabase secrets set TWILIO_PHONE_NUMBER=+33939035429
 ```
 
 **Expo (Frontend) :**
+
 ```bash
 # Dans app.config.ts ou .env
 EXPO_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
@@ -82,27 +84,27 @@ grep -r "f50761d9f66c2196508efef4dba2e1d9" .
 
 ### Credentials Twilio
 
-| Donnée | Où stocker | Où exposer |
-|--------|-----------|-----------|
-| Account SID | Supabase Secrets | ❌ JAMAIS |
-| Auth Token | Supabase Secrets | ❌ JAMAIS |
-| Phone Number | Supabase Secrets | ❌ JAMAIS |
+| Donnée       | Où stocker       | Où exposer |
+| ------------ | ---------------- | ---------- |
+| Account SID  | Supabase Secrets | ❌ JAMAIS  |
+| Auth Token   | Supabase Secrets | ❌ JAMAIS  |
+| Phone Number | Supabase Secrets | ❌ JAMAIS  |
 
 ### Credentials Supabase
 
-| Donnée | Où stocker | Où exposer |
-|--------|-----------|-----------|
-| URL | `EXPO_PUBLIC_SUPABASE_URL` | ✅ OK (public) |
-| Service Role Key | Supabase Secrets | ❌ JAMAIS |
-| Anon Key | `SUPABASE_ANON_KEY` | ✅ OK (public) |
+| Donnée           | Où stocker                 | Où exposer     |
+| ---------------- | -------------------------- | -------------- |
+| URL              | `EXPO_PUBLIC_SUPABASE_URL` | ✅ OK (public) |
+| Service Role Key | Supabase Secrets           | ❌ JAMAIS      |
+| Anon Key         | `SUPABASE_ANON_KEY`        | ✅ OK (public) |
 
 ### Données Utilisateur
 
-| Donnée | Où stocker | Où exposer |
-|--------|-----------|-----------|
-| Numéro d'urgence | Supabase DB | ❌ JAMAIS dans le code |
-| Localisation | Supabase DB | ❌ JAMAIS dans les logs |
-| Prénom utilisateur | Supabase DB | ✅ OK (chiffré) |
+| Donnée             | Où stocker  | Où exposer              |
+| ------------------ | ----------- | ----------------------- |
+| Numéro d'urgence   | Supabase DB | ❌ JAMAIS dans le code  |
+| Localisation       | Supabase DB | ❌ JAMAIS dans les logs |
+| Prénom utilisateur | Supabase DB | ✅ OK (chiffré)         |
 
 ---
 
@@ -113,12 +115,15 @@ grep -r "f50761d9f66c2196508efef4dba2e1d9" .
 ```typescript
 const sosRequestSchema = z.object({
   firstName: z.string().min(1).max(100),
-  emergencyContacts: z.array(
-    z.object({
-      name: z.string().min(1).max(100),
-      phone: z.string().regex(/^\+?[1-9]\d{1,14}$/), // E.164 format
-    })
-  ).min(1).max(5),
+  emergencyContacts: z
+    .array(
+      z.object({
+        name: z.string().min(1).max(100),
+        phone: z.string().regex(/^\+?[1-9]\d{1,14}$/), // E.164 format
+      }),
+    )
+    .min(1)
+    .max(5),
   latitude: z.number().min(-90).max(90).optional(),
   longitude: z.number().min(-180).max(180).optional(),
 });
@@ -143,9 +148,9 @@ if (!e164Regex.test(phoneNumber)) {
 
 ```typescript
 const sosLimiter = rateLimit({
-  windowMs: 60 * 1000,  // 1 minute
-  max: 5,               // Max 5 requêtes par minute
-  message: "Trop de requêtes. Veuillez réessayer dans 1 minute.",
+  windowMs: 60 * 1000, // 1 minute
+  max: 5, // Max 5 requêtes par minute
+  message: 'Trop de requêtes. Veuillez réessayer dans 1 minute.',
 });
 ```
 
@@ -217,7 +222,9 @@ logger.debug('Session created', { sessionId, status });
 
 ```typescript
 // ✅ Utiliser Supabase Auth pour les utilisateurs
-const { data: { user } } = await supabase.auth.getUser();
+const {
+  data: { user },
+} = await supabase.auth.getUser();
 
 if (!user) {
   return new Response('Unauthorized', { status: 401 });
@@ -341,9 +348,10 @@ supabase --version
 ## Support
 
 Pour toute question de sécurité :
+
 - 📧 Email: security@safewalk.app
 - 🐛 GitHub Issues: https://github.com/safewalk-app/safewalk-app/security
 
 ---
 
-*Dernière mise à jour: 19 Février 2026*
+_Dernière mise à jour: 19 Février 2026_

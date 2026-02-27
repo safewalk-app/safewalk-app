@@ -3,6 +3,7 @@
 ## Cas d'erreur identifiés
 
 ### 1. **Code OTP incorrect**
+
 - **Cause** : L'utilisateur saisit un code qui ne correspond pas
 - **Code HTTP** : 401 Unauthorized
 - **Message** : "Code incorrect. X tentative(s) restante(s)"
@@ -10,6 +11,7 @@
 - **Visuel** : Champ rouge, icône d'erreur
 
 ### 2. **Trop de tentatives (3 max)**
+
 - **Cause** : L'utilisateur a échoué 3 fois
 - **Code HTTP** : 429 Too Many Requests
 - **Message** : "Trop de tentatives. Demandez un nouveau code."
@@ -17,6 +19,7 @@
 - **Visuel** : Alerte rouge, bouton d'action
 
 ### 3. **Code OTP expiré (10 min)**
+
 - **Cause** : L'utilisateur a attendu plus de 10 minutes
 - **Code HTTP** : 410 Gone
 - **Message** : "Code expiré. Demandez un nouveau code."
@@ -24,6 +27,7 @@
 - **Visuel** : Alerte orange, timer à 0
 
 ### 4. **Numéro de téléphone non trouvé**
+
 - **Cause** : L'utilisateur n'a pas d'OTP en attente
 - **Code HTTP** : 404 Not Found
 - **Message** : "Aucun code trouvé. Demandez un nouveau code."
@@ -31,6 +35,7 @@
 - **Visuel** : Alerte rouge
 
 ### 5. **Format numéro invalide**
+
 - **Cause** : Le numéro n'est pas au format E.164
 - **Code HTTP** : 400 Bad Request
 - **Message** : "Format invalide. Utilisez +33..."
@@ -38,6 +43,7 @@
 - **Visuel** : Champ rouge, message d'aide
 
 ### 6. **Format code invalide**
+
 - **Cause** : Le code n'a pas 6 chiffres
 - **Code HTTP** : 400 Bad Request
 - **Message** : "Le code doit avoir 6 chiffres"
@@ -45,6 +51,7 @@
 - **Visuel** : Champ rouge, message d'aide
 
 ### 7. **Erreur réseau**
+
 - **Cause** : Pas de connexion Internet
 - **Code HTTP** : Network Error
 - **Message** : "Erreur réseau. Vérifiez votre connexion."
@@ -52,6 +59,7 @@
 - **Visuel** : Alerte rouge, icône de connexion
 
 ### 8. **Erreur serveur**
+
 - **Cause** : Supabase/Twilio indisponible
 - **Code HTTP** : 500 Internal Server Error
 - **Message** : "Erreur serveur. Réessayez plus tard."
@@ -59,6 +67,7 @@
 - **Visuel** : Alerte rouge
 
 ### 9. **SMS non envoyé (Twilio)**
+
 - **Cause** : Twilio a rejeté l'envoi
 - **Code HTTP** : 500 Internal Server Error
 - **Message** : "Impossible d'envoyer le SMS. Vérifiez le numéro."
@@ -66,6 +75,7 @@
 - **Visuel** : Alerte rouge
 
 ### 10. **Limite d'envoi dépassée**
+
 - **Cause** : L'utilisateur a demandé trop de codes (rate limiting)
 - **Code HTTP** : 429 Too Many Requests
 - **Message** : "Trop de demandes. Réessayez dans 1 heure."
@@ -100,12 +110,12 @@
 
 ### Types d'erreurs
 
-| Type | Cause | Récupération | Visuel |
-|------|-------|--------------|--------|
-| **Validation** | Format invalide | Corriger l'entrée | 🔴 Rouge |
-| **Logique métier** | Code incorrect, expiré, tentatives | Renvoyer code ou réessayer | 🟠 Orange |
-| **Réseau** | Pas de connexion | Réessayer | 🔴 Rouge |
-| **Serveur** | Erreur 5xx | Réessayer ou contacter support | 🔴 Rouge |
+| Type               | Cause                              | Récupération                   | Visuel    |
+| ------------------ | ---------------------------------- | ------------------------------ | --------- |
+| **Validation**     | Format invalide                    | Corriger l'entrée              | 🔴 Rouge  |
+| **Logique métier** | Code incorrect, expiré, tentatives | Renvoyer code ou réessayer     | 🟠 Orange |
+| **Réseau**         | Pas de connexion                   | Réessayer                      | 🔴 Rouge  |
+| **Serveur**        | Erreur 5xx                         | Réessayer ou contacter support | 🔴 Rouge  |
 
 ---
 
@@ -117,11 +127,11 @@
 <ErrorAlert
   title="Code incorrect"
   message="Vous avez 2 tentative(s) restante(s)"
-  type="error"  // 'error' | 'warning' | 'info'
+  type="error" // 'error' | 'warning' | 'info'
   icon="alert-circle"
   action={{
-    label: "Réessayer",
-    onPress: handleRetry
+    label: 'Réessayer',
+    onPress: handleRetry,
   }}
 />
 ```
@@ -129,10 +139,7 @@
 ### 2. **ErrorMessage** - Message d'erreur simple
 
 ```tsx
-<ErrorMessage
-  text="Le code doit avoir 6 chiffres"
-  type="error"
-/>
+<ErrorMessage text="Le code doit avoir 6 chiffres" type="error" />
 ```
 
 ### 3. **ErrorState** - État d'erreur avec action
@@ -142,8 +149,8 @@
   title="Code expiré"
   description="Votre code a expiré après 10 minutes"
   action={{
-    label: "Demander un nouveau code",
-    onPress: handleResend
+    label: 'Demander un nouveau code',
+    onPress: handleResend,
   }}
   retryCount={2}
 />
@@ -248,18 +255,18 @@
 
 ### Français
 
-| Cas | Message | Action |
-|-----|---------|--------|
-| Code incorrect | "Code incorrect. X tentative(s) restante(s)" | Réessayer |
-| Trop de tentatives | "Trop de tentatives. Demandez un nouveau code." | Renvoyer |
-| Code expiré | "Code expiré. Demandez un nouveau code." | Renvoyer |
-| Numéro non trouvé | "Aucun code trouvé. Demandez un nouveau code." | Renvoyer |
-| Format numéro | "Format invalide. Utilisez +33..." | Corriger |
-| Format code | "Le code doit avoir 6 chiffres" | Corriger |
-| Erreur réseau | "Erreur réseau. Vérifiez votre connexion." | Réessayer |
-| Erreur serveur | "Erreur serveur. Réessayez plus tard." | Réessayer |
-| SMS non envoyé | "Impossible d'envoyer le SMS. Vérifiez le numéro." | Réessayer |
-| Limite dépassée | "Trop de demandes. Réessayez dans 1 heure." | Attendre |
+| Cas                | Message                                            | Action    |
+| ------------------ | -------------------------------------------------- | --------- |
+| Code incorrect     | "Code incorrect. X tentative(s) restante(s)"       | Réessayer |
+| Trop de tentatives | "Trop de tentatives. Demandez un nouveau code."    | Renvoyer  |
+| Code expiré        | "Code expiré. Demandez un nouveau code."           | Renvoyer  |
+| Numéro non trouvé  | "Aucun code trouvé. Demandez un nouveau code."     | Renvoyer  |
+| Format numéro      | "Format invalide. Utilisez +33..."                 | Corriger  |
+| Format code        | "Le code doit avoir 6 chiffres"                    | Corriger  |
+| Erreur réseau      | "Erreur réseau. Vérifiez votre connexion."         | Réessayer |
+| Erreur serveur     | "Erreur serveur. Réessayez plus tard."             | Réessayer |
+| SMS non envoyé     | "Impossible d'envoyer le SMS. Vérifiez le numéro." | Réessayer |
+| Limite dépassée    | "Trop de demandes. Réessayez dans 1 heure."        | Attendre  |
 
 ---
 
@@ -268,26 +275,26 @@
 ```typescript
 enum OtpErrorCode {
   // Validation (400)
-  INVALID_PHONE_FORMAT = "INVALID_PHONE_FORMAT",
-  INVALID_OTP_FORMAT = "INVALID_OTP_FORMAT",
-  EMPTY_PHONE = "EMPTY_PHONE",
-  EMPTY_OTP = "EMPTY_OTP",
+  INVALID_PHONE_FORMAT = 'INVALID_PHONE_FORMAT',
+  INVALID_OTP_FORMAT = 'INVALID_OTP_FORMAT',
+  EMPTY_PHONE = 'EMPTY_PHONE',
+  EMPTY_OTP = 'EMPTY_OTP',
 
   // Logique métier (4xx)
-  OTP_NOT_FOUND = "OTP_NOT_FOUND",           // 404
-  OTP_EXPIRED = "OTP_EXPIRED",               // 410
-  OTP_INVALID = "OTP_INVALID",               // 401
-  MAX_ATTEMPTS_EXCEEDED = "MAX_ATTEMPTS_EXCEEDED", // 429
-  RATE_LIMIT = "RATE_LIMIT",                 // 429
+  OTP_NOT_FOUND = 'OTP_NOT_FOUND', // 404
+  OTP_EXPIRED = 'OTP_EXPIRED', // 410
+  OTP_INVALID = 'OTP_INVALID', // 401
+  MAX_ATTEMPTS_EXCEEDED = 'MAX_ATTEMPTS_EXCEEDED', // 429
+  RATE_LIMIT = 'RATE_LIMIT', // 429
 
   // Serveur (5xx)
-  SMS_SEND_FAILED = "SMS_SEND_FAILED",       // 500
-  DATABASE_ERROR = "DATABASE_ERROR",         // 500
-  SERVER_ERROR = "SERVER_ERROR",             // 500
+  SMS_SEND_FAILED = 'SMS_SEND_FAILED', // 500
+  DATABASE_ERROR = 'DATABASE_ERROR', // 500
+  SERVER_ERROR = 'SERVER_ERROR', // 500
 
   // Réseau
-  NETWORK_ERROR = "NETWORK_ERROR",
-  TIMEOUT = "TIMEOUT",
+  NETWORK_ERROR = 'NETWORK_ERROR',
+  TIMEOUT = 'TIMEOUT',
 }
 ```
 
@@ -330,7 +337,7 @@ async verifyOtp(phone: string, code: string): Promise<VerifyOtpResponse> {
 
     if (!response.ok) {
       const data = await response.json();
-      
+
       // Mapper les erreurs serveur
       return {
         success: false,
@@ -367,12 +374,12 @@ export default function OtpVerificationScreen() {
     if (!result.success) {
       // Mapper le code d'erreur à un message
       const errorMessage = getErrorMessage(result.errorCode);
-      
+
       setError({
         code: result.errorCode,
         message: errorMessage,
         attemptsRemaining: result.attemptsRemaining,
-        action: getErrorAction(result.errorCode)
+        action: getErrorAction(result.errorCode),
       });
 
       setAttemptsRemaining(result.attemptsRemaining || 3);
@@ -394,9 +401,9 @@ export default function OtpVerificationScreen() {
           action={error.action}
         />
       )}
-      
+
       <OtpInput value={code} onChangeText={setCode} />
-      
+
       <TouchableOpacity onPress={handleVerify}>
         <Text>Vérifier</Text>
       </TouchableOpacity>
@@ -407,4 +414,4 @@ export default function OtpVerificationScreen() {
 
 ---
 
-*Documentation créée le 24 février 2026*
+_Documentation créée le 24 février 2026_

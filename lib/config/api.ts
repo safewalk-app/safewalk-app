@@ -1,6 +1,6 @@
 /**
  * Configuration API pour SafeWalk
- * 
+ *
  * Cette configuration garantit que l'URL de l'API est correctement définie
  * en développement et en production.
  */
@@ -11,16 +11,16 @@ import { logger } from '@/lib/logger';
 export function getApiUrl(): string {
   // 1. Essayer d'utiliser EXPO_PUBLIC_API_URL (définie dans les secrets Manus)
   const envApiUrl = process.env.EXPO_PUBLIC_API_URL;
-  
+
   if (envApiUrl) {
     logger.info('✅ API URL depuis EXPO_PUBLIC_API_URL:', envApiUrl);
     return envApiUrl;
   }
-  
+
   // 2. Fallback: utiliser l'URL publique Manus exposée
   const manusPublicUrl = 'https://3000-i97kkuvwkekymxd119cln-297f2a9c.us2.manus.computer';
   logger.warn('⚠️ EXPO_PUBLIC_API_URL non définie, utilisation du fallback:', manusPublicUrl);
-  
+
   return manusPublicUrl;
 }
 
@@ -34,7 +34,7 @@ export async function testApiConnection(): Promise<boolean> {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
     });
-    
+
     if (response.ok) {
       const data = await response.json();
       logger.info('✅ API Health Check OK:', data);

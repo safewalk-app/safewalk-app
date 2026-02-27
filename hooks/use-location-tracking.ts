@@ -19,7 +19,7 @@ export interface UseLocationTrackingOptions {
 
 /**
  * Hook pour tracker la position GPS et envoyer les pings automatiquement
- * 
+ *
  * Utilise expo-location pour obtenir la position et tripService.pingLocation()
  * pour envoyer les pings à Supabase
  */
@@ -99,10 +99,7 @@ export function useLocationTracking(options: UseLocationTrackingOptions) {
       });
 
       if (location) {
-        await sendLocationPing(
-          location.coords.latitude,
-          location.coords.longitude
-        );
+        await sendLocationPing(location.coords.latitude, location.coords.longitude);
       }
 
       // Configurer l'intervalle pour envoyer les pings
@@ -115,7 +112,7 @@ export function useLocationTracking(options: UseLocationTrackingOptions) {
           if (currentLocation) {
             await sendLocationPing(
               currentLocation.coords.latitude,
-              currentLocation.coords.longitude
+              currentLocation.coords.longitude,
             );
           }
         } catch (error) {

@@ -30,6 +30,7 @@ if (reduceMotion) {
 ```
 
 **Détection:**
+
 - ✅ Lecteur d'écran activé (iOS/Android)
 - ✅ Texte gras activé (iOS/Android)
 - ✅ Réduire les animations (iOS)
@@ -40,6 +41,7 @@ if (reduceMotion) {
 Tous les composants d'animation respectent `reduceMotionEnabled`:
 
 #### 1. ScreenTransitionWrapper
+
 ```typescript
 <ScreenTransitionWrapper type="fade" duration={300}>
   {/* Animation fade: 300ms normal, 0ms si réduire les animations */}
@@ -48,10 +50,12 @@ Tous les composants d'animation respectent `reduceMotionEnabled`:
 ```
 
 **Comportement:**
+
 - Normal: Fade in/slide up/slide down (300ms)
 - Réduit: Affichage immédiat (0ms)
 
 #### 2. FeedbackAnimation
+
 ```typescript
 <FeedbackAnimation state={submitState}>
   {/* Animation feedback: 300-600ms normal, 0ms si réduit */}
@@ -60,10 +64,12 @@ Tous les composants d'animation respectent `reduceMotionEnabled`:
 ```
 
 **Comportement:**
+
 - Normal: Loading (300ms), Success (500ms), Error (600ms)
 - Réduit: Changements d'état instantanés (0ms)
 
 #### 3. useStateAnimation
+
 ```typescript
 const { animatedStyle } = useStateAnimation(state, {
   duration: 300,
@@ -73,6 +79,7 @@ const { animatedStyle } = useStateAnimation(state, {
 ```
 
 **Comportement:**
+
 - Normal: Animations subtiles (pulse, shake, fade)
 - Réduit: Pas d'animation (durée 0ms)
 
@@ -81,6 +88,7 @@ const { animatedStyle } = useStateAnimation(state, {
 ## ✅ Checklist d'Accessibilité
 
 ### Animations
+
 - [x] Hook `useReduceMotion` implémenté
 - [x] ScreenTransitionWrapper respecte reduceMotionEnabled
 - [x] FeedbackAnimation respecte reduceMotionEnabled
@@ -88,21 +96,25 @@ const { animatedStyle } = useStateAnimation(state, {
 - [x] Tous les composants d'animation adaptés
 
 ### Contraste et Couleurs
+
 - [ ] Vérifier le contraste WCAG AA (4.5:1 pour le texte)
 - [ ] Tester avec un simulateur de daltonisme
 - [ ] Vérifier que les couleurs seules ne transmettent pas l'information
 
 ### Lecteur d'Écran
+
 - [ ] Tester avec VoiceOver (iOS) et TalkBack (Android)
 - [ ] Vérifier les labels accessibles
 - [ ] Vérifier la structure sémantique
 
 ### Navigation au Clavier
+
 - [ ] Tester la navigation au clavier (Tab, Shift+Tab)
 - [ ] Vérifier l'ordre de focus
 - [ ] Vérifier les touches d'accès rapide
 
 ### Tailles de Texte
+
 - [ ] Tester avec des tailles de texte augmentées
 - [ ] Vérifier que le texte ne se coupe pas
 - [ ] Vérifier la lisibilité
@@ -145,12 +157,12 @@ const { animatedStyle } = useStateAnimation(state, {
 
 SafeWalk vise la conformité WCAG 2.1 niveau AA:
 
-| Critère | Statut | Notes |
-|---------|--------|-------|
-| 2.3.3 Animation from Interactions | ✅ | Respecte reduceMotionEnabled |
-| 1.4.3 Contrast (Minimum) | 🔄 | À vérifier |
-| 2.1.1 Keyboard | 🔄 | À vérifier |
-| 4.1.3 Status Messages | 🔄 | À vérifier |
+| Critère                           | Statut | Notes                        |
+| --------------------------------- | ------ | ---------------------------- |
+| 2.3.3 Animation from Interactions | ✅     | Respecte reduceMotionEnabled |
+| 1.4.3 Contrast (Minimum)          | 🔄     | À vérifier                   |
+| 2.1.1 Keyboard                    | 🔄     | À vérifier                   |
+| 4.1.3 Status Messages             | 🔄     | À vérifier                   |
 
 ### ADA (Americans with Disabilities Act)
 
@@ -172,6 +184,7 @@ SafeWalk respecte les directives ADA pour l'accessibilité mobile.
    - `useStateAnimation` pour les animations personnalisées
 
 3. **Respecter les préférences:**
+
    ```typescript
    const reduceMotion = useReduceMotion();
    const duration = reduceMotion ? 0 : 300;
@@ -194,16 +207,19 @@ SafeWalk respecte les directives ADA pour l'accessibilité mobile.
 ## 📚 Ressources
 
 ### Documentation Officielle
+
 - [WCAG 2.1 Guidelines](https://www.w3.org/WAI/WCAG21/quickref/)
 - [Apple Human Interface Guidelines - Accessibility](https://developer.apple.com/design/human-interface-guidelines/accessibility)
 - [Android Accessibility Guidelines](https://developer.android.com/guide/topics/ui/accessibility)
 
 ### Outils de Test
+
 - [WAVE Web Accessibility Evaluation Tool](https://wave.webaim.org/)
 - [Axe DevTools](https://www.deque.com/axe/devtools/)
 - [Lighthouse (Chrome DevTools)](https://developers.google.com/web/tools/lighthouse)
 
 ### Ressources Supplémentaires
+
 - [WebAIM - Web Accessibility In Mind](https://webaim.org/)
 - [The A11Y Project](https://www.a11yproject.com/)
 - [Accessible Colors](https://accessible-colors.com/)

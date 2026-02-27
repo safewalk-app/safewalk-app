@@ -77,7 +77,7 @@ export async function checkNetworkBeforeAction(): Promise<{
   const state = await NetInfo.fetch();
   const isConnected = state.isConnected ?? false;
   const type = state.type || 'unknown';
-  
+
   // On peut envoyer des SMS si connecté (WiFi ou cellulaire)
   const canSendSMS = isConnected && (type === 'wifi' || type === 'cellular');
 

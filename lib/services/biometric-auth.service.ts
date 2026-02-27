@@ -1,9 +1,9 @@
 /**
  * Biometric Authentication Service
- * 
+ *
  * Implémente l'authentification biométrique (Face ID/Touch ID)
  * pour protéger l'accès aux tokens sensibles
- * 
+ *
  * Fonctionnalités:
  * - Détection des capacités biométriques
  * - Authentification Face ID (iOS)
@@ -85,7 +85,7 @@ class BiometricAuthService {
         supportedTypes: this.supportedTypes,
       });
     } catch (error) {
-      logger.error('❌ [Biometric Auth] Erreur lors de l\'initialisation:', error);
+      logger.error("❌ [Biometric Auth] Erreur lors de l'initialisation:", error);
       this.isAvailable = false;
     }
   }
@@ -107,7 +107,9 @@ class BiometricAuthService {
   /**
    * Authentifier avec la biométrie
    */
-  public async authenticate(reason: string = 'Authentification requise'): Promise<BiometricAuthResult> {
+  public async authenticate(
+    reason: string = 'Authentification requise',
+  ): Promise<BiometricAuthResult> {
     try {
       if (!this.isBiometricAvailable()) {
         logger.warn('⚠️ [Biometric Auth] Biométrie non disponible');
@@ -129,7 +131,7 @@ class BiometricAuthService {
         };
       }
 
-      logger.info('🔐 [Biometric Auth] Demande d\'authentification biométrique');
+      logger.info("🔐 [Biometric Auth] Demande d'authentification biométrique");
 
       // TODO: Implémenter l'authentification biométrique avec expo-local-authentication
       // Pour le moment, simuler une authentification réussie
@@ -142,7 +144,7 @@ class BiometricAuthService {
         timestamp: this.lastAuthTime,
       };
     } catch (error) {
-      logger.error('❌ [Biometric Auth] Erreur lors de l\'authentification:', error);
+      logger.error("❌ [Biometric Auth] Erreur lors de l'authentification:", error);
       return {
         success: false,
         biometricType: BiometricType.NONE,
@@ -165,7 +167,7 @@ class BiometricAuthService {
    */
   public invalidateAuthenticationCache(): void {
     this.lastAuthTime = 0;
-    logger.info('✅ [Biometric Auth] Cache d\'authentification invalidé');
+    logger.info("✅ [Biometric Auth] Cache d'authentification invalidé");
   }
 
   /**

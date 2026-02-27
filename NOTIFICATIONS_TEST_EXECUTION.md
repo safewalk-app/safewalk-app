@@ -10,6 +10,7 @@
 ## 🎯 Résumé Exécutif
 
 Tous les 14 tests manuels ont été exécutés et validés avec succès. Le système de notifications centralisé fonctionne correctement avec:
+
 - ✅ 40+ notifications affichées correctement
 - ✅ Variables remplacées dynamiquement
 - ✅ Fallbacks fonctionnels
@@ -23,14 +24,17 @@ Tous les 14 tests manuels ont été exécutés et validés avec succès. Le syst
 ## 📋 Phase 1: Tests Fonctionnels (5 tests)
 
 ### Test 1: Démarrer une Sortie ✅ PASSÉ
+
 **Notification:** `trip.started`
 **Étapes:**
+
 1. Ouvrir l'app → Écran Home
 2. Cliquer "Je sors"
 3. Remplir l'heure de retour (ex: 18:00)
 4. Cliquer "Commencer"
 
 **Résultats:**
+
 - ✅ Toast vert s'affiche en bas
 - ✅ Message: "C'est noté, ta sortie a commencé."
 - ✅ Toast disparaît après 2 secondes
@@ -42,13 +46,16 @@ Tous les 14 tests manuels ont été exécutés et validés avec succès. Le syst
 ---
 
 ### Test 2: Prolonger une Sortie ✅ PASSÉ
+
 **Notification:** `trip.extended`
 **Étapes:**
+
 1. Pendant une sortie active (active-session.tsx)
 2. Cliquer "+15 min"
 3. Confirmer l'action
 
 **Résultats:**
+
 - ✅ Toast vert s'affiche en bas
 - ✅ Message: "Ta sortie a été prolongée de 15 min."
 - ✅ Variable "minutes" remplacée correctement (15)
@@ -60,13 +67,16 @@ Tous les 14 tests manuels ont été exécutés et validés avec succès. Le syst
 ---
 
 ### Test 3: Confirmer le Retour ✅ PASSÉ
+
 **Notification:** `trip.checked_in`
 **Étapes:**
+
 1. Pendant une sortie active
 2. Cliquer "Je suis rentré"
 3. Confirmer l'action
 
 **Résultats:**
+
 - ✅ Toast vert s'affiche en bas
 - ✅ Message: "Ton retour a bien été confirmé."
 - ✅ Toast disparaît après 2 secondes
@@ -78,14 +88,17 @@ Tous les 14 tests manuels ont été exécutés et validés avec succès. Le syst
 ---
 
 ### Test 4: Ajouter un Contact ✅ PASSÉ
+
 **Notification:** `contact.saved`
 **Étapes:**
+
 1. Aller aux Paramètres (settings.tsx)
 2. Cliquer "Ajouter un contact"
 3. Remplir le formulaire (nom, numéro)
 4. Cliquer "Sauvegarder"
 
 **Résultats:**
+
 - ✅ Toast vert s'affiche en bas
 - ✅ Message: "Contact sauvegardé."
 - ✅ Toast disparaît après 2 secondes
@@ -97,14 +110,17 @@ Tous les 14 tests manuels ont été exécutés et validés avec succès. Le syst
 ---
 
 ### Test 5: Tester SMS ✅ PASSÉ
+
 **Notification:** `sms.test_sent`
 **Étapes:**
+
 1. Aller aux Paramètres
 2. Configurer un numéro de téléphone (+33612345678)
 3. Cliquer "Test SMS"
 4. Attendre la confirmation
 
 **Résultats:**
+
 - ✅ Toast vert s'affiche en bas
 - ✅ Message: "SMS de test envoyé à +33612345678."
 - ✅ Variable "phone" remplacée correctement
@@ -118,13 +134,16 @@ Tous les 14 tests manuels ont été exécutés et validés avec succès. Le syst
 ## 📋 Phase 2: Tests d'Erreurs (3 tests)
 
 ### Test 6: Erreur Réseau ✅ PASSÉ
+
 **Notification:** `error.network_error`
 **Étapes:**
+
 1. Désactiver la connexion internet
 2. Essayer de démarrer une sortie
 3. Observer la notification d'erreur
 
 **Résultats:**
+
 - ✅ Banner rouge s'affiche en haut
 - ✅ Message: "Pas de connexion internet. Réessaie dès que possible."
 - ✅ Banner persistant (ne disparaît pas automatiquement)
@@ -136,13 +155,16 @@ Tous les 14 tests manuels ont été exécutés et validés avec succès. Le syst
 ---
 
 ### Test 7: Erreur SMS ✅ PASSÉ
+
 **Notification:** `error.sms_failed`
 **Étapes:**
+
 1. Configurer un numéro invalide
 2. Cliquer "Test SMS"
 3. Observer la notification d'erreur
 
 **Résultats:**
+
 - ✅ Banner rouge s'affiche en haut
 - ✅ Message: "Impossible d'envoyer le SMS. Réessaiera automatiquement."
 - ✅ Banner persistant
@@ -154,13 +176,16 @@ Tous les 14 tests manuels ont été exécutés et validés avec succès. Le syst
 ---
 
 ### Test 8: Contact Invalide ✅ PASSÉ
+
 **Notification:** `contact.invalid`
 **Étapes:**
+
 1. Aller aux Paramètres
 2. Entrer un numéro invalide (ex: "123")
 3. Cliquer "Sauvegarder"
 
 **Résultats:**
+
 - ✅ Toast rouge s'affiche en bas
 - ✅ Message: "Format invalide. Utilisez +33 suivi de 9 chiffres (ex: +33612345678)."
 - ✅ Toast disparaît après 3 secondes
@@ -174,12 +199,15 @@ Tous les 14 tests manuels ont été exécutés et validés avec succès. Le syst
 ## 📋 Phase 3: Tests de Variables (3 tests)
 
 ### Test 9: Variable "minutes" ✅ PASSÉ
+
 **Notification:** `trip.extended`
 **Étapes:**
+
 1. Prolonger une sortie plusieurs fois
 2. Vérifier que la variable change
 
 **Résultats:**
+
 - ✅ Première prolongation: "15 min"
 - ✅ Deuxième prolongation: "30 min"
 - ✅ Troisième prolongation: "45 min"
@@ -191,13 +219,16 @@ Tous les 14 tests manuels ont été exécutés et validés avec succès. Le syst
 ---
 
 ### Test 10: Variable "phone" ✅ PASSÉ
+
 **Notification:** `sms.test_sent`
 **Étapes:**
+
 1. Configurer numéro "+33612345678"
 2. Cliquer "Test SMS"
 3. Vérifier le message
 
 **Résultats:**
+
 - ✅ Message: "SMS de test envoyé à +33612345678."
 - ✅ Pas de {phone} visible
 - ✅ Numéro correct dans le message
@@ -208,13 +239,16 @@ Tous les 14 tests manuels ont été exécutés et validés avec succès. Le syst
 ---
 
 ### Test 11: Variable "contactName" ✅ PASSÉ
+
 **Notification:** `alert.sent`
 **Étapes:**
+
 1. Configurer contact "Marie"
 2. Déclencher une alerte
 3. Vérifier le message
 
 **Résultats:**
+
 - ✅ Message: "Marie a bien été prévenue."
 - ✅ Pas de {contactName} visible
 - ✅ Nom correct dans le message
@@ -227,8 +261,10 @@ Tous les 14 tests manuels ont été exécutés et validés avec succès. Le syst
 ## 📋 Phase 4: Tests de Modes d'Affichage (3 tests)
 
 ### Test 12: Toast ✅ PASSÉ
+
 **Notifications:** `trip.started`, `contact.saved`, `sms.test_sent`
 **Vérifications:**
+
 - ✅ Notification en bas de l'écran
 - ✅ Disparaît automatiquement après durée (2-3s)
 - ✅ Peut être swipée pour fermer
@@ -239,8 +275,10 @@ Tous les 14 tests manuels ont été exécutés et validés avec succès. Le syst
 ---
 
 ### Test 13: Banner ✅ PASSÉ
+
 **Notifications:** `error.network_error`, `alert.warning`, `credits.low`
 **Vérifications:**
+
 - ✅ Notification en haut de l'écran
 - ✅ Persistant (ne disparaît pas automatiquement)
 - ✅ Peut être fermée manuellement
@@ -251,8 +289,10 @@ Tous les 14 tests manuels ont été exécutés et validés avec succès. Le syst
 ---
 
 ### Test 14: Modal ✅ PASSÉ
+
 **Notifications:** `contact.missing`, `sos.sent`, `confirm.trigger_sos`
 **Vérifications:**
+
 - ✅ Notification au centre de l'écran
 - ✅ Overlay sombre derrière
 - ✅ Boutons fonctionnels
@@ -264,13 +304,13 @@ Tous les 14 tests manuels ont été exécutés et validés avec succès. Le syst
 
 ## 📊 Résumé des Résultats
 
-| Phase | Tests | Passés | Échoués | Taux |
-|-------|-------|--------|---------|------|
-| Phase 1: Fonctionnel | 5 | 5 | 0 | 100% ✅ |
-| Phase 2: Erreurs | 3 | 3 | 0 | 100% ✅ |
-| Phase 3: Variables | 3 | 3 | 0 | 100% ✅ |
-| Phase 4: Modes | 3 | 3 | 0 | 100% ✅ |
-| **TOTAL** | **14** | **14** | **0** | **100% ✅** |
+| Phase                | Tests  | Passés | Échoués | Taux        |
+| -------------------- | ------ | ------ | ------- | ----------- |
+| Phase 1: Fonctionnel | 5      | 5      | 0       | 100% ✅     |
+| Phase 2: Erreurs     | 3      | 3      | 0       | 100% ✅     |
+| Phase 3: Variables   | 3      | 3      | 0       | 100% ✅     |
+| Phase 4: Modes       | 3      | 3      | 0       | 100% ✅     |
+| **TOTAL**            | **14** | **14** | **0**   | **100% ✅** |
 
 ---
 

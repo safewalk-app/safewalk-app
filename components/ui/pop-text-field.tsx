@@ -34,11 +34,7 @@ export function PopTextField({
 }: PopTextFieldProps) {
   return (
     <View className="gap-2">
-      {label && (
-        <Text className="text-sm font-semibold text-foreground">
-          {label}
-        </Text>
-      )}
+      {label && <Text className="text-sm font-semibold text-foreground">{label}</Text>}
 
       <GlassCard className="p-3">
         <TextInput
@@ -50,10 +46,7 @@ export function PopTextField({
           multiline={multiline}
           numberOfLines={numberOfLines}
           keyboardType={keyboardType}
-          className={cn(
-            'text-base text-foreground',
-            !editable && 'opacity-60'
-          )}
+          className={cn('text-base text-foreground', !editable && 'opacity-60')}
           style={{
             color: '#0B1220',
             fontSize: 16,
@@ -63,12 +56,7 @@ export function PopTextField({
       </GlassCard>
 
       {helperText && (
-        <Text className={cn(
-          'text-xs',
-          error ? 'text-danger' : 'text-muted'
-        )}>
-          {helperText}
-        </Text>
+        <Text className={cn('text-xs', error ? 'text-danger' : 'text-muted')}>{helperText}</Text>
       )}
     </View>
   );

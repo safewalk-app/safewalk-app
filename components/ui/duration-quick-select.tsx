@@ -11,23 +11,15 @@ interface DurationQuickSelectProps {
   onSelect: (minutes: number) => void;
 }
 
-export function DurationQuickSelect({
-  options,
-  onSelect,
-}: DurationQuickSelectProps) {
+export function DurationQuickSelect({ options, onSelect }: DurationQuickSelectProps) {
   const colors = useColors();
 
   return (
     <View className="gap-2">
-      <Text className="text-xs font-semibold text-muted uppercase tracking-wide">
-        Durée rapide
-      </Text>
+      <Text className="text-xs font-semibold text-muted uppercase tracking-wide">Durée rapide</Text>
       <View className="flex-row gap-2 flex-wrap">
         {options.map((option) => (
-          <Pressable
-            key={option.minutes}
-            onPress={() => onSelect(option.minutes)}
-          >
+          <Pressable key={option.minutes} onPress={() => onSelect(option.minutes)}>
             {({ pressed }) => (
               <View
                 className="px-4 py-2 rounded-full border"

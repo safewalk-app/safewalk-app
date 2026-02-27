@@ -1,8 +1,8 @@
-import * as Api from "@/lib/_core/api";
-import * as Auth from "@/lib/_core/auth";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { Platform } from "react-native";
-import { logger } from "@/lib/logger";
+import * as Api from '@/lib/_core/api';
+import * as Auth from '@/lib/_core/auth';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Platform } from 'react-native';
+import { logger } from '@/lib/logger';
 
 type UseAuthOptions = {
   autoFetch?: boolean;
@@ -15,16 +15,16 @@ export function useAuth(options?: UseAuthOptions) {
   const [error, setError] = useState<Error | null>(null);
 
   const fetchUser = useCallback(async () => {
-    logger.info("[useAuth] fetchUser called");
+    logger.info('[useAuth] fetchUser called');
     try {
       setLoading(true);
       setError(null);
 
       // Web platform: use cookie-based auth, fetch user from API
-      if (Platform.OS === "web") {
-        logger.info("[useAuth] Web platform: fetching user from API...");
+      if (Platform.OS === 'web') {
+        logger.info('[useAuth] Web platform: fetching user from API...');
         const apiUser = await Api.getMe();
-        logger.info("[useAuth] API user response:", apiUser);
+        logger.info('[useAuth] API user response:', apiUser);
 
         if (apiUser) {
           const userInfo: Auth.User = {
@@ -38,9 +38,9 @@ export function useAuth(options?: UseAuthOptions) {
           setUser(userInfo);
           // Cache user info in localStorage for faster subsequent loads
           await Auth.setUserInfo(userInfo);
-          logger.info("[useAuth] Web user set from API:", userInfo);
+          logger.info('[useAuth] Web user set from API:', userInfo);
         } else {
-          logger.info("[useAuth] Web: No authenticated user from API");
+          logger.info('[useAuth] Web: No authenticated user from API');
           setUser(null);
           await Auth.clearUserInfo();
         }
@@ -48,36 +48,36 @@ export function useAuth(options?: UseAuthOptions) {
       }
 
       // Native platform: use token-based auth
-      logger.info("[useAuth] Native platform: checking for session token...");
+      logger.info('[useAuth] Native platform: checking for session token...');
       const sessionToken = await Auth.getSessionToken();
       logger.info(
-        "[useAuth] Session token:",
-        sessionToken ? `present (${sessionToken.substring(0, 20)}...)` : "missing",
+        '[useAuth] Session token:',
+        sessionToken ? `present (${sessionToken.substring(0, 20)}...)` : 'missing',
       );
       if (!sessionToken) {
-        logger.info("[useAuth] No session token, setting user to null");
+        logger.info('[useAuth] No session token, setting user to null');
         setUser(null);
         return;
       }
 
       // Use cached user info for native (token validates the session)
       const cachedUser = await Auth.getUserInfo();
-      logger.info("[useAuth] Cached user:", cachedUser);
+      logger.info('[useAuth] Cached user:', cachedUser);
       if (cachedUser) {
-        logger.info("[useAuth] Using cached user info");
+        logger.info('[useAuth] Using cached user info');
         setUser(cachedUser);
       } else {
-        logger.info("[useAuth] No cached user, setting user to null");
+        logger.info('[useAuth] No cached user, setting user to null');
         setUser(null);
       }
     } catch (err) {
-      const error = err instanceof Error ? err : new Error("Failed to fetch user");
-      logger.error("[useAuth] fetchUser error:", error);
+      const error = err instanceof Error ? err : new Error('Failed to fetch user');
+      logger.error('[useAuth] fetchUser error:', error);
       setError(error);
       setUser(null);
     } finally {
       setLoading(false);
-      logger.info("[useAuth] fetchUser completed, loading:", false);
+      logger.info('[useAuth] fetchUser completed, loading:', false);
     }
   }, []);
 
@@ -85,7 +85,7 @@ export function useAuth(options?: UseAuthOptions) {
     try {
       await Api.logout();
     } catch (err) {
-      logger.error("[Auth] Logout API call failed:", err);
+      logger.error('[Auth] Logout API call failed:', err);
       // Continue with logout even if API call fails
     } finally {
       await Auth.removeSessionToken();
@@ -98,18 +98,18 @@ export function useAuth(options?: UseAuthOptions) {
   const isAuthenticated = useMemo(() => Boolean(user), [user]);
 
   useEffect(() => {
-    logger.info("[useAuth] useEffect triggered, autoFetch:", autoFetch, "platform:", Platform.OS);
+    logger.info('[useAuth] useEffect triggered, autoFetch:', autoFetch, 'platform:', Platform.OS);
     if (autoFetch) {
-      if (Platform.OS === "web") {
+      if (Platform.OS === 'web') {
         // Web: fetch user from API directly (user will login manually if needed)
-        logger.info("[useAuth] Web: fetching user from API...");
+        logger.info('[useAuth] Web: fetching user from API...');
         fetchUser();
       } else {
         // Native: check for cached user info first for faster initial load
         Auth.getUserInfo().then((cachedUser) => {
-          logger.info("[useAuth] Native cached user check:", cachedUser);
+          logger.info('[useAuth] Native cached user check:', cachedUser);
           if (cachedUser) {
-            logger.info("[useAuth] Native: setting cached user immediately");
+            logger.info('[useAuth] Native: setting cached user immediately');
             setUser(cachedUser);
             setLoading(false);
           } else {
@@ -119,13 +119,13 @@ export function useAuth(options?: UseAuthOptions) {
         });
       }
     } else {
-      logger.info("[useAuth] autoFetch disabled, setting loading to false");
+      logger.info('[useAuth] autoFetch disabled, setting loading to false');
       setLoading(false);
     }
   }, [autoFetch, fetchUser]);
 
   useEffect(() => {
-    logger.info("[useAuth] State updated:", {
+    logger.info('[useAuth] State updated:', {
       hasUser: !!user,
       loading,
       isAuthenticated,

@@ -15,7 +15,7 @@ interface ScreenTransitionProps extends ViewProps {
 
 /**
  * ScreenTransition - Adds subtle fade-in and slide-up animation to screen content
- * 
+ *
  * Usage:
  * ```tsx
  * <ScreenTransition>

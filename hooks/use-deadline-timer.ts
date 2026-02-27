@@ -12,11 +12,11 @@ export interface DeadlineTimerState {
  * Hook pour afficher un countdown jusqu'à une deadline
  * Affiche le temps restant en format HH:MM:SS
  * Alerte si < 5 minutes
- * 
+ *
  * Utilisation:
  * ```tsx
  * const deadline = useDeadlineTimer(new Date(deadlineISO));
- * 
+ *
  * <Text className={deadline.isAlertImminent ? "text-error" : "text-foreground"}>
  *   {deadline.displayText}
  * </Text>
@@ -25,7 +25,7 @@ export interface DeadlineTimerState {
 export function useDeadlineTimer(
   deadline: Date | null | undefined,
   onExpired?: () => void,
-  onAlertImminent?: () => void
+  onAlertImminent?: () => void,
 ): DeadlineTimerState {
   const [timeRemaining, setTimeRemaining] = useState(0);
   const [isAlertImminent, setIsAlertImminent] = useState(false);
@@ -88,7 +88,7 @@ export function useDeadlineTimer(
 
     const now = Date.now();
     const deadlineTime = deadline.getTime();
-    const createdTime = deadlineTime - (timeRemaining * 1000); // Estimer le temps de création
+    const createdTime = deadlineTime - timeRemaining * 1000; // Estimer le temps de création
     const totalDuration = deadlineTime - createdTime;
     const elapsed = now - createdTime;
 
@@ -108,7 +108,7 @@ export function useDeadlineTimer(
  * Hook pour gérer plusieurs deadlines (pour futures extensions)
  */
 export function useMultipleDeadlines(
-  deadlines: Record<string, Date | null | undefined>
+  deadlines: Record<string, Date | null | undefined>,
 ): Record<string, DeadlineTimerState> {
   const result: Record<string, DeadlineTimerState> = {};
 

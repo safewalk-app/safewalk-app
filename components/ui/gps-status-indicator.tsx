@@ -45,7 +45,7 @@ export function GPSStatusIndicator({ enabled, className = '' }: GPSStatusIndicat
       setIsActive(diff < 30000);
 
       if (diff < 5000) {
-        setDisplayTime('À l\'instant');
+        setDisplayTime("À l'instant");
       } else if (diff < 60000) {
         setDisplayTime(`Il y a ${Math.floor(diff / 1000)}s`);
       } else if (diff < 3600000) {
@@ -109,12 +109,8 @@ export function GPSStatusIndicator({ enabled, className = '' }: GPSStatusIndicat
 
       {/* Texte */}
       <View className="flex-1">
-        <Text className="text-sm font-semibold text-foreground">
-          {status.label}
-        </Text>
-        <Text className="text-xs text-muted mt-0.5">
-          Dernière mise à jour: {displayTime}
-        </Text>
+        <Text className="text-sm font-semibold text-foreground">{status.label}</Text>
+        <Text className="text-xs text-muted mt-0.5">Dernière mise à jour: {displayTime}</Text>
       </View>
 
       {/* Pulse animation pour actif */}
@@ -140,15 +136,10 @@ export function GPSStatusCard({ enabled }: { enabled: boolean }) {
   const { location } = useRealTimeLocation({ enabled });
 
   return (
-    <View
-      className="p-4 rounded-lg gap-2"
-      style={{ backgroundColor: `${colors.primary}10` }}
-    >
+    <View className="p-4 rounded-lg gap-2" style={{ backgroundColor: `${colors.primary}10` }}>
       <View className="flex-row items-center gap-2 mb-2">
         <Text className="text-lg">📍</Text>
-        <Text className="text-sm font-semibold text-foreground">
-          Statut de localisation
-        </Text>
+        <Text className="text-sm font-semibold text-foreground">Statut de localisation</Text>
       </View>
 
       <GPSStatusIndicator enabled={enabled} />

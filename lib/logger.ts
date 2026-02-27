@@ -3,7 +3,7 @@
  * Provides consistent logging across the app
  */
 
-type LogLevel = "debug" | "info" | "warn" | "error";
+type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
 interface LogEntry {
   level: LogLevel;
@@ -48,19 +48,19 @@ class Logger {
   }
 
   debug(message: string, data?: any) {
-    this.addLog("debug", message, data);
+    this.addLog('debug', message, data);
   }
 
   info(message: string, data?: any) {
-    this.addLog("info", message, data);
+    this.addLog('info', message, data);
   }
 
   warn(message: string, data?: any) {
-    this.addLog("warn", message, data);
+    this.addLog('warn', message, data);
   }
 
   error(message: string, data?: any) {
-    this.addLog("error", message, data);
+    this.addLog('error', message, data);
   }
 
   getLogs(): LogEntry[] {

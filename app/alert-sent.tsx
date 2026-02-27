@@ -1,4 +1,4 @@
-import { logger } from "@/lib/utils/logger";
+import { logger } from '@/lib/utils/logger';
 import { ScrollView, Text, View, Pressable, Linking } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -55,9 +55,7 @@ export default function AlertSentScreen() {
         {/* Header */}
         <ScreenTransition delay={0} duration={350}>
           <View className="gap-1 mb-4">
-            <Text className="text-4xl font-bold text-foreground">
-              Oups… 😬
-            </Text>
+            <Text className="text-4xl font-bold text-foreground">Oups… 😬</Text>
             <Text className="text-base text-muted">
               On a prévenu ton contact. Confirme si tout va bien.
             </Text>
@@ -77,11 +75,12 @@ export default function AlertSentScreen() {
         )}
 
         {/* Alert Details Card */}
-        <ScreenTransition delay={settings.locationEnabled && currentSession?.lastLocation ? 200 : 100} duration={350}>
+        <ScreenTransition
+          delay={settings.locationEnabled && currentSession?.lastLocation ? 200 : 100}
+          duration={350}
+        >
           <GlassCard className="gap-3 mb-4">
-            <Text className="text-sm font-semibold text-foreground">
-              Récapitulatif
-            </Text>
+            <Text className="text-sm font-semibold text-foreground">Récapitulatif</Text>
             <View className="gap-2">
               <View className="flex-row justify-between">
                 <Text className="text-sm text-muted">Contact alerté :</Text>
@@ -102,7 +101,8 @@ export default function AlertSentScreen() {
                 <View className="flex-row justify-between">
                   <Text className="text-sm text-muted">Position :</Text>
                   <Text className="text-sm font-semibold text-foreground">
-                    {currentSession.lastLocation.latitude.toFixed(4)}, {currentSession.lastLocation.longitude.toFixed(4)}
+                    {currentSession.lastLocation.latitude.toFixed(4)},{' '}
+                    {currentSession.lastLocation.longitude.toFixed(4)}
                   </Text>
                 </View>
               )}
@@ -111,16 +111,20 @@ export default function AlertSentScreen() {
         </ScreenTransition>
 
         {/* Actions Section */}
-        <ScreenTransition delay={settings.locationEnabled && currentSession?.lastLocation ? 300 : 200} duration={350}>
+        <ScreenTransition
+          delay={settings.locationEnabled && currentSession?.lastLocation ? 300 : 200}
+          duration={350}
+        >
           <View className="gap-2 mb-3">
-            <Text className="text-xs font-bold text-muted uppercase tracking-wider">
-              Actions
-            </Text>
+            <Text className="text-xs font-bold text-muted uppercase tracking-wider">Actions</Text>
           </View>
         </ScreenTransition>
 
         {/* Je vais bien Button */}
-        <ScreenTransition delay={settings.locationEnabled && currentSession?.lastLocation ? 400 : 300} duration={350}>
+        <ScreenTransition
+          delay={settings.locationEnabled && currentSession?.lastLocation ? 400 : 300}
+          duration={350}
+        >
           <View className="mb-3">
             <CushionPillButton
               label="Je vais bien"
@@ -132,11 +136,11 @@ export default function AlertSentScreen() {
         </ScreenTransition>
 
         {/* Call Contact */}
-        <ScreenTransition delay={settings.locationEnabled && currentSession?.lastLocation ? 500 : 400} duration={350}>
-          <Pressable
-            onPress={handleCallContact}
-            className="mb-3"
-          >
+        <ScreenTransition
+          delay={settings.locationEnabled && currentSession?.lastLocation ? 500 : 400}
+          duration={350}
+        >
+          <Pressable onPress={handleCallContact} className="mb-3">
             {({ pressed }) => (
               <GlassCard
                 className="gap-3"
@@ -145,11 +149,7 @@ export default function AlertSentScreen() {
                 }}
               >
                 <View className="flex-row items-center gap-3">
-                  <MaterialIcons
-                    name="phone"
-                    size={20}
-                    color="#6C63FF"
-                  />
+                  <MaterialIcons name="phone" size={20} color="#6C63FF" />
                   <View className="flex-1">
                     <Text className="text-base font-semibold text-foreground">
                       Appeler {settings.emergencyContactName}
@@ -166,10 +166,11 @@ export default function AlertSentScreen() {
         </ScreenTransition>
 
         {/* Call 112 */}
-        <ScreenTransition delay={settings.locationEnabled && currentSession?.lastLocation ? 600 : 500} duration={350}>
-          <Pressable
-            onPress={handleCall112}
-          >
+        <ScreenTransition
+          delay={settings.locationEnabled && currentSession?.lastLocation ? 600 : 500}
+          duration={350}
+        >
+          <Pressable onPress={handleCall112}>
             {({ pressed }) => (
               <GlassCard
                 className="gap-3"
@@ -178,18 +179,12 @@ export default function AlertSentScreen() {
                 }}
               >
                 <View className="flex-row items-center gap-3">
-                  <MaterialIcons
-                    name="emergency"
-                    size={20}
-                    color="#FF4D4D"
-                  />
+                  <MaterialIcons name="emergency" size={20} color="#FF4D4D" />
                   <View className="flex-1">
                     <Text className="text-base font-semibold text-foreground">
                       Appeler les secours
                     </Text>
-                    <Text className="text-xs text-muted mt-1">
-                      Numéro d'urgence 112
-                    </Text>
+                    <Text className="text-xs text-muted mt-1">Numéro d'urgence 112</Text>
                   </View>
                   <MaterialIcons name="chevron-right" size={20} color="#B0B0B0" />
                 </View>

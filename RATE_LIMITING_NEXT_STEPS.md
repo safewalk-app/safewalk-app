@@ -6,7 +6,7 @@
 
 - [x] Hooks React créés (useDebounce, useCooldown)
 
-- [x] Middleware rate-limiter créé (_shared/rate-limiter.ts)
+- [x] Middleware rate-limiter créé (\_shared/rate-limiter.ts)
 
 - [x] Edge Function start-trip mise à jour avec rate limiting
 
@@ -179,7 +179,7 @@ export async function sendOTP(phoneNumber: string) {
 #### 4.1 app/phone-verification.tsx
 
 ```tsx
-import { useCooldown } from "@/lib/hooks/use-cooldown";
+import { useCooldown } from '@/lib/hooks/use-cooldown';
 
 export default function PhoneVerificationScreen() {
   const { trigger, isOnCooldown, remainingTime } = useCooldown({ duration: 60000 }); // 60 secondes
@@ -189,25 +189,25 @@ export default function PhoneVerificationScreen() {
       const result = await authService.sendOTP(phoneNumber);
 
       if (!result.success) {
-        if (result.errorCode === "rate_limit_exceeded") {
+        if (result.errorCode === 'rate_limit_exceeded') {
           showToast({
-            type: "error",
-            title: "Trop de requêtes",
+            type: 'error',
+            title: 'Trop de requêtes',
             message: result.message,
             duration: 3,
           });
         } else {
           showToast({
-            type: "error",
-            title: "Erreur",
+            type: 'error',
+            title: 'Erreur',
             message: result.message,
           });
         }
       } else {
         showToast({
-          type: "success",
-          title: "OTP envoyé",
-          message: "Vérifiez votre SMS",
+          type: 'success',
+          title: 'OTP envoyé',
+          message: 'Vérifiez votre SMS',
         });
       }
     });
@@ -217,13 +217,10 @@ export default function PhoneVerificationScreen() {
     <TouchableOpacity
       onPress={handleSendOTP}
       disabled={isOnCooldown}
-      className={cn(
-        "bg-primary py-3 px-6 rounded-lg",
-        isOnCooldown && "opacity-50"
-      )}
+      className={cn('bg-primary py-3 px-6 rounded-lg', isOnCooldown && 'opacity-50')}
     >
       <Text className="text-white font-bold">
-        {isOnCooldown ? `Attendre ${Math.ceil(remainingTime / 1000)}s` : "Envoyer OTP"}
+        {isOnCooldown ? `Attendre ${Math.ceil(remainingTime / 1000)}s` : 'Envoyer OTP'}
       </Text>
     </TouchableOpacity>
   );
@@ -233,7 +230,7 @@ export default function PhoneVerificationScreen() {
 #### 4.2 app/new-session.tsx
 
 ```tsx
-import { useCooldown } from "@/lib/hooks/use-cooldown";
+import { useCooldown } from '@/lib/hooks/use-cooldown';
 
 export default function NewSessionScreen() {
   const { trigger, isOnCooldown, remainingTime } = useCooldown({ duration: 2000 }); // 2 secondes
@@ -247,22 +244,22 @@ export default function NewSessionScreen() {
       });
 
       if (!result.success) {
-        if (result.errorCode === "rate_limit_exceeded") {
+        if (result.errorCode === 'rate_limit_exceeded') {
           showToast({
-            type: "error",
-            title: "Trop de requêtes",
-            message: "Attendez quelques secondes avant de réessayer.",
+            type: 'error',
+            title: 'Trop de requêtes',
+            message: 'Attendez quelques secondes avant de réessayer.',
           });
         } else {
           showToast({
-            type: "error",
-            title: "Erreur",
+            type: 'error',
+            title: 'Erreur',
             message: result.message,
           });
         }
       } else {
         // Succès
-        navigation.navigate("active-session", { tripId: result.data.tripId });
+        navigation.navigate('active-session', { tripId: result.data.tripId });
       }
     });
   };
@@ -271,13 +268,10 @@ export default function NewSessionScreen() {
     <TouchableOpacity
       onPress={handleStartSession}
       disabled={isOnCooldown}
-      className={cn(
-        "bg-primary py-3 px-6 rounded-lg",
-        isOnCooldown && "opacity-50"
-      )}
+      className={cn('bg-primary py-3 px-6 rounded-lg', isOnCooldown && 'opacity-50')}
     >
       <Text className="text-white font-bold">
-        {isOnCooldown ? `Attendre ${Math.ceil(remainingTime / 1000)}s` : "Commencer"}
+        {isOnCooldown ? `Attendre ${Math.ceil(remainingTime / 1000)}s` : 'Commencer'}
       </Text>
     </TouchableOpacity>
   );
@@ -404,4 +398,3 @@ Si vous avez des questions:
 - Phase 6: 1 jour
 
 **Total: 2-3 semaines**
-

@@ -17,7 +17,7 @@ describe.skip('Friendly SMS', () => {
       location: { latitude: 48.8566, longitude: 2.3522 },
     };
 
-    console.log('📤 Envoi d\'une alerte SMS friendly...');
+    console.log("📤 Envoi d'une alerte SMS friendly...");
 
     const response = await fetch(`${API_URL}/api/friendly-sms/alert`, {
       method: 'POST',

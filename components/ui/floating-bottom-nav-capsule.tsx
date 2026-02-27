@@ -64,7 +64,7 @@ export function FloatingBottomNavCapsule({
               onPress={() => handlePress(item.route)}
               className={cn(
                 'flex-1 items-center justify-center gap-1',
-                isFirst && 'border-r border-border'
+                isFirst && 'border-r border-border',
               )}
               style={{
                 backgroundColor: isActive ? 'rgba(108, 99, 255, 0.10)' : 'transparent',

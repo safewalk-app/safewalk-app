@@ -24,7 +24,7 @@ export async function checkNetworkForSMS(): Promise<NetworkCheckResult> {
     const state = await NetInfo.fetch();
     const isConnected = state.isConnected ?? false;
     const type = state.type || 'unknown';
-    
+
     // On peut envoyer des SMS si connecté (WiFi ou cellulaire)
     const canSendSMS = isConnected && (type === 'wifi' || type === 'cellular');
 
@@ -39,7 +39,7 @@ export async function checkNetworkForSMS(): Promise<NetworkCheckResult> {
         isConnected: false,
         type,
         canSendSMS: false,
-        errorMessage: '📵 Aucune connexion Internet. Impossible d\'envoyer l\'alerte SMS.',
+        errorMessage: "📵 Aucune connexion Internet. Impossible d'envoyer l'alerte SMS.",
       };
     }
 
@@ -76,11 +76,11 @@ export async function isAirplaneModeEnabled(): Promise<boolean> {
     const state = await NetInfo.fetch();
     // Mode avion = pas de connexion et type "none"
     const isAirplaneMode = !state.isConnected && state.type === 'none';
-    
+
     if (isAirplaneMode) {
       logger.warn('[NetworkChecker] ✈️ Mode avion détecté');
     }
-    
+
     return isAirplaneMode;
   } catch (error) {
     logger.error('[NetworkChecker] Erreur détection mode avion:', error);
@@ -125,16 +125,16 @@ export async function waitForNetworkConnection(timeoutMs: number = 10000): Promi
  */
 export function getNetworkErrorMessage(type: string, isConnected: boolean): string {
   if (!isConnected) {
-    return '📵 Aucune connexion Internet.\n\nL\'alerte SMS ne pourra pas être envoyée. Vérifiez votre connexion WiFi ou cellulaire.';
+    return "📵 Aucune connexion Internet.\n\nL'alerte SMS ne pourra pas être envoyée. Vérifiez votre connexion WiFi ou cellulaire.";
   }
 
   if (type === 'none') {
-    return '✈️ Mode avion activé.\n\nDésactivez le mode avion pour permettre l\'envoi d\'alertes SMS.';
+    return "✈️ Mode avion activé.\n\nDésactivez le mode avion pour permettre l'envoi d'alertes SMS.";
   }
 
   if (type === 'unknown') {
-    return '⚠️ Connexion réseau instable.\n\nL\'envoi de SMS peut échouer. Vérifiez votre connexion.';
+    return "⚠️ Connexion réseau instable.\n\nL'envoi de SMS peut échouer. Vérifiez votre connexion.";
   }
 
-  return '⚠️ Problème de connexion réseau.\n\nL\'envoi de SMS peut échouer.';
+  return "⚠️ Problème de connexion réseau.\n\nL'envoi de SMS peut échouer.";
 }

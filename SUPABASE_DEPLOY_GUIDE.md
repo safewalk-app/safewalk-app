@@ -3,6 +3,7 @@
 ## 📋 Résumé
 
 Vous devez créer 3 fichiers dans le dossier `_shared` de Supabase Edge Functions:
+
 1. `twilio.ts` - Helper Twilio
 2. `rate-limiter.ts` - Helper Rate Limiting
 3. `sms-templates.ts` - Helper SMS Templates
@@ -84,14 +85,14 @@ export async function sendSms(options: SendSmsOptions): Promise<SendSmsResponse>
     const response = await fetch(url, {
       method: 'POST',
       headers: {
-        'Authorization': `Basic ${auth}`,
+        Authorization: `Basic ${auth}`,
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: formData.toString(),
     });
 
     // Parse response
-    const data = await response.json() as Record<string, unknown>;
+    const data = (await response.json()) as Record<string, unknown>;
 
     if (!response.ok) {
       const errorData = data as Record<string, unknown>;
@@ -165,7 +166,7 @@ export function createOverdueAlertMessage(
   deadline: Date,
   shareLocation: boolean,
   latitude?: number,
-  longitude?: number
+  longitude?: number,
 ): string {
   const timeStr = deadline.toLocaleTimeString('fr-FR', {
     hour: '2-digit',
@@ -188,7 +189,7 @@ export function createOverdueAlertMessage(
  * @returns SMS message text
  */
 export function createTestSmsMessage(): string {
-  return '✅ SafeWalk: Ceci est un SMS de test. Votre contact d\'urgence a bien été configuré.';
+  return "✅ SafeWalk: Ceci est un SMS de test. Votre contact d'urgence a bien été configuré.";
 }
 
 /**
@@ -203,7 +204,7 @@ export function createSosAlertMessage(
   userName: string,
   shareLocation: boolean,
   latitude?: number,
-  longitude?: number
+  longitude?: number,
 ): string {
   let message = `🆘 Alerte SOS SafeWalk: ${userName} a déclenché une alerte d'urgence immédiate.`;
 
@@ -222,7 +223,7 @@ export function createSosAlertMessage(
 ## 📄 Fichier 2: `_shared/rate-limiter.ts`
 
 ```typescript
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
 
 export interface RateLimitResult {
   isAllowed: boolean;
@@ -251,17 +252,17 @@ export async function checkRateLimit(
   supabase: ReturnType<typeof createClient>,
   userId: string | null,
   endpoint: string,
-  ipAddress?: string
+  ipAddress?: string,
 ): Promise<RateLimitResult> {
   try {
-    const { data, error } = await supabase.rpc("check_rate_limit", {
+    const { data, error } = await supabase.rpc('check_rate_limit', {
       p_user_id: userId,
       p_endpoint: endpoint,
       p_ip_address: ipAddress,
     });
 
     if (error) {
-      console.error("Rate limit check error:", error);
+      console.error('Rate limit check error:', error);
       // Laisser passer en cas d'erreur (fail-open)
       return {
         isAllowed: true,
@@ -287,7 +288,7 @@ export async function checkRateLimit(
       resetAt: data[0].reset_at,
     };
   } catch (error) {
-    console.error("Rate limit check exception:", error);
+    console.error('Rate limit check exception:', error);
     // Laisser passer en cas d'erreur
     return {
       isAllowed: true,
@@ -310,16 +311,16 @@ export async function logRequest(
   supabase: ReturnType<typeof createClient>,
   userId: string | null,
   endpoint: string,
-  ipAddress?: string
+  ipAddress?: string,
 ): Promise<void> {
   try {
-    await supabase.rpc("log_request", {
+    await supabase.rpc('log_request', {
       p_user_id: userId,
       p_endpoint: endpoint,
       p_ip_address: ipAddress,
     });
   } catch (error) {
-    console.error("Rate limit log error:", error);
+    console.error('Rate limit log error:', error);
     // Continuer même si le logging échoue
   }
 }
@@ -336,8 +337,8 @@ export function createRateLimitResponse(resetAt: string): RateLimitResponse {
   const retryAfter = Math.ceil((resetDate.getTime() - now.getTime()) / 1000);
 
   return {
-    error: "rate_limit_exceeded",
-    message: "Trop de requêtes. Veuillez réessayer plus tard.",
+    error: 'rate_limit_exceeded',
+    message: 'Trop de requêtes. Veuillez réessayer plus tard.',
     resetAt,
     retryAfter: Math.max(1, retryAfter),
   };
@@ -355,8 +356,8 @@ export function createRateLimitHttpResponse(resetAt: string) {
   return new Response(JSON.stringify(errorData), {
     status: 429,
     headers: {
-      "Content-Type": "application/json",
-      "Retry-After": errorData.retryAfter.toString(),
+      'Content-Type': 'application/json',
+      'Retry-After': errorData.retryAfter.toString(),
     },
   });
 }
@@ -387,23 +388,26 @@ export interface SmsTemplateParams {
  */
 function formatPhoneNumber(phone: string | null | undefined): string | null {
   if (!phone || typeof phone !== 'string') return null;
-  
+
   const cleaned = phone.trim();
   if (!cleaned || cleaned === 'undefined' || cleaned === 'null') return null;
-  
+
   // Basic E.164 validation
   if (!/^\+\d{1,15}$/.test(cleaned)) return null;
-  
+
   return cleaned;
 }
 
 /**
  * Generates Google Maps link from coordinates
  */
-function generateMapLink(lat: number | null | undefined, lng: number | null | undefined): string | null {
+function generateMapLink(
+  lat: number | null | undefined,
+  lng: number | null | undefined,
+): string | null {
   if (lat === null || lat === undefined || lng === null || lng === undefined) return null;
   if (typeof lat !== 'number' || typeof lng !== 'number') return null;
-  
+
   return `https://maps.google.com/maps?q=${lat},${lng}`;
 }
 
@@ -411,24 +415,24 @@ function generateMapLink(lat: number | null | undefined, lng: number | null | un
  * Formats time difference for SMS (e.g., "2h30")
  */
 function formatTimeDifference(deadline: string | null | undefined): string {
-  if (!deadline) return "quelques heures";
-  
+  if (!deadline) return 'quelques heures';
+
   try {
     const now = new Date();
     const deadlineDate = new Date(deadline);
     const diffMs = now.getTime() - deadlineDate.getTime();
-    
-    if (diffMs < 0) return "quelques heures";
-    
+
+    if (diffMs < 0) return 'quelques heures';
+
     const diffMins = Math.floor(diffMs / 60000);
     const hours = Math.floor(diffMins / 60);
     const mins = diffMins % 60;
-    
+
     if (hours === 0) return `${mins}min`;
     if (mins === 0) return `${hours}h`;
     return `${hours}h${mins}`;
   } catch {
-    return "quelques heures";
+    return 'quelques heures';
   }
 }
 
@@ -437,21 +441,15 @@ function formatTimeDifference(deadline: string | null | undefined): string {
  * Supports: firstName, phone, position
  */
 export function buildLateSms(params: SmsTemplateParams): string {
-  const {
-    firstName,
-    deadline,
-    lat,
-    lng,
-    userPhone,
-    shareUserPhoneInAlerts = false,
-  } = params;
+  const { firstName, deadline, lat, lng, userPhone, shareUserPhoneInAlerts = false } = params;
 
-  const hasFirstName = firstName && firstName.trim() && firstName !== 'undefined' && firstName !== 'null';
+  const hasFirstName =
+    firstName && firstName.trim() && firstName !== 'undefined' && firstName !== 'null';
   const hasPhone = shareUserPhoneInAlerts && formatPhoneNumber(userPhone);
   const hasPosition = generateMapLink(lat, lng);
   const timeDiff = formatTimeDifference(deadline);
 
-  const personRef = hasFirstName ? firstName.trim() : "Utilisateur";
+  const personRef = hasFirstName ? firstName.trim() : 'Utilisateur';
   const mapLink = generateMapLink(lat, lng);
 
   // Build the message based on available data
@@ -461,7 +459,7 @@ export function buildLateSms(params: SmsTemplateParams): string {
   if (hasPhone) {
     message += ` immédiatement au ${hasPhone}.`;
   } else {
-    message += " immédiatement.";
+    message += ' immédiatement.';
   }
 
   // Add position if available
@@ -477,15 +475,10 @@ export function buildLateSms(params: SmsTemplateParams): string {
  * Supports: firstName, phone, position
  */
 export function buildSosSms(params: SmsTemplateParams): string {
-  const {
-    firstName,
-    lat,
-    lng,
-    userPhone,
-    shareUserPhoneInAlerts = false,
-  } = params;
+  const { firstName, lat, lng, userPhone, shareUserPhoneInAlerts = false } = params;
 
-  const hasFirstName = firstName && firstName.trim() && firstName !== 'undefined' && firstName !== 'null';
+  const hasFirstName =
+    firstName && firstName.trim() && firstName !== 'undefined' && firstName !== 'null';
   const hasPhone = shareUserPhoneInAlerts && formatPhoneNumber(userPhone);
   const mapLink = generateMapLink(lat, lng);
 
@@ -501,7 +494,7 @@ export function buildSosSms(params: SmsTemplateParams): string {
   if (hasPhone) {
     message += ` au ${hasPhone}.`;
   } else {
-    message += ".";
+    message += '.';
   }
 
   // Add position if available
@@ -519,7 +512,8 @@ export function buildSosSms(params: SmsTemplateParams): string {
 export function buildTestSms(params: SmsTemplateParams): string {
   const { firstName } = params;
 
-  const hasFirstName = firstName && firstName.trim() && firstName !== 'undefined' && firstName !== 'null';
+  const hasFirstName =
+    firstName && firstName.trim() && firstName !== 'undefined' && firstName !== 'null';
 
   if (hasFirstName) {
     return `SafeWalk test : tout est bien configuré. Vous recevrez un SMS comme celui-ci si ${firstName.trim()} ne confirme pas son arrivée.`;
@@ -603,6 +597,7 @@ export function validateSmsParams(params: SmsTemplateParams): { valid: boolean; 
 ## 🚀 Étape 3: Déployer les Edge Functions
 
 Les Edge Functions suivantes utilisent les fichiers `_shared`:
+
 - `cron-check-deadlines` - Utilise `buildLateSms()`
 - `sos` - Utilise `buildSosSms()`
 - `test-sms` - Utilise `buildTestSms()`
@@ -623,15 +618,18 @@ Ces fonctions devraient être **automatiquement mises à jour** une fois que les
 ## 🆘 Troubleshooting
 
 **Erreur: "Module not found"**
+
 - Vérifier que les fichiers `_shared` sont bien créés
 - Vérifier le chemin d'import: `import { buildLateSms } from "../_shared/sms-templates.ts";`
 
 **Erreur: "Function deployment failed"**
+
 - Vérifier la syntaxe TypeScript
 - Vérifier que tous les imports sont corrects
 - Vérifier les logs dans Supabase Dashboard
 
 **Les SMS ne sont pas envoyés**
+
 - Vérifier que Twilio est configuré (TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER)
 - Vérifier les logs dans Supabase Dashboard
 - Vérifier que le contact d'urgence a un numéro valide en format E.164 (+1234567890)

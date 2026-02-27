@@ -10,29 +10,29 @@ Analysons si le modèle de pricing est rentable pour SafeWalk.
 
 ### Coûts Twilio
 
-| Opération | Coût |
-|-----------|------|
-| SMS sortant (US/Canada) | $0.0075 |
+| Opération                   | Coût       |
+| --------------------------- | ---------- |
+| SMS sortant (US/Canada)     | $0.0075    |
 | SMS sortant (International) | $0.01-0.02 |
-| SMS entrant | Gratuit |
-| **Moyenne globale** | **$0.01** |
+| SMS entrant                 | Gratuit    |
+| **Moyenne globale**         | **$0.01**  |
 
 ### Coûts RevenueCat
 
-| Item | Coût |
-|------|------|
-| Frais RevenueCat | 1% des revenus |
+| Item               | Coût                  |
+| ------------------ | --------------------- |
+| Frais RevenueCat   | 1% des revenus        |
 | Frais Apple/Google | 30% des achats in-app |
-| **Total** | **31%** |
+| **Total**          | **31%**               |
 
 ### Coûts Infrastructure Supabase
 
-| Item | Coût/mois |
-|------|-----------|
-| Database (1GB) | $25 |
-| Edge Functions (1M invocations) | $0.15 |
-| Storage (1GB) | $5 |
-| **Total** | **$30-50/mois** |
+| Item                            | Coût/mois       |
+| ------------------------------- | --------------- |
+| Database (1GB)                  | $25             |
+| Edge Functions (1M invocations) | $0.15           |
+| Storage (1GB)                   | $5              |
+| **Total**                       | **$30-50/mois** |
 
 ---
 
@@ -95,12 +95,12 @@ Profit: $0.68 - $0.10 = $0.58/achat
 
 ### 100 Utilisateurs
 
-| Plan | Nombre | Revenu/mois | Coûts SMS | Coûts Infra | Profit |
-|------|--------|-------------|-----------|------------|--------|
-| Free | 80 | $0 | $40 | $10 | -$50 |
-| Premium | 15 | $74.85 | $75 | $10 | -$10.15 |
-| Pay-as-you-go | 5 | $4.95 | $4 | $10 | -$9.05 |
-| **TOTAL** | **100** | **$79.80** | **$119** | **$30** | **-$69.20** |
+| Plan          | Nombre  | Revenu/mois | Coûts SMS | Coûts Infra | Profit      |
+| ------------- | ------- | ----------- | --------- | ----------- | ----------- |
+| Free          | 80      | $0          | $40       | $10         | -$50        |
+| Premium       | 15      | $74.85      | $75       | $10         | -$10.15     |
+| Pay-as-you-go | 5       | $4.95       | $4        | $10         | -$9.05      |
+| **TOTAL**     | **100** | **$79.80**  | **$119**  | **$30**     | **-$69.20** |
 
 **Verdict:** ❌ **Non rentable à 100 users** (perte de $69/mois)
 
@@ -108,12 +108,12 @@ Profit: $0.68 - $0.10 = $0.58/achat
 
 ### 1,000 Utilisateurs
 
-| Plan | Nombre | Revenu/mois | Coûts SMS | Coûts Infra | Profit |
-|------|--------|-------------|-----------|------------|--------|
-| Free | 800 | $0 | $400 | $50 | -$450 |
-| Premium | 150 | $748.50 | $750 | $50 | -$51.50 |
-| Pay-as-you-go | 50 | $49.50 | $40 | $50 | -$40.50 |
-| **TOTAL** | **1,000** | **$798** | **$1,190** | **$150** | **-$542** |
+| Plan          | Nombre    | Revenu/mois | Coûts SMS  | Coûts Infra | Profit    |
+| ------------- | --------- | ----------- | ---------- | ----------- | --------- |
+| Free          | 800       | $0          | $400       | $50         | -$450     |
+| Premium       | 150       | $748.50     | $750       | $50         | -$51.50   |
+| Pay-as-you-go | 50        | $49.50      | $40        | $50         | -$40.50   |
+| **TOTAL**     | **1,000** | **$798**    | **$1,190** | **$150**    | **-$542** |
 
 **Verdict:** ❌ **Non rentable à 1,000 users** (perte de $542/mois)
 
@@ -121,12 +121,12 @@ Profit: $0.68 - $0.10 = $0.58/achat
 
 ### 10,000 Utilisateurs
 
-| Plan | Nombre | Revenu/mois | Coûts SMS | Coûts Infra | Profit |
-|------|--------|-------------|-----------|------------|--------|
-| Free | 8,000 | $0 | $4,000 | $100 | -$4,100 |
-| Premium | 1,500 | $7,485 | $7,500 | $100 | -$115 |
-| Pay-as-you-go | 500 | $495 | $400 | $100 | -$5 |
-| **TOTAL** | **10,000** | **$7,980** | **$11,900** | **$300** | **-$4,220** |
+| Plan          | Nombre     | Revenu/mois | Coûts SMS   | Coûts Infra | Profit      |
+| ------------- | ---------- | ----------- | ----------- | ----------- | ----------- |
+| Free          | 8,000      | $0          | $4,000      | $100        | -$4,100     |
+| Premium       | 1,500      | $7,485      | $7,500      | $100        | -$115       |
+| Pay-as-you-go | 500        | $495        | $400        | $100        | -$5         |
+| **TOTAL**     | **10,000** | **$7,980**  | **$11,900** | **$300**    | **-$4,220** |
 
 **Verdict:** ❌ **Non rentable à 10,000 users** (perte de $4,220/mois)
 
@@ -134,12 +134,12 @@ Profit: $0.68 - $0.10 = $0.58/achat
 
 ### 50,000 Utilisateurs
 
-| Plan | Nombre | Revenu/mois | Coûts SMS | Coûts Infra | Profit |
-|------|--------|-------------|-----------|------------|--------|
-| Free | 40,000 | $0 | $20,000 | $500 | -$20,500 |
-| Premium | 7,500 | $37,425 | $37,500 | $500 | -$575 |
-| Pay-as-you-go | 2,500 | $2,475 | $2,000 | $500 | -$25 |
-| **TOTAL** | **50,000** | **$39,900** | **$59,500** | **$1,500** | **-$21,100** |
+| Plan          | Nombre     | Revenu/mois | Coûts SMS   | Coûts Infra | Profit       |
+| ------------- | ---------- | ----------- | ----------- | ----------- | ------------ |
+| Free          | 40,000     | $0          | $20,000     | $500        | -$20,500     |
+| Premium       | 7,500      | $37,425     | $37,500     | $500        | -$575        |
+| Pay-as-you-go | 2,500      | $2,475      | $2,000      | $500        | -$25         |
+| **TOTAL**     | **50,000** | **$39,900** | **$59,500** | **$1,500**  | **-$21,100** |
 
 **Verdict:** ❌ **Non rentable à 50,000 users** (perte de $21,100/mois)
 
@@ -180,11 +180,13 @@ Break-even: ~100 users (mais avec hypothèses optimistes)
 ### ❌ Problème 1: Coûts SMS Trop Élevés
 
 **Situation:**
+
 - Coût SMS: $0.01
 - Revenu Premium: $3.44/mois = ~344 SMS gratuits
 - Mais les utilisateurs Free envoient aussi des SMS!
 
 **Exemple:**
+
 - 1,000 utilisateurs
 - 800 Free users × 5 SMS = 4,000 SMS = $40 de coûts
 - 150 Premium users × 50 SMS = 7,500 SMS = $75 de coûts
@@ -197,10 +199,12 @@ Break-even: ~100 users (mais avec hypothèses optimistes)
 ### ❌ Problème 2: Frais RevenueCat/Apple Trop Élevés (31%)
 
 **Situation:**
+
 - 31% des revenus vont à RevenueCat + Apple
 - Cela réduit considérablement la marge
 
 **Exemple:**
+
 - Revenu brut: $4.99
 - Frais: $1.55 (31%)
 - Revenu net: $3.44
@@ -212,16 +216,19 @@ Break-even: ~100 users (mais avec hypothèses optimistes)
 ### ❌ Problème 3: Conversion Premium Trop Faible
 
 **Situation:**
+
 - Hypothèse: 15% des utilisateurs deviennent Premium
 - Réalité: Généralement 2-5% pour les apps de niche
 
 **Exemple avec 5% conversion:**
+
 - 1,000 utilisateurs
 - 50 Premium users × $3.44 = $172/mois
 - Coûts SMS: ~$1,190/mois
 - **Perte: $1,018/mois**
 
 **Solution:** Augmenter la conversion via:
+
 - Meilleure UX du paywall
 - Freemium plus restrictif
 - Testimonials et social proof
@@ -232,13 +239,14 @@ Break-even: ~100 users (mais avec hypothèses optimistes)
 
 ### Option A: Augmenter les Prix
 
-| Plan | Prix | Alertes SMS |
-|------|------|------------|
-| Free | Gratuit | 2/mois (au lieu de 5) |
-| Premium | $9.99/mois (au lieu de $4.99) | Illimitées |
-| Premium Annual | $79.99/an (au lieu de $39.99) | Illimitées |
+| Plan           | Prix                          | Alertes SMS           |
+| -------------- | ----------------------------- | --------------------- |
+| Free           | Gratuit                       | 2/mois (au lieu de 5) |
+| Premium        | $9.99/mois (au lieu de $4.99) | Illimitées            |
+| Premium Annual | $79.99/an (au lieu de $39.99) | Illimitées            |
 
 **Impact:**
+
 - Revenu Premium: $9.99 × 30% = $6.99 net (au lieu de $3.44)
 - Profit par Premium user: $6.99 - $0.60 = **$6.39/mois** (au lieu de $2.84)
 
@@ -246,13 +254,14 @@ Break-even: ~100 users (mais avec hypothèses optimistes)
 
 ### Option B: Utiliser Stripe au lieu de RevenueCat
 
-| Processeur | Frais | Revenu net |
-|-----------|------|-----------|
-| RevenueCat + Apple | 31% | $3.44 |
-| Stripe | 2.9% + $0.30 | $4.53 |
-| **Différence** | **-28.1%** | **+31.7%** |
+| Processeur         | Frais        | Revenu net |
+| ------------------ | ------------ | ---------- |
+| RevenueCat + Apple | 31%          | $3.44      |
+| Stripe             | 2.9% + $0.30 | $4.53      |
+| **Différence**     | **-28.1%**   | **+31.7%** |
 
 **Impact:**
+
 - Revenu Premium: $4.99 × (1 - 2.9%) - $0.30 = $4.53 net
 - Profit par Premium user: $4.53 - $0.60 = **$3.93/mois** (au lieu de $2.84)
 
@@ -260,13 +269,14 @@ Break-even: ~100 users (mais avec hypothèses optimistes)
 
 ### Option C: Réduire les SMS Gratuits
 
-| Plan | SMS gratuits | Impact |
-|------|-------------|--------|
-| Free (actuel) | 5/mois | Coûts: $0.05/user |
-| Free (révisé) | 1/mois | Coûts: $0.01/user |
-| **Économies** | -80% | **-$0.04/user** |
+| Plan          | SMS gratuits | Impact            |
+| ------------- | ------------ | ----------------- |
+| Free (actuel) | 5/mois       | Coûts: $0.05/user |
+| Free (révisé) | 1/mois       | Coûts: $0.01/user |
+| **Économies** | -80%         | **-$0.04/user**   |
 
 **Impact:**
+
 - Économies: 1,000 users × $0.04 = $40/mois
 - Augmente la conversion Premium (moins de SMS gratuits)
 
@@ -347,25 +357,26 @@ PROFIT: $712 - $137 = $575/mois (81% marge)
 
 ### Rentabilité Actuelle
 
-| Taille | Rentable? | Profit/mois |
-|--------|-----------|------------|
-| 100 users | ❌ Non | -$69 |
-| 1,000 users | ❌ Non | -$542 |
-| 10,000 users | ❌ Non | -$4,220 |
+| Taille       | Rentable? | Profit/mois |
+| ------------ | --------- | ----------- |
+| 100 users    | ❌ Non    | -$69        |
+| 1,000 users  | ❌ Non    | -$542       |
+| 10,000 users | ❌ Non    | -$4,220     |
 
 ### Rentabilité Révisée (Stripe + $9.99 Premium + 1 SMS gratuit)
 
-| Taille | Rentable? | Profit/mois |
-|--------|-----------|------------|
-| 100 users | ✅ Oui | $57 |
-| 1,000 users | ✅ Oui | $575 |
-| 10,000 users | ✅ Oui | $5,750 |
+| Taille       | Rentable? | Profit/mois |
+| ------------ | --------- | ----------- |
+| 100 users    | ✅ Oui    | $57         |
+| 1,000 users  | ✅ Oui    | $575        |
+| 10,000 users | ✅ Oui    | $5,750      |
 
 ### Recommandation
 
 **Garder le modèle MVP actuel pour le lancement, puis pivoter vers le modèle révisé après 3-6 mois d'utilisation réelle.**
 
 Cela permet de:
+
 - ✅ Lancer rapidement
 - ✅ Mesurer les vraies métriques
 - ✅ Optimiser basé sur les données réelles

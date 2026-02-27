@@ -11,8 +11,10 @@
 ### P0 - Bloquant
 
 #### ✅ FAIT: Afficher un statut clair avant le bouton "Je sors"
+
 **Problème:** Utilisateur ne sait pas s'il peut démarrer immédiatement
 **Solution:** La checklist d'état est déjà présente et affiche:
+
 - Contact d'urgence (ok/pending)
 - Téléphone vérifié (ok/pending)
 - Crédits disponibles (ok/pending)
@@ -22,12 +24,14 @@
 **Implémentation:** ✅ Déjà fait dans StatusChecklist
 
 #### ✅ FAIT: Clarifier "Sécurité inactive"
+
 **Problème:** Trop vague
 **Solution:** Remplacé par checklist détaillée avec statuts clairs
 
 **Implémentation:** ✅ Déjà fait - affiche "Configurer un contact" avec lien vers Paramètres
 
 #### ✅ FAIT: Afficher les crédits gratuits restants
+
 **Problème:** Utilisateur ne sait pas s'il peut démarrer
 **Solution:** Affiche "Crédits: X restants" ou "Abonnement: Actif"
 
@@ -36,12 +40,14 @@
 ### P1 - Important
 
 #### ✅ FAIT: Afficher l'état des permissions
+
 **Problème:** Utilisateur ne sait pas si les alertes fonctionneront
 **Solution:** Checklist affiche "Notifications: Activées/À activer" et "Localisation: Autorisée/À autoriser"
 
 **Implémentation:** ✅ Déjà fait
 
 #### ✅ FAIT: Afficher la vérification du numéro
+
 **Problème:** Utilisateur ne sait pas si son numéro est vérifié
 **Solution:** Checklist affiche "Téléphone: Vérifié/À vérifier"
 
@@ -54,10 +60,12 @@
 ### P0 - Bloquant
 
 #### À FAIRE: Afficher un message clair si le bouton "Démarrer" est grisé
+
 **Problème:** Utilisateur ne sait pas pourquoi il ne peut pas démarrer
 **Solution:** Ajouter un message au-dessus du bouton si une condition critique manque
 
 **Implémentation:**
+
 ```typescript
 // Dans new-session.tsx, avant le bouton "Démarrer"
 const getBlockingReason = () => {
@@ -80,10 +88,12 @@ const getBlockingReason = () => {
 ```
 
 #### À FAIRE: Afficher clairement à qui l'alerte sera envoyée
+
 **Problème:** Utilisateur ne sait pas à qui l'alerte sera envoyée
 **Solution:** Ajouter un résumé clair avant le bouton "Démarrer"
 
 **Implémentation:**
+
 ```typescript
 // Ajouter une section "Résumé" avant le bouton
 <View className="p-4 bg-primary/10 rounded-lg mb-4">
@@ -106,10 +116,12 @@ const getBlockingReason = () => {
 ```
 
 #### À FAIRE: Simplifier la distinction "Heure limite" vs "Heure d'alerte"
+
 **Problème:** Utilisateur ne comprend pas la différence
 **Solution:** Afficher seulement "Heure d'alerte" avec explication simple
 
 **Implémentation:**
+
 ```typescript
 // Remplacer les deux champs par un seul
 <View className="gap-2">
@@ -124,10 +136,12 @@ const getBlockingReason = () => {
 ### P1 - Important
 
 #### À FAIRE: Clarifier le toggle "Partager ma position"
+
 **Problème:** Utilisateur ne sait pas pourquoi partager sa position
 **Solution:** Ajouter une explication claire
 
 **Implémentation:**
+
 ```typescript
 // Ajouter un texte explicatif sous le toggle
 <View className="gap-2">
@@ -148,10 +162,12 @@ const getBlockingReason = () => {
 ### P0 - Bloquant
 
 #### À FAIRE: Sécuriser le bouton "SOS" avec appui long 2 secondes
+
 **Problème:** Risque d'appui accidentel
 **Solution:** Implémenter un appui long avec feedback visuel
 
 **Implémentation:**
+
 ```typescript
 // Utiliser LongPressGestureHandler
 import { LongPressGestureHandler } from 'react-native-gesture-handler';
@@ -175,10 +191,12 @@ import { LongPressGestureHandler } from 'react-native-gesture-handler';
 ```
 
 #### À FAIRE: Créer un bouton clair "Arrêter la sortie"
+
 **Problème:** Utilisateur ne sait pas comment terminer sans alerte
 **Solution:** Créer un bouton secondaire avec confirmation
 
 **Implémentation:**
+
 ```typescript
 // Ajouter un bouton "Arrêter la sortie" avec confirmation
 const handleStopSession = () => {
@@ -211,10 +229,12 @@ const handleStopSession = () => {
 ```
 
 #### À FAIRE: Simplifier l'affichage "Heure limite" vs "Heure d'alerte"
+
 **Problème:** Confusion sur le timing
 **Solution:** Afficher seulement "Alerte envoyée à [HH:MM]"
 
 **Implémentation:**
+
 ```typescript
 // Remplacer les deux affichages par un seul
 <View className="gap-2 mt-3 pt-3 border-t">
@@ -226,32 +246,32 @@ const handleStopSession = () => {
 ### P1 - Important
 
 #### À FAIRE: Offrir des choix clairs pour "Prolonger"
+
 **Problème:** Utilisateur ne sait pas de combien prolonger
 **Solution:** Afficher les options +15 / +30 / +60 / Personnalisé
 
 **Implémentation:**
+
 ```typescript
 // Créer un modal avec options
 const handleProlongSession = () => {
-  Alert.alert(
-    'Prolonger la sortie',
-    'Ajouter du temps:',
-    [
-      { text: 'Annuler', style: 'cancel' },
-      { text: '+15 min', onPress: () => extendSession(15) },
-      { text: '+30 min', onPress: () => extendSession(30) },
-      { text: '+60 min', onPress: () => extendSession(60) },
-      { text: 'Personnalisé', onPress: () => showCustomDurationModal() },
-    ]
-  );
+  Alert.alert('Prolonger la sortie', 'Ajouter du temps:', [
+    { text: 'Annuler', style: 'cancel' },
+    { text: '+15 min', onPress: () => extendSession(15) },
+    { text: '+30 min', onPress: () => extendSession(30) },
+    { text: '+60 min', onPress: () => extendSession(60) },
+    { text: 'Personnalisé', onPress: () => showCustomDurationModal() },
+  ]);
 };
 ```
 
 #### À FAIRE: Afficher l'état de la localisation
+
 **Problème:** Utilisateur ne sait pas si sa position est partagée
 **Solution:** Afficher un indicateur clair
 
 **Implémentation:**
+
 ```typescript
 // Ajouter un indicateur GPS
 <View className="flex-row items-center gap-2 p-3 bg-green-100 rounded-lg">
@@ -264,10 +284,12 @@ const handleProlongSession = () => {
 ```
 
 #### À FAIRE: Afficher l'état de la batterie
+
 **Problème:** Utilisateur ne sait pas si l'alerte peut être envoyée
 **Solution:** Afficher un avertissement si batterie faible
 
 **Implémentation:**
+
 ```typescript
 // Ajouter un avertissement batterie
 {batteryLevel < 20 && (
@@ -285,10 +307,12 @@ const handleProlongSession = () => {
 ### P0 - Bloquant
 
 #### À FAIRE: Afficher feedback clair sur la validation du numéro
+
 **Problème:** Utilisateur ne sait pas si le numéro est valide
 **Solution:** Afficher un message de validation en temps réel
 
 **Implémentation:**
+
 ```typescript
 // Dans le champ de saisie du numéro
 const handlePhoneChange = (text: string) => {
@@ -307,10 +331,12 @@ const handlePhoneChange = (text: string) => {
 ```
 
 #### À FAIRE: Afficher feedback clair sur "Test SMS"
+
 **Problème:** Utilisateur ne sait pas si le SMS a été envoyé
 **Solution:** Afficher un message de succès/erreur
 
 **Implémentation:**
+
 ```typescript
 // Après l'envoi du SMS
 const handleTestSMS = async () => {
@@ -319,7 +345,7 @@ const handleTestSMS = async () => {
     setToastMessage('✅ SMS envoyé à ' + contactPhone);
     setShowToast(true);
   } catch (error) {
-    setToastMessage('❌ Erreur d\'envoi: ' + error.message);
+    setToastMessage("❌ Erreur d'envoi: " + error.message);
     setShowToast(true);
   }
 };
@@ -328,10 +354,12 @@ const handleTestSMS = async () => {
 ### P1 - Important
 
 #### À FAIRE: Ajouter confirmation avant "Supprimer données"
+
 **Problème:** Risque de suppression accidentelle
 **Solution:** Afficher une alerte de confirmation
 
 **Implémentation:**
+
 ```typescript
 // Déjà implémenté dans le code existant
 // Vérifier que le message est clair et avertit bien
@@ -349,15 +377,17 @@ Alert.alert(
         setShowToast(true);
       },
     },
-  ]
+  ],
 );
 ```
 
 #### À FAIRE: Ajouter explication sur les permissions
+
 **Problème:** Utilisateur ne sait pas pourquoi activer les permissions
 **Solution:** Ajouter texte explicatif sous chaque toggle
 
 **Implémentation:**
+
 ```typescript
 // Pour chaque permission
 <View className="gap-2 mb-4">
@@ -372,10 +402,12 @@ Alert.alert(
 ```
 
 #### À FAIRE: Afficher l'état des permissions
+
 **Problème:** Utilisateur ne sait pas si les permissions sont actives
 **Solution:** Afficher un indicateur visuel
 
 **Implémentation:**
+
 ```typescript
 // Ajouter un indicateur à côté de chaque toggle
 <View className="flex-row items-center justify-between">
@@ -399,10 +431,12 @@ Alert.alert(
 ### P0 - Bloquant
 
 #### À FAIRE: Ajouter un "contrat utilisateur" clair
+
 **Problème:** Utilisateur ne comprend pas le fonctionnement
 **Solution:** Ajouter un écran d'onboarding ou un texte explicatif
 
 **Implémentation:**
+
 ```typescript
 // Ajouter un modal d'onboarding au premier lancement
 // Ou afficher un texte clair sur Home
@@ -417,49 +451,51 @@ Alert.alert(
 ```
 
 #### À FAIRE: Améliorer les messages d'erreur
+
 **Problème:** Messages trop techniques
 **Solution:** Remplacer par messages clairs et orientés action
 
 **Implémentation:**
+
 ```typescript
 // Exemples de messages à utiliser
 const errorMessages = {
   NO_CONTACT: "Ajoute un contact d'urgence pour continuer.",
-  PHONE_NOT_VERIFIED: "Vérifie ton numéro pour activer les alertes.",
+  PHONE_NOT_VERIFIED: 'Vérifie ton numéro pour activer les alertes.',
   NO_CREDITS: "Tu as atteint la limite d'aujourd'hui.",
   SMS_FAILED: "Impossible d'envoyer le SMS pour le moment.",
-  NETWORK_ERROR: "Vérifiez votre connexion Internet.",
-  PERMISSION_DENIED: "Autorise les permissions dans Paramètres.",
+  NETWORK_ERROR: 'Vérifiez votre connexion Internet.',
+  PERMISSION_DENIED: 'Autorise les permissions dans Paramètres.',
 };
 ```
 
 #### À FAIRE: Ajouter des liens directs depuis les erreurs
+
 **Problème:** Utilisateur ne sait pas où aller pour corriger
 **Solution:** Ajouter des liens directs vers Paramètres/OTP/Paywall
 
 **Implémentation:**
+
 ```typescript
 // Exemple: Message d'erreur avec lien
-Alert.alert(
-  'Contact d\'urgence manquant',
-  'Ajoute un contact pour démarrer une sortie.',
-  [
-    { text: 'Annuler', style: 'cancel' },
-    {
-      text: 'Aller aux Paramètres',
-      onPress: () => router.push('/settings'),
-    },
-  ]
-);
+Alert.alert("Contact d'urgence manquant", 'Ajoute un contact pour démarrer une sortie.', [
+  { text: 'Annuler', style: 'cancel' },
+  {
+    text: 'Aller aux Paramètres',
+    onPress: () => router.push('/settings'),
+  },
+]);
 ```
 
 ### P1 - Important
 
 #### À FAIRE: Unifier les libellés
+
 **Problème:** Vocabulaire change entre écrans
 **Solution:** Créer un fichier de constantes pour les textes
 
 **Implémentation:**
+
 ```typescript
 // Créer lib/constants/ui-text.ts
 export const UIText = {
@@ -479,10 +515,12 @@ export const UIText = {
 ```
 
 #### À FAIRE: Ajouter feedback sur les actions en cours
+
 **Problème:** Utilisateur ne sait pas si l'app fonctionne
 **Solution:** Afficher loading/spinner pendant les appels API
 
 **Implémentation:**
+
 ```typescript
 // Ajouter un loading state
 const [isLoading, setIsLoading] = useState(false);
@@ -504,10 +542,12 @@ const handleStartSession = async () => {
 ### P2 - Amélioration
 
 #### À FAIRE: Ajouter feedback positif après succès
+
 **Problème:** Utilisateur ne sait pas si l'action a réussi
 **Solution:** Afficher toast/notification de succès
 
 **Implémentation:**
+
 ```typescript
 // Afficher un toast après chaque action réussie
 const handleCompleteSession = async () => {

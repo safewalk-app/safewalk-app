@@ -1,6 +1,6 @@
 /**
  * Service de Notifications Centralisé
- * 
+ *
  * Gère l'affichage de toutes les notifications de l'app.
  * - Récupère la configuration depuis notifications.config.ts
  * - Injecte les variables dynamiques
@@ -53,7 +53,7 @@ export function registerNotificationContext(context: typeof notificationContext)
 /**
  * Remplace les variables dans un template
  * Exemple: "Bonjour {name}" avec {name: "Alice"} → "Bonjour Alice"
- * 
+ *
  * @param template - Template avec variables {var}
  * @param variables - Valeurs des variables
  * @param fallbacks - Valeurs par défaut si variable manquante
@@ -62,13 +62,13 @@ export function registerNotificationContext(context: typeof notificationContext)
 export function interpolateVariables(
   template: string,
   variables?: Record<string, string | number>,
-  fallbacks?: Record<string, string>
+  fallbacks?: Record<string, string>,
 ): string {
   let message = template;
 
   // Extraire toutes les variables du template
   const variableMatches = template.match(/\{(\w+)\}/g) || [];
-  const variableNames = variableMatches.map(m => m.slice(1, -1));
+  const variableNames = variableMatches.map((m) => m.slice(1, -1));
 
   // Remplacer chaque variable
   for (const varName of variableNames) {
@@ -87,7 +87,7 @@ export function interpolateVariables(
 
 /**
  * Affiche une notification
- * 
+ *
  * @param key - Clé de la notification (ex: "trip.started")
  * @param options - Options d'affichage
  */
@@ -101,11 +101,7 @@ export function notify(key: string, options: NotificationOptions = {}): void {
     }
 
     // Interpoler les variables
-    const message = interpolateVariables(
-      config.message,
-      options.variables,
-      config.fallback
-    );
+    const message = interpolateVariables(config.message, options.variables, config.fallback);
 
     // Déterminer le type et le mode d'affichage
     const type = options.type ?? config.type;
@@ -143,11 +139,7 @@ export function notify(key: string, options: NotificationOptions = {}): void {
 /**
  * Affiche une notification toast
  */
-function showToastNotification(
-  message: string,
-  type: NotificationType,
-  duration: number
-): void {
+function showToastNotification(message: string, type: NotificationType, duration: number): void {
   if (!notificationContext?.showToast) {
     logger.warn('Contexte de toast non disponible');
     return;
@@ -162,7 +154,7 @@ function showToastNotification(
 function showBannerNotification(
   message: string,
   type: NotificationType,
-  onDismiss?: () => void
+  onDismiss?: () => void,
 ): void {
   if (!notificationContext?.showBanner) {
     logger.warn('Contexte de banner non disponible');
@@ -175,11 +167,7 @@ function showBannerNotification(
 /**
  * Affiche une notification modal
  */
-function showModalNotification(
-  key: string,
-  message: string,
-  type: NotificationType
-): void {
+function showModalNotification(key: string, message: string, type: NotificationType): void {
   if (!notificationContext?.showModal) {
     logger.warn('Contexte de modal non disponible');
     return;
@@ -201,11 +189,7 @@ function showModalNotification(
 /**
  * Affiche une notification via Alert.alert (pour les confirmations)
  */
-function showAlertNotification(
-  key: string,
-  message: string,
-  type: NotificationType
-): void {
+function showAlertNotification(key: string, message: string, type: NotificationType): void {
   // Pour les alertes natives, utiliser Alert.alert
   const titles: Record<NotificationType, string> = {
     success: 'Succès',
@@ -287,7 +271,7 @@ export function notifyConfirmation(
     onConfirm: () => void;
     onCancel?: () => void;
     variables?: Record<string, string | number>;
-  }
+  },
 ): void {
   const config = getNotificationConfig(key);
   if (!config) {
@@ -295,11 +279,7 @@ export function notifyConfirmation(
     return;
   }
 
-  const message = interpolateVariables(
-    config.message,
-    options.variables,
-    config.fallback
-  );
+  const message = interpolateVariables(config.message, options.variables, config.fallback);
 
   Alert.alert('Confirmation', message, [
     {
@@ -324,7 +304,7 @@ export function notifyBlocked(
     action?: string;
     onAction?: () => void;
     variables?: Record<string, string | number>;
-  } = {}
+  } = {},
 ): void {
   const config = getNotificationConfig(key);
   if (!config) {
@@ -332,11 +312,7 @@ export function notifyBlocked(
     return;
   }
 
-  const message = interpolateVariables(
-    config.message,
-    options.variables,
-    config.fallback
-  );
+  const message = interpolateVariables(config.message, options.variables, config.fallback);
 
   const buttons = [];
 
@@ -364,7 +340,7 @@ export function notifyErrorWithRetry(
   options: {
     onRetry: () => void;
     variables?: Record<string, string | number>;
-  }
+  },
 ): void {
   const config = getNotificationConfig(key);
   if (!config) {
@@ -372,11 +348,7 @@ export function notifyErrorWithRetry(
     return;
   }
 
-  const message = interpolateVariables(
-    config.message,
-    options.variables,
-    config.fallback
-  );
+  const message = interpolateVariables(config.message, options.variables, config.fallback);
 
   Alert.alert('Erreur', message, [
     {

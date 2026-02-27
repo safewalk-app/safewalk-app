@@ -16,6 +16,7 @@ Ce document identifie tous les messages hardcodés dispersés dans le code SafeW
 ### 1. app/home.tsx
 
 #### Messages Identifiés:
+
 ```tsx
 // Line ~111
 setToastMessage('Configure un contact d\'urgence');
@@ -32,11 +33,13 @@ setToastMessage('Configure un contact d\'urgence');
 ```
 
 **Problèmes:**
+
 - ❌ Message d'erreur hardcodé dans le handler
 - ❌ Textes de branding en dur
 - ⚠️ Pas de contexte dynamique
 
 **À Refactoriser:**
+
 - `'Configure un contact d\'urgence'` → `notify('contact.missing')`
 
 ---
@@ -44,6 +47,7 @@ setToastMessage('Configure un contact d\'urgence');
 ### 2. app/new-session.tsx
 
 #### Messages Identifiés:
+
 ```tsx
 // Line ~74
 return {
@@ -79,11 +83,13 @@ return {
 ```
 
 **Problèmes:**
+
 - ❌ Messages d'erreur/blocage hardcodés dans la logique
 - ❌ Dupliqués (certains messages apparaissent ailleurs)
 - ❌ Pas de gestion centralisée des raisons de blocage
 
 **À Refactoriser:**
+
 - Créer un système de blocages contextuels
 - Centraliser les messages de raison/action
 
@@ -92,6 +98,7 @@ return {
 ### 3. app/active-session.tsx
 
 #### Messages Identifiés:
+
 ```tsx
 // Line ~657
 <Text className="text-xs text-error font-semibold">
@@ -123,11 +130,13 @@ Alert.alert(
 ```
 
 **Problèmes:**
+
 - ❌ Messages d'alerte hardcodés dans les handlers
 - ❌ Confirmations écrites en dur
 - ❌ Pas de gestion centralisée des erreurs SOS
 
 **À Refactoriser:**
+
 - Centraliser les messages de confirmation
 - Créer des templates pour les erreurs SOS
 - Utiliser un système d'affichage unique
@@ -137,6 +146,7 @@ Alert.alert(
 ### 4. app/settings.tsx
 
 #### Messages Identifiés:
+
 ```tsx
 // Line ~90
 setPhoneError('Format invalide. Utilisez +33 suivi de 9 chiffres (ex: +33612345678)');
@@ -159,11 +169,13 @@ Alert.alert(
 ```
 
 **Problèmes:**
+
 - ❌ Messages de validation hardcodés
 - ❌ Messages de succès hardcodés
 - ❌ Confirmations écrites en dur
 
 **À Refactoriser:**
+
 - Centraliser les messages de validation
 - Utiliser des clés pour les succès
 - Créer des confirmations contextuelles
@@ -173,12 +185,14 @@ Alert.alert(
 ### 5. lib/services/trip-service.ts
 
 #### Messages Identifiés (potentiels):
+
 ```tsx
 // Besoin de vérifier les réponses d'erreur
 // et les messages de statut
 ```
 
 **À Analyser:**
+
 - Messages d'erreur API
 - Messages de statut de voyage
 - Réponses de succès
@@ -188,12 +202,14 @@ Alert.alert(
 ### 6. lib/services/sms-service.ts
 
 #### Messages Identifiés (potentiels):
+
 ```tsx
 // Besoin de vérifier les messages d'envoi SMS
 // et les erreurs Twilio
 ```
 
 **À Analyser:**
+
 - Messages d'envoi SMS
 - Erreurs Twilio
 - Statut de livraison
@@ -202,29 +218,32 @@ Alert.alert(
 
 ## 📈 Statistiques du Hardcode
 
-| Catégorie | Nombre | Fichiers |
-|-----------|--------|----------|
-| Messages Toast | 5 | home, new-session, settings |
-| Alertes (Alert.alert) | 6 | active-session, settings |
-| Textes de blocage | 4 | new-session |
-| Textes d'erreur | 3+ | active-session, settings |
-| **Total** | **18+** | **6** |
+| Catégorie             | Nombre  | Fichiers                    |
+| --------------------- | ------- | --------------------------- |
+| Messages Toast        | 5       | home, new-session, settings |
+| Alertes (Alert.alert) | 6       | active-session, settings    |
+| Textes de blocage     | 4       | new-session                 |
+| Textes d'erreur       | 3+      | active-session, settings    |
+| **Total**             | **18+** | **6**                       |
 
 ---
 
 ## 🎯 Problèmes Identifiés
 
 ### P0 - Critique
+
 - ❌ Messages d'erreur dispersés dans les handlers
 - ❌ Pas de source unique de vérité
 - ❌ Difficile à maintenir et à traduire
 
 ### P1 - Important
+
 - ❌ Dupliquation de messages (ex: "Contact d'urgence manquant")
 - ❌ Pas de gestion centralisée des variables dynamiques
 - ❌ Ton incohérent entre les messages
 
 ### P2 - Amélioration
+
 - ⚠️ Pas de fallback pour les variables manquantes
 - ⚠️ Pas de contexte utilisateur dans les messages
 - ⚠️ Pas de système de niveaux de notification
@@ -234,6 +253,7 @@ Alert.alert(
 ## 🔑 Clés de Notifications Identifiées
 
 ### Voyage (Trip)
+
 - `trip.started` - Sortie démarrée
 - `trip.extended` - Sortie prolongée
 - `trip.checked_in` - Check-in confirmé
@@ -241,44 +261,52 @@ Alert.alert(
 - `trip.cancelled` - Sortie annulée
 
 ### Alertes (Alert)
+
 - `alert.warning` - Alerte imminente
 - `alert.sent` - Alerte envoyée
 - `alert.failed` - Échec d'alerte
 - `alert.quota_reached` - Quota atteint
 
 ### SOS
+
 - `sos.sending` - SOS en cours d'envoi
 - `sos.sent` - SOS envoyé
 - `sos.failed` - Échec SOS
 - `sos.quota_reached` - Quota SOS atteint
 
 ### Contact
+
 - `contact.saved` - Contact sauvegardé
 - `contact.deleted` - Contact supprimé
 - `contact.missing` - Contact manquant
 - `contact.invalid` - Contact invalide
 
 ### Authentification
+
 - `auth.otp_required` - OTP requis
 - `auth.otp_sent` - OTP envoyé
 - `auth.otp_failed` - Échec OTP
 
 ### Crédits
+
 - `credits.empty` - Crédits épuisés
 - `credits.low` - Crédits faibles
 - `credits.added` - Crédits ajoutés
 
 ### Permissions
+
 - `permission.location_required` - Localisation requise
 - `permission.notifications_required` - Notifications requises
 - `permission.phone_required` - Téléphone requis
 
 ### Erreurs
+
 - `error.network` - Erreur réseau
 - `error.sms_failed` - Échec SMS
 - `error.unknown` - Erreur inconnue
 
 ### SMS
+
 - `sms.test_sent` - SMS de test envoyé
 - `sms.test_failed` - Échec SMS de test
 
@@ -287,17 +315,20 @@ Alert.alert(
 ## 📋 Checklist de Refactorisation
 
 ### Phase 1: Audit (✅ En cours)
+
 - [x] Identifier tous les messages hardcodés
 - [x] Lister les clés de notifications
 - [x] Documenter les problèmes
 
 ### Phase 2: Système Dynamique
+
 - [ ] Créer le registre central (notifications.config.ts)
 - [ ] Créer le service d'affichage (notification.service.ts)
 - [ ] Implémenter la gestion des variables dynamiques
 - [ ] Créer les templates pour chaque clé
 
 ### Phase 3: Refactorisation
+
 - [ ] Refactoriser home.tsx
 - [ ] Refactoriser new-session.tsx
 - [ ] Refactoriser active-session.tsx
@@ -305,6 +336,7 @@ Alert.alert(
 - [ ] Refactoriser les services
 
 ### Phase 4: Validation
+
 - [ ] Tester chaque notification
 - [ ] Valider les variables dynamiques
 - [ ] Vérifier la cohérence des messages

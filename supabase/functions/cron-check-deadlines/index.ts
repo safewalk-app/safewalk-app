@@ -4,15 +4,14 @@
 // Input: {}
 // Output: { success, processed, sent, failed, message }
 
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
-import { sendSms, isValidPhoneNumber } from "../_shared/twilio.ts";
-import { buildLateSms } from "../_shared/sms-templates.ts";
-import { retryWithBackoff } from "../_shared/retry-helper.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
+import { sendSms, isValidPhoneNumber } from '../_shared/twilio.ts';
+import { buildLateSms } from '../_shared/sms-templates.ts';
+import { retryWithBackoff } from '../_shared/retry-helper.ts';
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
 interface CronResponse {
@@ -40,98 +39,97 @@ interface ClaimedTrip {
 
 async function cronCheckDeadlines(req: Request): Promise<Response> {
   // Handle CORS
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders });
   }
 
   try {
     // Verify CRON_SECRET header
-    const cronSecret = req.headers.get("x-cron-secret");
-    const expectedSecret = Deno.env.get("CRON_SECRET");
+    const cronSecret = req.headers.get('x-cron-secret');
+    const expectedSecret = Deno.env.get('CRON_SECRET');
 
     if (!cronSecret || !expectedSecret || cronSecret !== expectedSecret) {
       return new Response(
         JSON.stringify({
           success: false,
-          error: "Invalid or missing CRON_SECRET",
-          errorCode: "UNAUTHORIZED",
+          error: 'Invalid or missing CRON_SECRET',
+          errorCode: 'UNAUTHORIZED',
           processed: 0,
           sent: 0,
           failed: 0,
         }),
         {
           status: 401,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        },
       );
     }
 
     // Create Supabase client
-    const supabaseUrl = Deno.env.get("SUPABASE_URL");
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
     if (!supabaseUrl || !supabaseServiceKey) {
       return new Response(
         JSON.stringify({
           success: false,
-          error: "Missing Supabase configuration",
-          errorCode: "CONFIG_ERROR",
+          error: 'Missing Supabase configuration',
+          errorCode: 'CONFIG_ERROR',
           processed: 0,
           sent: 0,
           failed: 0,
         }),
         {
           status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        },
       );
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Get Twilio config from environment
-    const twilioAccountSid = Deno.env.get("TWILIO_ACCOUNT_SID");
-    const twilioAuthToken = Deno.env.get("TWILIO_AUTH_TOKEN");
-    const twilioFromNumber = Deno.env.get("TWILIO_PHONE_NUMBER");
+    const twilioAccountSid = Deno.env.get('TWILIO_ACCOUNT_SID');
+    const twilioAuthToken = Deno.env.get('TWILIO_AUTH_TOKEN');
+    const twilioFromNumber = Deno.env.get('TWILIO_PHONE_NUMBER');
 
     if (!twilioAccountSid || !twilioAuthToken || !twilioFromNumber) {
       return new Response(
         JSON.stringify({
           success: false,
-          error: "Twilio configuration missing",
-          errorCode: "CONFIG_ERROR",
+          error: 'Twilio configuration missing',
+          errorCode: 'CONFIG_ERROR',
           processed: 0,
           sent: 0,
           failed: 0,
         }),
         {
           status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        },
       );
     }
 
     // Claim overdue trips
-    const { data: claimedTrips, error: claimError } = await supabase.rpc(
-      "claim_overdue_trips",
-      { p_limit: 50 }
-    );
+    const { data: claimedTrips, error: claimError } = await supabase.rpc('claim_overdue_trips', {
+      p_limit: 50,
+    });
 
     if (claimError) {
-      console.error("Claim trips error:", claimError);
+      console.error('Claim trips error:', claimError);
       return new Response(
         JSON.stringify({
           success: false,
-          error: "Failed to claim overdue trips",
-          errorCode: "CLAIM_ERROR",
+          error: 'Failed to claim overdue trips',
+          errorCode: 'CLAIM_ERROR',
           processed: 0,
           sent: 0,
           failed: 0,
         }),
         {
           status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        },
       );
     }
 
@@ -144,11 +142,11 @@ async function cronCheckDeadlines(req: Request): Promise<Response> {
       try {
         // Check if alert was already sent (idempotence)
         const { data: existingAlert } = await supabase
-          .from("sms_logs")
-          .select("id")
-          .eq("session_id", trip.trip_id)
-          .eq("sms_type", "alert")
-          .eq("status", "sent")
+          .from('sms_logs')
+          .select('id')
+          .eq('session_id', trip.trip_id)
+          .eq('sms_type', 'alert')
+          .eq('status', 'sent')
           .limit(1);
 
         if (existingAlert && existingAlert.length > 0) {
@@ -171,25 +169,22 @@ async function cronCheckDeadlines(req: Request): Promise<Response> {
         }
 
         // Call consume_credit RPC to check if alert can be sent
-        const { data: creditData, error: creditError } = await supabase.rpc(
-          "consume_credit",
-          { p_user_id: trip.user_id, p_type: "late" }
-        );
+        const { data: creditData, error: creditError } = await supabase.rpc('consume_credit', {
+          p_user_id: trip.user_id,
+          p_type: 'late',
+        });
 
         if (creditError || !creditData?.[0]?.allowed) {
-          console.warn(
-            `Trip ${trip.trip_id}: Credit check failed or not allowed`,
-            creditError
-          );
+          console.warn(`Trip ${trip.trip_id}: Credit check failed or not allowed`, creditError);
 
           // Log failed alert (no credit)
-          await supabase.from("sms_logs").insert({
+          await supabase.from('sms_logs').insert({
             user_id: trip.user_id,
             contact_id: trip.contact_id,
             session_id: trip.trip_id,
-            sms_type: "alert",
-            status: "failed",
-            error_message: creditData?.[0]?.reason || "No credits",
+            sms_type: 'alert',
+            status: 'failed',
+            error_message: creditData?.[0]?.reason || 'No credits',
           });
 
           failedCount++;
@@ -198,9 +193,9 @@ async function cronCheckDeadlines(req: Request): Promise<Response> {
 
         // Get user profile for alert message
         const { data: userData } = await supabase
-          .from("profiles")
-          .select("first_name, share_user_phone_in_alerts")
-          .eq("id", trip.user_id)
+          .from('profiles')
+          .select('first_name, share_user_phone_in_alerts')
+          .eq('id', trip.user_id)
           .single();
 
         // Build alert message using dynamic template
@@ -215,35 +210,45 @@ async function cronCheckDeadlines(req: Request): Promise<Response> {
 
         // Send SMS via Twilio with retry logic
         const smsRetryResult = await retryWithBackoff(
-          () => sendSms({
-            to: trip.contact_phone_number,
-            message: alertMessage,
-            config: {
-              accountSid: twilioAccountSid,
-              authToken: twilioAuthToken,
-              fromNumber: twilioFromNumber,
-            },
-            maxRetries: 3,
-            initialDelayMs: 1000,
-          }),
+          () =>
+            sendSms({
+              to: trip.contact_phone_number,
+              message: alertMessage,
+              config: {
+                accountSid: twilioAccountSid,
+                authToken: twilioAuthToken,
+                fromNumber: twilioFromNumber,
+              },
+              maxRetries: 3,
+              initialDelayMs: 1000,
+            }),
           {
             maxRetries: 3,
             initialDelayMs: 1000,
-          }
+          },
         );
-        
-        const smsResult = smsRetryResult.success ? smsRetryResult.data! : { success: false, error: smsRetryResult.error?.message || 'Unknown error', errorCode: 'RETRY_FAILED' };
+
+        const smsResult = smsRetryResult.success
+          ? smsRetryResult.data!
+          : {
+              success: false,
+              error: smsRetryResult.error?.message || 'Unknown error',
+              errorCode: 'RETRY_FAILED',
+            };
 
         if (!smsResult.success) {
-          console.error(`Trip ${trip.trip_id}: SMS failed after ${smsRetryResult.retryCount} retries`, smsResult.error);
+          console.error(
+            `Trip ${trip.trip_id}: SMS failed after ${smsRetryResult.retryCount} retries`,
+            smsResult.error,
+          );
 
           // Log failed SMS
-          await supabase.from("sms_logs").insert({
+          await supabase.from('sms_logs').insert({
             user_id: trip.user_id,
             contact_id: trip.contact_id,
             session_id: trip.trip_id,
-            sms_type: "alert",
-            status: "failed",
+            sms_type: 'alert',
+            status: 'failed',
             error_message: smsResult.error,
             retry_count: smsRetryResult.retryCount,
             duration_ms: smsRetryResult.totalDurationMs,
@@ -254,12 +259,12 @@ async function cronCheckDeadlines(req: Request): Promise<Response> {
         }
 
         // Log successful SMS
-        await supabase.from("sms_logs").insert({
+        await supabase.from('sms_logs').insert({
           user_id: trip.user_id,
           contact_id: trip.contact_id,
           session_id: trip.trip_id,
-          sms_type: "alert",
-          status: "sent",
+          sms_type: 'alert',
+          status: 'sent',
           message_sid: smsResult.messageSid,
           retry_count: smsRetryResult.retryCount,
           duration_ms: smsRetryResult.totalDurationMs,
@@ -267,40 +272,40 @@ async function cronCheckDeadlines(req: Request): Promise<Response> {
 
         sentCount++;
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         console.error(`Trip ${trip.trip_id}: Processing error`, errorMessage);
-        
+
         // Log processing error
         try {
-          await supabase.from("sms_logs").insert({
+          await supabase.from('sms_logs').insert({
             user_id: trip.user_id,
             contact_id: trip.contact_id,
             session_id: trip.trip_id,
-            sms_type: "alert",
-            status: "failed",
+            sms_type: 'alert',
+            status: 'failed',
             error_message: errorMessage,
           });
         } catch (logError) {
           console.error(`Failed to log error for trip ${trip.trip_id}:`, logError);
         }
-        
+
         failedCount++;
       }
     }
 
     // Log cron execution heartbeat
     try {
-      await supabase.from("cron_heartbeat").insert({
-        function_name: "cron-check-deadlines",
+      await supabase.from('cron_heartbeat').insert({
+        function_name: 'cron-check-deadlines',
         last_run_at: new Date().toISOString(),
-        status: "success",
+        status: 'success',
         processed: trips.length,
         sent: sentCount,
         failed: failedCount,
         notes: `Processed ${trips.length} trips, sent ${sentCount} alerts, ${failedCount} failed`,
       });
     } catch (heartbeatError) {
-      console.error("Failed to log cron heartbeat:", heartbeatError);
+      console.error('Failed to log cron heartbeat:', heartbeatError);
     }
 
     // Success response
@@ -314,25 +319,25 @@ async function cronCheckDeadlines(req: Request): Promise<Response> {
 
     return new Response(JSON.stringify(response), {
       status: 200,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    console.error("Cron check deadlines error:", errorMessage);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Cron check deadlines error:', errorMessage);
 
     return new Response(
       JSON.stringify({
         success: false,
         error: errorMessage,
-        errorCode: "EXCEPTION",
+        errorCode: 'EXCEPTION',
         processed: 0,
         sent: 0,
         failed: 0,
       }),
       {
         status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      },
     );
   }
 }

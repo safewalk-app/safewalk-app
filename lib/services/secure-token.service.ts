@@ -1,10 +1,10 @@
 /**
  * Secure Token Service - Gestion sécurisée des tokens JWT
- * 
+ *
  * Utilise expo-secure-store pour stocker les tokens dans:
  * - iOS: Keychain
  * - Android: Keystore
- * 
+ *
  * Fonctionnalités:
  * - Stockage sécurisé des tokens
  * - Gestion automatique de l'expiration
@@ -54,7 +54,7 @@ class SecureTokenService {
       this.isInitialized = true;
       logger.info('✅ [Secure Token] Service initialisé');
     } catch (error) {
-      logger.error('❌ [Secure Token] Erreur d\'initialisation:', error);
+      logger.error("❌ [Secure Token] Erreur d'initialisation:", error);
     }
   }
 
@@ -64,30 +64,18 @@ class SecureTokenService {
   public async saveTokens(tokenData: TokenData): Promise<void> {
     try {
       // Sauvegarder le token d'accès
-      await SecureStore.setItemAsync(
-        SECURE_KEYS.ACCESS_TOKEN,
-        tokenData.accessToken
-      );
+      await SecureStore.setItemAsync(SECURE_KEYS.ACCESS_TOKEN, tokenData.accessToken);
 
       // Sauvegarder le token de rafraîchissement si présent
       if (tokenData.refreshToken) {
-        await SecureStore.setItemAsync(
-          SECURE_KEYS.REFRESH_TOKEN,
-          tokenData.refreshToken
-        );
+        await SecureStore.setItemAsync(SECURE_KEYS.REFRESH_TOKEN, tokenData.refreshToken);
       }
 
       // Sauvegarder la date d'expiration
-      await SecureStore.setItemAsync(
-        SECURE_KEYS.TOKEN_EXPIRY,
-        tokenData.expiresAt.toString()
-      );
+      await SecureStore.setItemAsync(SECURE_KEYS.TOKEN_EXPIRY, tokenData.expiresAt.toString());
 
       // Sauvegarder l'ID utilisateur
-      await SecureStore.setItemAsync(
-        SECURE_KEYS.USER_ID,
-        tokenData.userId
-      );
+      await SecureStore.setItemAsync(SECURE_KEYS.USER_ID, tokenData.userId);
 
       logger.info('✅ [Secure Token] Tokens sauvegardés avec succès');
     } catch (error) {
