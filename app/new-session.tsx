@@ -56,6 +56,7 @@ export default function NewSessionScreen() {
 
   // Check if phone is verified on mount
   useEffect(() => {
+    setBlockingReason(null);
     checkPhoneVerification();
   }, []);
 

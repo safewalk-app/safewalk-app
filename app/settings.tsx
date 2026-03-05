@@ -91,7 +91,7 @@ export default function SettingsScreen() {
       ) {
         // Nettoyer et valider le numéro si non vide
         const cleanedPhone = cleanPhoneNumber(contactPhone);
-        if (cleanedPhone && !validatePhoneNumber(cleanedPhone)) {
+        if (cleanedPhone && !validatePhoneNumberService(cleanedPhone)) {
           setPhoneError('Format invalide. Utilisez +33 suivi de 9 chiffres (ex: +33612345678)');
           return;
         }
