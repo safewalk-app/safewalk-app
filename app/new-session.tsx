@@ -18,6 +18,9 @@ import { RateLimitErrorAlert } from '@/components/rate-limit-error-alert';
 import { useCooldown } from '@/lib/hooks/use-cooldown';
 import { notify, notifyBlocked } from '@/lib/services/notification.service';
 import { MaterialIcons } from '@expo/vector-icons';
+import { runSafetyGuard, buildGuardContext } from '@/lib/core/safety-guard';
+import { pendingActionStore } from '@/lib/core/pending-action-store';
+import { useLocationPermission } from '@/hooks/use-location-permission';
 
 export default function NewSessionScreen() {
   const router = useRouter();

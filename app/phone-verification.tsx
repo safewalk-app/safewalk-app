@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useApp } from '@/lib/context/app-context';
 import { ScreenContainer } from '@/components/screen-container';
 import { ErrorAlert } from '@/components/error-alert';
 import { RateLimitErrorAlert } from '@/components/rate-limit-error-alert';
@@ -15,7 +16,7 @@ import { useCooldown } from '@/lib/hooks/use-cooldown';
 import { otpService } from '@/lib/services/otp-service';
 import { logger } from '@/lib/logger';
 import { useColors } from '@/hooks/use-colors';
-import { cn } from '@/lib/utils';
+import { cn, cleanPhoneNumber } from '@/lib/utils';
 import {
   validatePhoneNumber,
   formatPhoneForInput,
@@ -44,9 +45,12 @@ import {
 export default function PhoneVerificationScreen() {
   const router = useRouter();
   const colors = useColors();
-  const { returnTo } = useLocalSearchParams<{ returnTo?: string }>();
+  const { returnTo, phone: phoneParam } = useLocalSearchParams<{ returnTo?: string; phone?: string }>();
+  const { settings } = useApp();
 
-  const [phoneInput, setPhoneInput] = useState('');
+  // Pré-remplir avec le numéro des paramètres ou le paramètre passé
+  const initialPhone = phoneParam || settings.userPhone || '';
+  const [phoneInput, setPhoneInput] = useState(initialPhone);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<{
     code: OtpErrorCode;
@@ -67,6 +71,13 @@ export default function PhoneVerificationScreen() {
   } = useCooldown({
     duration: 60000,
   });
+
+  // Si le numéro est déjà pré-rempli et valide, passer directement à OTP
+  useEffect(() => {
+    if (initialPhone && validatePhoneNumber(initialPhone).isValid) {
+      // Le numéro est pré-rempli et valide, on peut l'utiliser directement
+    }
+  }, []);
 
   // Validation en temps réel
   const validation = validatePhoneNumber(phoneInput);

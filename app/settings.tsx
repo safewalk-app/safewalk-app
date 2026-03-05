@@ -17,58 +17,68 @@ import {
   getValidationFeedback,
 } from '@/lib/services/phone-validation-service';
 import { checkHealth } from '@/lib/services/api-client';
-import { sendEmergencySMS } from '@/lib/services/sms-service';
 import { useLocationPermission } from '@/hooks/use-location-permission';
-import * as tripService from '@/lib/services/trip-service';
 import { useProfileData } from '@/hooks/use-profile-data';
 import { RateLimitErrorAlert } from '@/components/rate-limit-error-alert';
-import { useCooldown } from '@/lib/hooks/use-cooldown';
 
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const { settings, updateSettings, deleteAllData } = useApp();
   const profileData = useProfileData();
   const [firstName, setFirstName] = useState(settings.firstName);
+  
+  // Mon numéro de téléphone (à vérifier)
+  const [myPhone, setMyPhone] = useState(settings.userPhone || '');
+  const [myPhoneValid, setMyPhoneValid] = useState<boolean | null>(null);
+  const [myPhoneError, setMyPhoneError] = useState<string | null>(null);
+  
+  // Contact d'urgence
   const [contactName, setContactName] = useState(settings.emergencyContactName);
   const [contactPhone, setContactPhone] = useState(settings.emergencyContactPhone);
+  const [contactPhoneValid, setContactPhoneValid] = useState<boolean | null>(null);
+  const [contactPhoneError, setContactPhoneError] = useState<string | null>(null);
 
-  // Handlers pour le masque de saisie
-  const handlePhoneChange = (text: string) => {
-    const formatted = formatPhoneInput(text);
-    setContactPhone(formatted);
-
-    // Validation en temps réel avec feedback détaillé
-    const cleaned = cleanPhoneNumber(formatted);
-    if (cleaned.length === 0) {
-      setIsPhone1Valid(null); // Pas d'icône si vide
-      setPhoneError(null);
-    } else {
-      const result = validatePhoneNumberService(cleaned);
-      setIsPhone1Valid(result.isValid);
-      setPhoneError(result.feedback || null);
-    }
-  };
-
-  const locationPermission = useLocationPermission();
-  const [locationEnabled, setLocationEnabled] = useState(locationPermission.enabled);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
-  const [phoneError, setPhoneError] = useState<string | null>(null);
-  const [isPhone1Valid, setIsPhone1Valid] = useState<boolean | null>(null);
-  const [isSendingTestSms, setIsSendingTestSms] = useState(false);
   const [rateLimitError, setRateLimitError] = useState<{
     visible: boolean;
     message?: string;
   }>({ visible: false });
 
-  // Cooldown de 5 secondes entre les SMS de test
-  const {
-    trigger: triggerTestSms,
-    isOnCooldown,
-    remainingTime,
-  } = useCooldown({
-    duration: 5000,
-  });
+  const locationPermission = useLocationPermission();
+  const [locationEnabled, setLocationEnabled] = useState(locationPermission.enabled);
+
+  // Handler pour "Mon numéro"
+  const handleMyPhoneChange = (text: string) => {
+    const formatted = formatPhoneInput(text);
+    setMyPhone(formatted);
+
+    const cleaned = cleanPhoneNumber(formatted);
+    if (cleaned.length === 0) {
+      setMyPhoneValid(null);
+      setMyPhoneError(null);
+    } else {
+      const result = validatePhoneNumberService(cleaned);
+      setMyPhoneValid(result.isValid);
+      setMyPhoneError(result.feedback || null);
+    }
+  };
+
+  // Handler pour Contact d'urgence
+  const handleContactPhoneChange = (text: string) => {
+    const formatted = formatPhoneInput(text);
+    setContactPhone(formatted);
+
+    const cleaned = cleanPhoneNumber(formatted);
+    if (cleaned.length === 0) {
+      setContactPhoneValid(null);
+      setContactPhoneError(null);
+    } else {
+      const result = validatePhoneNumberService(cleaned);
+      setContactPhoneValid(result.isValid);
+      setContactPhoneError(result.feedback || null);
+    }
+  };
 
   // Autosave firstName
   useEffect(() => {
@@ -82,26 +92,47 @@ export default function SettingsScreen() {
     return () => clearTimeout(timer);
   }, [firstName]);
 
-  // Autosave contact 1 avec validation stricte E.164
+  // Autosave Mon numéro
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (myPhone !== settings.userPhone) {
+        const cleanedPhone = cleanPhoneNumber(myPhone);
+        if (cleanedPhone && !validatePhoneNumberService(cleanedPhone)) {
+          setMyPhoneError('Format invalide. Utilisez +33 suivi de 9 chiffres');
+          return;
+        }
+        setMyPhoneError(null);
+        updateSettings({ userPhone: cleanedPhone });
+        if (cleanedPhone) {
+          setToastMessage('Mon numéro sauvegardé');
+          setShowToast(true);
+        }
+      }
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [myPhone]);
+
+  // Autosave Contact d'urgence
   useEffect(() => {
     const timer = setTimeout(() => {
       if (
         contactName !== settings.emergencyContactName ||
         contactPhone !== settings.emergencyContactPhone
       ) {
-        // Nettoyer et valider le numéro si non vide
         const cleanedPhone = cleanPhoneNumber(contactPhone);
         if (cleanedPhone && !validatePhoneNumberService(cleanedPhone)) {
-          setPhoneError('Format invalide. Utilisez +33 suivi de 9 chiffres (ex: +33612345678)');
+          setContactPhoneError('Format invalide. Utilisez +33 suivi de 9 chiffres');
           return;
         }
-        setPhoneError(null);
+        setContactPhoneError(null);
         updateSettings({
           emergencyContactName: contactName,
           emergencyContactPhone: cleanedPhone,
         });
-        setToastMessage('Contact 1 sauvegardé');
-        setShowToast(true);
+        if (contactName || cleanedPhone) {
+          setToastMessage('Contact d\'urgence sauvegardé');
+          setShowToast(true);
+        }
       }
     }, 500);
     return () => clearTimeout(timer);
@@ -117,12 +148,10 @@ export default function SettingsScreen() {
     const result = await locationPermission.toggleLocation(value);
 
     if (result.success) {
-      // Succès
       updateSettings({ locationEnabled: value });
       setToastMessage(value ? '✅ Localisation activée' : 'Localisation désactivée');
       setShowToast(true);
     } else if (result.needsSettings) {
-      // Permission refusée => afficher message + bouton Settings
       Alert.alert(
         'Permission refusée',
         "Pour activer la localisation, vous devez autoriser l'accès dans les réglages de votre téléphone.",
@@ -135,69 +164,9 @@ export default function SettingsScreen() {
         ],
       );
     } else if (result.needsPermission) {
-      // Permission refusée après demande
       setToastMessage('❌ Permission refusée');
       setShowToast(true);
     }
-  };
-
-  const handleTestSms = async () => {
-    await triggerTestSms(async () => {
-      // CRITIQUE: Vérifier que le contact d'urgence est configuré
-      if (!contactPhone || !contactName) {
-        Alert.alert(
-          "Contact d'urgence manquant",
-          "Veuillez d'abord configurer un contact d'urgence pour tester les SMS.",
-        );
-        return;
-      }
-
-      // CRITIQUE: Valider le format du numéro d'urgence
-      const cleanedPhone = cleanPhoneNumber(contactPhone);
-      if (!validatePhoneNumber(cleanedPhone)) {
-        Alert.alert(
-          'Numéro invalide',
-          "Le numéro d'urgence n'est pas au bon format. Utilisez +33 suivi de 9 chiffres.",
-        );
-        return;
-      }
-
-      // Check phone_verified
-      if (!profileData?.phone_verified) {
-        Alert.alert(
-          'Téléphone non vérifié',
-          "Veuillez d'abord vérifier votre numéro de téléphone.",
-        );
-        return;
-      }
-
-      // Check credits
-      if (profileData?.free_test_sms_remaining === 0 && !profileData?.subscription_active) {
-        Alert.alert('Pas de crédits', "Vous n'avez plus de SMS de test disponibles.");
-        return;
-      }
-
-      setIsSendingTestSms(true);
-      const result = await tripService.sendTestSms();
-      setIsSendingTestSms(false);
-
-      if (result.success) {
-        setToastMessage('✅ SMS de test envoyé !');
-        setShowToast(true);
-      } else {
-        // Handle specific error codes
-        const errorCode = result.errorCode;
-        if (errorCode === 'no_credits') {
-          Alert.alert('Crédits insuffisants', "Vous n'avez plus de SMS de test disponibles.");
-        } else if (errorCode === 'quota_reached') {
-          Alert.alert('Limite atteinte', "Vous avez atteint la limite d'SMS pour aujourd'hui.");
-        } else if (errorCode === 'twilio_failed') {
-          Alert.alert("Erreur d'envoi", "Impossible d'envoyer le SMS. Réessaiera automatiquement.");
-        } else {
-          Alert.alert('Erreur', result.error || "Impossible d'envoyer le SMS de test");
-        }
-      }
-    });
   };
 
   const handleDeleteData = () => {
@@ -229,100 +198,187 @@ export default function SettingsScreen() {
       >
         {/* Header */}
         <ScreenTransition delay={0} duration={350}>
-          <View className="gap-1 mb-4">
+          <View className="gap-1 mb-6">
             <Text className="text-4xl font-bold text-foreground">Paramètres</Text>
+            <Text className="text-sm text-muted">Configure ton profil et ta sécurité</Text>
           </View>
         </ScreenTransition>
 
-        {/* SECTION 1: PROFIL */}
-        <ScreenTransition delay={100} duration={350}>
-          <View className="mb-4">
-            <Text className="text-xs font-bold text-muted uppercase tracking-wider mb-2">
-              Profil
-            </Text>
-
-            {/* Card "Mon prénom" */}
-            <GlassCard className="gap-2">
-              <View className="flex-row items-center gap-2">
-                <MaterialIcons name="person" size={16} color="#6C63FF" />
-                <Text className="text-sm font-semibold text-muted">Mon prénom</Text>
-              </View>
-              <PopTextField
-                placeholder="Ex. Ben"
-                value={firstName}
-                onChangeText={setFirstName}
-                accessibilityLabel="Champ Mon prénom"
-                accessibilityHint="Entrez votre prénom"
-              />
-              <Text className="text-xs text-muted mt-2">
-                Ce prénom sera utilisé dans les alertes envoyées à ton contact.
+        <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
+          {/* SECTION 1: PROFIL */}
+          <ScreenTransition delay={100} duration={350}>
+            <View className="mb-6">
+              <Text className="text-xs font-bold text-muted uppercase tracking-wider mb-3">
+                👤 Profil
               </Text>
-            </GlassCard>
-          </View>
-        </ScreenTransition>
 
-        {/* SECTION 2: SÉCURITÉ */}
-        <ScreenTransition delay={200} duration={350}>
-          <View className="mb-4">
-            <Text className="text-xs font-bold text-muted uppercase tracking-wider mb-2">
-              Sécurité
-            </Text>
-
-            {/* Card "Contact d'urgence" */}
-            <View className="mb-3">
-              <GlassCard className="gap-2">
+              <GlassCard className="gap-3">
                 <View className="flex-row items-center gap-2">
-                  <MaterialIcons name="emergency" size={16} color="#FF4D4D" />
-                  <Text className="text-sm font-semibold text-foreground">Contact d'urgence</Text>
+                  <MaterialIcons name="person" size={18} color="#6C63FF" />
+                  <Text className="text-sm font-semibold text-foreground">Mon prénom</Text>
                 </View>
-
                 <PopTextField
-                  placeholder="Ex. Sarah"
-                  value={contactName}
-                  onChangeText={setContactName}
-                  accessibilityLabel="Champ Nom du contact d'urgence"
-                  accessibilityHint="Entrez le nom du contact d'alerte"
+                  placeholder="Ex. Ben"
+                  value={firstName}
+                  onChangeText={setFirstName}
+                  accessibilityLabel="Champ Mon prénom"
+                  accessibilityHint="Entrez votre prénom"
                 />
+                <Text className="text-xs text-muted">
+                  Utilisé dans les alertes envoyées à ton contact.
+                </Text>
+              </GlassCard>
+            </View>
+          </ScreenTransition>
+
+          {/* SECTION 2: MON NUMÉRO (À VÉRIFIER) */}
+          <ScreenTransition delay={150} duration={350}>
+            <View className="mb-6">
+              <Text className="text-xs font-bold text-muted uppercase tracking-wider mb-3">
+                📱 Vérification
+              </Text>
+
+              <GlassCard className="gap-3">
+                <View className="flex-row items-center justify-between">
+                  <View className="flex-row items-center gap-2 flex-1">
+                    <MaterialIcons name="phone" size={18} color="#3A86FF" />
+                    <Text className="text-sm font-semibold text-foreground">Mon numéro</Text>
+                  </View>
+                  <View className="p-2">
+                    {profileData?.phone_verified ? (
+                      <View className="flex-row items-center gap-1 bg-success/10 px-2 py-1 rounded-full">
+                        <MaterialIcons name="check-circle" size={16} color="#22C55E" />
+                        <Text className="text-xs text-success font-semibold">Vérifié</Text>
+                      </View>
+                    ) : (
+                      <View className="flex-row items-center gap-1 bg-warning/10 px-2 py-1 rounded-full">
+                        <MaterialIcons name="schedule" size={16} color="#F59E0B" />
+                        <Text className="text-xs text-warning font-semibold">À vérifier</Text>
+                      </View>
+                    )}
+                  </View>
+                </View>
 
                 <View className="flex-row items-center gap-2">
                   <View className="flex-1">
-                    <Text className="text-xs font-semibold text-muted mb-1">Téléphone</Text>
                     <PopTextField
                       placeholder="+33 6 12 34 56 78"
-                      value={contactPhone}
-                      onChangeText={handlePhoneChange}
+                      value={myPhone}
+                      onChangeText={handleMyPhoneChange}
                       keyboardType="phone-pad"
-                      accessibilityLabel="Champ Numéro de téléphone"
-                      accessibilityHint="Entrez votre numéro de téléphone au format E.164 (ex: +33612345678)"
+                      editable={!profileData?.phone_verified}
+                      accessibilityLabel="Champ Mon numéro de téléphone"
+                      accessibilityHint="Entrez votre numéro au format E.164"
                     />
-                    {phoneError && <Text className="text-xs text-error mt-1">{phoneError}</Text>}
+                    {myPhoneError && <Text className="text-xs text-error mt-1">{myPhoneError}</Text>}
                   </View>
                   <View className="p-2">
-                    {isPhone1Valid === true && (
+                    {myPhoneValid === true && (
                       <MaterialIcons name="check-circle" size={20} color="#22C55E" />
                     )}
-                    {isPhone1Valid === false && (
+                    {myPhoneValid === false && (
                       <MaterialIcons name="cancel" size={20} color="#EF4444" />
                     )}
-                    {isPhone1Valid === null && (
+                    {myPhoneValid === null && (
                       <MaterialIcons name="phone" size={20} color="#9BA1A6" />
                     )}
                   </View>
                 </View>
-                <Text className="text-xs text-muted mt-2">
-                  Cette personne sera prévenue automatiquement si tu ne confirmes pas ton retour.
+
+                {!profileData?.phone_verified && myPhone && (
+                  <Pressable
+                    onPress={() => router.push('/phone-verification')}
+                    className="bg-primary/10 rounded-lg p-3"
+                  >
+                    <Text className="text-primary font-semibold text-center">
+                      Vérifier mon numéro via OTP
+                    </Text>
+                  </Pressable>
+                )}
+
+                <Text className="text-xs text-muted">
+                  Nécessaire pour activer les alertes de sécurité.
                 </Text>
               </GlassCard>
             </View>
+          </ScreenTransition>
 
-            {/* Card "Partager ma position en cas d'alerte" */}
-            <View className="mb-3">
-              <GlassCard className="gap-2">
+          {/* SECTION 3: CONTACT D'URGENCE */}
+          <ScreenTransition delay={200} duration={350}>
+            <View className="mb-6">
+              <Text className="text-xs font-bold text-muted uppercase tracking-wider mb-3">
+                🆘 Contact d'urgence
+              </Text>
+
+              <GlassCard className="gap-3">
+                <View className="flex-row items-center gap-2">
+                  <MaterialIcons name="emergency" size={18} color="#FF4D4D" />
+                  <Text className="text-sm font-semibold text-foreground">Qui prévenir ?</Text>
+                </View>
+
+                {/* Nom du contact */}
+                <View>
+                  <Text className="text-xs font-semibold text-muted mb-1">Nom</Text>
+                  <PopTextField
+                    placeholder="Ex. Sarah"
+                    value={contactName}
+                    onChangeText={setContactName}
+                    accessibilityLabel="Champ Nom du contact d'urgence"
+                    accessibilityHint="Entrez le nom du contact d'alerte"
+                  />
+                </View>
+
+                {/* Numéro du contact */}
+                <View>
+                  <Text className="text-xs font-semibold text-muted mb-1">Numéro de téléphone</Text>
+                  <View className="flex-row items-center gap-2">
+                    <View className="flex-1">
+                      <PopTextField
+                        placeholder="+33 6 12 34 56 78"
+                        value={contactPhone}
+                        onChangeText={handleContactPhoneChange}
+                        keyboardType="phone-pad"
+                        accessibilityLabel="Champ Numéro de téléphone du contact"
+                        accessibilityHint="Entrez le numéro au format E.164"
+                      />
+                      {contactPhoneError && (
+                        <Text className="text-xs text-error mt-1">{contactPhoneError}</Text>
+                      )}
+                    </View>
+                    <View className="p-2">
+                      {contactPhoneValid === true && (
+                        <MaterialIcons name="check-circle" size={20} color="#22C55E" />
+                      )}
+                      {contactPhoneValid === false && (
+                        <MaterialIcons name="cancel" size={20} color="#EF4444" />
+                      )}
+                      {contactPhoneValid === null && (
+                        <MaterialIcons name="phone" size={20} color="#9BA1A6" />
+                      )}
+                    </View>
+                  </View>
+                </View>
+
+                <Text className="text-xs text-muted">
+                  Cette personne recevra une alerte SMS si tu ne confirmes pas ton retour.
+                </Text>
+              </GlassCard>
+            </View>
+          </ScreenTransition>
+
+          {/* SECTION 4: LOCALISATION */}
+          <ScreenTransition delay={250} duration={350}>
+            <View className="mb-6">
+              <Text className="text-xs font-bold text-muted uppercase tracking-wider mb-3">
+                📍 Localisation
+              </Text>
+
+              <GlassCard className="gap-3">
                 <View className="flex-row items-center justify-between">
                   <View className="flex-row items-center gap-2 flex-1">
-                    <MaterialIcons name="location-on" size={16} color="#3A86FF" />
+                    <MaterialIcons name="location-on" size={18} color="#3A86FF" />
                     <Text className="text-sm font-semibold text-foreground">
-                      Partager ma position en cas d'alerte
+                      Partager en cas d'alerte
                     </Text>
                   </View>
                   <Switch
@@ -331,19 +387,61 @@ export default function SettingsScreen() {
                     trackColor={{ false: '#E5E7EB', true: '#2DE2A6' }}
                     thumbColor="#FFFFFF"
                     accessible={true}
-                    accessibilityLabel="Commutateur Partager ma position en cas d'alerte"
+                    accessibilityLabel="Partager ma position"
                     accessibilityHint="Activez pour partager votre localisation en cas d'alerte"
                     accessibilityRole="switch"
                     accessibilityState={{ checked: locationEnabled }}
                   />
                 </View>
-                <Text className="text-xs text-muted mt-2">
-                  Ta position n'est envoyée qu'en cas d'alerte.
+                <Text className="text-xs text-muted">
+                  Ta position n'est envoyée qu'en cas d'alerte à ton contact.
                 </Text>
               </GlassCard>
             </View>
-          </View>
-        </ScreenTransition>
+          </ScreenTransition>
+
+          {/* SECTION 5: ACTIONS */}
+          <ScreenTransition delay={300} duration={350}>
+            <View className="mb-6">
+              <Text className="text-xs font-bold text-muted uppercase tracking-wider mb-3">
+                ⚙️ Actions
+              </Text>
+
+              {/* À propos */}
+              <Pressable
+                onPress={() => router.push('/about')}
+                className="mb-3"
+                accessible={true}
+                accessibilityRole="button"
+                accessibilityLabel="À propos"
+              >
+                <GlassCard className="gap-2 flex-row items-center justify-between">
+                  <View className="flex-row items-center gap-2">
+                    <MaterialIcons name="info" size={18} color="#6C63FF" />
+                    <Text className="text-sm font-semibold text-foreground">À propos</Text>
+                  </View>
+                  <MaterialIcons name="chevron-right" size={20} color="#9BA1A6" />
+                </GlassCard>
+              </Pressable>
+
+              {/* Supprimer les données */}
+              <Pressable
+                onPress={handleDeleteData}
+                accessible={true}
+                accessibilityRole="button"
+                accessibilityLabel="Supprimer toutes les données"
+              >
+                <GlassCard className="gap-2 flex-row items-center justify-between bg-error/5">
+                  <View className="flex-row items-center gap-2">
+                    <MaterialIcons name="delete" size={18} color="#EF4444" />
+                    <Text className="text-sm font-semibold text-error">Supprimer les données</Text>
+                  </View>
+                  <MaterialIcons name="chevron-right" size={20} color="#EF4444" />
+                </GlassCard>
+              </Pressable>
+            </View>
+          </ScreenTransition>
+        </ScrollView>
 
         {/* Rate Limit Error Alert */}
         <RateLimitErrorAlert
@@ -352,86 +450,9 @@ export default function SettingsScreen() {
           onDismiss={() => setRateLimitError({ visible: false })}
         />
 
-        {/* Bouton "Tester les alertes par SMS" */}
-        <ScreenTransition delay={250} duration={350}>
-          <Pressable
-            onPress={handleTestSms}
-            disabled={isSendingTestSms || isOnCooldown}
-            className="mb-4"
-            accessible={true}
-            accessibilityRole="button"
-            accessibilityLabel="Bouton Tester les alertes par SMS"
-            accessibilityHint="Appuyez pour envoyer un SMS de test"
-            accessibilityState={{ disabled: isSendingTestSms || isOnCooldown }}
-          >
-            <GlassCard className={`gap-2 py-4 ${isOnCooldown ? 'opacity-50' : ''}`}>
-              <View className="flex-row items-center justify-center gap-2">
-                {isSendingTestSms ? (
-                  <ActivityIndicator size="small" color="#0a7ea4" />
-                ) : (
-                  <MaterialIcons name="message" size={20} color="#0a7ea4" />
-                )}
-                <Text className="text-base font-semibold text-foreground">
-                  {isSendingTestSms
-                    ? 'Envoi en cours...'
-                    : isOnCooldown
-                      ? `Attendre ${Math.ceil(remainingTime / 1000)}s`
-                      : 'Tester les alertes par SMS'}
-                </Text>
-              </View>
-              <Text className="text-xs text-muted text-center">
-                Vérifie que ton contact reçoit bien les alertes.
-              </Text>
-            </GlassCard>
-          </Pressable>
-        </ScreenTransition>
-
-        {/* Bouton "À propos" */}
-        <ScreenTransition delay={300} duration={350}>
-          <Pressable
-            onPress={() => router.push('/about')}
-            className="mb-4"
-            accessible={true}
-            accessibilityRole="button"
-            accessibilityLabel="Bouton À propos"
-            accessibilityHint="Appuyez pour voir les informations sur l'app"
-          >
-            <GlassCard className="gap-2 py-4">
-              <View className="flex-row items-center justify-center gap-2">
-                <MaterialIcons name="info" size={20} color="#0a7ea4" />
-                <Text className="text-base font-semibold text-foreground">À propos</Text>
-              </View>
-              <Text className="text-xs text-muted text-center">
-                Comment fonctionne SafeWalk et comment tes données sont utilisées.
-              </Text>
-            </GlassCard>
-          </Pressable>
-        </ScreenTransition>
-
-        {/* Bouton "Supprimer mon compte" */}
-        <ScreenTransition delay={350} duration={350}>
-          <Pressable onPress={handleDeleteData}>
-            <View className="gap-1">
-              <Text className="text-center text-base font-bold text-error">
-                Supprimer mon compte
-              </Text>
-              <Text className="text-center text-xs text-muted">
-                Supprime ton compte et les données associées.
-              </Text>
-            </View>
-          </Pressable>
-        </ScreenTransition>
+        {/* Toast */}
+        <ToastPop visible={showToast} message={toastMessage} onDismiss={() => setShowToast(false)} />
       </View>
-
-      {/* Toast */}
-      {showToast && (
-        <ToastPop
-          message={toastMessage}
-          type="success"
-          duration={1500}
-          onDismiss={() => setShowToast(false)}
-        />
-      )}
     </View>
   );
 }
