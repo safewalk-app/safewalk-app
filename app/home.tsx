@@ -7,6 +7,7 @@ import { ScreenTransition } from '@/components/ui/screen-transition';
 import { useApp } from '@/lib/context/app-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useState, useEffect } from 'react';
+import { Alert } from 'react-native';
 import { ToastPop } from '@/components/ui/toast-pop';
 import { StatusChecklist, type ChecklistItem } from '@/components/ui/status-checklist';
 import { DurationQuickSelect, type DurationOption } from '@/components/ui/duration-quick-select';
@@ -16,6 +17,7 @@ import { useColors } from '@/hooks/use-colors';
 import { logger } from '@/lib/logger';
 import { useProfileData } from '@/hooks/use-profile-data';
 import { notify, notifyBlocked } from '@/lib/services/notification.service';
+
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -116,14 +118,8 @@ export default function HomeScreen() {
   };
 
   const handleStartSession = () => {
-    if (!hasContact) {
-      notifyBlocked('contact.missing', {
-        action: 'Aller aux Paramètres',
-        onAction: () => router.push('/settings'),
-      });
-      return;
-    }
-
+    // Pas de blocage ici - laisser l'utilisateur accéder à l'écran "Je sors"
+    // Le blocage intervient seulement au lancement réel de la sortie
     router.push('/new-session');
   };
 

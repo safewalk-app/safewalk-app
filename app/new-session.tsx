@@ -39,7 +39,9 @@ export default function NewSessionScreen() {
     visible: boolean;
     message?: string;
   }>({ visible: false });
+  const [hasResumedPendingAction, setHasResumedPendingAction] = useState(false);
   const profileData = useProfileData();
+  const locationPermission = useLocationPermission();
 
   // Wrapper pour afficher l'indicateur de chargement lors du démarrage de la sortie
   const withSessionLoading = useLoadingWrapper({
@@ -57,83 +59,109 @@ export default function NewSessionScreen() {
     duration: 2000,
   });
 
-  // Check if phone is verified on mount
+  // Charger les données au montage
   useEffect(() => {
     setBlockingReason(null);
-    checkPhoneVerification();
+    setPhoneVerified(profileData?.phone_verified || false);
+    setLoading(false);
   }, []);
 
-  const checkPhoneVerification = async () => {
-    try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) {
-        setLoading(false);
-        return;
+  // Vérifier s'il y a une action en attente et la relancer (une seule fois)
+  useEffect(() => {
+    if (!hasResumedPendingAction && pendingActionStore.hasPendingAction() && !pendingActionStore.isPendingActionExpired()) {
+      const pendingAction = pendingActionStore.getPendingAction();
+      if (pendingAction?.actionType === 'start_trip') {
+        // Restaurer les paramètres de l'action en attente
+        if (pendingAction.params?.deadline) {
+          setLimitTime(pendingAction.params.deadline);
+        }
+        if (pendingAction.params?.note) {
+          setNote(pendingAction.params.note);
+        }
+        // Marquer comme traité pour éviter la boucle infinie
+        setHasResumedPendingAction(true);
+        // Relancer automatiquement l'action
+        setTimeout(() => {
+          handleStartSession();
+        }, 500);
+        pendingActionStore.clearPendingAction();
       }
-
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('phone_verified')
-        .eq('id', user.id)
-        .single();
-
-      setPhoneVerified(profile?.phone_verified || false);
-      setLoading(false);
-    } catch (error) {
-      console.error('Error checking phone verification:', error);
-      setLoading(false);
     }
-  };
+  }, []);
 
-  // Vérifier les blocages et retourner la raison du blocage
+  // Utiliser le safety guard centralisé
   const checkBlockingConditions = () => {
-    if (!settings.emergencyContactName || !settings.emergencyContactPhone) {
-      setBlockingReason('contact.missing');
+    const context = buildGuardContext({
+      settings,
+      profileData,
+      locationEnabled: locationPermission.enabled,
+    });
+
+    const result = runSafetyGuard('start_trip', context);
+    
+    if (!result.allowed) {
+      setBlockingReason(result.blockReason || 'unknown');
+      console.log('[NewSession] Blocking reason:', result.blockReason, result.message);
       return true;
     }
-    if (!phoneVerified) {
-      setBlockingReason('auth.otp_required');
-      return true;
-    }
-    const hasCredits = profileData.subscription_active || profileData.free_alerts_remaining > 0;
-    if (!hasCredits) {
-      setBlockingReason('credits.empty');
-      return true;
-    }
-    // GPS est optionnel - ne pas bloquer
+    
     setBlockingReason(null);
     return false;
   };
 
-  // Obtenir le message et l'action pour le blocage
+  // Obtenir le message et l'action pour le blocage (depuis le guard)
   const getBlockingMessage = () => {
-    switch (blockingReason) {
-      case 'contact.missing':
-        return {
-          title: "Contact d'urgence manquant",
-          message: "Ajoute un contact d'urgence pour continuer.",
-          action: 'Aller aux Paramètres',
-          onAction: () => router.push('/settings'),
-        };
-      case 'auth.otp_required':
-        return {
-          title: 'Téléphone non vérifié',
-          message: 'Vérifie ton numéro pour activer les alertes.',
-          action: 'Vérifier maintenant',
-          onAction: () => setShowOtpModal(true),
-        };
-      case 'credits.empty':
-        return {
-          title: "Pas d'alertes disponibles",
-          message: "Tu n'as plus d'alertes disponibles. Ajoute des crédits pour continuer.",
-          action: 'Ajouter des crédits',
-          onAction: () => setShowPaywallModal(true),
-        };
-      default:
-        return null;
+    if (!blockingReason) return null;
+
+    const context = buildGuardContext({
+      settings,
+      profileData,
+      locationEnabled: locationPermission.enabled,
+    });
+
+    const guardResult = runSafetyGuard('start_trip', context);
+
+    if (guardResult.allowed) {
+      console.log('[NewSession] Guard allowed - no blocking message');
+      return null;
     }
+
+    console.log('[NewSession] Guard blocked:', guardResult.blockReason, guardResult.nextStep);
+
+    // Mapper les actions en fonction du nextStep
+    let onAction = () => {};
+    switch (guardResult.nextStep) {
+      case 'go_settings_contact':
+        onAction = () => router.push('/settings');
+        break;
+      case 'open_otp':
+        onAction = () => {
+          pendingActionStore.setPendingAction('start_trip', {
+            deadline: limitTime,
+            note,
+          });
+          setShowOtpModal(true);
+        };
+        break;
+      case 'open_paywall':
+        onAction = () => {
+          pendingActionStore.setPendingAction('start_trip', {
+            deadline: limitTime,
+            note,
+          });
+          setShowPaywallModal(true);
+        };
+        break;
+    }
+
+    const msg = {
+      title: guardResult.blockReason?.replace(/_/g, ' ').toUpperCase() || 'Erreur',
+      message: guardResult.message,
+      action: guardResult.action || 'OK',
+      onAction,
+    };
+    console.log('[NewSession] Blocking message:', msg);
+    return msg;
   };
 
   const handleStartSession = async () => {
@@ -148,6 +176,11 @@ export default function NewSessionScreen() {
       }
       return;
     }
+
+    // Réinitialiser le flag de reprise pour la prochaine action
+    setHasResumedPendingAction(false);
+    // Effacer l'action en attente si elle existe
+    pendingActionStore.clearPendingAction();
 
     await triggerStartSession(async () => {
       // Vérifier deadline valide (minimum 15 minutes)
