@@ -34,6 +34,8 @@ import { useDeadlineTimer } from '@/hooks/use-deadline-timer';
 import { LongPressGestureHandler } from 'react-native-gesture-handler';
 import * as Haptics from 'expo-haptics';
 import * as tripService from '@/lib/services/trip-service';
+import { runSafetyGuard, buildGuardContext } from '@/lib/core/safety-guard';
+import { useProfileData } from '@/hooks/use-profile-data';
 
 export default function ActiveSessionScreen() {
   // Empêcher l'écran de s'éteindre pendant la session
@@ -72,6 +74,7 @@ export default function ActiveSessionScreen() {
   const { confirmCheckIn: confirmCheckInNotif } = useCheckInNotifications();
   const { location } = useRealTimeLocation({ enabled: settings.locationEnabled });
   const locationPermission = useLocationPermission();
+  const profileData = useProfileData();
   const { sendNotification, scheduleNotification, cancelNotification, cancelAllNotifications } =
     useNotifications();
   const { triggerSOS, isLoading: sosLoading } = useSOS({
@@ -798,9 +801,43 @@ export default function ActiveSessionScreen() {
             >
               <SOSButton
                 onPress={async () => {
-                  // HAUTE #9: Confirmation SOS avec delai
+                  // Verifier les conditions de securite avant SOS
+                  const context = buildGuardContext({
+                    settings,
+                    profileData,
+                    locationEnabled: locationPermission.enabled,
+                  });
+
+                  const guardResult = runSafetyGuard('trigger_sos', context);
+
+                  if (!guardResult.allowed) {
+                    // Afficher un avertissement si les conditions ne sont pas remplies
+                    Alert.alert(
+                      guardResult.blockReason?.replace(/_/g, ' ').toUpperCase() || 'Erreur',
+                      guardResult.message,
+                      [
+                        { text: 'OK', style: 'cancel' },
+                        {
+                          text: guardResult.action || 'Corriger',
+                          onPress: () => {
+                            switch (guardResult.nextStep) {
+                              case 'go_settings_contact':
+                                router.push('/settings');
+                                break;
+                              case 'open_otp':
+                                router.push('/phone-verification');
+                                break;
+                            }
+                          },
+                        },
+                      ],
+                    );
+                    return;
+                  }
+
+                  // Confirmation SOS avec delai
                   Alert.alert(
-                    'Déclencher SOS ?',
+                    'Declencher SOS ?',
                     "Es-tu en danger ? Cette action alertera ton contact d'urgence.",
                     [
                       { text: 'Annuler', style: 'cancel' },
