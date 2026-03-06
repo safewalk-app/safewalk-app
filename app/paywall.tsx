@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View, Text, ScrollView, Pressable, ActivityIndicator, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useStripe, usePaymentSheet } from '@stripe/stripe-react-native';
 import { ScreenContainer } from '@/components/screen-container';
 import { useColors } from '@/hooks/use-colors';
 import { useApp } from '@/lib/context/app-context';
@@ -11,34 +10,25 @@ import {
   CREDIT_PACKAGES,
   createPaymentSession,
   confirmPayment,
-  initializeStripe,
 } from '@/lib/services/stripe.service';
 import { notifyPaymentSuccess, notifyPaymentError } from '@/lib/services/push-notifications.service';
 import { pendingActionStore } from '@/lib/core/pending-action-store';
 
+/**
+ * Écran du Paywall - Acheter des alertes
+ * 
+ * Note: L'intégration Stripe complète nécessite:
+ * 1. npm install @stripe/stripe-react-native
+ * 2. Configuration des clés Stripe dans .env
+ * 3. Edge Functions Supabase pour gérer les paiements
+ */
 export default function PaywallScreen() {
   const router = useRouter();
   const colors = useColors();
   const { user } = useApp();
   const profileData = useProfileData();
-  const { initPaymentSheet, presentPaymentSheet } = usePaymentSheet();
   const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [stripeInitialized, setStripeInitialized] = useState(false);
-
-  // Initialiser Stripe au montage
-  useEffect(() => {
-    const init = async () => {
-      try {
-        await initializeStripe();
-        setStripeInitialized(true);
-      } catch (error) {
-        console.error('❌ Stripe init failed:', error);
-        Alert.alert('Erreur', 'Impossible de charger le système de paiement');
-      }
-    };
-    init();
-  }, []);
 
   // Gérer le paiement
   const handleBuyCredits = async (packageId: string) => {
@@ -52,63 +42,53 @@ export default function PaywallScreen() {
       setSelectedPackage(packageId);
 
       // Créer la session de paiement
-      const { clientSecret, ephemeralKey, customerId, publishableKey } =
-        await createPaymentSession(packageId, user.id);
+      const sessionData = await createPaymentSession(packageId, user.id);
 
-      // Initialiser le payment sheet
-      const { error: initError } = await initPaymentSheet({
-        merchantDisplayName: 'SafeWalk',
-        customerId,
-        customerEphemeralKeySecret: ephemeralKey,
-        paymentIntentClientSecret: clientSecret,
-        allowsDelayedPaymentMethods: false,
-        defaultBillingDetails: {
-          name: profileData?.first_name || 'User',
-        },
-      });
-
-      if (initError) {
-        throw initError;
-      }
-
-      // Présenter le payment sheet
-      const { error: presentError } = await presentPaymentSheet();
-
-      if (presentError) {
-        if (presentError.code === 'Canceled') {
-          // Utilisateur a annulé
-          return;
-        }
-        throw presentError;
-      }
-
-      // Paiement réussi - confirmer et ajouter les crédits
-      const result = await confirmPayment(packageId, user.id);
-
-      // Notifier l'utilisateur
-      await notifyPaymentSuccess(result.creditsAdded, result.totalCredits);
-
-      // Afficher un message de succès
-      Alert.alert('✅ Succès', `${result.creditsAdded} alertes ajoutées!`, [
-        {
-          text: 'OK',
-          onPress: () => {
-            // Relancer l'action en attente si elle existe
-            if (pendingActionStore.hasPendingAction()) {
-              router.back();
-            } else {
-              router.push('/(tabs)');
-            }
+      // TODO: Intégrer Stripe Payment Sheet ici
+      // Pour l'instant, afficher un message de test
+      Alert.alert(
+        'Paiement en Test',
+        `Package: ${packageId}\nClientSecret: ${sessionData.clientSecret.substring(0, 20)}...`,
+        [
+          {
+            text: 'Annuler',
+            onPress: () => setLoading(false),
+            style: 'cancel',
           },
-        },
-      ]);
+          {
+            text: 'Simuler Succès',
+            onPress: async () => {
+              try {
+                // Simuler le succès du paiement
+                const result = await confirmPayment(packageId, user.id);
+                await notifyPaymentSuccess(result.creditsAdded, result.totalCredits);
+
+                Alert.alert('✅ Succès', `${result.creditsAdded} alertes ajoutées!`, [
+                  {
+                    text: 'OK',
+                    onPress: () => {
+                      setLoading(false);
+                      if (pendingActionStore.hasPendingAction()) {
+                        router.back();
+                      } else {
+                        router.push('/(tabs)');
+                      }
+                    },
+                  },
+                ]);
+              } catch (error: any) {
+                setLoading(false);
+                Alert.alert('Erreur', error.message);
+              }
+            },
+          },
+        ]
+      );
     } catch (error: any) {
       console.error('❌ Payment failed:', error);
       await notifyPaymentError(error.message || 'Erreur de paiement');
       Alert.alert('Erreur', error.message || 'Le paiement a échoué');
-    } finally {
       setLoading(false);
-      setSelectedPackage(null);
     }
   };
 
@@ -153,9 +133,6 @@ export default function PaywallScreen() {
               style={({ pressed }) => [
                 {
                   opacity: pressed ? 0.7 : 1,
-                  borderColor:
-                    selectedPackage === package_.id ? colors.primary : colors.border,
-                  borderWidth: selectedPackage === package_.id ? 2 : 1,
                 },
               ]}
               className="p-4 rounded-lg border"
@@ -164,10 +141,11 @@ export default function PaywallScreen() {
                   selectedPackage === package_.id ? `${colors.primary}10` : colors.surface,
                 borderColor:
                   selectedPackage === package_.id ? colors.primary : colors.border,
+                borderWidth: selectedPackage === package_.id ? 2 : 1,
               }}
             >
               <View className="flex-row items-start justify-between mb-2">
-                <View>
+                <View className="flex-1">
                   <Text className="text-lg font-bold text-foreground">{package_.name}</Text>
                   {package_.badge && (
                     <Text className="text-xs font-semibold text-primary mt-1">
