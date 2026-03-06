@@ -1,4 +1,5 @@
-import { initStripe, useStripe, usePaymentSheet } from '@stripe/stripe-react-native';
+// Stripe imports - à installer avec: npm install @stripe/stripe-react-native
+// import { initStripe, useStripe, usePaymentSheet } from '@stripe/stripe-react-native';
 import { supabase } from '@/lib/services/supabase-client';
 
 /**
@@ -43,10 +44,13 @@ export async function initializeStripe() {
       throw new Error('EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY not configured');
     }
 
-    await initStripe({
-      publishableKey,
-      merchantIdentifier: 'merchant.space.manus.safewalk',
-    });
+    // TODO: Décommenter après npm install @stripe/stripe-react-native
+    // await initStripe({
+    //   publishableKey,
+    //   merchantIdentifier: 'merchant.space.manus.safewalk',
+    // });
+
+    console.log('✅ Stripe configured (awaiting Payment Sheet integration)');
   } catch (error) {
     console.error('❌ Stripe initialization failed:', error);
     throw error;
