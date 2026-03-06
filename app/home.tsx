@@ -17,6 +17,7 @@ import { useColors } from '@/hooks/use-colors';
 import { logger } from '@/lib/logger';
 import { useProfileData } from '@/hooks/use-profile-data';
 import { notify, notifyBlocked } from '@/lib/services/notification.service';
+import { CreditsBar } from '@/components/ui/credits-bar';
 
 
 export default function HomeScreen() {
@@ -30,6 +31,8 @@ export default function HomeScreen() {
   const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>([]);
 
   const hasContact = settings.emergencyContactName && settings.emergencyContactPhone;
+  const freeAlertsRemaining = profileData?.free_alerts_remaining ?? 0;
+  const totalFreeAlerts = 5; // À configurer selon votre modèle
 
   // Vérifier l'état des permissions
   useEffect(() => {
@@ -194,8 +197,20 @@ export default function HomeScreen() {
           </View>
         </ScreenTransition>
 
-        {/* Raccourcis Durée */}
+        {/* Barre de Crédits */}
         <ScreenTransition delay={300} duration={350}>
+          <View className="mb-6">
+            <CreditsBar
+              current={freeAlertsRemaining}
+              total={totalFreeAlerts}
+              label="Alertes disponibles"
+              showPercentage={true}
+            />
+          </View>
+        </ScreenTransition>
+
+        {/* Raccourcis Durée */}
+        <ScreenTransition delay={350} duration={350}>
           <View className="mb-6">
             <DurationQuickSelect options={durationOptions} onSelect={handleDurationSelect} />
           </View>
